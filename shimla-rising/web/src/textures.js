@@ -18,12 +18,30 @@ function canvas(size) {
   return c;
 }
 
-function texture(cv, repeat = 1, srgb = false) {
+/**
+ * Hex ke sRGB components, 0..1 mein.
+ *
+ * Yahan three ka Color istemaal **nahi** kar sakte. ColorManagement on hai,
+ * isliye wo hex ko sRGB se *linear* convert kar deta hai.
+ * Uske .r/.g/.b ko canvas pe likhne aur phir canvas ko sRGB tag karne se rang do
+ * baar convert ho jaata tha -- skin 176,125,85 asal mein 110,52,23 ban ke likhta
+ * tha, topi ka hara 74,93,58 se 17,27,10. Poori duniya lagbhag aadhi brightness
+ * pe render ho rahi thi. Canvas khud sRGB hai, use seedhe hex ke bytes chahiye.
+ *
+ * Dhyan rahe: vertex colours par yeh laagu **nahi** hota. `col.setHex()` ka
+ * result `color` buffer attribute mein jaata hai, aur usse three linear hi
+ * expect karta hai -- wahan conversion sahi hai.
+ */
+function srgb(hex) {
+  return { r: ((hex >> 16) & 255) / 255, g: ((hex >> 8) & 255) / 255, b: (hex & 255) / 255 };
+}
+
+function texture(cv, repeat = 1, isSrgb = false) {
   const t = new THREE.CanvasTexture(cv);
   t.wrapS = t.wrapT = THREE.RepeatWrapping;
   t.repeat.set(repeat, repeat);
   t.anisotropy = 8;
-  if (srgb) t.colorSpace = THREE.SRGBColorSpace;
+  if (isSrgb) t.colorSpace = THREE.SRGBColorSpace;
   return t;
 }
 
@@ -109,7 +127,7 @@ export function plaster(hex = 0xd8cdb8, seed = 11) {
     const stain = fbm(S, 2, 3, seed + 31);
     const cv = canvas(S);
     const ctx = cv.getContext("2d");
-    const base = new THREE.Color(hex);
+    const base = srgb(hex);
     const img = ctx.createImageData(S, S);
     for (let i = 0; i < S * S; i++) {
       // barish ke daag: neeche ki taraf halka gehra
@@ -150,7 +168,7 @@ export function corrugatedTin(hex = 0x8c3b2e, seed = 5) {
     }
     const cv = canvas(S);
     const ctx = cv.getContext("2d");
-    const base = new THREE.Color(hex);
+    const base = srgb(hex);
     const img = ctx.createImageData(S, S);
     for (let i = 0; i < S * S; i++) {
       const k = 0.72 + h[i] * 0.42;
@@ -232,7 +250,7 @@ export function skin(hex = 0xb07d55, seed = 7) {
     const blotch = fbm(S, 6, 3, seed + 13);
     const cv = canvas(S);
     const ctx = cv.getContext("2d");
-    const base = new THREE.Color(hex);
+    const base = srgb(hex);
     const img = ctx.createImageData(S, S);
     for (let i = 0; i < S * S; i++) {
       const k = 0.92 + pores[i] * 0.14;
@@ -265,7 +283,7 @@ export function fabric(hex = 0xc8442e, seed = 23, weave = 46) {
     }
     const cv = canvas(S);
     const ctx = cv.getContext("2d");
-    const base = new THREE.Color(hex);
+    const base = srgb(hex);
     const img = ctx.createImageData(S, S);
     for (let i = 0; i < S * S; i++) {
       const k = 0.80 + h[i] * 0.34;
@@ -290,7 +308,7 @@ export function carPaint(hex = 0xe8c33a, seed = 61) {
     const peel = fbm(S, 14, 3, seed);
     const cv = canvas(S);
     const ctx = cv.getContext("2d");
-    const base = new THREE.Color(hex);
+    const base = srgb(hex);
     const img = ctx.createImageData(S, S);
     for (let i = 0; i < S * S; i++) {
       const k = 0.97 + peel[i] * 0.06;
@@ -372,100 +390,151 @@ export function needles(seed = 83) {
  * theek -Z disha par aata hai, aur -Z hi character ka forward hai -- isliye
  * bina kisi rotation ke chehra saamne aa jaata hai.
  */
-export function face(hex = 0xb07d55, seed = 19) {
+export function face(hex = 0xc08a5e, seed = 19) {
   return cached(`face${hex}`, () => {
     const W = 512, H = 256;
     const cv = canvas(W);
     cv.height = H;
     const ctx = cv.getContext("2d");
-    const base = new THREE.Color(hex);
+    const base = srgb(hex);
     const rgb = (k = 1, a = 1) =>
-      `rgba(${(base.r * 255 * k) | 0},${(base.g * 255 * k) | 0},${(base.b * 255 * k) | 0},${a})`;
+      `rgba(${Math.min(255, base.r * 255 * k) | 0},${Math.min(255, base.g * 255 * k) | 0},${Math.min(255, base.b * 255 * k) | 0},${a})`;
 
     // twacha ka base + roomiyan
     ctx.fillStyle = rgb(1); ctx.fillRect(0, 0, W, H);
-    const pores = fbm(128, 34, 3, seed);
+    const pores = fbm(128, 40, 3, seed);
     const img = ctx.getImageData(0, 0, W, H);
     for (let y = 0; y < H; y++) {
       for (let x = 0; x < W; x++) {
-        const k = 0.94 + pores[(y % 128) * 128 + (x % 128)] * 0.12;
+        const k = 0.95 + pores[(y % 128) * 128 + (x % 128)] * 0.10;
         const i = (y * W + x) * 4;
-        img.data[i] *= k; img.data[i + 1] *= k; img.data[i + 2] *= k;
+        img.data[i] *= k; img.data[i + 1] *= k * 0.995; img.data[i + 2] *= k * 0.985;
       }
     }
     ctx.putImageData(img, 0, 0);
 
-    const cx = W * 0.75;            // chehre ka केंद्र -- -Z disha
-    const eyeY = H * 0.44, dx = W * 0.045;
+    const cx = W * 0.75;            // chehre ka kendra -- -Z disha
+    const eyeY = H * 0.44;
+    // Khopdi ki geometry y mein 1.22 guna khinchi hui hai, isliye texture bhi
+    // utna khinchta hai. Vertical doori pehle hi utni kam rakhte hain warna
+    // aankh-naak-honth ka faasla lamba lagta hai.
+    const VY = 0.82;
+    const dy = (u) => eyeY + u * H * VY;
+    const ex = W * 0.0445;          // aankhon ke beech aadhi doori
 
-    // aankh ka gaddha (halki chhaya)
-    ctx.fillStyle = rgb(0.82, 0.5);
+    // --- chehre ki shading: gaal, kanpati, jabda -------------------------
+    // SA ke chehre zyadatar painted hain -- yahi unhe 3D feel deta hai.
+    const shade = (x, y, rx, ry, k, a) => {
+      const gr = ctx.createRadialGradient(x, y, 0, x, y, Math.max(rx, ry));
+      gr.addColorStop(0, rgb(k, a)); gr.addColorStop(1, rgb(k, 0));
+      ctx.save(); ctx.translate(x, y); ctx.scale(1, ry / Math.max(rx, ry));
+      ctx.fillStyle = gr; ctx.beginPath();
+      ctx.arc(0, 0, Math.max(rx, ry), 0, Math.PI * 2); ctx.fill(); ctx.restore();
+    };
     for (const s2 of [-1, 1]) {
-      ctx.beginPath();
-      ctx.ellipse(cx + s2 * dx, eyeY + 4, W * 0.036, H * 0.05, 0, 0, Math.PI * 2);
-      ctx.fill();
+      shade(cx + s2 * W * 0.092, dy(0.060), W * 0.055, H * 0.115, 0.84, 0.38); // kanpati
+      shade(cx + s2 * W * 0.058, dy(0.100), W * 0.045, H * 0.070, 1.10, 0.26); // gaal ki haddi
     }
-    // aankh ki safedi
-    ctx.fillStyle = "#efeae4";
+    shade(cx, dy(-0.175), W * 0.062, H * 0.080, 1.09, 0.30);                   // maatha
+    // naak ki haddi pe ujaala -- isse naak saamne se bhi ubhri lagti hai
+    shade(cx, dy(0.070), W * 0.012, H * 0.075, 1.13, 0.42);
+
+    // --- aankhein: chhoti, badaam jaisi ----------------------------------
     for (const s2 of [-1, 1]) {
+      const x = cx + s2 * ex, y = dy(0);
+      // gaddha
+      shade(x, y + 2, W * 0.033, H * 0.045, 0.76, 0.60);
+      // safedi -- sirf utni jitni asli aankh mein dikhti hai
+      ctx.save();
       ctx.beginPath();
-      ctx.ellipse(cx + s2 * dx, eyeY, W * 0.028, H * 0.026, 0, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    // putli
-    for (const s2 of [-1, 1]) {
-      ctx.fillStyle = "#4a3521";
-      ctx.beginPath(); ctx.arc(cx + s2 * dx, eyeY, H * 0.021, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = "#140f0a";
-      ctx.beginPath(); ctx.arc(cx + s2 * dx, eyeY, H * 0.010, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = "rgba(255,255,255,.85)";
-      ctx.beginPath(); ctx.arc(cx + s2 * dx - 3, eyeY - 3, 2, 0, Math.PI * 2); ctx.fill();
-    }
-    // bhauhein
-    ctx.strokeStyle = "#2a1d12"; ctx.lineWidth = H * 0.022; ctx.lineCap = "round";
-    for (const s2 of [-1, 1]) {
+      ctx.ellipse(x, y, W * 0.0225, H * 0.0175, 0, 0, Math.PI * 2);
+      ctx.clip();
+      ctx.fillStyle = "#d8d0c6"; ctx.fillRect(x - 20, y - 20, 40, 40);
+      // putli
+      ctx.fillStyle = "#4b3520";                 // bhoori putli
+      ctx.beginPath(); ctx.arc(x, y + 1, H * 0.0165, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#100c07";
+      ctx.beginPath(); ctx.arc(x, y + 1, H * 0.0072, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "rgba(255,255,255,.75)";
+      ctx.beginPath(); ctx.arc(x - 2.5, y - 2.5, 1.7, 0, Math.PI * 2); ctx.fill();
+      // upar ki palak ki chhaya
+      ctx.fillStyle = "rgba(58,38,22,.55)";
+      ctx.fillRect(x - 20, y - 20, 40, 20 - H * 0.006);
+      ctx.restore();
+      // palak ki rekha
+      ctx.strokeStyle = "rgba(34,22,13,.85)"; ctx.lineWidth = 2.0; ctx.lineCap = "round";
       ctx.beginPath();
-      ctx.moveTo(cx + s2 * (dx - W * 0.026), eyeY - H * 0.062);
-      ctx.quadraticCurveTo(cx + s2 * dx, eyeY - H * 0.085,
-                           cx + s2 * (dx + W * 0.026), eyeY - H * 0.058);
+      ctx.moveTo(x - W * 0.0235, y - H * 0.001);
+      ctx.quadraticCurveTo(x, y - H * 0.021, x + W * 0.0235, y - H * 0.002);
+      ctx.stroke();
+      // nichli palak
+      ctx.strokeStyle = rgb(0.78, 0.5); ctx.lineWidth = 1.3;
+      ctx.beginPath();
+      ctx.moveTo(x - W * 0.020, y + H * 0.016);
+      ctx.quadraticCurveTo(x, y + H * 0.024, x + W * 0.020, y + H * 0.015);
       ctx.stroke();
     }
-    // naak ki chhaya
-    ctx.strokeStyle = rgb(0.80, 0.55); ctx.lineWidth = H * 0.012;
-    ctx.beginPath();
-    ctx.moveTo(cx - 2, eyeY + H * 0.02);
-    ctx.lineTo(cx - 5, eyeY + H * 0.14);
-    ctx.stroke();
-    ctx.fillStyle = rgb(0.62, 0.45);
+
+    // --- bhauhein: moti, koney pe neeche ----------------------------------
     for (const s2 of [-1, 1]) {
+      ctx.fillStyle = "#241a10";
       ctx.beginPath();
-      ctx.ellipse(cx + s2 * W * 0.011, eyeY + H * 0.155, 2.6, 1.8, 0, 0, Math.PI * 2);
+      const bx = cx + s2 * ex, by = dy(-0.052);
+      ctx.moveTo(bx - s2 * W * 0.030, by + H * 0.012);
+      ctx.quadraticCurveTo(bx, by - H * 0.014, bx + s2 * W * 0.026, by + H * 0.002);
+      ctx.quadraticCurveTo(bx, by + H * 0.002, bx - s2 * W * 0.030, by + H * 0.020);
       ctx.fill();
     }
-    // hont
-    ctx.fillStyle = "rgba(122,62,52,.72)";
+
+    // --- naak: dono taraf chhaya, neeche nathune --------------------------
+    for (const s2 of [-1, 1]) {
+      ctx.strokeStyle = rgb(0.74, 0.42); ctx.lineWidth = H * 0.014; ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(cx + s2 * W * 0.014, dy(0.030));
+      ctx.quadraticCurveTo(cx + s2 * W * 0.021, dy(0.120), cx + s2 * W * 0.016, dy(0.160));
+      ctx.stroke();
+    }
+    ctx.fillStyle = "rgba(48,30,18,.62)";
+    for (const s2 of [-1, 1]) {
+      ctx.beginPath();
+      ctx.ellipse(cx + s2 * W * 0.0135, dy(0.168), 2.9, 1.9, s2 * 0.3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    shade(cx, dy(0.185), W * 0.030, H * 0.020, 0.80, 0.45);      // naak ke neeche
+
+    // --- moochh: SA ke ped ki sabse badi pehchan -------------------------
+    // Patli aur chaudi, honth ko chhue bina. Pehle ye moti kaali thi aur
+    // 3D mein khule mooh jaisi dikhti thi.
+    ctx.fillStyle = "#33241a";
     ctx.beginPath();
-    ctx.ellipse(cx, eyeY + H * 0.245, W * 0.036, H * 0.026, 0, 0, Math.PI * 2);
+    ctx.moveTo(cx - W * 0.046, dy(0.208));
+    ctx.quadraticCurveTo(cx, dy(0.194), cx + W * 0.046, dy(0.208));
+    ctx.quadraticCurveTo(cx + W * 0.028, dy(0.228), cx, dy(0.220));
+    ctx.quadraticCurveTo(cx - W * 0.028, dy(0.228), cx - W * 0.046, dy(0.208));
     ctx.fill();
-    ctx.strokeStyle = "rgba(70,34,28,.6)"; ctx.lineWidth = 1.6;
+
+    // --- hont: halke, sirf rekha aur thoda rang --------------------------
+    ctx.fillStyle = "rgba(146,90,74,.34)";
     ctx.beginPath();
-    ctx.moveTo(cx - W * 0.034, eyeY + H * 0.245);
-    ctx.quadraticCurveTo(cx, eyeY + H * 0.258, cx + W * 0.034, eyeY + H * 0.245);
+    ctx.ellipse(cx, dy(0.278), W * 0.032, H * 0.016, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = "rgba(70,40,28,.62)"; ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(cx - W * 0.031, dy(0.276));
+    ctx.quadraticCurveTo(cx, dy(0.286), cx + W * 0.031, dy(0.276));
     ctx.stroke();
-    // halki daadhi
-    ctx.fillStyle = "rgba(38,26,17,.20)";
-    ctx.beginPath();
-    ctx.ellipse(cx, eyeY + H * 0.26, W * 0.075, H * 0.115, 0, 0, Math.PI * 2);
-    ctx.fill();
+
+    // Jabde pe daadhi ka patch jaan-boojh kar nahi hai: ellipse chehre ke
+    // curve pe daag jaisa dikhta tha. Halki chhaya hi kaafi hai.
+    shade(cx, dy(0.330), W * 0.055, H * 0.045, 0.88, 0.30);
 
     return {
       map: texture(cv, 1, true),
-      normalMap: texture(normalMapFrom(pores, 128, 0.45)),
-      roughness: 0.62,
+      normalMap: texture(normalMapFrom(pores, 128, 0.35)),
+      roughness: 0.60,
     };
   });
 }
-
 
 /**
  * Naam ka board -- canvas pe text draw karke.
@@ -567,8 +636,8 @@ export function topi(bodyHex = 0x4a5d3a, bandHex = 0x8c2f2f, seed = 29) {
     const wool = fbm(S, 30, 3, seed);
     const cv = canvas(S);
     const ctx = cv.getContext("2d");
-    const body = new THREE.Color(bodyHex);
-    const band = new THREE.Color(bandHex);
+    const body = srgb(bodyHex);
+    const band = srgb(bandHex);
     const img = ctx.createImageData(S, S);
     for (let y = 0; y < S; y++) {
       for (let x = 0; x < S; x++) {
