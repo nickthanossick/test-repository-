@@ -1,0 +1,114 @@
+{
+  "_comment": "Bus ke route. Har route ek ya zyada sanjauli.json segment par chalta hai aur stop par rukta hai. Operator ka id vehicles.json se aata hai.",
+  "stops": [
+    {
+      "id": "sanjauli_chowk_stop",
+      "name": "Sanjauli Chowk",
+      "segment": "chowk_dhalli",
+      "t": 0.012,
+      "side": -1
+    },
+    {
+      "id": "sanjauli_bazaar_stop",
+      "name": "Sanjauli Bazaar",
+      "segment": "chowk_dhalli",
+      "t": 0.16,
+      "side": -1
+    },
+    {
+      "id": "dhalli_stop",
+      "name": "Dhalli Chowk",
+      "segment": "chowk_dhalli",
+      "t": 0.97,
+      "side": -1
+    },
+    {
+      "id": "igmc_stop",
+      "name": "IGMC",
+      "segment": "chowk_igmc",
+      "t": 0.94,
+      "side": -1
+    },
+    {
+      "id": "igmc_gate_stop",
+      "name": "IGMC Gate",
+      "segment": "chowk_igmc",
+      "t": 0.52,
+      "side": -1
+    },
+    {
+      "id": "tunnel_stop",
+      "name": "Sanjauli Tunnel",
+      "segment": "chowk_tunnel",
+      "t": 0.44,
+      "side": -1
+    },
+    {
+      "id": "lakkar_stop",
+      "name": "Lakkar Bazaar",
+      "segment": "chowk_tunnel",
+      "t": 0.95,
+      "side": -1
+    },
+    {
+      "id": "navbahar_stop",
+      "name": "Navbahar",
+      "segment": "chowk_navbahar",
+      "t": 0.62,
+      "side": -1
+    }
+  ],
+  "routes": [
+    {
+      "id": "r_dhalli",
+      "name": "Sanjauli - Dhalli",
+      "operators": [
+        "hrtc_bus",
+        "lalit_bus"
+      ],
+      "segment": "chowk_dhalli",
+      "stops": [
+        "sanjauli_chowk_stop",
+        "sanjauli_bazaar_stop",
+        "dhalli_stop"
+      ]
+    },
+    {
+      "id": "r_igmc",
+      "name": "Sanjauli - IGMC",
+      "operators": [
+        "hrtc_bus",
+        "krishna_bus"
+      ],
+      "segment": "chowk_igmc",
+      "stops": [
+        "igmc_gate_stop",
+        "igmc_stop"
+      ]
+    },
+    {
+      "id": "r_mall",
+      "name": "Sanjauli - The Mall",
+      "operators": [
+        "hrtc_bus",
+        "rajdhani_bus"
+      ],
+      "segment": "chowk_tunnel",
+      "stops": [
+        "tunnel_stop",
+        "lakkar_stop"
+      ]
+    },
+    {
+      "id": "r_navbahar",
+      "name": "Sanjauli - Navbahar",
+      "operators": [
+        "krishna_bus"
+      ],
+      "segment": "chowk_navbahar",
+      "stops": [
+        "navbahar_stop"
+      ]
+    }
+  ]
+}

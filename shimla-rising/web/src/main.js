@@ -5,6 +5,8 @@ import { Terrain } from "./terrain.js";
 import { RoadNetwork } from "./roads.js";
 import { buildCity } from "./city.js";
 import { buildBazaar } from "./bazaar.js";
+import { BusSystem } from "./buses.js";
+import { Crowd } from "./crowd.js";
 import { Sky } from "./sky.js";
 import { Weather } from "./weather.js";
 import { DayNight } from "./daynight.js";
@@ -99,13 +101,10 @@ async function boot() {
   // Ye city ke generic scatter se *pehle* banta hai taaki `buildCity` ko pata ho
   // ki corridor mein ghar nahi rakhne -- warna dukanein aur ghar aapas mein
   // ghus jaate hain.
-  const BAZAAR_CORRIDORS = [
-    { road: "sanjauli_bazaar_road", denseUntil: 500 },
-    { road: "nh5_east", denseUntil: 420 },
-    { road: "sanjauli_inner", denseUntil: 260 },
-    { road: "dhalli_bazaar_road", denseUntil: 320 },
-  ];
-  const bazaar = buildBazaar(terrain, roads, data.shops, BAZAAR_CORRIDORS, Q);
+  // Dukanein ab `data/sanjauli.json` ke **slots** par lagti hain -- har jagah ka
+  // apna naam hai (chowk_dhalli_L_012), taaki baad mein asli dukan asli jagah
+  // par lagayi ja sake.
+  const bazaar = buildBazaar(terrain, roads, data.shops, data.sanjauliMap, Q);
   scene.add(bazaar);
 
   const city = buildCity(terrain, roads, data.districts, data.pois, mulberry32(31104877), Q,
@@ -190,6 +189,11 @@ async function boot() {
     scene.add(home.mesh);
     parked.push(home);
   }
+  const buses = new BusSystem(scene, terrain, data.sanjauliMap, data.routes,
+                              data.vehicleById, Q.buses ?? 5);
+  const crowd = new Crowd(scene, terrain, roads, bazaar.userData.stalls,
+                          Q.crowd ?? { keepers: 18, walkers: 10, dogs: 2, cows: 1 });
+
   const dialogue = new Dialogue(document.getElementById("subtitle"), data);
   const audio = new Audio();
   const wanted = new WantedSystem(scene, terrain, roads, data.vehicleById);
@@ -393,6 +397,8 @@ async function boot() {
 
     wanted.update(dt, pos, state.mode === "vehicle", weather.grip, district, onRoad);
     missions.update(dt, { playerPos: pos, inVehicle: state.mode === "vehicle", stars: wanted.stars });
+    buses.update(dt);
+    crowd.update(dt, pos);
     dayNight.update(dt, camera);   // waqt, sooraj, taare, raat ki roshni, mausam
     sky.update(camera);
     sky.fitShadow(pos);            // shadow camera khiladi ke saath chalta hai
@@ -424,6 +430,7 @@ async function boot() {
   // debugging ke liye -- Playwright test yahi padhta hai
   window.__shimla = {
     ready: true, scene, camera, renderer, terrain, roads, city, player, missions, wanted, chase, sky, dayNight,
+    bazaar, buses, crowd,
     weather, state, data, get fps() { return fps; },
     get stats() { return {
       triangles: renderer.info.render.triangles,
@@ -437,6 +444,9 @@ async function boot() {
       landmarks: city.userData.landmarkCount,
       signs: city.userData.signCount,
       shops: bazaar.userData.shopCount,
+      buses: buses.count,
+      keepers: crowd.count.keepers,
+      walkers: crowd.count.walkers,
       shopSigns: bazaar.userData.signCount,
     }; },
     teleport(poiId) {

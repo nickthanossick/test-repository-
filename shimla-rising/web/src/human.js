@@ -34,7 +34,7 @@ export function deform(geo, fn) {
  *
  * @param r topi ki chaudai (sir ke hisaab se)
  */
-export function buildTopi(r = 0.128) {
+export function buildTopi(r = 0.128, lite = false) {
   const g = new THREE.Group();
   const velvetMat = TEX.standard(TEX.velvet(0x14543c), { roughness: 0.58 });
   const wovenMat = TEX.standard(TEX.wovenBand(0x8a6a4c), { roughness: 0.92 });
@@ -58,7 +58,7 @@ export function buildTopi(r = 0.128) {
     { hex: 0x8e1f2f, a: -0.18, s: 1.12 },   // maroon
     { hex: 0xe0c65a, a: 0.62, s: 1.02 },    // peela
   ];
-  for (const { hex, a, s } of POM) {
+  for (const { hex, a, s } of (lite ? [] : POM)) {
     const pom = add(new THREE.Mesh(new THREE.SphereGeometry(0.0155 * s, 10, 8),
       TEX.standard(TEX.pompom(hex), { roughness: 0.98 })));
     pom.position.set(Math.sin(a) * r * 0.66, 0.0805, Math.cos(a) * r * 0.66 - r * 0.10);
@@ -76,10 +76,15 @@ const HEAD_R = 0.098;
  * @param o.hair    baalon ka hex
  * @param o.topi    topi pehne ya nahi
  * @param o.height  kul oonchai ka guna (1 = ~1.75 m)
+ * @param o.lod     "crowd" -> chhoti detail chhod do (naak, kaan, bhauh, cuff,
+ *                  zip, sole, topi ki phundi). Bheed mein 50 kirdaar hote hain
+ *                  aur har ek ke ~30 alag mesh se draw call phat jaate the;
+ *                  ye cheezein 15 m se aage waise bhi dikhti nahi.
  */
 export function buildHuman(o = {}) {
   const build = o.build || "male";
   const female = build === "female";
+  const lite = o.lod === "crowd";
   const elder = build === "elder";
   const SKIN = o.skin ?? 0xc08a5e;
   const HAIR = o.hair ?? (elder ? 0xb8b2a8 : 0x140f0a);
@@ -122,21 +127,23 @@ export function buildHuman(o = {}) {
   const head = add(new THREE.Mesh(headGeo, faceMat));
   head.position.y = HEAD_Y;
 
-  const nose = add(new THREE.Mesh(new THREE.ConeGeometry(female ? 0.022 : 0.026, 0.055, 6), skinMat));
-  nose.position.set(0, HEAD_Y - 0.012, -HEAD_R * 0.90);
-  nose.rotation.set(Math.PI * 0.52, 0, 0);
-  nose.scale.set(1, 1, 0.72);
+  if (!lite) {
+    const nose = add(new THREE.Mesh(new THREE.ConeGeometry(female ? 0.022 : 0.026, 0.055, 6), skinMat));
+    nose.position.set(0, HEAD_Y - 0.012, -HEAD_R * 0.90);
+    nose.rotation.set(Math.PI * 0.52, 0, 0);
+    nose.scale.set(1, 1, 0.72);
 
-  const brow = add(new THREE.Mesh(new THREE.SphereGeometry(0.052, 12, 8,
-    0, Math.PI * 2, 0, Math.PI * 0.5), skinMat));
-  brow.position.set(0, HEAD_Y + 0.036, -HEAD_R * 0.60);
-  brow.scale.set(1.55, female ? 0.30 : 0.38, 0.95);
-  brow.rotation.x = -0.30;
+    const brow = add(new THREE.Mesh(new THREE.SphereGeometry(0.052, 12, 8,
+      0, Math.PI * 2, 0, Math.PI * 0.5), skinMat));
+    brow.position.set(0, HEAD_Y + 0.036, -HEAD_R * 0.60);
+    brow.scale.set(1.55, female ? 0.30 : 0.38, 0.95);
+    brow.rotation.x = -0.30;
 
-  for (const side of [-1, 1]) {
-    const ear = add(new THREE.Mesh(new THREE.SphereGeometry(0.026, 10, 8), skinMat));
-    ear.position.set(side * HEAD_R * 0.98, HEAD_Y - 0.004, 0.006);
-    ear.scale.set(0.42, 1.25, 0.85);
+    for (const side of [-1, 1]) {
+      const ear = add(new THREE.Mesh(new THREE.SphereGeometry(0.026, 10, 8), skinMat));
+      ear.position.set(side * HEAD_R * 0.98, HEAD_Y - 0.004, 0.006);
+      ear.scale.set(0.42, 1.25, 0.85);
+    }
   }
 
   // baal: aankhein face texture mein phi = 0.44*PI pe hain, isliye hairline
@@ -158,10 +165,12 @@ export function buildHuman(o = {}) {
       0, Math.PI * 2, Math.PI * 0.24, Math.PI * 0.16), hairMat));
     hair.scale.set(1.02, 1.24, 1.02);
     hair.position.y = HEAD_Y;
-    for (const side of [-1, 1]) {
-      const burn = add(new THREE.Mesh(new THREE.SphereGeometry(0.022, 8, 8), hairMat));
-      burn.position.set(side * HEAD_R * 0.93, HEAD_Y + 0.016, -0.012);
-      burn.scale.set(0.40, 1.5, 1.0);
+    if (!lite) {
+      for (const side of [-1, 1]) {
+        const burn = add(new THREE.Mesh(new THREE.SphereGeometry(0.022, 8, 8), hairMat));
+        burn.position.set(side * HEAD_R * 0.93, HEAD_Y + 0.016, -0.012);
+        burn.scale.set(0.40, 1.5, 1.0);
+      }
     }
   }
   // Pichhle sir ke baal khopdi se chipke rehne chahiye. Pehle ye 0.085 ka gola
@@ -176,7 +185,7 @@ export function buildHuman(o = {}) {
   neck.rotation.x = -0.06;
 
   if (o.topi !== false && !female) {
-    const topi = buildTopi(0.128);
+    const topi = buildTopi(0.128, lite);
     topi.position.y = HEAD_Y + 0.070;
     topi.rotation.x = -0.06;
     g.add(topi);
@@ -193,9 +202,11 @@ export function buildHuman(o = {}) {
   });
   add(new THREE.Mesh(torsoGeo, topMat)).position.y = 1.228;
 
-  const collar = add(new THREE.Mesh(new THREE.CylinderGeometry(0.072, 0.085, 0.045, 14, 1, true), topMat));
-  collar.position.y = 1.446;
-  collar.scale.set(1.18, 1, 0.86);
+  if (!lite) {
+    const collar = add(new THREE.Mesh(new THREE.CylinderGeometry(0.072, 0.085, 0.045, 14, 1, true), topMat));
+    collar.position.y = 1.446;
+    collar.scale.set(1.18, 1, 0.86);
+  }
 
   if (female) {
     // kameez: kamar se ghutnon ke beech tak lamba kurta
@@ -223,12 +234,14 @@ export function buildHuman(o = {}) {
     tailEnd.position.set(0.108, 1.075, 0.116);
     tailEnd.rotation.z = -0.14;
   } else {
-    const zip = add(new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.30, 0.010),
-      new THREE.MeshStandardMaterial({ color: 0x6d1f16, roughness: 0.6 })));
-    zip.position.set(0, 1.265, -0.104);
-    const hem = add(new THREE.Mesh(new THREE.CylinderGeometry(0.152, 0.148, 0.036, 18), topMat));
-    hem.position.y = 1.083;
-    hem.scale.set(1.30, 1, 0.72);
+    if (!lite) {
+      const zip = add(new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.30, 0.010),
+        new THREE.MeshStandardMaterial({ color: 0x6d1f16, roughness: 0.6 })));
+      zip.position.set(0, 1.265, -0.104);
+      const hem = add(new THREE.Mesh(new THREE.CylinderGeometry(0.152, 0.148, 0.036, 18), topMat));
+      hem.position.y = 1.083;
+      hem.scale.set(1.30, 1, 0.72);
+    }
   }
 
   if (elder) {
@@ -261,9 +274,11 @@ export function buildHuman(o = {}) {
     const fore = add(new THREE.Mesh(new THREE.CylinderGeometry(0.043, 0.033, 0.215, 12),
       female ? skinMat : topMat), elbow);
     fore.position.y = -0.104;
-    const cuff = add(new THREE.Mesh(new THREE.CylinderGeometry(0.037, 0.035, 0.028, 12),
-      new THREE.MeshStandardMaterial({ color: female ? (o.top ?? 0xa8324f) : 0x8f2b1e, roughness: 0.9 })), elbow);
-    cuff.position.y = female ? 0.004 : -0.206;
+    if (!lite) {
+      const cuff = add(new THREE.Mesh(new THREE.CylinderGeometry(0.037, 0.035, 0.028, 12),
+        new THREE.MeshStandardMaterial({ color: female ? (o.top ?? 0xa8324f) : 0x8f2b1e, roughness: 0.9 })), elbow);
+      cuff.position.y = female ? 0.004 : -0.206;
+    }
     const hand = add(new THREE.Mesh(new THREE.SphereGeometry(0.040, 10, 8), skinMat), elbow);
     hand.scale.set(0.82, 1.55, 0.52);
     hand.position.y = -0.256;
@@ -285,8 +300,10 @@ export function buildHuman(o = {}) {
     shin.position.y = -0.163;
     const shoe = add(new THREE.Mesh(new THREE.BoxGeometry(0.093, 0.058, 0.215), shoeMat), knee);
     shoe.position.set(0, -0.352, -0.030);
-    const sole = add(new THREE.Mesh(new THREE.BoxGeometry(0.099, 0.024, 0.228), soleMat), knee);
-    sole.position.set(0, -0.389, -0.032);
+    if (!lite) {
+      const sole = add(new THREE.Mesh(new THREE.BoxGeometry(0.099, 0.024, 0.228), soleMat), knee);
+      sole.position.set(0, -0.389, -0.032);
+    }
     legs.push({ hip, knee });
   }
 

@@ -1,49 +1,236 @@
 {
   "$comment": "Shimla mein jo gaadiyan asli mein chalti hain. handling values arcade hain, simulation nahi - pahadi sadak pe mazedaar lagni chahiye. 'shape' web/src/vehicle.js ko batata hai kaunsa silhouette banana hai. NOTE: Alto/Baleno Maruti Suzuki ke, Thar Mahindra ka trademark hai - public release se pehle naam badalne padenge (design/08-legal-and-attribution.md dekho).",
   "vehicles": [
-    { "id": "taxi", "name": "Shimla Taxi (Alto)", "class": "car", "shape": "tallboy", "seats": 4,
-      "top_speed_kmh": 102, "accel": 6.4, "grip": 0.96, "mass_t": 0.79, "brake": 0.95,
-      "body": [1.48, 1.48, 3.45], "color": "#e8c33a", "roof_sign": true,
-      "desc": "Peeli-kaali local taxi. Shimla mein zyadatar Alto hi taxi hoti hai - chhoti, tang galiyon mein ghus jaati hai." },
-
-    { "id": "alto", "name": "Alto", "class": "car", "shape": "tallboy", "seats": 4,
-      "top_speed_kmh": 105, "accel": 6.6, "grip": 0.95, "mass_t": 0.76, "brake": 0.95,
-      "body": [1.48, 1.48, 3.45], "color": "#dfe3e6",
-      "desc": "Sheher ki sabse aam gaadi. Ooncha roof, chhota footprint, aur har mod pe ghoom jaati hai." },
-
-    { "id": "maruti800", "name": "Maruti 800", "class": "car", "shape": "classic", "seats": 4,
-      "top_speed_kmh": 94, "accel": 5.4, "grip": 0.90, "mass_t": 0.66, "brake": 0.88,
-      "body": [1.44, 1.41, 3.34], "color": "#b9c6cf",
-      "desc": "Purane Shimla ki gaadi. Dheemi, seedhi lakeerein, aur abhi bhi galiyon mein khadi milti hai." },
-
-    { "id": "baleno", "name": "Baleno", "class": "car", "shape": "hatch", "seats": 5,
-      "top_speed_kmh": 138, "accel": 8.6, "grip": 1.06, "mass_t": 0.94, "brake": 1.08,
-      "body": [1.75, 1.50, 4.00], "color": "#2f4f7a",
-      "desc": "Naya Shimla. Lambi, dhalaan wali chhat, Cart Road pe sabse tez." },
-
-    { "id": "thar", "name": "Thar", "class": "suv", "shape": "offroad", "seats": 4,
-      "top_speed_kmh": 118, "accel": 7.4, "grip": 1.22, "mass_t": 1.85, "brake": 1.02,
-      "body": [1.86, 1.84, 3.99], "color": "#3f4b3a", "spare_wheel": true,
-      "desc": "Pahad ke liye sabse sahi. Khada windshield, bade tyre, peeche spare wheel - kacchi sadak pe bhi nahi rukti." },
-
-    { "id": "scooter", "name": "Scooter", "class": "bike", "shape": "bike", "seats": 2,
-      "top_speed_kmh": 86, "accel": 8.8, "grip": 0.92, "mass_t": 0.13, "brake": 0.95,
-      "body": [0.70, 1.15, 1.85], "color": "#3b6fb5",
-      "desc": "Sanjauli ki tang galiyon ka raja. Mall Road pe bhi nikal jaati hai." },
-
-    { "id": "hrtc_bus", "name": "HRTC Bus", "class": "bus", "shape": "bus", "seats": 32,
-      "top_speed_kmh": 72, "accel": 3.0, "grip": 0.80, "mass_t": 9.50, "brake": 0.7,
-      "body": [2.45, 3.05, 9.20], "color": "#1e6f4a",
-      "desc": "Himachal Road Transport. Bhaari, dheemi, par pahad pe rukti nahi. Guru ki jaan." },
-
-    { "id": "timber_truck", "name": "Timber Truck", "class": "truck", "shape": "truck", "seats": 2,
-      "top_speed_kmh": 78, "accel": 2.6, "grip": 0.78, "mass_t": 12.0, "brake": 0.6,
-      "body": [2.55, 3.25, 8.60], "color": "#8a5a2b",
-      "desc": "Deodar ke latthe laadta hai. Kaagaz kabhi poore nahi hote." },
-
-    { "id": "police_jeep", "name": "HP Police Gypsy", "class": "police", "shape": "offroad", "seats": 4,
-      "top_speed_kmh": 122, "accel": 8.6, "grip": 1.14, "mass_t": 1.02, "brake": 1.1,
-      "body": [1.54, 1.84, 3.97], "color": "#2b3f63", "siren": true,
-      "desc": "Himachal Police. Halki aur phurtili - pahadi mod pe tumse tez." }
+    {
+      "id": "taxi",
+      "name": "Shimla Taxi (Alto)",
+      "class": "car",
+      "shape": "tallboy",
+      "seats": 4,
+      "top_speed_kmh": 102,
+      "accel": 6.4,
+      "grip": 0.96,
+      "mass_t": 0.79,
+      "brake": 0.95,
+      "body": [
+        1.48,
+        1.48,
+        3.45
+      ],
+      "color": "#e8c33a",
+      "roof_sign": true,
+      "desc": "Peeli-kaali local taxi. Shimla mein zyadatar Alto hi taxi hoti hai - chhoti, tang galiyon mein ghus jaati hai."
+    },
+    {
+      "id": "alto",
+      "name": "Alto",
+      "class": "car",
+      "shape": "tallboy",
+      "seats": 4,
+      "top_speed_kmh": 105,
+      "accel": 6.6,
+      "grip": 0.95,
+      "mass_t": 0.76,
+      "brake": 0.95,
+      "body": [
+        1.48,
+        1.48,
+        3.45
+      ],
+      "color": "#dfe3e6",
+      "desc": "Sheher ki sabse aam gaadi. Ooncha roof, chhota footprint, aur har mod pe ghoom jaati hai."
+    },
+    {
+      "id": "maruti800",
+      "name": "Maruti 800",
+      "class": "car",
+      "shape": "classic",
+      "seats": 4,
+      "top_speed_kmh": 94,
+      "accel": 5.4,
+      "grip": 0.9,
+      "mass_t": 0.66,
+      "brake": 0.88,
+      "body": [
+        1.44,
+        1.41,
+        3.34
+      ],
+      "color": "#b9c6cf",
+      "desc": "Purane Shimla ki gaadi. Dheemi, seedhi lakeerein, aur abhi bhi galiyon mein khadi milti hai."
+    },
+    {
+      "id": "baleno",
+      "name": "Baleno",
+      "class": "car",
+      "shape": "hatch",
+      "seats": 5,
+      "top_speed_kmh": 138,
+      "accel": 8.6,
+      "grip": 1.06,
+      "mass_t": 0.94,
+      "brake": 1.08,
+      "body": [
+        1.75,
+        1.5,
+        4.0
+      ],
+      "color": "#2f4f7a",
+      "desc": "Naya Shimla. Lambi, dhalaan wali chhat, Cart Road pe sabse tez."
+    },
+    {
+      "id": "thar",
+      "name": "Thar",
+      "class": "suv",
+      "shape": "offroad",
+      "seats": 4,
+      "top_speed_kmh": 118,
+      "accel": 7.4,
+      "grip": 1.22,
+      "mass_t": 1.85,
+      "brake": 1.02,
+      "body": [
+        1.86,
+        1.84,
+        3.99
+      ],
+      "color": "#3f4b3a",
+      "spare_wheel": true,
+      "desc": "Pahad ke liye sabse sahi. Khada windshield, bade tyre, peeche spare wheel - kacchi sadak pe bhi nahi rukti."
+    },
+    {
+      "id": "scooter",
+      "name": "Scooter",
+      "class": "bike",
+      "shape": "bike",
+      "seats": 2,
+      "top_speed_kmh": 86,
+      "accel": 8.8,
+      "grip": 0.92,
+      "mass_t": 0.13,
+      "brake": 0.95,
+      "body": [
+        0.7,
+        1.15,
+        1.85
+      ],
+      "color": "#3b6fb5",
+      "desc": "Sanjauli ki tang galiyon ka raja. Mall Road pe bhi nikal jaati hai."
+    },
+    {
+      "id": "hrtc_bus",
+      "name": "HRTC Bus",
+      "class": "bus",
+      "shape": "bus",
+      "seats": 32,
+      "top_speed_kmh": 72,
+      "accel": 3.0,
+      "grip": 0.8,
+      "mass_t": 9.5,
+      "brake": 0.7,
+      "body": [
+        2.45,
+        3.05,
+        9.2
+      ],
+      "color": "#1e6f4a",
+      "desc": "Himachal Road Transport. Bhaari, dheemi, par pahad pe rukti nahi. Guru ki jaan."
+    },
+    {
+      "id": "timber_truck",
+      "name": "Timber Truck",
+      "class": "truck",
+      "shape": "truck",
+      "seats": 2,
+      "top_speed_kmh": 78,
+      "accel": 2.6,
+      "grip": 0.78,
+      "mass_t": 12.0,
+      "brake": 0.6,
+      "body": [
+        2.55,
+        3.25,
+        8.6
+      ],
+      "color": "#8a5a2b",
+      "desc": "Deodar ke latthe laadta hai. Kaagaz kabhi poore nahi hote."
+    },
+    {
+      "id": "police_jeep",
+      "name": "HP Police Gypsy",
+      "class": "police",
+      "shape": "offroad",
+      "seats": 4,
+      "top_speed_kmh": 122,
+      "accel": 8.6,
+      "grip": 1.14,
+      "mass_t": 1.02,
+      "brake": 1.1,
+      "body": [
+        1.54,
+        1.84,
+        3.97
+      ],
+      "color": "#2b3f63",
+      "siren": true,
+      "desc": "Himachal Police. Halki aur phurtili - pahadi mod pe tumse tez."
+    },
+    {
+      "id": "lalit_bus",
+      "name": "Lalit Travels",
+      "class": "bus",
+      "shape": "bus",
+      "seats": 32,
+      "top_speed_kmh": 72,
+      "accel": 3.0,
+      "grip": 0.8,
+      "mass_t": 9.5,
+      "brake": 0.7,
+      "body": [
+        2.45,
+        3.05,
+        9.2
+      ],
+      "color": "#1f4f8f",
+      "desc": "Neeli-safed private bus. Shimla-Dhalli-Kufri route pe roz chalti hai."
+    },
+    {
+      "id": "krishna_bus",
+      "name": "Krishna Travels",
+      "class": "bus",
+      "shape": "bus",
+      "seats": 32,
+      "top_speed_kmh": 72,
+      "accel": 3.0,
+      "grip": 0.8,
+      "mass_t": 9.5,
+      "brake": 0.7,
+      "body": [
+        2.45,
+        3.05,
+        9.2
+      ],
+      "color": "#b8382c",
+      "desc": "Laal-kreem private bus. Sanjauli se Chhota Shimla aur Khalini."
+    },
+    {
+      "id": "rajdhani_bus",
+      "name": "Rajdhani Express",
+      "class": "bus",
+      "shape": "bus",
+      "seats": 32,
+      "top_speed_kmh": 72,
+      "accel": 3.0,
+      "grip": 0.8,
+      "mass_t": 9.5,
+      "brake": 0.7,
+      "body": [
+        2.45,
+        3.05,
+        9.2
+      ],
+      "color": "#d8a52a",
+      "desc": "Peeli-maroon deluxe. Lambi doori -- Shimla se Delhi raat bhar."
+    }
   ]
 }

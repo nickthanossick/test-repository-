@@ -165,3 +165,57 @@ def test_shops_have_the_names_nikhil_named():
     for s in shops["shops"]:
         assert s["kind"] in shops["kinds"], f"{s['name']}: kism {s['kind']} defined nahi"
         assert len(s["name"]) <= 24, f"{s['name']} board pe fit nahi hoga"
+
+
+def test_sanjauli_map_structure():
+    """Naksha aisa hona chahiye ki baad mein asli dukan asli jagah par lage."""
+    m = load("sanjauli.json")
+    seg_ids = {s["id"] for s in m["segments"]}
+    assert len(seg_ids) == len(m["segments"]), "segment id dohra hai"
+    for need in ("chowk_dhalli", "chowk_igmc", "chowk_tunnel", "chowk_navbahar"):
+        assert need in seg_ids, f"{need} segment nahi mila"
+
+    for s in m["segments"]:
+        assert len(s["points"]) >= 2, f"{s['id']}: kam se kam do point chahiye"
+        assert s["width_m"] > 0
+        assert s["accuracy"] in ("verified", "approx")
+
+    chowk = next(j for j in m["junctions"] if j["id"] == "sanjauli_chowk")
+    assert len(chowk["arms"]) == 4, "Sanjauli Chowk chauraha hona chahiye"
+    for arm in chowk["arms"]:
+        assert arm["segment"] in seg_ids
+
+    assert m["slots"], "ek bhi dukan ki jagah nahi"
+    slot_ids = set()
+    for slot in m["slots"]:
+        assert slot["segment"] in seg_ids, f"{slot['id']}: segment maujood nahi"
+        assert 0.0 <= slot["t"] <= 1.0, f"{slot['id']}: t = {slot['t']}"
+        assert slot["side"] in (-1, 1)
+        assert slot["id"] not in slot_ids, f"{slot['id']} dohra hai"
+        slot_ids.add(slot["id"])
+    assert sum(1 for s in m["slots"] if s["dense"]) >= 200, "ghana bazaar chhota hai"
+
+
+def test_bus_routes_point_at_real_segments():
+    r = load("routes.json")
+    seg_ids = {s["id"] for s in load("sanjauli.json")["segments"]}
+    veh_ids = {v["id"] for v in load("vehicles.json")["vehicles"]}
+    stop_ids = {s["id"] for s in r["stops"]}
+
+    for s in r["stops"]:
+        assert s["segment"] in seg_ids, f"stop {s['id']}: segment nahi mila"
+        assert 0.0 <= s["t"] <= 1.0
+
+    for route in r["routes"]:
+        assert route["segment"] in seg_ids
+        for op in route["operators"]:
+            assert op in veh_ids, f"{route['id']}: operator {op} nahi mila"
+        for st in route["stops"]:
+            assert st in stop_ids, f"{route['id']}: stop {st} nahi mila"
+
+
+def test_four_bus_operators_nikhil_named():
+    buses = [v for v in load("vehicles.json")["vehicles"] if v["class"] == "bus"]
+    names = " ".join(v["name"] for v in buses)
+    for need in ("HRTC", "Lalit", "Krishna", "Rajdhani"):
+        assert need in names, f"{need} bus nahi mili"

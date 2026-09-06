@@ -94,7 +94,7 @@ const MODULES = [
   "util.js", "textures.js", "geo.js", "grid.js", "geometry.js", "terrain.js", "roads.js",
   "landmarks.js", "signs.js", "bazaar.js", "quality.js", "city.js", "sky.js", "weather.js",
   "daynight.js", "input.js",
-  "vehicle.js", "human.js", "animals.js", "player.js",
+  "vehicle.js", "human.js", "animals.js", "buses.js", "crowd.js", "player.js",
   "chase-camera.js", "wanted.js", "missions.js", "dialogue.js", "hud.js",
   "audio.js", "save.js", "main.js",
 ];
@@ -122,7 +122,7 @@ function bundleModule(name, source) {
 // ------------------------------------------------------------------- data
 function inlineData() {
   const files = ["georeference", "terrain", "districts", "pois", "roads",
-                 "missions", "characters", "vehicles", "dialogue", "shops"];
+                 "missions", "characters", "vehicles", "dialogue", "shops", "sanjauli", "routes"];
   const blob = {};
   for (const f of files) blob[f] = JSON.parse(read(join(DATA, `${f}.json`)));
   const png = readFileSync(join(DATA, "heightmap.png")).toString("base64");
@@ -179,7 +179,7 @@ function build(outPath, profileSvg) {
       geo: RAW.georeference, terrainMeta: RAW.terrain, districts: RAW.districts,
       pois: RAW.pois, roads: RAW.roads, missions: RAW.missions,
       characters: RAW.characters, vehicles: RAW.vehicles, dialogue: RAW.dialogue,
-      shops: RAW.shops,
+      shops: RAW.shops, sanjauliMap: RAW.sanjauli, routes: RAW.routes,
     };
     onProgress(0.6, "heightmap");
     out.heightmapImage = await new Promise((res, rej) => {

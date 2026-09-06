@@ -34,12 +34,19 @@ function seeded(str) {
 
 const WALLS = [0xd6c9ae, 0xc9bda6, 0xbfae92, 0xd2c4ad, 0xc4b49a, 0xcabfa8];
 const SHUTTERS = [0x3a4149, 0x4a4038, 0x2f3b46, 0x45403a];
-
 /**
- * @param corridor {road, fromT, toT} -- road ke kaunse hisse par
- * @param opts.denseUntil  Chowk se kitne metre tak har jagah dukan (uske aage halka)
+ * Bazaar ko `data/sanjauli.json` ke **slots** se banata hai.
+ *
+ * Pehle ye ek road ke poore polyline par 5 m ke kadam chalta tha. Us tareeke se
+ * "Negi Tea Stall ko chowk se 60 m aage baayein taraf lagao" kehna mumkin nahi
+ * tha -- jagah har build pe procedural thi. Ab har dukan ki jagah data mein ek
+ * naam ke saath hai (`chowk_dhalli_L_012`), aur `shops.json` mein us slot ka id
+ * likh dene se asli dukan apni asli jagah par lag jaati hai.
+ *
+ * Jab tak slot khaali hain, unme cycle karke naam bhar diye jaate hain -- kaam
+ * rukta nahi.
  */
-export function buildBazaar(terrain, roads, shopsJson, corridors, quality = {}) {
+export function buildBazaar(terrain, roads, shopsJson, mapJson, quality = {}) {
   const g = new THREE.Group();
   g.name = "bazaar";
 
@@ -57,119 +64,103 @@ export function buildBazaar(terrain, roads, shopsJson, corridors, quality = {}) 
 
   const shops = shopsJson.shops;
   const kinds = shopsJson.kinds;
+  const byName = new Map(shops.map((s) => [s.name, s]));
   const signs = [];
   const wires = [];
   const stalls = [];      // shopkeeper yahan khade honge
   let shopIndex = 0;
   let count = 0;
 
-  for (const cor of corridors) {
-    const road = roads.roads.find((r) => r.id === cor.road);
-    if (!road) continue;
-    const pts = road.points;
-    const rng = seeded("bazaar:" + cor.road);
-    const halfW = road.spec.width_m / 2;
-
-    // Corridor ke saath 5 m ke kadam -- ek dukan ka frontage.
-    // maxLength zaroori hai: nh5_east Kufri tak jaati hai, aur bina cap ke
-    // uspe akele 600+ dukanein ban jaati thi.
-    const maxLen = cor.maxLength ?? 1400;
-    let travelled = 0;
+  // Segment ke points ko world mein badal kar rakh lo -- har slot inhi par baithta hai
+  const segs = new Map();
+  for (const s of mapJson.segments) {
+    const pts = s.points.map(([lat, lon]) => {
+      const w = terrain.geo.toWorld(lat, lon);
+      return { x: w.x, z: w.z };
+    });
+    const cum = [0];
     for (let i = 1; i < pts.length; i++) {
-      const a = pts[i - 1], b = pts[i];
-      const dx = b.x - a.x, dz = b.z - a.z;
-      const seg = Math.hypot(dx, dz);
-      if (seg < 0.01) continue;
-      const ux = dx / seg, uz = dz / seg;          // sadak ki disha
-      const nx = -uz, nz = ux;                     // perpendicular
+      cum.push(cum[i - 1] + Math.hypot(pts[i].x - pts[i - 1].x, pts[i].z - pts[i - 1].z));
+    }
+    segs.set(s.id, { spec: s, pts, cum, total: cum[cum.length - 1] });
+  }
 
-      for (let s = 0; s < seg; s += 5.0) {
-        const dist = travelled + s;
-        if (dist > maxLen) break;
-        // Chowk ke paas ghana bazaar, aage jaate hue halka -- asli Sanjauli
-        // bhi aisa hi hai. Nikhil ne yahi chuna.
-        const density = dist < (cor.denseUntil ?? 500) ? 1.0 : 0.34;
-        const cx = a.x + ux * s, cz = a.z + uz * s;
+  /** Segment par t (0..1) ki jagah, disha aur perpendicular. */
+  function at(seg, t) {
+    const want = t * seg.total;
+    let i = 1;
+    while (i < seg.cum.length - 1 && seg.cum[i] < want) i++;
+    const a = seg.pts[i - 1], b = seg.pts[i];
+    const segLen = seg.cum[i] - seg.cum[i - 1] || 1;
+    const k = (want - seg.cum[i - 1]) / segLen;
+    const ux = (b.x - a.x) / segLen, uz = (b.z - a.z) / segLen;
+    return { x: a.x + (b.x - a.x) * k, z: a.z + (b.z - a.z) * k, ux, uz, nx: -uz, nz: ux };
+  }
 
-        for (const side of [-1, 1]) {
-          if (rng() > density) continue;
-          const spec = shops[shopIndex++ % shops.length];
-          const kind = kinds[spec.kind] || kinds.general;
-          const off = halfW + 3.4;
-          const bx = cx + nx * side * off;
-          const bz = cz + nz * side * off;
-          const gy = terrain.heightAt(bx, bz);
-          // Dhalan pe dukan tairni nahi chahiye -- neeche tak plinth jaata hai
-          const front = terrain.heightAt(cx + nx * side * halfW, cz + nz * side * halfW);
-          const drop = Math.max(0, gy - front) + 1.2;
-          // Dukan ka mooh sadak ki *taraf* hona chahiye, sadak ke saath nahi.
-          // Pehle yaw sadak ki disha se nikala tha, jisse har shutter, counter,
-          // awning aur board gali ke neeche ki taraf mooh kiye khade the aur
-          // saamne se koi naam dikhta hi nahi tha.
-          //
-          // MeshBuilder mein local -Z hi "aage" hai, aur disha (dx,dz) ke liye
-          // yaw = atan2(dx, -dz). Dukan se sadak ki disha = -(nx,nz)*side.
-          const fyaw = Math.atan2(-nx * side, nz * side);
+  const rng = seeded("bazaar:slots");
+  let wireCounter = 0;
 
-          shopUnit(mb, interior, {
-            x: bx, y: gy, z: bz, yaw: fyaw, drop,
-            width: 4.6, depth: 6.4, rng, spec, kind,
-          });
+  for (const slot of mapJson.slots) {
+    const seg = segs.get(slot.segment);
+    if (!seg) continue;
+    // Halke hisse mein har teesri dukan -- asli bazaar chowk ke paas ghana hai
+    if (!slot.dense && rng() > 0.34) continue;
 
-          // Signboard: har dukan pe 2-4, alag oonchai pe. Yahi ek cheez
-          // bazaar ko "asli" banati hai.
-          // Board dukan ke saamne wale mukh par. Sabse neeche wala bada aur
-          // dukan ke naam ka; uske upar chhote board, jo asli bazaar mein
-          // upar tak chade rehte hain.
-          const boards = density >= 1 ? 2 + ((rng() * 2) | 0) : 1;
-          const fx2 = Math.sin(fyaw), fz2 = -Math.cos(fyaw);   // local -Z = sadak ki taraf
-          for (let bI = 0; bI < boards; bI++) {
-            // Board awning ke bahri kinaare ke upar. Pehle ye deewar se chipke
-            // the (3.3 m) aur awning saamne aa jaati thi -- sadak se ek bhi naam
-            // nahi dikhta tha.
-            // Row 0 awning ke bahri kinaare (fascia) par -- sadak se yahi
-            // sabse pehle dikhta hai. Uske upar wale deewar par chipke hote hain.
-            if (bI === 0) {
-              /*
-               * Naam ka board **sadak pe lambvat** nikla hua -- deewar ke saath
-               * chipka board apni hi awning ke peeche chhup jaata tha aur gali
-               * mein khade hoke ek bhi naam padha nahi jaata tha. Asli bazaar
-               * mein bhi yahi hota hai: board sadak mein nikle rehte hain taaki
-               * dono taraf se dikhein.
-               *
-               * Dono taraf padha ja sake iske liye do quad peeth-se-peeth --
-               * DoubleSide se ek taraf text aaine jaisa palat jaata hai.
-               */
-              for (const turn of [Math.PI / 2, -Math.PI / 2]) {
-                signs.push({
-                  x: bx + fx2 * 4.9, z: bz + fz2 * 4.9,
-                  y: gy + 4.05,
-                  yaw: fyaw + turn,
-                  text: spec.name, sub: spec.sub,
-                  width: 2.9,
-                });
-              }
-            } else {
-              signs.push({
-                x: bx + fx2 * 3.34, z: bz + fz2 * 3.34,
-                y: gy + 5.25 + (bI - 1) * 1.24,
-                yaw: fyaw,
-                text: spec.sub || spec.name, sub: "",
-                width: 3.0 + rng() * 1.0,
-              });
-            }
-          }
-          stalls.push({ x: bx, y: gy, z: bz, yaw: fyaw, depth: 3.5, kind: spec.kind });
-          count++;
-        }
+    const spec = (slot.shop && byName.get(slot.shop)) || shops[shopIndex++ % shops.length];
+    const kind = kinds[spec.kind] || kinds.general;
 
-        // Bijli ke taar -- gali ke aar-paar, har ~22 m
-        if ((dist % 22) < 5.0) {
-          wires.push({ x: cx, z: cz, nx, nz, span: halfW + 4.2, y: terrain.heightAt(cx, cz) });
-        }
-      }
-      travelled += seg;
-      if (travelled > maxLen) break;
+    const p = at(seg, slot.t);
+    const halfW = seg.spec.width_m / 2;
+    const off = halfW + 3.4;
+    const bx = p.x + p.nx * slot.side * off;
+    const bz = p.z + p.nz * slot.side * off;
+    const gy = terrain.heightAt(bx, bz);
+    // Dhalan pe dukan tairni nahi chahiye -- plinth sadak ke level tak jaata hai
+    const front = terrain.heightAt(p.x + p.nx * slot.side * halfW,
+                                   p.z + p.nz * slot.side * halfW);
+    const drop = Math.max(0, gy - front) + 1.2;
+    // Dukan ka mooh sadak ki *taraf*: disha = -(nx,nz)*side, aur MeshBuilder
+    // mein local -Z hi aage hai, isliye yaw = atan2(dx, -dz).
+    const fyaw = Math.atan2(-p.nx * slot.side, p.nz * slot.side);
+
+    shopUnit(mb, interior, {
+      x: bx, y: gy, z: bz, yaw: fyaw, drop,
+      width: 4.6, depth: 6.4, rng, spec, kind,
+    });
+
+    const fx2 = Math.sin(fyaw), fz2 = -Math.cos(fyaw);   // local -Z = sadak ki taraf
+    /*
+     * Naam ka board **sadak pe lambvat** nikla hua -- deewar ke saath chipka
+     * board apni hi awning ke peeche chhup jaata hai. Dono taraf padha ja sake
+     * iske liye do quad peeth-se-peeth (DoubleSide se ek taraf text palat jaata).
+     */
+    for (const turn of [Math.PI / 2, -Math.PI / 2]) {
+      signs.push({
+        x: bx + fx2 * 4.9, z: bz + fz2 * 4.9, y: gy + 4.05,
+        yaw: fyaw + turn, text: spec.name, sub: spec.sub, width: 2.9,
+      });
+    }
+    if (slot.dense) {
+      signs.push({
+        x: bx + fx2 * 3.34, z: bz + fz2 * 3.34, y: gy + 5.25,
+        yaw: fyaw, text: spec.sub || spec.name, sub: "", width: 3.0 + rng() * 1.0,
+      });
+    }
+
+    stalls.push({
+      id: slot.id, x: bx, y: gy, z: bz, yaw: fyaw,
+      kind: spec.kind, name: spec.name,
+      // Dukandaar counter ke *peeche* khada hota hai. Counter dukan ke kendra se
+      // 2.65 m sadak ki taraf hai, aur peechhli deewar 1.34 m par -- isliye
+      // 2.05 m dono ke beech ki sahi jagah hai. Pehle 1.15 m tha, jisse aadmi
+      // peechhli deewar ke andar chala jaata tha aur dikhta hi nahi tha.
+      keeperX: bx + fx2 * 2.05, keeperZ: bz + fz2 * 2.05,
+    });
+    count++;
+
+    // Bijli ke taar -- gali ke aar-paar, har chauthi dukan pe ek khambe ki jodi
+    if (slot.side < 0 && (wireCounter++ % 4) === 0) {
+      wires.push({ x: p.x, z: p.z, nx: p.nx, nz: p.nz, span: halfW + 4.2 });
     }
   }
 
@@ -200,6 +191,7 @@ export function buildBazaar(terrain, roads, shopsJson, corridors, quality = {}) 
   g.userData.signCount = signs.length;
   g.userData.stalls = stalls;
   g.userData.shopCount = count;
+  g.userData.slotCount = 0;
   g.userData.interiorMaterial = interiorMat;
   return g;
 }

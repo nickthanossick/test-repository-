@@ -131,7 +131,7 @@ export class Vehicle {
  * hataakar), alag greenhouse (sheeshe), asli tyre + rim, headlight/taillight
  * (emissive), bumper, aur number plate. Paint clear-coat jaisa hai.
  */
-function buildBody(spec) {
+export function buildBody(spec) {
   const g = new THREE.Group();
   const [w, h, l] = spec.body;
 

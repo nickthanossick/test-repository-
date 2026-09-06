@@ -1,0 +1,9189 @@
+{
+  "_comment": "Sanjauli ka structured naksha. Har sadak ka tukda naam ke saath hai aur uspe dukanon ke slot pehle se gine hue hain, taaki baad mein asli dukan apni asli jagah par lag sake: shops.json mein 'slot' likh do. Coordinates abhi approx hain -- OSM is container se block hai (403). tools/shimla_pipeline --preset sanjauli chalane par asli geometry aayegi.",
+  "origin": {
+    "lat": 31.1082,
+    "lon": 77.1927,
+    "name": "Sanjauli Chowk"
+  },
+  "source": "hand-authored",
+  "segments": [
+    {
+      "id": "chowk_dhalli",
+      "name": "Sanjauli - Dhalli Road (NH-5)",
+      "road": "nh5_east",
+      "type": "arterial",
+      "width_m": 12.5,
+      "oneway": false,
+      "accuracy": "approx",
+      "points": [
+        [
+          31.1082,
+          77.1927
+        ],
+        [
+          31.109,
+          77.1942
+        ],
+        [
+          31.1098,
+          77.1956
+        ],
+        [
+          31.1105,
+          77.1968
+        ],
+        [
+          31.1113,
+          77.1982
+        ],
+        [
+          31.1121,
+          77.1996
+        ],
+        [
+          31.1128,
+          77.201
+        ],
+        [
+          31.1136,
+          77.2026
+        ],
+        [
+          31.1143,
+          77.2038
+        ],
+        [
+          31.115,
+          77.205
+        ]
+      ],
+      "length_m": 1394.9
+    },
+    {
+      "id": "chowk_tunnel",
+      "name": "Sanjauli Tunnel Road",
+      "road": "sanjauli_tunnel_road",
+      "type": "arterial",
+      "width_m": 12.5,
+      "oneway": false,
+      "accuracy": "approx",
+      "points": [
+        [
+          31.1082,
+          77.1927
+        ],
+        [
+          31.1078,
+          77.1916
+        ],
+        [
+          31.1072,
+          77.1901
+        ],
+        [
+          31.1068,
+          77.1885
+        ],
+        [
+          31.1063,
+          77.1868
+        ],
+        [
+          31.1058,
+          77.1849
+        ],
+        [
+          31.1054,
+          77.183
+        ]
+      ],
+      "length_m": 977.9
+    },
+    {
+      "id": "chowk_igmc",
+      "name": "Sanjauli - IGMC Road",
+      "road": "igmc_road",
+      "type": "arterial",
+      "width_m": 12.5,
+      "oneway": false,
+      "accuracy": "approx",
+      "points": [
+        [
+          31.1082,
+          77.1927
+        ],
+        [
+          31.1074,
+          77.1912
+        ],
+        [
+          31.1066,
+          77.1893
+        ],
+        [
+          31.1058,
+          77.1872
+        ],
+        [
+          31.105,
+          77.1851
+        ],
+        [
+          31.1042,
+          77.183
+        ],
+        [
+          31.1035,
+          77.1812
+        ],
+        [
+          31.1033,
+          77.1808
+        ]
+      ],
+      "length_m": 1259.6
+    },
+    {
+      "id": "chowk_navbahar",
+      "name": "Navbahar Road",
+      "road": "navbahar_road",
+      "type": "street",
+      "width_m": 8.5,
+      "oneway": false,
+      "accuracy": "approx",
+      "points": [
+        [
+          31.1082,
+          77.1927
+        ],
+        [
+          31.106,
+          77.1912
+        ],
+        [
+          31.103,
+          77.1896
+        ],
+        [
+          31.1,
+          77.1878
+        ],
+        [
+          31.0975,
+          77.1862
+        ],
+        [
+          31.0958,
+          77.187
+        ],
+        [
+          31.0946,
+          77.1874
+        ]
+      ],
+      "length_m": 1681.1
+    },
+    {
+      "id": "bazaar_lane",
+      "name": "Sanjauli Bazaar Lane",
+      "road": "sanjauli_inner",
+      "type": "lane",
+      "width_m": 5.0,
+      "oneway": false,
+      "accuracy": "approx",
+      "points": [
+        [
+          31.1082,
+          77.1927
+        ],
+        [
+          31.1086,
+          77.1935
+        ],
+        [
+          31.109,
+          77.1942
+        ],
+        [
+          31.1095,
+          77.1949
+        ],
+        [
+          31.1101,
+          77.1956
+        ],
+        [
+          31.1106,
+          77.1951
+        ]
+      ],
+      "length_m": 422.5
+    },
+    {
+      "id": "upper_sanjauli",
+      "name": "Upper Sanjauli Road",
+      "road": null,
+      "type": "street",
+      "width_m": 8.5,
+      "oneway": false,
+      "accuracy": "approx",
+      "points": [
+        [
+          31.1082,
+          77.1927
+        ],
+        [
+          31.109,
+          77.1924
+        ],
+        [
+          31.1098,
+          77.192
+        ],
+        [
+          31.1107,
+          77.1918
+        ],
+        [
+          31.1116,
+          77.1921
+        ],
+        [
+          31.1124,
+          77.1928
+        ]
+      ],
+      "length_m": 506.2
+    },
+    {
+      "id": "dhingu_mata_road",
+      "name": "Dhingu Mata Road",
+      "road": null,
+      "type": "lane",
+      "width_m": 5.0,
+      "oneway": false,
+      "accuracy": "approx",
+      "points": [
+        [
+          31.1116,
+          77.1921
+        ],
+        [
+          31.1124,
+          77.1912
+        ],
+        [
+          31.1132,
+          77.1906
+        ],
+        [
+          31.114,
+          77.1903
+        ]
+      ],
+      "length_m": 322.2
+    },
+    {
+      "id": "dhalli_bazaar",
+      "name": "Dhalli Bazaar",
+      "road": "dhalli_bazaar_road",
+      "type": "street",
+      "width_m": 8.5,
+      "oneway": false,
+      "accuracy": "approx",
+      "points": [
+        [
+          31.115,
+          77.205
+        ],
+        [
+          31.1156,
+          77.2058
+        ],
+        [
+          31.1162,
+          77.2067
+        ],
+        [
+          31.1168,
+          77.2076
+        ]
+      ],
+      "length_m": 318.4
+    }
+  ],
+  "junctions": [
+    {
+      "id": "sanjauli_chowk",
+      "name": "Sanjauli Chowk",
+      "lat": 31.1082,
+      "lon": 77.1927,
+      "radius_m": 17.0,
+      "accuracy": "approx",
+      "island": true,
+      "arms": [
+        {
+          "segment": "chowk_dhalli",
+          "sign": "DHALLI",
+          "km": 4
+        },
+        {
+          "segment": "chowk_igmc",
+          "sign": "IGMC",
+          "km": 2
+        },
+        {
+          "segment": "chowk_tunnel",
+          "sign": "THE MALL",
+          "km": 3
+        },
+        {
+          "segment": "chowk_navbahar",
+          "sign": "NAVBAHAR",
+          "km": 1
+        }
+      ]
+    },
+    {
+      "id": "dhalli_chowk",
+      "name": "Dhalli Chowk",
+      "lat": 31.115,
+      "lon": 77.205,
+      "radius_m": 13.0,
+      "accuracy": "approx",
+      "island": false,
+      "arms": [
+        {
+          "segment": "chowk_dhalli",
+          "sign": "SANJAULI",
+          "km": 4
+        },
+        {
+          "segment": "dhalli_bazaar",
+          "sign": "KUFRI",
+          "km": 12
+        }
+      ]
+    },
+    {
+      "id": "tunnel_mouth",
+      "name": "Sanjauli Tunnel",
+      "lat": 31.1068,
+      "lon": 77.1885,
+      "radius_m": 9.0,
+      "accuracy": "approx",
+      "island": false,
+      "arms": [
+        {
+          "segment": "chowk_tunnel",
+          "sign": "LAKKAR BAZAAR",
+          "km": 2
+        }
+      ]
+    }
+  ],
+  "slots": [
+    {
+      "id": "chowk_dhalli_L_000",
+      "segment": "chowk_dhalli",
+      "t": 0.00179,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_000",
+      "segment": "chowk_dhalli",
+      "t": 0.00179,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_001",
+      "segment": "chowk_dhalli",
+      "t": 0.00538,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_001",
+      "segment": "chowk_dhalli",
+      "t": 0.00538,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_002",
+      "segment": "chowk_dhalli",
+      "t": 0.00896,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_002",
+      "segment": "chowk_dhalli",
+      "t": 0.00896,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_003",
+      "segment": "chowk_dhalli",
+      "t": 0.01255,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_003",
+      "segment": "chowk_dhalli",
+      "t": 0.01255,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_004",
+      "segment": "chowk_dhalli",
+      "t": 0.01613,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_004",
+      "segment": "chowk_dhalli",
+      "t": 0.01613,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_005",
+      "segment": "chowk_dhalli",
+      "t": 0.01972,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_005",
+      "segment": "chowk_dhalli",
+      "t": 0.01972,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_006",
+      "segment": "chowk_dhalli",
+      "t": 0.0233,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_006",
+      "segment": "chowk_dhalli",
+      "t": 0.0233,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_007",
+      "segment": "chowk_dhalli",
+      "t": 0.02688,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_007",
+      "segment": "chowk_dhalli",
+      "t": 0.02688,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_008",
+      "segment": "chowk_dhalli",
+      "t": 0.03047,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_008",
+      "segment": "chowk_dhalli",
+      "t": 0.03047,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_009",
+      "segment": "chowk_dhalli",
+      "t": 0.03405,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_009",
+      "segment": "chowk_dhalli",
+      "t": 0.03405,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_010",
+      "segment": "chowk_dhalli",
+      "t": 0.03764,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_010",
+      "segment": "chowk_dhalli",
+      "t": 0.03764,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_011",
+      "segment": "chowk_dhalli",
+      "t": 0.04122,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_011",
+      "segment": "chowk_dhalli",
+      "t": 0.04122,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_012",
+      "segment": "chowk_dhalli",
+      "t": 0.04481,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_012",
+      "segment": "chowk_dhalli",
+      "t": 0.04481,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_013",
+      "segment": "chowk_dhalli",
+      "t": 0.04839,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_013",
+      "segment": "chowk_dhalli",
+      "t": 0.04839,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_014",
+      "segment": "chowk_dhalli",
+      "t": 0.05198,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_014",
+      "segment": "chowk_dhalli",
+      "t": 0.05198,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_015",
+      "segment": "chowk_dhalli",
+      "t": 0.05556,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_015",
+      "segment": "chowk_dhalli",
+      "t": 0.05556,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_016",
+      "segment": "chowk_dhalli",
+      "t": 0.05915,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_016",
+      "segment": "chowk_dhalli",
+      "t": 0.05915,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_017",
+      "segment": "chowk_dhalli",
+      "t": 0.06273,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_017",
+      "segment": "chowk_dhalli",
+      "t": 0.06273,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_018",
+      "segment": "chowk_dhalli",
+      "t": 0.06631,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_018",
+      "segment": "chowk_dhalli",
+      "t": 0.06631,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_019",
+      "segment": "chowk_dhalli",
+      "t": 0.0699,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_019",
+      "segment": "chowk_dhalli",
+      "t": 0.0699,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_020",
+      "segment": "chowk_dhalli",
+      "t": 0.07348,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_020",
+      "segment": "chowk_dhalli",
+      "t": 0.07348,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_021",
+      "segment": "chowk_dhalli",
+      "t": 0.07707,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_021",
+      "segment": "chowk_dhalli",
+      "t": 0.07707,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_022",
+      "segment": "chowk_dhalli",
+      "t": 0.08065,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_022",
+      "segment": "chowk_dhalli",
+      "t": 0.08065,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_023",
+      "segment": "chowk_dhalli",
+      "t": 0.08424,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_023",
+      "segment": "chowk_dhalli",
+      "t": 0.08424,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_024",
+      "segment": "chowk_dhalli",
+      "t": 0.08782,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_024",
+      "segment": "chowk_dhalli",
+      "t": 0.08782,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_025",
+      "segment": "chowk_dhalli",
+      "t": 0.09141,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_025",
+      "segment": "chowk_dhalli",
+      "t": 0.09141,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_026",
+      "segment": "chowk_dhalli",
+      "t": 0.09499,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_026",
+      "segment": "chowk_dhalli",
+      "t": 0.09499,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_027",
+      "segment": "chowk_dhalli",
+      "t": 0.09858,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_027",
+      "segment": "chowk_dhalli",
+      "t": 0.09858,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_028",
+      "segment": "chowk_dhalli",
+      "t": 0.10216,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_028",
+      "segment": "chowk_dhalli",
+      "t": 0.10216,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_029",
+      "segment": "chowk_dhalli",
+      "t": 0.10574,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_029",
+      "segment": "chowk_dhalli",
+      "t": 0.10574,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_030",
+      "segment": "chowk_dhalli",
+      "t": 0.10933,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_030",
+      "segment": "chowk_dhalli",
+      "t": 0.10933,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_031",
+      "segment": "chowk_dhalli",
+      "t": 0.11291,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_031",
+      "segment": "chowk_dhalli",
+      "t": 0.11291,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_032",
+      "segment": "chowk_dhalli",
+      "t": 0.1165,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_032",
+      "segment": "chowk_dhalli",
+      "t": 0.1165,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_033",
+      "segment": "chowk_dhalli",
+      "t": 0.12008,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_033",
+      "segment": "chowk_dhalli",
+      "t": 0.12008,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_034",
+      "segment": "chowk_dhalli",
+      "t": 0.12367,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_034",
+      "segment": "chowk_dhalli",
+      "t": 0.12367,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_035",
+      "segment": "chowk_dhalli",
+      "t": 0.12725,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_035",
+      "segment": "chowk_dhalli",
+      "t": 0.12725,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_036",
+      "segment": "chowk_dhalli",
+      "t": 0.13084,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_036",
+      "segment": "chowk_dhalli",
+      "t": 0.13084,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_037",
+      "segment": "chowk_dhalli",
+      "t": 0.13442,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_037",
+      "segment": "chowk_dhalli",
+      "t": 0.13442,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_038",
+      "segment": "chowk_dhalli",
+      "t": 0.13801,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_038",
+      "segment": "chowk_dhalli",
+      "t": 0.13801,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_039",
+      "segment": "chowk_dhalli",
+      "t": 0.14159,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_039",
+      "segment": "chowk_dhalli",
+      "t": 0.14159,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_040",
+      "segment": "chowk_dhalli",
+      "t": 0.14517,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_040",
+      "segment": "chowk_dhalli",
+      "t": 0.14517,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_041",
+      "segment": "chowk_dhalli",
+      "t": 0.14876,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_041",
+      "segment": "chowk_dhalli",
+      "t": 0.14876,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_042",
+      "segment": "chowk_dhalli",
+      "t": 0.15234,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_042",
+      "segment": "chowk_dhalli",
+      "t": 0.15234,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_043",
+      "segment": "chowk_dhalli",
+      "t": 0.15593,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_043",
+      "segment": "chowk_dhalli",
+      "t": 0.15593,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_044",
+      "segment": "chowk_dhalli",
+      "t": 0.15951,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_044",
+      "segment": "chowk_dhalli",
+      "t": 0.15951,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_045",
+      "segment": "chowk_dhalli",
+      "t": 0.1631,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_045",
+      "segment": "chowk_dhalli",
+      "t": 0.1631,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_046",
+      "segment": "chowk_dhalli",
+      "t": 0.16668,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_046",
+      "segment": "chowk_dhalli",
+      "t": 0.16668,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_047",
+      "segment": "chowk_dhalli",
+      "t": 0.17027,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_047",
+      "segment": "chowk_dhalli",
+      "t": 0.17027,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_048",
+      "segment": "chowk_dhalli",
+      "t": 0.17385,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_048",
+      "segment": "chowk_dhalli",
+      "t": 0.17385,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_049",
+      "segment": "chowk_dhalli",
+      "t": 0.17744,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_049",
+      "segment": "chowk_dhalli",
+      "t": 0.17744,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_050",
+      "segment": "chowk_dhalli",
+      "t": 0.18102,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_050",
+      "segment": "chowk_dhalli",
+      "t": 0.18102,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_051",
+      "segment": "chowk_dhalli",
+      "t": 0.1846,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_051",
+      "segment": "chowk_dhalli",
+      "t": 0.1846,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_052",
+      "segment": "chowk_dhalli",
+      "t": 0.18819,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_052",
+      "segment": "chowk_dhalli",
+      "t": 0.18819,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_053",
+      "segment": "chowk_dhalli",
+      "t": 0.19177,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_053",
+      "segment": "chowk_dhalli",
+      "t": 0.19177,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_054",
+      "segment": "chowk_dhalli",
+      "t": 0.19536,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_054",
+      "segment": "chowk_dhalli",
+      "t": 0.19536,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_055",
+      "segment": "chowk_dhalli",
+      "t": 0.19894,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_055",
+      "segment": "chowk_dhalli",
+      "t": 0.19894,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_056",
+      "segment": "chowk_dhalli",
+      "t": 0.20253,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_056",
+      "segment": "chowk_dhalli",
+      "t": 0.20253,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_057",
+      "segment": "chowk_dhalli",
+      "t": 0.20611,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_057",
+      "segment": "chowk_dhalli",
+      "t": 0.20611,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_058",
+      "segment": "chowk_dhalli",
+      "t": 0.2097,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_058",
+      "segment": "chowk_dhalli",
+      "t": 0.2097,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_059",
+      "segment": "chowk_dhalli",
+      "t": 0.21328,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_059",
+      "segment": "chowk_dhalli",
+      "t": 0.21328,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_060",
+      "segment": "chowk_dhalli",
+      "t": 0.21687,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_060",
+      "segment": "chowk_dhalli",
+      "t": 0.21687,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_061",
+      "segment": "chowk_dhalli",
+      "t": 0.22045,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_061",
+      "segment": "chowk_dhalli",
+      "t": 0.22045,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_062",
+      "segment": "chowk_dhalli",
+      "t": 0.22403,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_062",
+      "segment": "chowk_dhalli",
+      "t": 0.22403,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_063",
+      "segment": "chowk_dhalli",
+      "t": 0.22762,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_063",
+      "segment": "chowk_dhalli",
+      "t": 0.22762,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_064",
+      "segment": "chowk_dhalli",
+      "t": 0.2312,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_064",
+      "segment": "chowk_dhalli",
+      "t": 0.2312,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_065",
+      "segment": "chowk_dhalli",
+      "t": 0.23479,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_065",
+      "segment": "chowk_dhalli",
+      "t": 0.23479,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_066",
+      "segment": "chowk_dhalli",
+      "t": 0.23837,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_066",
+      "segment": "chowk_dhalli",
+      "t": 0.23837,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_067",
+      "segment": "chowk_dhalli",
+      "t": 0.24196,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_067",
+      "segment": "chowk_dhalli",
+      "t": 0.24196,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_068",
+      "segment": "chowk_dhalli",
+      "t": 0.24554,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_068",
+      "segment": "chowk_dhalli",
+      "t": 0.24554,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_069",
+      "segment": "chowk_dhalli",
+      "t": 0.24913,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_069",
+      "segment": "chowk_dhalli",
+      "t": 0.24913,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_070",
+      "segment": "chowk_dhalli",
+      "t": 0.25271,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_070",
+      "segment": "chowk_dhalli",
+      "t": 0.25271,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_071",
+      "segment": "chowk_dhalli",
+      "t": 0.2563,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_071",
+      "segment": "chowk_dhalli",
+      "t": 0.2563,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_072",
+      "segment": "chowk_dhalli",
+      "t": 0.25988,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_072",
+      "segment": "chowk_dhalli",
+      "t": 0.25988,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_073",
+      "segment": "chowk_dhalli",
+      "t": 0.26346,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_073",
+      "segment": "chowk_dhalli",
+      "t": 0.26346,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_074",
+      "segment": "chowk_dhalli",
+      "t": 0.26705,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_074",
+      "segment": "chowk_dhalli",
+      "t": 0.26705,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_075",
+      "segment": "chowk_dhalli",
+      "t": 0.27063,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_075",
+      "segment": "chowk_dhalli",
+      "t": 0.27063,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_076",
+      "segment": "chowk_dhalli",
+      "t": 0.27422,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_076",
+      "segment": "chowk_dhalli",
+      "t": 0.27422,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_077",
+      "segment": "chowk_dhalli",
+      "t": 0.2778,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_077",
+      "segment": "chowk_dhalli",
+      "t": 0.2778,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_078",
+      "segment": "chowk_dhalli",
+      "t": 0.28139,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_078",
+      "segment": "chowk_dhalli",
+      "t": 0.28139,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_079",
+      "segment": "chowk_dhalli",
+      "t": 0.28497,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_079",
+      "segment": "chowk_dhalli",
+      "t": 0.28497,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_080",
+      "segment": "chowk_dhalli",
+      "t": 0.28856,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_080",
+      "segment": "chowk_dhalli",
+      "t": 0.28856,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_081",
+      "segment": "chowk_dhalli",
+      "t": 0.29214,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_081",
+      "segment": "chowk_dhalli",
+      "t": 0.29214,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_082",
+      "segment": "chowk_dhalli",
+      "t": 0.29573,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_082",
+      "segment": "chowk_dhalli",
+      "t": 0.29573,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_083",
+      "segment": "chowk_dhalli",
+      "t": 0.29931,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_083",
+      "segment": "chowk_dhalli",
+      "t": 0.29931,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_084",
+      "segment": "chowk_dhalli",
+      "t": 0.30289,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_084",
+      "segment": "chowk_dhalli",
+      "t": 0.30289,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_085",
+      "segment": "chowk_dhalli",
+      "t": 0.30648,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_085",
+      "segment": "chowk_dhalli",
+      "t": 0.30648,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_086",
+      "segment": "chowk_dhalli",
+      "t": 0.31006,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_086",
+      "segment": "chowk_dhalli",
+      "t": 0.31006,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_087",
+      "segment": "chowk_dhalli",
+      "t": 0.31365,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_087",
+      "segment": "chowk_dhalli",
+      "t": 0.31365,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_088",
+      "segment": "chowk_dhalli",
+      "t": 0.31723,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_088",
+      "segment": "chowk_dhalli",
+      "t": 0.31723,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_089",
+      "segment": "chowk_dhalli",
+      "t": 0.32082,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_089",
+      "segment": "chowk_dhalli",
+      "t": 0.32082,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_090",
+      "segment": "chowk_dhalli",
+      "t": 0.3244,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_090",
+      "segment": "chowk_dhalli",
+      "t": 0.3244,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_091",
+      "segment": "chowk_dhalli",
+      "t": 0.32799,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_091",
+      "segment": "chowk_dhalli",
+      "t": 0.32799,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_092",
+      "segment": "chowk_dhalli",
+      "t": 0.33157,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_092",
+      "segment": "chowk_dhalli",
+      "t": 0.33157,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_093",
+      "segment": "chowk_dhalli",
+      "t": 0.33516,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_093",
+      "segment": "chowk_dhalli",
+      "t": 0.33516,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_094",
+      "segment": "chowk_dhalli",
+      "t": 0.33874,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_094",
+      "segment": "chowk_dhalli",
+      "t": 0.33874,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_095",
+      "segment": "chowk_dhalli",
+      "t": 0.34232,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_095",
+      "segment": "chowk_dhalli",
+      "t": 0.34232,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_096",
+      "segment": "chowk_dhalli",
+      "t": 0.34591,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_096",
+      "segment": "chowk_dhalli",
+      "t": 0.34591,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_097",
+      "segment": "chowk_dhalli",
+      "t": 0.34949,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_097",
+      "segment": "chowk_dhalli",
+      "t": 0.34949,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_098",
+      "segment": "chowk_dhalli",
+      "t": 0.35308,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_098",
+      "segment": "chowk_dhalli",
+      "t": 0.35308,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_099",
+      "segment": "chowk_dhalli",
+      "t": 0.35666,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_099",
+      "segment": "chowk_dhalli",
+      "t": 0.35666,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_100",
+      "segment": "chowk_dhalli",
+      "t": 0.36025,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_100",
+      "segment": "chowk_dhalli",
+      "t": 0.36025,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_101",
+      "segment": "chowk_dhalli",
+      "t": 0.36383,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_101",
+      "segment": "chowk_dhalli",
+      "t": 0.36383,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_102",
+      "segment": "chowk_dhalli",
+      "t": 0.36742,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_102",
+      "segment": "chowk_dhalli",
+      "t": 0.36742,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_103",
+      "segment": "chowk_dhalli",
+      "t": 0.371,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_103",
+      "segment": "chowk_dhalli",
+      "t": 0.371,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_104",
+      "segment": "chowk_dhalli",
+      "t": 0.37459,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_104",
+      "segment": "chowk_dhalli",
+      "t": 0.37459,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_105",
+      "segment": "chowk_dhalli",
+      "t": 0.37817,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_105",
+      "segment": "chowk_dhalli",
+      "t": 0.37817,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_106",
+      "segment": "chowk_dhalli",
+      "t": 0.38175,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_106",
+      "segment": "chowk_dhalli",
+      "t": 0.38175,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_107",
+      "segment": "chowk_dhalli",
+      "t": 0.38534,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_107",
+      "segment": "chowk_dhalli",
+      "t": 0.38534,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_108",
+      "segment": "chowk_dhalli",
+      "t": 0.38892,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_108",
+      "segment": "chowk_dhalli",
+      "t": 0.38892,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_109",
+      "segment": "chowk_dhalli",
+      "t": 0.39251,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_109",
+      "segment": "chowk_dhalli",
+      "t": 0.39251,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_110",
+      "segment": "chowk_dhalli",
+      "t": 0.39609,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_110",
+      "segment": "chowk_dhalli",
+      "t": 0.39609,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_111",
+      "segment": "chowk_dhalli",
+      "t": 0.39968,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_111",
+      "segment": "chowk_dhalli",
+      "t": 0.39968,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_112",
+      "segment": "chowk_dhalli",
+      "t": 0.40326,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_112",
+      "segment": "chowk_dhalli",
+      "t": 0.40326,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_113",
+      "segment": "chowk_dhalli",
+      "t": 0.40685,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_113",
+      "segment": "chowk_dhalli",
+      "t": 0.40685,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_114",
+      "segment": "chowk_dhalli",
+      "t": 0.41043,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_114",
+      "segment": "chowk_dhalli",
+      "t": 0.41043,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_115",
+      "segment": "chowk_dhalli",
+      "t": 0.41402,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_115",
+      "segment": "chowk_dhalli",
+      "t": 0.41402,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_116",
+      "segment": "chowk_dhalli",
+      "t": 0.4176,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_116",
+      "segment": "chowk_dhalli",
+      "t": 0.4176,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_117",
+      "segment": "chowk_dhalli",
+      "t": 0.42118,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_117",
+      "segment": "chowk_dhalli",
+      "t": 0.42118,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_118",
+      "segment": "chowk_dhalli",
+      "t": 0.42477,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_118",
+      "segment": "chowk_dhalli",
+      "t": 0.42477,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_119",
+      "segment": "chowk_dhalli",
+      "t": 0.42835,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_119",
+      "segment": "chowk_dhalli",
+      "t": 0.42835,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_120",
+      "segment": "chowk_dhalli",
+      "t": 0.43194,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_120",
+      "segment": "chowk_dhalli",
+      "t": 0.43194,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_121",
+      "segment": "chowk_dhalli",
+      "t": 0.43552,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_121",
+      "segment": "chowk_dhalli",
+      "t": 0.43552,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_122",
+      "segment": "chowk_dhalli",
+      "t": 0.43911,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_122",
+      "segment": "chowk_dhalli",
+      "t": 0.43911,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_123",
+      "segment": "chowk_dhalli",
+      "t": 0.44269,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_123",
+      "segment": "chowk_dhalli",
+      "t": 0.44269,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_124",
+      "segment": "chowk_dhalli",
+      "t": 0.44628,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_124",
+      "segment": "chowk_dhalli",
+      "t": 0.44628,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_125",
+      "segment": "chowk_dhalli",
+      "t": 0.44986,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_125",
+      "segment": "chowk_dhalli",
+      "t": 0.44986,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_126",
+      "segment": "chowk_dhalli",
+      "t": 0.45345,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_126",
+      "segment": "chowk_dhalli",
+      "t": 0.45345,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_127",
+      "segment": "chowk_dhalli",
+      "t": 0.45703,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_127",
+      "segment": "chowk_dhalli",
+      "t": 0.45703,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_128",
+      "segment": "chowk_dhalli",
+      "t": 0.46061,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_128",
+      "segment": "chowk_dhalli",
+      "t": 0.46061,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_129",
+      "segment": "chowk_dhalli",
+      "t": 0.4642,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_129",
+      "segment": "chowk_dhalli",
+      "t": 0.4642,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_130",
+      "segment": "chowk_dhalli",
+      "t": 0.46778,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_130",
+      "segment": "chowk_dhalli",
+      "t": 0.46778,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_131",
+      "segment": "chowk_dhalli",
+      "t": 0.47137,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_131",
+      "segment": "chowk_dhalli",
+      "t": 0.47137,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_132",
+      "segment": "chowk_dhalli",
+      "t": 0.47495,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_132",
+      "segment": "chowk_dhalli",
+      "t": 0.47495,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_133",
+      "segment": "chowk_dhalli",
+      "t": 0.47854,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_133",
+      "segment": "chowk_dhalli",
+      "t": 0.47854,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_134",
+      "segment": "chowk_dhalli",
+      "t": 0.48212,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_134",
+      "segment": "chowk_dhalli",
+      "t": 0.48212,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_135",
+      "segment": "chowk_dhalli",
+      "t": 0.48571,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_135",
+      "segment": "chowk_dhalli",
+      "t": 0.48571,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_136",
+      "segment": "chowk_dhalli",
+      "t": 0.48929,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_136",
+      "segment": "chowk_dhalli",
+      "t": 0.48929,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_137",
+      "segment": "chowk_dhalli",
+      "t": 0.49288,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_137",
+      "segment": "chowk_dhalli",
+      "t": 0.49288,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_138",
+      "segment": "chowk_dhalli",
+      "t": 0.49646,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_138",
+      "segment": "chowk_dhalli",
+      "t": 0.49646,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_139",
+      "segment": "chowk_dhalli",
+      "t": 0.50004,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_139",
+      "segment": "chowk_dhalli",
+      "t": 0.50004,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_140",
+      "segment": "chowk_dhalli",
+      "t": 0.50363,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_140",
+      "segment": "chowk_dhalli",
+      "t": 0.50363,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_141",
+      "segment": "chowk_dhalli",
+      "t": 0.50721,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_141",
+      "segment": "chowk_dhalli",
+      "t": 0.50721,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_142",
+      "segment": "chowk_dhalli",
+      "t": 0.5108,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_142",
+      "segment": "chowk_dhalli",
+      "t": 0.5108,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_143",
+      "segment": "chowk_dhalli",
+      "t": 0.51438,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_143",
+      "segment": "chowk_dhalli",
+      "t": 0.51438,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_144",
+      "segment": "chowk_dhalli",
+      "t": 0.51797,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_144",
+      "segment": "chowk_dhalli",
+      "t": 0.51797,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_145",
+      "segment": "chowk_dhalli",
+      "t": 0.52155,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_145",
+      "segment": "chowk_dhalli",
+      "t": 0.52155,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_146",
+      "segment": "chowk_dhalli",
+      "t": 0.52514,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_146",
+      "segment": "chowk_dhalli",
+      "t": 0.52514,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_147",
+      "segment": "chowk_dhalli",
+      "t": 0.52872,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_147",
+      "segment": "chowk_dhalli",
+      "t": 0.52872,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_148",
+      "segment": "chowk_dhalli",
+      "t": 0.53231,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_148",
+      "segment": "chowk_dhalli",
+      "t": 0.53231,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_149",
+      "segment": "chowk_dhalli",
+      "t": 0.53589,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_149",
+      "segment": "chowk_dhalli",
+      "t": 0.53589,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_150",
+      "segment": "chowk_dhalli",
+      "t": 0.53947,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_150",
+      "segment": "chowk_dhalli",
+      "t": 0.53947,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_151",
+      "segment": "chowk_dhalli",
+      "t": 0.54306,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_151",
+      "segment": "chowk_dhalli",
+      "t": 0.54306,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_152",
+      "segment": "chowk_dhalli",
+      "t": 0.54664,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_152",
+      "segment": "chowk_dhalli",
+      "t": 0.54664,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_153",
+      "segment": "chowk_dhalli",
+      "t": 0.55023,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_153",
+      "segment": "chowk_dhalli",
+      "t": 0.55023,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_154",
+      "segment": "chowk_dhalli",
+      "t": 0.55381,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_154",
+      "segment": "chowk_dhalli",
+      "t": 0.55381,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_155",
+      "segment": "chowk_dhalli",
+      "t": 0.5574,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_155",
+      "segment": "chowk_dhalli",
+      "t": 0.5574,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_156",
+      "segment": "chowk_dhalli",
+      "t": 0.56098,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_156",
+      "segment": "chowk_dhalli",
+      "t": 0.56098,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_157",
+      "segment": "chowk_dhalli",
+      "t": 0.56457,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_157",
+      "segment": "chowk_dhalli",
+      "t": 0.56457,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_158",
+      "segment": "chowk_dhalli",
+      "t": 0.56815,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_158",
+      "segment": "chowk_dhalli",
+      "t": 0.56815,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_159",
+      "segment": "chowk_dhalli",
+      "t": 0.57174,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_159",
+      "segment": "chowk_dhalli",
+      "t": 0.57174,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_160",
+      "segment": "chowk_dhalli",
+      "t": 0.57532,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_160",
+      "segment": "chowk_dhalli",
+      "t": 0.57532,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_161",
+      "segment": "chowk_dhalli",
+      "t": 0.57891,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_161",
+      "segment": "chowk_dhalli",
+      "t": 0.57891,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_162",
+      "segment": "chowk_dhalli",
+      "t": 0.58249,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_162",
+      "segment": "chowk_dhalli",
+      "t": 0.58249,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_163",
+      "segment": "chowk_dhalli",
+      "t": 0.58607,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_163",
+      "segment": "chowk_dhalli",
+      "t": 0.58607,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_164",
+      "segment": "chowk_dhalli",
+      "t": 0.58966,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_164",
+      "segment": "chowk_dhalli",
+      "t": 0.58966,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_165",
+      "segment": "chowk_dhalli",
+      "t": 0.59324,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_165",
+      "segment": "chowk_dhalli",
+      "t": 0.59324,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_166",
+      "segment": "chowk_dhalli",
+      "t": 0.59683,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_166",
+      "segment": "chowk_dhalli",
+      "t": 0.59683,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_167",
+      "segment": "chowk_dhalli",
+      "t": 0.60041,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_167",
+      "segment": "chowk_dhalli",
+      "t": 0.60041,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_168",
+      "segment": "chowk_dhalli",
+      "t": 0.604,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_168",
+      "segment": "chowk_dhalli",
+      "t": 0.604,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_169",
+      "segment": "chowk_dhalli",
+      "t": 0.60758,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_169",
+      "segment": "chowk_dhalli",
+      "t": 0.60758,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_170",
+      "segment": "chowk_dhalli",
+      "t": 0.61117,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_170",
+      "segment": "chowk_dhalli",
+      "t": 0.61117,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_171",
+      "segment": "chowk_dhalli",
+      "t": 0.61475,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_171",
+      "segment": "chowk_dhalli",
+      "t": 0.61475,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_172",
+      "segment": "chowk_dhalli",
+      "t": 0.61834,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_172",
+      "segment": "chowk_dhalli",
+      "t": 0.61834,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_173",
+      "segment": "chowk_dhalli",
+      "t": 0.62192,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_173",
+      "segment": "chowk_dhalli",
+      "t": 0.62192,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_174",
+      "segment": "chowk_dhalli",
+      "t": 0.6255,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_174",
+      "segment": "chowk_dhalli",
+      "t": 0.6255,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_175",
+      "segment": "chowk_dhalli",
+      "t": 0.62909,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_175",
+      "segment": "chowk_dhalli",
+      "t": 0.62909,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_176",
+      "segment": "chowk_dhalli",
+      "t": 0.63267,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_176",
+      "segment": "chowk_dhalli",
+      "t": 0.63267,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_177",
+      "segment": "chowk_dhalli",
+      "t": 0.63626,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_177",
+      "segment": "chowk_dhalli",
+      "t": 0.63626,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_178",
+      "segment": "chowk_dhalli",
+      "t": 0.63984,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_178",
+      "segment": "chowk_dhalli",
+      "t": 0.63984,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_179",
+      "segment": "chowk_dhalli",
+      "t": 0.64343,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_179",
+      "segment": "chowk_dhalli",
+      "t": 0.64343,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_180",
+      "segment": "chowk_dhalli",
+      "t": 0.64701,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_180",
+      "segment": "chowk_dhalli",
+      "t": 0.64701,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_181",
+      "segment": "chowk_dhalli",
+      "t": 0.6506,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_181",
+      "segment": "chowk_dhalli",
+      "t": 0.6506,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_182",
+      "segment": "chowk_dhalli",
+      "t": 0.65418,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_182",
+      "segment": "chowk_dhalli",
+      "t": 0.65418,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_183",
+      "segment": "chowk_dhalli",
+      "t": 0.65777,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_183",
+      "segment": "chowk_dhalli",
+      "t": 0.65777,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_184",
+      "segment": "chowk_dhalli",
+      "t": 0.66135,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_184",
+      "segment": "chowk_dhalli",
+      "t": 0.66135,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_185",
+      "segment": "chowk_dhalli",
+      "t": 0.66493,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_185",
+      "segment": "chowk_dhalli",
+      "t": 0.66493,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_186",
+      "segment": "chowk_dhalli",
+      "t": 0.66852,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_186",
+      "segment": "chowk_dhalli",
+      "t": 0.66852,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_187",
+      "segment": "chowk_dhalli",
+      "t": 0.6721,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_187",
+      "segment": "chowk_dhalli",
+      "t": 0.6721,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_188",
+      "segment": "chowk_dhalli",
+      "t": 0.67569,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_188",
+      "segment": "chowk_dhalli",
+      "t": 0.67569,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_189",
+      "segment": "chowk_dhalli",
+      "t": 0.67927,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_189",
+      "segment": "chowk_dhalli",
+      "t": 0.67927,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_190",
+      "segment": "chowk_dhalli",
+      "t": 0.68286,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_190",
+      "segment": "chowk_dhalli",
+      "t": 0.68286,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_191",
+      "segment": "chowk_dhalli",
+      "t": 0.68644,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_191",
+      "segment": "chowk_dhalli",
+      "t": 0.68644,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_192",
+      "segment": "chowk_dhalli",
+      "t": 0.69003,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_192",
+      "segment": "chowk_dhalli",
+      "t": 0.69003,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_193",
+      "segment": "chowk_dhalli",
+      "t": 0.69361,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_193",
+      "segment": "chowk_dhalli",
+      "t": 0.69361,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_194",
+      "segment": "chowk_dhalli",
+      "t": 0.6972,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_194",
+      "segment": "chowk_dhalli",
+      "t": 0.6972,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_195",
+      "segment": "chowk_dhalli",
+      "t": 0.70078,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_195",
+      "segment": "chowk_dhalli",
+      "t": 0.70078,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_196",
+      "segment": "chowk_dhalli",
+      "t": 0.70436,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_196",
+      "segment": "chowk_dhalli",
+      "t": 0.70436,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_197",
+      "segment": "chowk_dhalli",
+      "t": 0.70795,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_197",
+      "segment": "chowk_dhalli",
+      "t": 0.70795,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_198",
+      "segment": "chowk_dhalli",
+      "t": 0.71153,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_198",
+      "segment": "chowk_dhalli",
+      "t": 0.71153,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_199",
+      "segment": "chowk_dhalli",
+      "t": 0.71512,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_199",
+      "segment": "chowk_dhalli",
+      "t": 0.71512,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_200",
+      "segment": "chowk_dhalli",
+      "t": 0.7187,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_200",
+      "segment": "chowk_dhalli",
+      "t": 0.7187,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_201",
+      "segment": "chowk_dhalli",
+      "t": 0.72229,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_201",
+      "segment": "chowk_dhalli",
+      "t": 0.72229,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_202",
+      "segment": "chowk_dhalli",
+      "t": 0.72587,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_202",
+      "segment": "chowk_dhalli",
+      "t": 0.72587,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_203",
+      "segment": "chowk_dhalli",
+      "t": 0.72946,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_203",
+      "segment": "chowk_dhalli",
+      "t": 0.72946,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_204",
+      "segment": "chowk_dhalli",
+      "t": 0.73304,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_204",
+      "segment": "chowk_dhalli",
+      "t": 0.73304,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_205",
+      "segment": "chowk_dhalli",
+      "t": 0.73663,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_205",
+      "segment": "chowk_dhalli",
+      "t": 0.73663,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_206",
+      "segment": "chowk_dhalli",
+      "t": 0.74021,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_206",
+      "segment": "chowk_dhalli",
+      "t": 0.74021,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_207",
+      "segment": "chowk_dhalli",
+      "t": 0.74379,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_207",
+      "segment": "chowk_dhalli",
+      "t": 0.74379,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_208",
+      "segment": "chowk_dhalli",
+      "t": 0.74738,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_208",
+      "segment": "chowk_dhalli",
+      "t": 0.74738,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_209",
+      "segment": "chowk_dhalli",
+      "t": 0.75096,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_209",
+      "segment": "chowk_dhalli",
+      "t": 0.75096,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_210",
+      "segment": "chowk_dhalli",
+      "t": 0.75455,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_210",
+      "segment": "chowk_dhalli",
+      "t": 0.75455,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_211",
+      "segment": "chowk_dhalli",
+      "t": 0.75813,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_211",
+      "segment": "chowk_dhalli",
+      "t": 0.75813,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_212",
+      "segment": "chowk_dhalli",
+      "t": 0.76172,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_212",
+      "segment": "chowk_dhalli",
+      "t": 0.76172,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_213",
+      "segment": "chowk_dhalli",
+      "t": 0.7653,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_213",
+      "segment": "chowk_dhalli",
+      "t": 0.7653,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_214",
+      "segment": "chowk_dhalli",
+      "t": 0.76889,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_214",
+      "segment": "chowk_dhalli",
+      "t": 0.76889,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_215",
+      "segment": "chowk_dhalli",
+      "t": 0.77247,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_215",
+      "segment": "chowk_dhalli",
+      "t": 0.77247,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_216",
+      "segment": "chowk_dhalli",
+      "t": 0.77606,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_216",
+      "segment": "chowk_dhalli",
+      "t": 0.77606,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_217",
+      "segment": "chowk_dhalli",
+      "t": 0.77964,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_217",
+      "segment": "chowk_dhalli",
+      "t": 0.77964,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_218",
+      "segment": "chowk_dhalli",
+      "t": 0.78322,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_218",
+      "segment": "chowk_dhalli",
+      "t": 0.78322,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_219",
+      "segment": "chowk_dhalli",
+      "t": 0.78681,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_219",
+      "segment": "chowk_dhalli",
+      "t": 0.78681,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_220",
+      "segment": "chowk_dhalli",
+      "t": 0.79039,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_220",
+      "segment": "chowk_dhalli",
+      "t": 0.79039,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_221",
+      "segment": "chowk_dhalli",
+      "t": 0.79398,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_221",
+      "segment": "chowk_dhalli",
+      "t": 0.79398,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_222",
+      "segment": "chowk_dhalli",
+      "t": 0.79756,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_222",
+      "segment": "chowk_dhalli",
+      "t": 0.79756,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_223",
+      "segment": "chowk_dhalli",
+      "t": 0.80115,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_223",
+      "segment": "chowk_dhalli",
+      "t": 0.80115,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_224",
+      "segment": "chowk_dhalli",
+      "t": 0.80473,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_224",
+      "segment": "chowk_dhalli",
+      "t": 0.80473,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_225",
+      "segment": "chowk_dhalli",
+      "t": 0.80832,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_225",
+      "segment": "chowk_dhalli",
+      "t": 0.80832,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_226",
+      "segment": "chowk_dhalli",
+      "t": 0.8119,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_226",
+      "segment": "chowk_dhalli",
+      "t": 0.8119,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_227",
+      "segment": "chowk_dhalli",
+      "t": 0.81549,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_227",
+      "segment": "chowk_dhalli",
+      "t": 0.81549,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_228",
+      "segment": "chowk_dhalli",
+      "t": 0.81907,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_228",
+      "segment": "chowk_dhalli",
+      "t": 0.81907,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_229",
+      "segment": "chowk_dhalli",
+      "t": 0.82265,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_229",
+      "segment": "chowk_dhalli",
+      "t": 0.82265,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_230",
+      "segment": "chowk_dhalli",
+      "t": 0.82624,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_230",
+      "segment": "chowk_dhalli",
+      "t": 0.82624,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_231",
+      "segment": "chowk_dhalli",
+      "t": 0.82982,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_231",
+      "segment": "chowk_dhalli",
+      "t": 0.82982,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_232",
+      "segment": "chowk_dhalli",
+      "t": 0.83341,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_232",
+      "segment": "chowk_dhalli",
+      "t": 0.83341,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_233",
+      "segment": "chowk_dhalli",
+      "t": 0.83699,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_233",
+      "segment": "chowk_dhalli",
+      "t": 0.83699,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_234",
+      "segment": "chowk_dhalli",
+      "t": 0.84058,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_234",
+      "segment": "chowk_dhalli",
+      "t": 0.84058,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_235",
+      "segment": "chowk_dhalli",
+      "t": 0.84416,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_235",
+      "segment": "chowk_dhalli",
+      "t": 0.84416,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_236",
+      "segment": "chowk_dhalli",
+      "t": 0.84775,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_236",
+      "segment": "chowk_dhalli",
+      "t": 0.84775,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_237",
+      "segment": "chowk_dhalli",
+      "t": 0.85133,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_237",
+      "segment": "chowk_dhalli",
+      "t": 0.85133,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_238",
+      "segment": "chowk_dhalli",
+      "t": 0.85492,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_238",
+      "segment": "chowk_dhalli",
+      "t": 0.85492,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_239",
+      "segment": "chowk_dhalli",
+      "t": 0.8585,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_239",
+      "segment": "chowk_dhalli",
+      "t": 0.8585,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_240",
+      "segment": "chowk_dhalli",
+      "t": 0.86208,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_240",
+      "segment": "chowk_dhalli",
+      "t": 0.86208,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_241",
+      "segment": "chowk_dhalli",
+      "t": 0.86567,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_241",
+      "segment": "chowk_dhalli",
+      "t": 0.86567,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_242",
+      "segment": "chowk_dhalli",
+      "t": 0.86925,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_242",
+      "segment": "chowk_dhalli",
+      "t": 0.86925,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_243",
+      "segment": "chowk_dhalli",
+      "t": 0.87284,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_243",
+      "segment": "chowk_dhalli",
+      "t": 0.87284,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_244",
+      "segment": "chowk_dhalli",
+      "t": 0.87642,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_244",
+      "segment": "chowk_dhalli",
+      "t": 0.87642,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_245",
+      "segment": "chowk_dhalli",
+      "t": 0.88001,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_245",
+      "segment": "chowk_dhalli",
+      "t": 0.88001,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_246",
+      "segment": "chowk_dhalli",
+      "t": 0.88359,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_246",
+      "segment": "chowk_dhalli",
+      "t": 0.88359,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_247",
+      "segment": "chowk_dhalli",
+      "t": 0.88718,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_247",
+      "segment": "chowk_dhalli",
+      "t": 0.88718,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_248",
+      "segment": "chowk_dhalli",
+      "t": 0.89076,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_248",
+      "segment": "chowk_dhalli",
+      "t": 0.89076,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_249",
+      "segment": "chowk_dhalli",
+      "t": 0.89435,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_249",
+      "segment": "chowk_dhalli",
+      "t": 0.89435,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_250",
+      "segment": "chowk_dhalli",
+      "t": 0.89793,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_250",
+      "segment": "chowk_dhalli",
+      "t": 0.89793,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_251",
+      "segment": "chowk_dhalli",
+      "t": 0.90151,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_251",
+      "segment": "chowk_dhalli",
+      "t": 0.90151,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_252",
+      "segment": "chowk_dhalli",
+      "t": 0.9051,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_252",
+      "segment": "chowk_dhalli",
+      "t": 0.9051,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_253",
+      "segment": "chowk_dhalli",
+      "t": 0.90868,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_253",
+      "segment": "chowk_dhalli",
+      "t": 0.90868,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_254",
+      "segment": "chowk_dhalli",
+      "t": 0.91227,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_254",
+      "segment": "chowk_dhalli",
+      "t": 0.91227,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_255",
+      "segment": "chowk_dhalli",
+      "t": 0.91585,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_255",
+      "segment": "chowk_dhalli",
+      "t": 0.91585,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_256",
+      "segment": "chowk_dhalli",
+      "t": 0.91944,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_256",
+      "segment": "chowk_dhalli",
+      "t": 0.91944,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_257",
+      "segment": "chowk_dhalli",
+      "t": 0.92302,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_257",
+      "segment": "chowk_dhalli",
+      "t": 0.92302,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_258",
+      "segment": "chowk_dhalli",
+      "t": 0.92661,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_258",
+      "segment": "chowk_dhalli",
+      "t": 0.92661,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_259",
+      "segment": "chowk_dhalli",
+      "t": 0.93019,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_259",
+      "segment": "chowk_dhalli",
+      "t": 0.93019,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_260",
+      "segment": "chowk_dhalli",
+      "t": 0.93378,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_260",
+      "segment": "chowk_dhalli",
+      "t": 0.93378,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_261",
+      "segment": "chowk_dhalli",
+      "t": 0.93736,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_261",
+      "segment": "chowk_dhalli",
+      "t": 0.93736,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_262",
+      "segment": "chowk_dhalli",
+      "t": 0.94094,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_262",
+      "segment": "chowk_dhalli",
+      "t": 0.94094,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_263",
+      "segment": "chowk_dhalli",
+      "t": 0.94453,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_263",
+      "segment": "chowk_dhalli",
+      "t": 0.94453,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_264",
+      "segment": "chowk_dhalli",
+      "t": 0.94811,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_264",
+      "segment": "chowk_dhalli",
+      "t": 0.94811,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_265",
+      "segment": "chowk_dhalli",
+      "t": 0.9517,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_265",
+      "segment": "chowk_dhalli",
+      "t": 0.9517,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_266",
+      "segment": "chowk_dhalli",
+      "t": 0.95528,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_266",
+      "segment": "chowk_dhalli",
+      "t": 0.95528,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_267",
+      "segment": "chowk_dhalli",
+      "t": 0.95887,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_267",
+      "segment": "chowk_dhalli",
+      "t": 0.95887,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_268",
+      "segment": "chowk_dhalli",
+      "t": 0.96245,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_268",
+      "segment": "chowk_dhalli",
+      "t": 0.96245,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_269",
+      "segment": "chowk_dhalli",
+      "t": 0.96604,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_269",
+      "segment": "chowk_dhalli",
+      "t": 0.96604,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_270",
+      "segment": "chowk_dhalli",
+      "t": 0.96962,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_270",
+      "segment": "chowk_dhalli",
+      "t": 0.96962,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_271",
+      "segment": "chowk_dhalli",
+      "t": 0.97321,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_271",
+      "segment": "chowk_dhalli",
+      "t": 0.97321,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_272",
+      "segment": "chowk_dhalli",
+      "t": 0.97679,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_272",
+      "segment": "chowk_dhalli",
+      "t": 0.97679,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_273",
+      "segment": "chowk_dhalli",
+      "t": 0.98037,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_273",
+      "segment": "chowk_dhalli",
+      "t": 0.98037,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_274",
+      "segment": "chowk_dhalli",
+      "t": 0.98396,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_274",
+      "segment": "chowk_dhalli",
+      "t": 0.98396,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_275",
+      "segment": "chowk_dhalli",
+      "t": 0.98754,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_275",
+      "segment": "chowk_dhalli",
+      "t": 0.98754,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_276",
+      "segment": "chowk_dhalli",
+      "t": 0.99113,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_276",
+      "segment": "chowk_dhalli",
+      "t": 0.99113,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_L_277",
+      "segment": "chowk_dhalli",
+      "t": 0.99471,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_dhalli_R_277",
+      "segment": "chowk_dhalli",
+      "t": 0.99471,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_000",
+      "segment": "bazaar_lane",
+      "t": 0.00592,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_000",
+      "segment": "bazaar_lane",
+      "t": 0.00592,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_001",
+      "segment": "bazaar_lane",
+      "t": 0.01775,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_001",
+      "segment": "bazaar_lane",
+      "t": 0.01775,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_002",
+      "segment": "bazaar_lane",
+      "t": 0.02958,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_002",
+      "segment": "bazaar_lane",
+      "t": 0.02958,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_003",
+      "segment": "bazaar_lane",
+      "t": 0.04142,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_003",
+      "segment": "bazaar_lane",
+      "t": 0.04142,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_004",
+      "segment": "bazaar_lane",
+      "t": 0.05325,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_004",
+      "segment": "bazaar_lane",
+      "t": 0.05325,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_005",
+      "segment": "bazaar_lane",
+      "t": 0.06509,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_005",
+      "segment": "bazaar_lane",
+      "t": 0.06509,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_006",
+      "segment": "bazaar_lane",
+      "t": 0.07692,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_006",
+      "segment": "bazaar_lane",
+      "t": 0.07692,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_007",
+      "segment": "bazaar_lane",
+      "t": 0.08875,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_007",
+      "segment": "bazaar_lane",
+      "t": 0.08875,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_008",
+      "segment": "bazaar_lane",
+      "t": 0.10059,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_008",
+      "segment": "bazaar_lane",
+      "t": 0.10059,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_009",
+      "segment": "bazaar_lane",
+      "t": 0.11242,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_009",
+      "segment": "bazaar_lane",
+      "t": 0.11242,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_010",
+      "segment": "bazaar_lane",
+      "t": 0.12426,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_010",
+      "segment": "bazaar_lane",
+      "t": 0.12426,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_011",
+      "segment": "bazaar_lane",
+      "t": 0.13609,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_011",
+      "segment": "bazaar_lane",
+      "t": 0.13609,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_012",
+      "segment": "bazaar_lane",
+      "t": 0.14792,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_012",
+      "segment": "bazaar_lane",
+      "t": 0.14792,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_013",
+      "segment": "bazaar_lane",
+      "t": 0.15976,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_013",
+      "segment": "bazaar_lane",
+      "t": 0.15976,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_014",
+      "segment": "bazaar_lane",
+      "t": 0.17159,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_014",
+      "segment": "bazaar_lane",
+      "t": 0.17159,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_015",
+      "segment": "bazaar_lane",
+      "t": 0.18343,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_015",
+      "segment": "bazaar_lane",
+      "t": 0.18343,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_016",
+      "segment": "bazaar_lane",
+      "t": 0.19526,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_016",
+      "segment": "bazaar_lane",
+      "t": 0.19526,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_017",
+      "segment": "bazaar_lane",
+      "t": 0.20709,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_017",
+      "segment": "bazaar_lane",
+      "t": 0.20709,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_018",
+      "segment": "bazaar_lane",
+      "t": 0.21893,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_018",
+      "segment": "bazaar_lane",
+      "t": 0.21893,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_019",
+      "segment": "bazaar_lane",
+      "t": 0.23076,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_019",
+      "segment": "bazaar_lane",
+      "t": 0.23076,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_020",
+      "segment": "bazaar_lane",
+      "t": 0.2426,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_020",
+      "segment": "bazaar_lane",
+      "t": 0.2426,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_021",
+      "segment": "bazaar_lane",
+      "t": 0.25443,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_021",
+      "segment": "bazaar_lane",
+      "t": 0.25443,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_022",
+      "segment": "bazaar_lane",
+      "t": 0.26626,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_022",
+      "segment": "bazaar_lane",
+      "t": 0.26626,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_023",
+      "segment": "bazaar_lane",
+      "t": 0.2781,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_023",
+      "segment": "bazaar_lane",
+      "t": 0.2781,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_024",
+      "segment": "bazaar_lane",
+      "t": 0.28993,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_024",
+      "segment": "bazaar_lane",
+      "t": 0.28993,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_025",
+      "segment": "bazaar_lane",
+      "t": 0.30177,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_025",
+      "segment": "bazaar_lane",
+      "t": 0.30177,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_026",
+      "segment": "bazaar_lane",
+      "t": 0.3136,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_026",
+      "segment": "bazaar_lane",
+      "t": 0.3136,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_027",
+      "segment": "bazaar_lane",
+      "t": 0.32543,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_027",
+      "segment": "bazaar_lane",
+      "t": 0.32543,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_028",
+      "segment": "bazaar_lane",
+      "t": 0.33727,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_028",
+      "segment": "bazaar_lane",
+      "t": 0.33727,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_029",
+      "segment": "bazaar_lane",
+      "t": 0.3491,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_029",
+      "segment": "bazaar_lane",
+      "t": 0.3491,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_030",
+      "segment": "bazaar_lane",
+      "t": 0.36093,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_030",
+      "segment": "bazaar_lane",
+      "t": 0.36093,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_031",
+      "segment": "bazaar_lane",
+      "t": 0.37277,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_031",
+      "segment": "bazaar_lane",
+      "t": 0.37277,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_032",
+      "segment": "bazaar_lane",
+      "t": 0.3846,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_032",
+      "segment": "bazaar_lane",
+      "t": 0.3846,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_033",
+      "segment": "bazaar_lane",
+      "t": 0.39644,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_033",
+      "segment": "bazaar_lane",
+      "t": 0.39644,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_034",
+      "segment": "bazaar_lane",
+      "t": 0.40827,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_034",
+      "segment": "bazaar_lane",
+      "t": 0.40827,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_035",
+      "segment": "bazaar_lane",
+      "t": 0.4201,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_035",
+      "segment": "bazaar_lane",
+      "t": 0.4201,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_036",
+      "segment": "bazaar_lane",
+      "t": 0.43194,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_036",
+      "segment": "bazaar_lane",
+      "t": 0.43194,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_037",
+      "segment": "bazaar_lane",
+      "t": 0.44377,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_037",
+      "segment": "bazaar_lane",
+      "t": 0.44377,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_038",
+      "segment": "bazaar_lane",
+      "t": 0.45561,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_038",
+      "segment": "bazaar_lane",
+      "t": 0.45561,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_039",
+      "segment": "bazaar_lane",
+      "t": 0.46744,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_039",
+      "segment": "bazaar_lane",
+      "t": 0.46744,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_040",
+      "segment": "bazaar_lane",
+      "t": 0.47927,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_040",
+      "segment": "bazaar_lane",
+      "t": 0.47927,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_041",
+      "segment": "bazaar_lane",
+      "t": 0.49111,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_041",
+      "segment": "bazaar_lane",
+      "t": 0.49111,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_042",
+      "segment": "bazaar_lane",
+      "t": 0.50294,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_042",
+      "segment": "bazaar_lane",
+      "t": 0.50294,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_043",
+      "segment": "bazaar_lane",
+      "t": 0.51478,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_043",
+      "segment": "bazaar_lane",
+      "t": 0.51478,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_044",
+      "segment": "bazaar_lane",
+      "t": 0.52661,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_044",
+      "segment": "bazaar_lane",
+      "t": 0.52661,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_045",
+      "segment": "bazaar_lane",
+      "t": 0.53844,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_045",
+      "segment": "bazaar_lane",
+      "t": 0.53844,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_046",
+      "segment": "bazaar_lane",
+      "t": 0.55028,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_046",
+      "segment": "bazaar_lane",
+      "t": 0.55028,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_047",
+      "segment": "bazaar_lane",
+      "t": 0.56211,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_047",
+      "segment": "bazaar_lane",
+      "t": 0.56211,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_048",
+      "segment": "bazaar_lane",
+      "t": 0.57395,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_048",
+      "segment": "bazaar_lane",
+      "t": 0.57395,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_049",
+      "segment": "bazaar_lane",
+      "t": 0.58578,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_049",
+      "segment": "bazaar_lane",
+      "t": 0.58578,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_050",
+      "segment": "bazaar_lane",
+      "t": 0.59761,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_050",
+      "segment": "bazaar_lane",
+      "t": 0.59761,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_051",
+      "segment": "bazaar_lane",
+      "t": 0.60945,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_051",
+      "segment": "bazaar_lane",
+      "t": 0.60945,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_052",
+      "segment": "bazaar_lane",
+      "t": 0.62128,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_052",
+      "segment": "bazaar_lane",
+      "t": 0.62128,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_053",
+      "segment": "bazaar_lane",
+      "t": 0.63311,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_053",
+      "segment": "bazaar_lane",
+      "t": 0.63311,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_054",
+      "segment": "bazaar_lane",
+      "t": 0.64495,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_054",
+      "segment": "bazaar_lane",
+      "t": 0.64495,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_055",
+      "segment": "bazaar_lane",
+      "t": 0.65678,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_055",
+      "segment": "bazaar_lane",
+      "t": 0.65678,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_056",
+      "segment": "bazaar_lane",
+      "t": 0.66862,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_056",
+      "segment": "bazaar_lane",
+      "t": 0.66862,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_057",
+      "segment": "bazaar_lane",
+      "t": 0.68045,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_057",
+      "segment": "bazaar_lane",
+      "t": 0.68045,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_058",
+      "segment": "bazaar_lane",
+      "t": 0.69228,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_058",
+      "segment": "bazaar_lane",
+      "t": 0.69228,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_059",
+      "segment": "bazaar_lane",
+      "t": 0.70412,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_059",
+      "segment": "bazaar_lane",
+      "t": 0.70412,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_060",
+      "segment": "bazaar_lane",
+      "t": 0.71595,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_060",
+      "segment": "bazaar_lane",
+      "t": 0.71595,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_061",
+      "segment": "bazaar_lane",
+      "t": 0.72779,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_061",
+      "segment": "bazaar_lane",
+      "t": 0.72779,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_062",
+      "segment": "bazaar_lane",
+      "t": 0.73962,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_062",
+      "segment": "bazaar_lane",
+      "t": 0.73962,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_063",
+      "segment": "bazaar_lane",
+      "t": 0.75145,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_063",
+      "segment": "bazaar_lane",
+      "t": 0.75145,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_064",
+      "segment": "bazaar_lane",
+      "t": 0.76329,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_064",
+      "segment": "bazaar_lane",
+      "t": 0.76329,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_065",
+      "segment": "bazaar_lane",
+      "t": 0.77512,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_065",
+      "segment": "bazaar_lane",
+      "t": 0.77512,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_066",
+      "segment": "bazaar_lane",
+      "t": 0.78696,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_066",
+      "segment": "bazaar_lane",
+      "t": 0.78696,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_067",
+      "segment": "bazaar_lane",
+      "t": 0.79879,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_067",
+      "segment": "bazaar_lane",
+      "t": 0.79879,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_068",
+      "segment": "bazaar_lane",
+      "t": 0.81062,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_068",
+      "segment": "bazaar_lane",
+      "t": 0.81062,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_069",
+      "segment": "bazaar_lane",
+      "t": 0.82246,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_069",
+      "segment": "bazaar_lane",
+      "t": 0.82246,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_070",
+      "segment": "bazaar_lane",
+      "t": 0.83429,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_070",
+      "segment": "bazaar_lane",
+      "t": 0.83429,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_071",
+      "segment": "bazaar_lane",
+      "t": 0.84613,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_071",
+      "segment": "bazaar_lane",
+      "t": 0.84613,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_072",
+      "segment": "bazaar_lane",
+      "t": 0.85796,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_072",
+      "segment": "bazaar_lane",
+      "t": 0.85796,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_073",
+      "segment": "bazaar_lane",
+      "t": 0.86979,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_073",
+      "segment": "bazaar_lane",
+      "t": 0.86979,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_074",
+      "segment": "bazaar_lane",
+      "t": 0.88163,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_074",
+      "segment": "bazaar_lane",
+      "t": 0.88163,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_075",
+      "segment": "bazaar_lane",
+      "t": 0.89346,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_075",
+      "segment": "bazaar_lane",
+      "t": 0.89346,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_076",
+      "segment": "bazaar_lane",
+      "t": 0.9053,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_076",
+      "segment": "bazaar_lane",
+      "t": 0.9053,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_077",
+      "segment": "bazaar_lane",
+      "t": 0.91713,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_077",
+      "segment": "bazaar_lane",
+      "t": 0.91713,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_078",
+      "segment": "bazaar_lane",
+      "t": 0.92896,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_078",
+      "segment": "bazaar_lane",
+      "t": 0.92896,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_L_079",
+      "segment": "bazaar_lane",
+      "t": 0.9408,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "bazaar_lane_R_079",
+      "segment": "bazaar_lane",
+      "t": 0.9408,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_000",
+      "segment": "chowk_tunnel",
+      "t": 0.00256,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_000",
+      "segment": "chowk_tunnel",
+      "t": 0.00256,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_001",
+      "segment": "chowk_tunnel",
+      "t": 0.00767,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_001",
+      "segment": "chowk_tunnel",
+      "t": 0.00767,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_002",
+      "segment": "chowk_tunnel",
+      "t": 0.01278,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_002",
+      "segment": "chowk_tunnel",
+      "t": 0.01278,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_003",
+      "segment": "chowk_tunnel",
+      "t": 0.0179,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_003",
+      "segment": "chowk_tunnel",
+      "t": 0.0179,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_004",
+      "segment": "chowk_tunnel",
+      "t": 0.02301,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_004",
+      "segment": "chowk_tunnel",
+      "t": 0.02301,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_005",
+      "segment": "chowk_tunnel",
+      "t": 0.02812,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_005",
+      "segment": "chowk_tunnel",
+      "t": 0.02812,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_006",
+      "segment": "chowk_tunnel",
+      "t": 0.03324,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_006",
+      "segment": "chowk_tunnel",
+      "t": 0.03324,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_007",
+      "segment": "chowk_tunnel",
+      "t": 0.03835,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_007",
+      "segment": "chowk_tunnel",
+      "t": 0.03835,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_008",
+      "segment": "chowk_tunnel",
+      "t": 0.04346,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_008",
+      "segment": "chowk_tunnel",
+      "t": 0.04346,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_009",
+      "segment": "chowk_tunnel",
+      "t": 0.04857,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_009",
+      "segment": "chowk_tunnel",
+      "t": 0.04857,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_010",
+      "segment": "chowk_tunnel",
+      "t": 0.05369,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_010",
+      "segment": "chowk_tunnel",
+      "t": 0.05369,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_011",
+      "segment": "chowk_tunnel",
+      "t": 0.0588,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_011",
+      "segment": "chowk_tunnel",
+      "t": 0.0588,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_012",
+      "segment": "chowk_tunnel",
+      "t": 0.06391,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_012",
+      "segment": "chowk_tunnel",
+      "t": 0.06391,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_013",
+      "segment": "chowk_tunnel",
+      "t": 0.06903,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_013",
+      "segment": "chowk_tunnel",
+      "t": 0.06903,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_014",
+      "segment": "chowk_tunnel",
+      "t": 0.07414,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_014",
+      "segment": "chowk_tunnel",
+      "t": 0.07414,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_015",
+      "segment": "chowk_tunnel",
+      "t": 0.07925,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_015",
+      "segment": "chowk_tunnel",
+      "t": 0.07925,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_016",
+      "segment": "chowk_tunnel",
+      "t": 0.08437,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_016",
+      "segment": "chowk_tunnel",
+      "t": 0.08437,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_017",
+      "segment": "chowk_tunnel",
+      "t": 0.08948,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_017",
+      "segment": "chowk_tunnel",
+      "t": 0.08948,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_018",
+      "segment": "chowk_tunnel",
+      "t": 0.09459,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_018",
+      "segment": "chowk_tunnel",
+      "t": 0.09459,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_019",
+      "segment": "chowk_tunnel",
+      "t": 0.09971,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_019",
+      "segment": "chowk_tunnel",
+      "t": 0.09971,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_020",
+      "segment": "chowk_tunnel",
+      "t": 0.10482,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_020",
+      "segment": "chowk_tunnel",
+      "t": 0.10482,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_021",
+      "segment": "chowk_tunnel",
+      "t": 0.10993,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_021",
+      "segment": "chowk_tunnel",
+      "t": 0.10993,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_022",
+      "segment": "chowk_tunnel",
+      "t": 0.11505,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_022",
+      "segment": "chowk_tunnel",
+      "t": 0.11505,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_023",
+      "segment": "chowk_tunnel",
+      "t": 0.12016,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_023",
+      "segment": "chowk_tunnel",
+      "t": 0.12016,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_024",
+      "segment": "chowk_tunnel",
+      "t": 0.12527,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_024",
+      "segment": "chowk_tunnel",
+      "t": 0.12527,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_025",
+      "segment": "chowk_tunnel",
+      "t": 0.13039,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_025",
+      "segment": "chowk_tunnel",
+      "t": 0.13039,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_026",
+      "segment": "chowk_tunnel",
+      "t": 0.1355,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_026",
+      "segment": "chowk_tunnel",
+      "t": 0.1355,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_027",
+      "segment": "chowk_tunnel",
+      "t": 0.14061,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_027",
+      "segment": "chowk_tunnel",
+      "t": 0.14061,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_028",
+      "segment": "chowk_tunnel",
+      "t": 0.14572,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_028",
+      "segment": "chowk_tunnel",
+      "t": 0.14572,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_029",
+      "segment": "chowk_tunnel",
+      "t": 0.15084,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_029",
+      "segment": "chowk_tunnel",
+      "t": 0.15084,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_030",
+      "segment": "chowk_tunnel",
+      "t": 0.15595,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_030",
+      "segment": "chowk_tunnel",
+      "t": 0.15595,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_031",
+      "segment": "chowk_tunnel",
+      "t": 0.16106,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_031",
+      "segment": "chowk_tunnel",
+      "t": 0.16106,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_032",
+      "segment": "chowk_tunnel",
+      "t": 0.16618,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_032",
+      "segment": "chowk_tunnel",
+      "t": 0.16618,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_033",
+      "segment": "chowk_tunnel",
+      "t": 0.17129,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_033",
+      "segment": "chowk_tunnel",
+      "t": 0.17129,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_034",
+      "segment": "chowk_tunnel",
+      "t": 0.1764,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_034",
+      "segment": "chowk_tunnel",
+      "t": 0.1764,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_035",
+      "segment": "chowk_tunnel",
+      "t": 0.18152,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_035",
+      "segment": "chowk_tunnel",
+      "t": 0.18152,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_036",
+      "segment": "chowk_tunnel",
+      "t": 0.18663,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_036",
+      "segment": "chowk_tunnel",
+      "t": 0.18663,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_037",
+      "segment": "chowk_tunnel",
+      "t": 0.19174,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_037",
+      "segment": "chowk_tunnel",
+      "t": 0.19174,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_038",
+      "segment": "chowk_tunnel",
+      "t": 0.19686,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_038",
+      "segment": "chowk_tunnel",
+      "t": 0.19686,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_039",
+      "segment": "chowk_tunnel",
+      "t": 0.20197,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_039",
+      "segment": "chowk_tunnel",
+      "t": 0.20197,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_040",
+      "segment": "chowk_tunnel",
+      "t": 0.20708,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_040",
+      "segment": "chowk_tunnel",
+      "t": 0.20708,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_041",
+      "segment": "chowk_tunnel",
+      "t": 0.2122,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_041",
+      "segment": "chowk_tunnel",
+      "t": 0.2122,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_042",
+      "segment": "chowk_tunnel",
+      "t": 0.21731,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_042",
+      "segment": "chowk_tunnel",
+      "t": 0.21731,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_043",
+      "segment": "chowk_tunnel",
+      "t": 0.22242,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_043",
+      "segment": "chowk_tunnel",
+      "t": 0.22242,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_044",
+      "segment": "chowk_tunnel",
+      "t": 0.22753,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_044",
+      "segment": "chowk_tunnel",
+      "t": 0.22753,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_045",
+      "segment": "chowk_tunnel",
+      "t": 0.23265,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_045",
+      "segment": "chowk_tunnel",
+      "t": 0.23265,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_046",
+      "segment": "chowk_tunnel",
+      "t": 0.23776,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_046",
+      "segment": "chowk_tunnel",
+      "t": 0.23776,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_047",
+      "segment": "chowk_tunnel",
+      "t": 0.24287,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_047",
+      "segment": "chowk_tunnel",
+      "t": 0.24287,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_048",
+      "segment": "chowk_tunnel",
+      "t": 0.24799,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_048",
+      "segment": "chowk_tunnel",
+      "t": 0.24799,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_049",
+      "segment": "chowk_tunnel",
+      "t": 0.2531,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_049",
+      "segment": "chowk_tunnel",
+      "t": 0.2531,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_050",
+      "segment": "chowk_tunnel",
+      "t": 0.25821,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_050",
+      "segment": "chowk_tunnel",
+      "t": 0.25821,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_051",
+      "segment": "chowk_tunnel",
+      "t": 0.26333,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_051",
+      "segment": "chowk_tunnel",
+      "t": 0.26333,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_052",
+      "segment": "chowk_tunnel",
+      "t": 0.26844,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_052",
+      "segment": "chowk_tunnel",
+      "t": 0.26844,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_053",
+      "segment": "chowk_tunnel",
+      "t": 0.27355,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_053",
+      "segment": "chowk_tunnel",
+      "t": 0.27355,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_054",
+      "segment": "chowk_tunnel",
+      "t": 0.27867,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_054",
+      "segment": "chowk_tunnel",
+      "t": 0.27867,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_055",
+      "segment": "chowk_tunnel",
+      "t": 0.28378,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_055",
+      "segment": "chowk_tunnel",
+      "t": 0.28378,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_056",
+      "segment": "chowk_tunnel",
+      "t": 0.28889,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_056",
+      "segment": "chowk_tunnel",
+      "t": 0.28889,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_057",
+      "segment": "chowk_tunnel",
+      "t": 0.29401,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_057",
+      "segment": "chowk_tunnel",
+      "t": 0.29401,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_058",
+      "segment": "chowk_tunnel",
+      "t": 0.29912,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_058",
+      "segment": "chowk_tunnel",
+      "t": 0.29912,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_059",
+      "segment": "chowk_tunnel",
+      "t": 0.30423,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_059",
+      "segment": "chowk_tunnel",
+      "t": 0.30423,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_060",
+      "segment": "chowk_tunnel",
+      "t": 0.30935,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_060",
+      "segment": "chowk_tunnel",
+      "t": 0.30935,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_061",
+      "segment": "chowk_tunnel",
+      "t": 0.31446,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_061",
+      "segment": "chowk_tunnel",
+      "t": 0.31446,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_062",
+      "segment": "chowk_tunnel",
+      "t": 0.31957,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_062",
+      "segment": "chowk_tunnel",
+      "t": 0.31957,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_063",
+      "segment": "chowk_tunnel",
+      "t": 0.32468,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_063",
+      "segment": "chowk_tunnel",
+      "t": 0.32468,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_064",
+      "segment": "chowk_tunnel",
+      "t": 0.3298,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_064",
+      "segment": "chowk_tunnel",
+      "t": 0.3298,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_065",
+      "segment": "chowk_tunnel",
+      "t": 0.33491,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_065",
+      "segment": "chowk_tunnel",
+      "t": 0.33491,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_066",
+      "segment": "chowk_tunnel",
+      "t": 0.34002,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_066",
+      "segment": "chowk_tunnel",
+      "t": 0.34002,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_L_067",
+      "segment": "chowk_tunnel",
+      "t": 0.34514,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "chowk_tunnel_R_067",
+      "segment": "chowk_tunnel",
+      "t": 0.34514,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_000",
+      "segment": "dhalli_bazaar",
+      "t": 0.00785,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_000",
+      "segment": "dhalli_bazaar",
+      "t": 0.00785,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_001",
+      "segment": "dhalli_bazaar",
+      "t": 0.02356,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_001",
+      "segment": "dhalli_bazaar",
+      "t": 0.02356,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_002",
+      "segment": "dhalli_bazaar",
+      "t": 0.03926,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_002",
+      "segment": "dhalli_bazaar",
+      "t": 0.03926,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_003",
+      "segment": "dhalli_bazaar",
+      "t": 0.05496,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_003",
+      "segment": "dhalli_bazaar",
+      "t": 0.05496,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_004",
+      "segment": "dhalli_bazaar",
+      "t": 0.07067,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_004",
+      "segment": "dhalli_bazaar",
+      "t": 0.07067,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_005",
+      "segment": "dhalli_bazaar",
+      "t": 0.08637,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_005",
+      "segment": "dhalli_bazaar",
+      "t": 0.08637,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_006",
+      "segment": "dhalli_bazaar",
+      "t": 0.10208,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_006",
+      "segment": "dhalli_bazaar",
+      "t": 0.10208,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_007",
+      "segment": "dhalli_bazaar",
+      "t": 0.11778,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_007",
+      "segment": "dhalli_bazaar",
+      "t": 0.11778,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_008",
+      "segment": "dhalli_bazaar",
+      "t": 0.13348,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_008",
+      "segment": "dhalli_bazaar",
+      "t": 0.13348,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_009",
+      "segment": "dhalli_bazaar",
+      "t": 0.14919,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_009",
+      "segment": "dhalli_bazaar",
+      "t": 0.14919,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_010",
+      "segment": "dhalli_bazaar",
+      "t": 0.16489,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_010",
+      "segment": "dhalli_bazaar",
+      "t": 0.16489,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_011",
+      "segment": "dhalli_bazaar",
+      "t": 0.18059,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_011",
+      "segment": "dhalli_bazaar",
+      "t": 0.18059,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_012",
+      "segment": "dhalli_bazaar",
+      "t": 0.1963,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_012",
+      "segment": "dhalli_bazaar",
+      "t": 0.1963,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_013",
+      "segment": "dhalli_bazaar",
+      "t": 0.212,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_013",
+      "segment": "dhalli_bazaar",
+      "t": 0.212,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_014",
+      "segment": "dhalli_bazaar",
+      "t": 0.22771,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_014",
+      "segment": "dhalli_bazaar",
+      "t": 0.22771,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_015",
+      "segment": "dhalli_bazaar",
+      "t": 0.24341,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_015",
+      "segment": "dhalli_bazaar",
+      "t": 0.24341,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_016",
+      "segment": "dhalli_bazaar",
+      "t": 0.25911,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_016",
+      "segment": "dhalli_bazaar",
+      "t": 0.25911,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_017",
+      "segment": "dhalli_bazaar",
+      "t": 0.27482,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_017",
+      "segment": "dhalli_bazaar",
+      "t": 0.27482,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_018",
+      "segment": "dhalli_bazaar",
+      "t": 0.29052,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_018",
+      "segment": "dhalli_bazaar",
+      "t": 0.29052,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_019",
+      "segment": "dhalli_bazaar",
+      "t": 0.30623,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_019",
+      "segment": "dhalli_bazaar",
+      "t": 0.30623,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_020",
+      "segment": "dhalli_bazaar",
+      "t": 0.32193,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_020",
+      "segment": "dhalli_bazaar",
+      "t": 0.32193,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_021",
+      "segment": "dhalli_bazaar",
+      "t": 0.33763,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_021",
+      "segment": "dhalli_bazaar",
+      "t": 0.33763,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_022",
+      "segment": "dhalli_bazaar",
+      "t": 0.35334,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_022",
+      "segment": "dhalli_bazaar",
+      "t": 0.35334,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_023",
+      "segment": "dhalli_bazaar",
+      "t": 0.36904,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_023",
+      "segment": "dhalli_bazaar",
+      "t": 0.36904,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_024",
+      "segment": "dhalli_bazaar",
+      "t": 0.38474,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_024",
+      "segment": "dhalli_bazaar",
+      "t": 0.38474,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_025",
+      "segment": "dhalli_bazaar",
+      "t": 0.40045,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_025",
+      "segment": "dhalli_bazaar",
+      "t": 0.40045,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_026",
+      "segment": "dhalli_bazaar",
+      "t": 0.41615,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_026",
+      "segment": "dhalli_bazaar",
+      "t": 0.41615,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_027",
+      "segment": "dhalli_bazaar",
+      "t": 0.43186,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_027",
+      "segment": "dhalli_bazaar",
+      "t": 0.43186,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_028",
+      "segment": "dhalli_bazaar",
+      "t": 0.44756,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_028",
+      "segment": "dhalli_bazaar",
+      "t": 0.44756,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_029",
+      "segment": "dhalli_bazaar",
+      "t": 0.46326,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_029",
+      "segment": "dhalli_bazaar",
+      "t": 0.46326,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_030",
+      "segment": "dhalli_bazaar",
+      "t": 0.47897,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_030",
+      "segment": "dhalli_bazaar",
+      "t": 0.47897,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_031",
+      "segment": "dhalli_bazaar",
+      "t": 0.49467,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_031",
+      "segment": "dhalli_bazaar",
+      "t": 0.49467,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_032",
+      "segment": "dhalli_bazaar",
+      "t": 0.51038,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_032",
+      "segment": "dhalli_bazaar",
+      "t": 0.51038,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_033",
+      "segment": "dhalli_bazaar",
+      "t": 0.52608,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_033",
+      "segment": "dhalli_bazaar",
+      "t": 0.52608,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_034",
+      "segment": "dhalli_bazaar",
+      "t": 0.54178,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_034",
+      "segment": "dhalli_bazaar",
+      "t": 0.54178,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_035",
+      "segment": "dhalli_bazaar",
+      "t": 0.55749,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_035",
+      "segment": "dhalli_bazaar",
+      "t": 0.55749,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_036",
+      "segment": "dhalli_bazaar",
+      "t": 0.57319,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_036",
+      "segment": "dhalli_bazaar",
+      "t": 0.57319,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_037",
+      "segment": "dhalli_bazaar",
+      "t": 0.58889,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_037",
+      "segment": "dhalli_bazaar",
+      "t": 0.58889,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_038",
+      "segment": "dhalli_bazaar",
+      "t": 0.6046,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_038",
+      "segment": "dhalli_bazaar",
+      "t": 0.6046,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_039",
+      "segment": "dhalli_bazaar",
+      "t": 0.6203,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_039",
+      "segment": "dhalli_bazaar",
+      "t": 0.6203,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_040",
+      "segment": "dhalli_bazaar",
+      "t": 0.63601,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_040",
+      "segment": "dhalli_bazaar",
+      "t": 0.63601,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_041",
+      "segment": "dhalli_bazaar",
+      "t": 0.65171,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_041",
+      "segment": "dhalli_bazaar",
+      "t": 0.65171,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_042",
+      "segment": "dhalli_bazaar",
+      "t": 0.66741,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_042",
+      "segment": "dhalli_bazaar",
+      "t": 0.66741,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_043",
+      "segment": "dhalli_bazaar",
+      "t": 0.68312,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_043",
+      "segment": "dhalli_bazaar",
+      "t": 0.68312,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_044",
+      "segment": "dhalli_bazaar",
+      "t": 0.69882,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_044",
+      "segment": "dhalli_bazaar",
+      "t": 0.69882,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_045",
+      "segment": "dhalli_bazaar",
+      "t": 0.71453,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_045",
+      "segment": "dhalli_bazaar",
+      "t": 0.71453,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_046",
+      "segment": "dhalli_bazaar",
+      "t": 0.73023,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_046",
+      "segment": "dhalli_bazaar",
+      "t": 0.73023,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_047",
+      "segment": "dhalli_bazaar",
+      "t": 0.74593,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_047",
+      "segment": "dhalli_bazaar",
+      "t": 0.74593,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_048",
+      "segment": "dhalli_bazaar",
+      "t": 0.76164,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_048",
+      "segment": "dhalli_bazaar",
+      "t": 0.76164,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_049",
+      "segment": "dhalli_bazaar",
+      "t": 0.77734,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_049",
+      "segment": "dhalli_bazaar",
+      "t": 0.77734,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_050",
+      "segment": "dhalli_bazaar",
+      "t": 0.79305,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_050",
+      "segment": "dhalli_bazaar",
+      "t": 0.79305,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_051",
+      "segment": "dhalli_bazaar",
+      "t": 0.80875,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_051",
+      "segment": "dhalli_bazaar",
+      "t": 0.80875,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_052",
+      "segment": "dhalli_bazaar",
+      "t": 0.82445,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_052",
+      "segment": "dhalli_bazaar",
+      "t": 0.82445,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_053",
+      "segment": "dhalli_bazaar",
+      "t": 0.84016,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_053",
+      "segment": "dhalli_bazaar",
+      "t": 0.84016,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_054",
+      "segment": "dhalli_bazaar",
+      "t": 0.85586,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_054",
+      "segment": "dhalli_bazaar",
+      "t": 0.85586,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_055",
+      "segment": "dhalli_bazaar",
+      "t": 0.87156,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_055",
+      "segment": "dhalli_bazaar",
+      "t": 0.87156,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_056",
+      "segment": "dhalli_bazaar",
+      "t": 0.88727,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_056",
+      "segment": "dhalli_bazaar",
+      "t": 0.88727,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_057",
+      "segment": "dhalli_bazaar",
+      "t": 0.90297,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_057",
+      "segment": "dhalli_bazaar",
+      "t": 0.90297,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_058",
+      "segment": "dhalli_bazaar",
+      "t": 0.91868,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_058",
+      "segment": "dhalli_bazaar",
+      "t": 0.91868,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_059",
+      "segment": "dhalli_bazaar",
+      "t": 0.93438,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_059",
+      "segment": "dhalli_bazaar",
+      "t": 0.93438,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_060",
+      "segment": "dhalli_bazaar",
+      "t": 0.95008,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_060",
+      "segment": "dhalli_bazaar",
+      "t": 0.95008,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_061",
+      "segment": "dhalli_bazaar",
+      "t": 0.96579,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_061",
+      "segment": "dhalli_bazaar",
+      "t": 0.96579,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_L_062",
+      "segment": "dhalli_bazaar",
+      "t": 0.98149,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    },
+    {
+      "id": "dhalli_bazaar_R_062",
+      "segment": "dhalli_bazaar",
+      "t": 0.98149,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": false,
+      "shop": null
+    }
+  ]
+}

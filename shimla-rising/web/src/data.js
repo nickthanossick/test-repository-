@@ -23,7 +23,7 @@ export async function loadAll(onProgress = () => {}) {
     ["districts.json", "districts"], ["pois.json", "pois"], ["roads.json", "roads"],
     ["missions.json", "missions"], ["characters.json", "characters"],
     ["vehicles.json", "vehicles"], ["dialogue.json", "dialogue"],
-    ["shops.json", "shops"],
+    ["shops.json", "shops"], ["sanjauli.json", "sanjauliMap"], ["routes.json", "routes"],
   ];
   const out = {};
   for (let i = 0; i < steps.length; i++) {

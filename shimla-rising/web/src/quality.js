@@ -17,6 +17,8 @@ export const PRESETS = {
     pixelRatio: 1.0,
     detailScatter: 0,      // ghaas/chattan ka daayra, metres
     shadows: true,
+    crowd: { keepers: 8, walkers: 5, dogs: 1, cows: 0 },
+    buses: 3,
   },
   medium: {
     name: "Medium",
@@ -28,6 +30,8 @@ export const PRESETS = {
     pixelRatio: 1.5,
     detailScatter: 120,
     shadows: true,
+    crowd: { keepers: 18, walkers: 10, dogs: 2, cows: 1 },
+    buses: 5,
   },
   high: {
     name: "High",
@@ -39,6 +43,8 @@ export const PRESETS = {
     pixelRatio: 2.0,
     detailScatter: 200,
     shadows: true,
+    crowd: { keepers: 32, walkers: 16, dogs: 3, cows: 2 },
+    buses: 8,
   },
 };
 
