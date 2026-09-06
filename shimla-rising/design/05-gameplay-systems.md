@@ -1,5 +1,52 @@
 # Gameplay systems
 
+## Controls
+
+| Key | Kaam |
+|---|---|
+| **↑ ↓ ← →** / W A S D | chalo / gaadi chalao |
+| **Ctrl** | **daudo** — dabao to on, dobara dabao to off |
+| Shift | daudo (dabaye rakho) |
+| **Space** | kudo (paidal) · handbrake (gaadi) |
+| F · E | gaadi mein baitho/utro · mission shuru karo |
+| M · 1 · T · 2 · Q · P | naksha · waqt +3h · waqt rok · mausam · quality · save |
+
+**Ctrl toggle kyun hai, hold kyun nahi:** browser mein **Ctrl+W tab band kar
+deta hai**, aur JavaScript use rok nahi sakta — `preventDefault()` ka us par koi
+asar nahi hota. Agar Ctrl ko dabaye rakh kar W se aage chalte, to game beech
+khel mein band ho jaata. Isliye Ctrl ek baar dabane pe run on/off hota hai, aur
+hold-to-run chahiye to **Shift** hai.
+
+## Din-raat aur mausam
+
+Waqt **lagataar chalta hai**: 1 asli second = 1 game minute, yaani poora din
+**24 minute** mein. Khelte-khelte subah, dopahar, shaam aur raat sab aa jaate hain.
+
+Raat ko: taare nikalte hain, chaand ki dheemi neeli light aati hai, **street
+lamp jal jaate hain**, **imaaraton ki khidkiyan roshan ho jaati hain**, aur
+dukanon ke board jagmagate hain.
+
+**Ek performance baat:** `sky.setTime()` PMREM se environment map dobara banata
+hai, jo mehnga hai. Isliye rang aur light har frame update hote hain par env map
+sirf har ~15 game-minute mein — warna frame rate gir jaata.
+
+Mausam apne aap badalta rehta hai, har 3–8 game-ghante mein, aur badlav **18
+second mein smooth** hota hai (grip, fog, particles sab lerp hote hain). Mahine
+ke hisaab se probability: December mein barf zyada, July mein monsoon.
+
+## Quality tiers
+
+Game device dekh kar khud tier chunta hai (GPU string, core count, mobile UA).
+`Q` se badla ja sakta hai; render settings turant lagti hain, terrain/ped ki
+density agle load pe.
+
+| | low | medium | high |
+|---|---|---|---|
+| terrain quads/chunk | 64 | 96 | 128 |
+| ped | 3 500 | 9 000 | 16 000 |
+| khidkiyan (deewarein) | 1 | 2 | 4 |
+| shadow map | 1024 | 2048 | 4096 |
+
 Har system dono engines mein implement hai. Jab bhi kuch badle, dono mein badalna
 chahiye — `web/src/` aur `godot/scripts/` ke files jaanboojh kar aamne-saamne
 mirror hain.

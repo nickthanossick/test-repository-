@@ -122,22 +122,29 @@ export class MeshBuilder {
     const c = Math.cos(yaw), s = Math.sin(yaw);
     const V = (x, y, z) => new THREE.Vector3(cx + x * c - z * s, cy + y, cz + x * s + z * c);
 
+    // Winding ka dhyan: chhat ke dono dhalan aur dono gable end alag-alag
+    // disha mein mukh karte hain. Pehle ye ulte the -- normal neeche/andar ki
+    // taraf, isliye slope back-face cull ho jaati thi aur deewar ka upar wala
+    // mukh dikhta tha (chhat gayab lagti thi). Har face ka order yahan
+    // haath se nikala gaya hai taaki normal bahar ki taraf ho.
     if (ridgeAlongX) {
       const a = V(-hx, 0, -hz), b = V(hx, 0, -hz);
       const d = V(hx, 0, hz), e = V(-hx, 0, hz);
       const r1 = V(-hx, rise, 0), r2 = V(hx, rise, 0);
-      this.quad(a, b, r2, r1, color, sx, Math.hypot(hz, rise));   // uttari dhalan
-      this.quad(e, r1, r2, d, color, sx, Math.hypot(hz, rise));   // dakshini dhalan
-      this._tri(a, r1, e, color);                                  // gable end
-      this._tri(b, d, r2, color);
+      const slant = Math.hypot(hz, rise);
+      this.quad(a, r1, r2, b, color, sx, slant);     // uttari dhalan
+      this.quad(e, d, r2, r1, color, sx, slant);     // dakshini dhalan
+      this._tri(a, e, r1, color);                    // pashchimi gable end
+      this._tri(b, r2, d, color);                    // poorvi gable end
     } else {
       const a = V(-hx, 0, -hz), b = V(hx, 0, -hz);
       const d = V(hx, 0, hz), e = V(-hx, 0, hz);
       const r1 = V(0, rise, -hz), r2 = V(0, rise, hz);
-      this.quad(a, r1, r2, e, color, sz, Math.hypot(hx, rise));
-      this.quad(b, d, r2, r1, color, sz, Math.hypot(hx, rise));
-      this._tri(a, e, r2, color);
-      this._tri(b, r1, d, color);
+      const slant = Math.hypot(hx, rise);
+      this.quad(a, r1, r2, e, color, sz, slant);     // pashchimi dhalan
+      this.quad(b, d, r2, r1, color, sz, slant);     // poorvi dhalan
+      this._tri(a, r1, b, color);                    // uttari gable end
+      this._tri(e, d, r2, color);                    // dakshini gable end
     }
     return this;
   }

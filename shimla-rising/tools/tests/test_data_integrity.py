@@ -100,3 +100,37 @@ def test_vehicles_have_sane_stats(bundle):
         assert 60 <= v["top_speed_kmh"] <= 200, v["id"]
         assert 0.4 <= v["grip"] <= 1.5, v["id"]
         assert len(v["body"]) == 3, v["id"]
+
+
+def test_pois_have_accuracy_and_landmark(bundle):
+    """Har POI batata ho ki uska coordinate verified hai ya approx.
+
+    Precision gadhna nahi hai: jo coordinate source se confirm nahi hua use
+    approx likhte hain, taaki baad mein OSM pipeline usse replace kar sake.
+    """
+    problems = []
+    for p in bundle["pois"]["pois"]:
+        acc = p.get("accuracy")
+        if acc not in (None, "verified", "approx"):
+            problems.append(f"{p['id']}: accuracy {acc!r}")
+    assert problems == []
+
+
+def test_named_places_the_user_asked_for_exist(bundle):
+    """Nikhil ne ye jagahein naam se maangi thi -- inka hona zaroori hai."""
+    ids = {p["id"] for p in bundle["pois"]["pois"]}
+    for need in ("sanjauli_chowk", "st_bedes", "buddys", "jakhoo_temple", "gov_college"):
+        assert need in ids, f"{need} POI missing"
+
+
+def test_signs_are_short_enough_to_read(bundle):
+    """Board ka text 34 characters se lamba ho to canvas pe chhota ho jaata hai."""
+    long = [p["id"] for p in bundle["pois"]["pois"] if len(p.get("sign", "")) > 34]
+    assert long == []
+
+
+def test_vehicles_have_shapes(bundle):
+    """Har gaadi ka `shape` field ho -- vehicle.js isse silhouette chunta hai."""
+    SHAPES = {"tallboy", "classic", "hatch", "offroad", "bus", "truck", "bike"}
+    bad = [v["id"] for v in bundle["vehicles"]["vehicles"] if v.get("shape") not in SHAPES]
+    assert bad == []

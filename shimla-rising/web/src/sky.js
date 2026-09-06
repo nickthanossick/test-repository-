@@ -51,8 +51,17 @@ export class Sky {
     this.setTime(9.0);
   }
 
-  /** hour 0..24 */
-  setTime(hour) {
+  /**
+   * Waqt set karo.
+   *
+   * @param regenerateEnv PMREM se environment map dobara banao ya nahi.
+   *   Ye **bahut mehnga** hai -- poora sky dome ek cube mein render hota hai
+   *   aur uske mip levels convolve hote hain. Rang aur light har frame update
+   *   ho sakte hain, par env map nahi: daynight.js ise sirf har ~15 game-minute
+   *   mein true karta hai. (Pehle ye flag tha hi nahi, isliye PMREM har frame
+   *   chal raha tha aur game rukne jaisa dheema ho gaya tha.)
+   */
+  setTime(hour, regenerateEnv = true) {
     this.hour = hour;
     const t = ((hour - 6) / 12) * Math.PI;         // 6am se 6pm
     const el = Math.sin(t);
@@ -70,16 +79,33 @@ export class Sky {
 
     // top -> horizon gradient
     // Ye rang sirf dikhne ke liye nahi hain -- PMREM inhi se image-based lighting
-    // banata hai, isliye ye poore scene ka ambient hain. Bahut gehra sky = kaali
-    // chhaya, jahan kuch bhi nahi dikhta.
-    this.top = new THREE.Color().setRGB(0.16 + day * 0.20, 0.30 + day * 0.34, 0.52 + day * 0.40);
-    this.horizon = new THREE.Color().setRGB(0.52 + day * 0.36 + dusk * 0.30,
-                                            0.60 + day * 0.32 + dusk * 0.06,
-                                            0.68 + day * 0.28 - dusk * 0.12);
+    // banata hai, isliye ye poore scene ka ambient bhi hain.
+    //
+    // Pehle inka floor bahut ooncha tha (day=0 pe bhi sky neela rehta tha),
+    // taaki chhaya kaali na ho. Nateeja: raat kabhi aati hi nahi thi -- rat ke
+    // 9 baje bhi aasman din jaisa neela. Ab din ke rang aur raat ke rang ke
+    // beech lerp hota hai, aur raat ka ambient chaand + environmentIntensity
+    // se sambhala jaata hai.
+    const NIGHT_TOP = [0.016, 0.028, 0.072];
+    const NIGHT_HZ = [0.055, 0.070, 0.115];
+    const DAY_TOP = [0.16, 0.30, 0.52];
+    const DAY_HZ = [0.52, 0.60, 0.68];
+    const mix = (a, b, k) => a + (b - a) * k;
+    this.top = new THREE.Color().setRGB(
+      mix(NIGHT_TOP[0], DAY_TOP[0] + day * 0.20, day),
+      mix(NIGHT_TOP[1], DAY_TOP[1] + day * 0.34, day),
+      mix(NIGHT_TOP[2], DAY_TOP[2] + day * 0.40, day));
+    this.horizon = new THREE.Color().setRGB(
+      mix(NIGHT_HZ[0], DAY_HZ[0] + day * 0.36 + dusk * 0.30, day),
+      mix(NIGHT_HZ[1], DAY_HZ[1] + day * 0.32 + dusk * 0.06, day),
+      mix(NIGHT_HZ[2], DAY_HZ[2] + day * 0.28 - dusk * 0.12, day));
     this._paint();
-    this.scene.fog.color.copy(this.horizon).lerp(new THREE.Color(0.72, 0.79, 0.86), 0.35);
+    // Raat mein sky khud gehra hai, to env se aane wali roshni bhi kam ho jaati
+    // hai -- par bilkul kaala nahi chahiye, warna kuch dikhta hi nahi.
+    this.scene.environmentIntensity = 0.42 + day * 0.62;
+    this.scene.fog.color.copy(this.horizon).lerp(new THREE.Color(0.72, 0.79, 0.86), 0.35 * (0.3 + day * 0.7));
     this.fogBase = this.scene.fog.color.clone();
-    this._updateEnvironment();
+    if (regenerateEnv) this._updateEnvironment();
   }
 
   _paint() {

@@ -20,9 +20,12 @@ node web/serve.mjs
 
 Bas Node chahiye. Koi `npm install` nahi — three.js repo mein vendored hai.
 
-**Controls:** `WASD` chalo · `Shift` daudo · `Space` kudo / handbrake ·
-`F` gaadi mein baitho/utro · `E` mission shuru karo · Mouse camera ·
-`M` naksha zoom · `2` mausam · `P` save
+**Controls:** `↑↓←→` / `WASD` chalo · **`Ctrl` daudo** (toggle) · `Space` kudo /
+handbrake · `F` gaadi mein baitho/utro · `E` mission · Mouse camera · `M` naksha ·
+`1` waqt +3h · `T` waqt rok · `2` mausam · `Q` quality · `P` save
+
+> `Ctrl` **toggle** hai, hold nahi — browser mein `Ctrl+W` tab band kar deta hai
+> aur JavaScript use rok nahi sakta. Hold-to-run chahiye to `Shift` hai.
 
 ---
 
@@ -31,9 +34,12 @@ Bas Node chahiye. Koi `npm install` nahi — three.js repo mein vendored hai.
 | | |
 |---|---|
 | **Map** | 8.2 km × 8.2 km asli Shimla — Summer Hill se Sanjauli/Dhalli tak, Annandale se New Shimla tak, Jakhoo (2455 m) beech mein |
+| **Asli jagahein** | 47 POI, **45 ki apni imaarat aur naam ka board** — Sanjauli Chowk, St. Bede's College, Buddy's Food Joint, Government College Sanjauli, Jakhu Mandir, Mall Road, Sanjauli–Dhalli tunnel |
+| **Din-raat** | Lagataar chalta hai — poora din **24 minute** mein. Raat ko street lamp, khidkiyan aur dukanon ke board jal jaate hain, taare nikalte hain |
+| **Mausam** | Apne aap badalta hai, 18 second mein smooth transition. Mahine ke hisaab se — December mein barf, July mein monsoon |
 | **Kahani** | 3 act, 14 story missions + 10 side missions, Hinglish dialogue |
-| **Gaadiyan** | Shimla taxi, HRTC bus, Bolero, scooter, timber truck, HP Police Gypsy |
-| **Systems** | Wanted level (0–5), mausam (barf/monsoon/kohra), slope stamina, save/load |
+| **Gaadiyan** | Alto (taxi bhi), Maruti 800, Baleno, Thar, scooter, HRTC bus, timber truck, HP Police Gypsy — har ek ka apna aakar |
+| **Systems** | Wanted level (0–5), slope stamina, save/load, **quality tiers** (device dekh kar auto, `Q` se badlo) |
 | **Engines** | Three.js (browser) + Godot 4.7 (desktop/web export) — ek hi data layer |
 
 ### Shimla-specific gameplay
@@ -123,7 +129,7 @@ Sach saaf rakhna behtar hai:
 
 | | |
 |---|---|
-| ✅ **Web game** | Headless Chromium mein chala kar verify kiya — 0 console errors, 0 page errors, ~0.8s load, 2707 imaaratein, 9000 ped, 27 km sadkein. Screenshots liye gaye. |
+| ✅ **Web game** | Headless Chromium mein chala kar verify kiya — 0 console errors, 0 page errors, 2600+ imaaratein, 45 landmark, 43 naam ke board, 27 km sadkein. Screenshots liye gaye. |
 | ✅ **Heightmap generator** | Chala kar output dekha gaya. Landmark elevation error: mean 0.7 m. |
 | ✅ **Tests + lint** | 72 pytest pass, ruff clean. |
 | ⚠️ **Godot project** | **Kabhi chalaya nahi gaya.** Godot editor is environment mein download nahi ho saka. Scripts Godot 4.7 API ke against dhyan se likhe hain, aur structural checks (res:// paths, scene bookkeeping, indentation) automated hain — par pehla asli run aapke PC pe hoga. |

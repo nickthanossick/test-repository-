@@ -70,6 +70,7 @@ export class RoadNetwork {
     const road = new MeshBuilder(0.16);
     const stone = new MeshBuilder(0.55);
     const metal = new MeshBuilder(0.8);
+    const lamps = new MeshBuilder(0.9);   // sirf lamp ke sir -- raat ko jalte hain
     const col = new THREE.Color();
     const edge = new THREE.Color();
     const stoneCol = new THREE.Color(0x8d857a);
@@ -175,8 +176,8 @@ export class RoadNetwork {
           metal.box(lx, ly + 2.3, lz2, 0.14, 4.6, 0.14, lampCol, yaw);
           metal.box(lx - nx * dSide * 0.55, ly + 4.6, lz2 - nz * dSide * 0.55,
                     1.2, 0.11, 0.11, lampCol, yaw);
-          metal.box(lx - nx * dSide * 1.05, ly + 4.44, lz2 - nz * dSide * 1.05,
-                    0.42, 0.22, 0.3, lampCol, yaw);
+          lamps.box(lx - nx * dSide * 1.05, ly + 4.44, lz2 - nz * dSide * 1.05,
+                    0.42, 0.22, 0.3, new THREE.Color(0xfff0c8), yaw);
         }
       }
     }
@@ -197,6 +198,18 @@ export class RoadNetwork {
         vertexColors: true, roughness: 0.42, metalness: 0.75 }));
       m.name = "road-railings";
       g.add(m);
+    }
+    if (lamps.count) {
+      // Apna material, taaki daynight.js raat ko sirf lamp ke sir jaga sake
+      const lampMat = new THREE.MeshStandardMaterial({
+        vertexColors: true, roughness: 0.3,
+        emissive: 0xffd98a, emissiveIntensity: 0,
+      });
+      const m = lamps.build(lampMat);
+      m.name = "road-lamps";
+      m.castShadow = false;
+      g.add(m);
+      g.userData.lampMaterial = lampMat;
     }
     return g;
   }

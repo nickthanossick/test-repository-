@@ -25,6 +25,9 @@ export class Input {
 
   down(code) { return this.keys.has(code); }
 
+  /** Do mein se koi bhi dabaa ho. */
+  anyDown(...codes) { return codes.some((c) => this.keys.has(c)); }
+
   /** Sirf ek baar true -- toggle keys (F, M, H) ke liye. */
   pressed(code) {
     if (this._pressedOnce.has(code)) { this._pressedOnce.delete(code); return true; }

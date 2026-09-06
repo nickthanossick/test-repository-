@@ -1,5 +1,20 @@
 # Roadmap
 
+## Round 3 mein kya aaya
+
+- ✅ **Asli jagahein** — 47 POI, **45 ki apni imaarat**, **43 naam ke board**.
+  St. Bede's College (Navbahar), Government College Sanjauli, Buddy's Food Joint,
+  Sanjauli Chowk aur bazaar, Sanjauli–Dhalli tunnel, Mall Road ka stretch,
+  Chhota Shimla/Kasumpti — sab apne asli sthaan pe
+- ✅ **Din-raat chalta rehta hai** — poora din 24 minute mein; raat ko street lamp,
+  khidkiyan aur dukanon ke board jal jaate hain, taare nikalte hain
+- ✅ **Mausam apne aap badalta hai** — 18 second mein smooth transition
+- ✅ **Quality tiers** — device dekh kar auto (`Q` se badlo)
+- ✅ **Asli gaadiyan** — Alto, Maruti 800, Baleno, Thar, har ek ka apna aakar
+- ✅ **Pahadi topi** har kirdaar pe
+- ✅ **Controls** — arrow keys + `Ctrl` se daudna (toggle)
+- ✅ Sadkein 14 → **19** (Navbahar Road, Sanjauli Bazaar Road, Lower Bazaar…)
+
 ## Abhi kya kaam karta hai
 
 - ✅ 8.2 km² Shimla terrain, 45 asli landmark elevations se (error: mean 0.7 m)
@@ -20,6 +35,17 @@ inhe ek baar chalana hai:
 1. **Godot project kholo aur F5 dabao.** Kuch API mismatch nikal sakte hain.
 2. **Pipeline chalao** OpenTopography key ke saath — asli DEM aur OSM.
 3. **Blender scripts chalao** — `--limit 50` se shuru karo.
+
+## Agla round — sabse pehle
+
+- **Dialogue ki awaaz** — Web Speech API, har kirdaar ka apna pitch/rate
+  (profiles `data/characters.json` mein rakhenge taaki Godot bhi padh sake)
+- **Traffic aur paidal log** — abhi sadkein khaali hain; Sanjauli Chowk aur
+  Mall Road pe bheed sabse zyada farak degi
+- **Sadkein 19 → ~40** — Middle Bazaar, Ram Bazaar, Jakhoo ke teen rastey,
+  Summer Hill ki hairpin, Tutikandi bypass
+- **District circles → polygons** — abhi har ilaaka ek circle hai, isliye
+  imaaratein kabhi-kabhi galat jagah phail jaati hain
 
 ## Phase 2 — content
 

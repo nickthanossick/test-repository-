@@ -57,6 +57,26 @@ Mashobra, Naldehra, Tara Devi — wo `shimla_extended` preset (16.4 km) mein hai
 | ISBT Tutikandi | 1900 m |
 | New Shimla | 1850 m |
 
+## Asli jagahein — apni imaarat ke saath
+
+47 POI hain aur **45 ki apni pehchan wali imaarat** hai (pehle sirf 12 thi).
+Har ek pe **naam ka board** bhi lagta hai — yahi ek jagah ko "random" se
+"Sanjauli Chowk" banata hai.
+
+| Jagah | Coordinates | Kya bana |
+|---|---|---|
+| **St. Bede's College**, Navbahar | 31.094, 77.187 ✅ | colonial campus — lamba block, arcade, chapel tower, lawn, gate |
+| **Government College Sanjauli** | 31.1069, 77.1887 ✅ | institutional campus, 1969 |
+| **Buddy's Food Joint**, Sanjauli | ~31.0958, 77.1880 ⚠️ | dukan — sheeshe ka front, awning, jagmagata board |
+| **Sanjauli Chowk / Bazaar** | 31.1082, 77.1927 | dhalan pe sitti dukanon ki kataar, upar balcony wale ghar |
+| **Sanjauli–Dhalli tunnel** | ~31.112, 77.1985 ⚠️ | naya double-lane portal (purana 1852 ka alag hai) |
+| **Jakhu Mandir** | 31.0999, 77.1836 ✅ | aangan, shikhara, ghanti ka arch, 108-ft murti |
+| **Mall Road** (Gaiety, Town Hall, Christ Church, Ridge) | | Victorian block, clock tower, arched khidkiyan |
+
+`accuracy` field har POI pe hai: **verified** matlab coordinate source se confirm
+hua, **approx** matlab jagah sahi hai par exact point nahi. `tools/shimla_pipeline`
+chalane pe OSM se asli coords aa jaate hain.
+
 ## Sadak network
 
 14 named roads, **26.3 km** total.

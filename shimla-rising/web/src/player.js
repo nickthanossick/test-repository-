@@ -160,6 +160,20 @@ function buildAvatar() {
   add(new THREE.Mesh(new THREE.CylinderGeometry(0.052, 0.062, 0.09, 10), skinMat))
     .position.y = 1.487;
 
+  // --- Himachali topi ----------------------------------------------------
+  // Chapti gol wool ki topi, aur aage ek alag rang ka velvet band. Yahi ek
+  // cheez poore sheher ko turant Himachal jaisa bana deti hai.
+  const topiMat = TEX.standard(TEX.topi(0x4a5d3a, 0x8c2f2f), { roughness: 0.95 });
+  const bandMat = new THREE.MeshStandardMaterial({ color: 0x8c2f2f, roughness: 0.72 });
+  const cap = add(new THREE.Mesh(new THREE.CylinderGeometry(0.132, 0.126, 0.105, 20), topiMat));
+  cap.position.y = 1.735;
+  const brim = add(new THREE.Mesh(new THREE.CylinderGeometry(0.142, 0.142, 0.022, 20), topiMat));
+  brim.position.y = 1.686;
+  // aage ka velvet patta -- topi ki pehchan
+  const band = add(new THREE.Mesh(new THREE.CylinderGeometry(0.134, 0.129, 0.062, 20, 1, true,
+    -0.62, 1.24), bandMat));
+  band.position.y = 1.716;
+
   // --- dhad --------------------------------------------------------------
   const torso = add(new THREE.Mesh(new THREE.CapsuleGeometry(0.155, 0.30, 6, 14), jacketMat));
   torso.scale.set(1.28, 1, 0.72);

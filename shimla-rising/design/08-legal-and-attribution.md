@@ -60,6 +60,16 @@ export karke build distribute karte ho, to Godot ke license aur uske third-party
 components ka attribution shamil karna chahiye. Godot editor mein
 **Project → Tools → Export → Licenses** se ye text mil jaata hai.
 
+### Gaadiyon ke naam — trademark
+
+`data/vehicles.json` mein **Alto**, **Baleno** (Maruti Suzuki) aur **Thar**
+(Mahindra) ke naam hain. Ye Shimla mein sach mein chalne wali gaadiyan hain,
+isliye personal project ke liye theek hai.
+
+**Par public release se pehle ye naam badalne padenge.** Gaadi ka *aakar* banana
+theek hai; brand ka naam use karna trademark ka maamla hai. Suggestion: shape
+waise hi rakho aur naam badal do (jaise "Tallboy", "Compact", "Hill 4x4").
+
 ---
 
 ## Is repo ka apna license

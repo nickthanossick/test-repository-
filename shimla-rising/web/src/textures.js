@@ -467,6 +467,131 @@ export function face(hex = 0xb07d55, seed = 19) {
 }
 
 
+/**
+ * Naam ka board -- canvas pe text draw karke.
+ *
+ * Yahi wo cheez hai jo ek jagah ko *pehchana* banati hai. Bina board ke
+ * "Sanjauli Chowk" aur "Kasumpti Market" bilkul ek jaise dikhte hain; board
+ * lagte hi khiladi ko pata chalta hai wo kahan khada hai.
+ *
+ * kind: "shop"  -- dukan ka rangeen board (raat ko halka jagmagata hai)
+ *       "stone" -- sansthaan ki utkirn pathar wali plate
+ *       "road"  -- HP ka hara sadak board
+ */
+export function signboard(text, sub = "", kind = "shop", seed = 0) {
+  return cached(`sign:${kind}:${text}:${sub}`, () => {
+    const W = 1024, H = 256;
+    const cv = canvas(W);
+    cv.height = H;
+    const ctx = cv.getContext("2d");
+
+    const PALETTE = {
+      shop:  { bg: "#1d3f5c", fg: "#f4e9cf", accent: "#e8c33a", border: "#e8c33a" },
+      stone: { bg: "#9a938a", fg: "#2c2721", accent: "#4a4239", border: "#7b746b" },
+      road:  { bg: "#14663d", fg: "#ffffff", accent: "#ffffff", border: "#ffffff" },
+    };
+    const pal = PALETTE[kind] || PALETTE.shop;
+
+    ctx.fillStyle = pal.bg;
+    ctx.fillRect(0, 0, W, H);
+
+    // halka daana taaki board flat na lage
+    const n = fbm(64, 12, 3, seed + 5);
+    const img = ctx.getImageData(0, 0, W, H);
+    for (let y = 0; y < H; y++) {
+      for (let x = 0; x < W; x++) {
+        const k = 0.93 + n[(y % 64) * 64 + (x % 64)] * 0.14;
+        const i = (y * W + x) * 4;
+        img.data[i] *= k; img.data[i + 1] *= k; img.data[i + 2] *= k;
+      }
+    }
+    ctx.putImageData(img, 0, 0);
+
+    ctx.strokeStyle = pal.border;
+    ctx.lineWidth = kind === "road" ? 8 : 6;
+    ctx.strokeRect(14, 14, W - 28, H - 28);
+
+    // Font stack fallback ke saath: agar webfont load na hua ho to bhi kuch
+    // padhne layak bane. main.js sign textures document.fonts.ready ke baad
+    // banata hai, isliye aam taur pe Plex hi milta hai.
+    const family = '"IBM Plex Sans Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif';
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = pal.fg;
+
+    // text ko board mein fit karo
+    let size = sub ? 92 : 108;
+    do {
+      ctx.font = `700 ${size}px ${family}`;
+      if (ctx.measureText(text).width <= W - 90) break;
+      size -= 4;
+    } while (size > 30);
+    ctx.fillText(text, W / 2, sub ? H * 0.40 : H * 0.5);
+
+    if (sub) {
+      ctx.fillStyle = pal.accent;
+      let ss = 44;
+      do {
+        ctx.font = `500 ${ss}px ${family}`;
+        if (ctx.measureText(sub).width <= W - 120) break;
+        ss -= 2;
+      } while (ss > 16);
+      ctx.fillText(sub, W / 2, H * 0.70);
+      ctx.strokeStyle = pal.accent;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(W * 0.33, H * 0.555);
+      ctx.lineTo(W * 0.67, H * 0.555);
+      ctx.stroke();
+    }
+
+    const t = new THREE.CanvasTexture(cv);
+    t.colorSpace = THREE.SRGBColorSpace;
+    t.anisotropy = 8;
+    return {
+      map: t,
+      roughness: kind === "stone" ? 0.92 : 0.42,
+      metalness: kind === "stone" ? 0.0 : 0.15,
+      emissiveMap: kind === "shop" ? t : null,   // raat ko jagmagane ke liye
+    };
+  });
+}
+
+/**
+ * Himachali topi ka kapda -- gehre rang ki oon, aur aage alag rang ka velvet band.
+ * Ye ek hi cheez poore sheher ko turant Himachal jaisa bana deti hai.
+ */
+export function topi(bodyHex = 0x4a5d3a, bandHex = 0x8c2f2f, seed = 29) {
+  return cached(`topi${bodyHex}${bandHex}`, () => {
+    const S = 128;
+    const wool = fbm(S, 30, 3, seed);
+    const cv = canvas(S);
+    const ctx = cv.getContext("2d");
+    const body = new THREE.Color(bodyHex);
+    const band = new THREE.Color(bandHex);
+    const img = ctx.createImageData(S, S);
+    for (let y = 0; y < S; y++) {
+      for (let x = 0; x < S; x++) {
+        const i = y * S + x;
+        // upar ka ~30% band hai (topi ke aage wala patta), baaki oon
+        const c = y < S * 0.3 ? band : body;
+        const k = 0.86 + wool[i] * 0.26;
+        img.data[i * 4] = c.r * 255 * k;
+        img.data[i * 4 + 1] = c.g * 255 * k;
+        img.data[i * 4 + 2] = c.b * 255 * k;
+        img.data[i * 4 + 3] = 255;
+      }
+    }
+    ctx.putImageData(img, 0, 0);
+    return {
+      map: texture(cv, 1, true),
+      normalMap: texture(normalMapFrom(wool, S, 1.2)),
+      roughnessMap: texture(grey(wool, S, 0.86, 0.99)),
+    };
+  });
+}
+
+
 function cached(key, make) {
   if (!cache.has(key)) cache.set(key, make());
   return cache.get(key);

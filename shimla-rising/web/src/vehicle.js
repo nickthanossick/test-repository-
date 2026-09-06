@@ -152,9 +152,26 @@ function buildBody(spec) {
     return mesh;
   };
 
-  const isBike = spec.class === "bike";
-  const isBig = spec.class === "bus" || spec.class === "truck";
-  const bodyH = h * (isBig ? 0.68 : 0.5);
+  const shape = spec.shape || "hatch";
+  const isBike = shape === "bike";
+  const isBig = shape === "bus" || shape === "truck";
+
+  /**
+   * Har gaadi ka apna anupaat -- yahi use pehchan deta hai.
+   * Alto ooncha aur chhota, Maruti 800 neecha aur choka, Baleno lamba aur
+   * dhalaan wali chhat ka, Thar khada aur bhaari.
+   */
+  const P = {
+    tallboy: { body: 0.46, cab: 0.44, cabL: 0.52, cabZ: -0.02, wheel: 0.30, roofDrop: 0.00 },
+    classic: { body: 0.50, cab: 0.36, cabL: 0.46, cabZ: -0.04, wheel: 0.28, roofDrop: 0.00 },
+    hatch:   { body: 0.48, cab: 0.36, cabL: 0.54, cabZ: -0.08, wheel: 0.34, roofDrop: 0.06 },
+    offroad: { body: 0.52, cab: 0.40, cabL: 0.48, cabZ: -0.02, wheel: 0.40, roofDrop: 0.00 },
+    bus:     { body: 0.68, cab: 0.42, cabL: 0.82, cabZ: 0.00, wheel: 0.26, roofDrop: 0.00 },
+    truck:   { body: 0.68, cab: 0.42, cabL: 0.34, cabZ: -0.28, wheel: 0.26, roofDrop: 0.00 },
+    bike:    { body: 0.42, cab: 0.30, cabL: 0.30, cabZ: 0.00, wheel: 0.30, roofDrop: 0.00 },
+  }[shape] || { body: 0.5, cab: 0.4, cabL: 0.5, cabZ: -0.05, wheel: 0.32, roofDrop: 0 };
+
+  const bodyH = h * P.body;
 
   // --- body: chamfered box, teekhe kone nahi ---------------------------
   const body = add(new THREE.Mesh(chamferBox(w, bodyH, l, Math.min(0.16, w * 0.12)), paintMat));
@@ -171,13 +188,39 @@ function buildBody(spec) {
   }
 
   // --- greenhouse (sheeshe) ---------------------------------------------
-  const cabL = isBig ? l * 0.82 : l * 0.5;
-  const cabH = h * (isBig ? 0.42 : 0.4);
+  const cabL = l * P.cabL;
+  const cabH = h * P.cab;
   const cab = add(new THREE.Mesh(
     chamferBox(w * 0.87, cabH, cabL, Math.min(0.12, w * 0.1)), glassMat));
-  cab.position.set(0, bodyH + cabH / 2 - 0.02, isBike ? 0 : -l * 0.05);
-  const roof = add(new THREE.Mesh(new THREE.BoxGeometry(w * 0.80, 0.06, cabL * 0.86), paintMat));
-  roof.position.set(0, bodyH + cabH - 0.01, isBike ? 0 : -l * 0.05);
+  cab.position.set(0, bodyH + cabH / 2 - 0.02, isBike ? 0 : l * P.cabZ);
+  // Baleno jaisi gaadi ki chhat peeche ki taraf dhalti hai
+  const roofW = w * (0.80 - P.roofDrop);
+  const roof = add(new THREE.Mesh(new THREE.BoxGeometry(roofW, 0.06, cabL * 0.86), paintMat));
+  roof.position.set(0, bodyH + cabH - 0.01 - P.roofDrop * h * 0.5, isBike ? 0 : l * P.cabZ);
+
+  if (shape === "offroad") {
+    // Thar: khada windshield + roll bar
+    const wsh = add(new THREE.Mesh(new THREE.BoxGeometry(w * 0.86, cabH * 0.95, 0.07), glassMat));
+    wsh.position.set(0, bodyH + cabH * 0.5, -cabL / 2 + l * P.cabZ);
+    for (const dx of [-1, 1]) {
+      const bar = add(new THREE.Mesh(new THREE.BoxGeometry(0.07, cabH, 0.07), trimMat));
+      bar.position.set(dx * w * 0.40, bodyH + cabH * 0.5, cabL * 0.35 + l * P.cabZ);
+    }
+  }
+  if (spec.spare_wheel) {
+    const sp = add(new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.34, 0.2, 14), rubberMat));
+    sp.rotation.x = Math.PI / 2;
+    sp.position.set(0, bodyH + 0.34, l / 2 + 0.14);
+  }
+  if (!isBike && !isBig) {
+    // side mirrors + darwaze ki lakeer
+    for (const dx of [-1, 1]) {
+      const mir = add(new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.08, 0.16), trimMat));
+      mir.position.set(dx * (w / 2 + 0.07), bodyH + cabH * 0.55, -cabL * 0.34 + l * P.cabZ);
+      const seam = add(new THREE.Mesh(new THREE.BoxGeometry(0.012, bodyH * 0.7, 0.02), trimMat));
+      seam.position.set(dx * (w / 2 + 0.005), bodyH * 0.52, l * P.cabZ);
+    }
+  }
 
   // --- lights ------------------------------------------------------------
   if (!isBike) {
@@ -218,7 +261,7 @@ function buildBody(spec) {
 
   // --- pahiye: tyre + rim ------------------------------------------------
   const wheels = [];
-  const rad = Math.min(isBig ? 0.55 : 0.36, h * 0.26);
+  const rad = Math.min(isBig ? 0.55 : 0.42, h * P.wheel);
   const width = isBike ? 0.14 : 0.24;
   const tyreGeo = new THREE.CylinderGeometry(rad, rad, width, 18, 1);
   tyreGeo.rotateZ(Math.PI / 2);

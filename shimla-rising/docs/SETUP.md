@@ -23,17 +23,25 @@ Game ES modules use karta hai aur `data/` ko `fetch` karta hai. Browsers
 
 | | |
 |---|---|
-| `W A S D` / arrows | chalo / gaadi chalao |
-| `Shift` | daudo |
+| `↑ ↓ ← →` / `W A S D` | chalo / gaadi chalao |
+| **`Ctrl`** | **daudo** — dabao to on, dobara dabao to off |
+| `Shift` | daudo (dabaye rakho) |
 | `Space` | kudo (paidal) / handbrake (gaadi) |
 | `F` | gaadi mein baitho / utro |
 | `E` | mission shuru karo (peele marker pe khade hokar) |
 | Mouse | camera (click karke pointer-lock, ya drag) |
 | `M` | minimap zoom |
-| `1` | time of day |
+| `1` | waqt +3 ghante |
+| `T` | waqt rok / chalu |
 | `2` | mausam |
+| `Q` | quality tier (low / medium / high) |
 | `P` | save |
 | `H` | help bar chhupao |
+
+> **`Ctrl` toggle kyun hai:** browser mein `Ctrl+W` tab band kar deta hai, aur
+> JavaScript use rok nahi sakta — `preventDefault()` ka us par asar nahi hota.
+> Ctrl dabaye rakh kar `W` se chalte to game beech mein band ho jaata. Isliye
+> Ctrl ek baar dabane pe run on/off hota hai; hold-to-run ke liye `Shift` hai.
 
 ---
 
@@ -113,5 +121,10 @@ repo ke andar se chalao, `web/` ke andar se nahi.
 **Godot: terrain flat hai** — `Image.load_from_file()` fail hua hoga. Check karo
 ki `godot/data/heightmap.png` maujood hai.
 
-**Web game bahut dheema** — `web/src/main.js` mein `terrain.buildMesh(8, 96)` ko
-`(8, 48)` karo, aur `city.js` mein `TARGET` (trees) kam karo.
+**Web game bahut dheema** — `Q` dabakar quality tier `low` karo, phir page
+reload karo (terrain aur ped ki density agle load pe lagti hai). Game shuru mein
+device dekh kar khud tier chunta hai, par wo andaza galat bhi ho sakta hai —
+`Q` se hamesha badal sakte ho.
+
+**Din bahut tez/dheema lagta hai** — `main.js` mein `new DayNight(..., { dayMinutes: 24 })`
+badlo. 24 matlab poora din 24 asli minute mein.

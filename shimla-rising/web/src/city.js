@@ -2,6 +2,8 @@ import * as THREE from "three";
 import { MeshBuilder } from "./geometry.js";
 import { SpatialGrid, Colliders } from "./grid.js";
 import * as TEX from "./textures.js";
+import { buildLandmarks } from "./landmarks.js";
+import { buildSigns } from "./signs.js";
 
 /**
  * Shimla ka basa hua hissa: imaaratein, deodar ka jungle, landmarks.
@@ -17,7 +19,7 @@ import * as TEX from "./textures.js";
 const ROOFS = [0x8c3b2e, 0x2f5d8a, 0x3f6b47, 0x6b6b70, 0x9c5a2b];
 const WALLS = [0xb8ad98, 0xa99d86, 0x9f8e75, 0xb2a48d, 0x8a7b6c, 0xc0b6a4];
 
-export function buildCity(terrain, roads, districts, pois, rng) {
+export function buildCity(terrain, roads, districts, pois, rng, quality = {}) {
   const group = new THREE.Group();
   group.name = "city";
 
@@ -25,6 +27,7 @@ export function buildCity(terrain, roads, districts, pois, rng) {
   const roofs = new MeshBuilder(0.5);
   const plinths = new MeshBuilder(0.35);
   const windows = new MeshBuilder(0.9);      // apna material -- raat ko jagmagati hain
+  const facades = quality.windowFacades ?? 2;
   const trim = new MeshBuilder(0.7);         // balcony, railing, chimney, floor bands
   const col = new THREE.Color();
   const placed = new SpatialGrid(16);
@@ -52,7 +55,7 @@ export function buildCity(terrain, roads, districts, pois, rng) {
         if (placed.occupied(x, z, 8.5)) continue;
         placed.add(x, z);
         placedCount++;
-        house({ walls, roofs, plinths, windows, trim }, terrain, x, z, d, rng, col, colliders);
+        house({ walls, roofs, plinths, windows, trim }, terrain, x, z, d, rng, col, colliders, facades);
       }
     }
   }
@@ -80,8 +83,17 @@ export function buildCity(terrain, roads, districts, pois, rng) {
 
   group.userData.buildingCount = placedCount;
   group.userData.colliders = colliders;
-  group.add(buildForest(terrain, roads, placed, rng));
-  group.add(buildLandmarks(terrain, pois));
+  group.add(buildForest(terrain, roads, placed, rng, quality.treeCount ?? 9000));
+
+  // Asli jagahein: har named POI ki apni imaarat, aur uske naam ka board.
+  const lm = buildLandmarks(terrain, roads, pois);
+  group.add(lm);
+  const signs = buildSigns(lm.userData.signs, terrain);
+  group.add(signs);
+  group.userData.landmarkCount = lm.userData.landmarkCount;
+  group.userData.signCount = signs.userData.count;
+  group.userData.glowingSigns = signs.userData.glowingMaterials;
+  group.userData.windowMaterial = windowMat;
   return group;
 }
 
@@ -97,7 +109,7 @@ export function buildCity(terrain, roads, districts, pois, rng) {
  *   - **gable chhat** bahar nikle eaves ke saath (pyramid nahi)
  *   - kabhi-kabhi **chimney**
  */
-function house(mb, terrain, x, z, d, rng, col, colliders) {
+function house(mb, terrain, x, z, d, rng, col, colliders, facadeCount = 2) {
   const w = 5 + rng() * 4.5;
   const dep = 5 + rng() * 4.5;
   const floors = 2 + Math.floor(rng() * (d.wealth > 0.7 ? 3 : 2.6));
@@ -138,12 +150,16 @@ function house(mb, terrain, x, z, d, rng, col, colliders) {
   }
 
   // --- khidkiyan ---------------------------------------------------------
-  // Chaar mein se do facades par -- charon par lagane se triangle count
-  // dogna ho jaata hai aur ghane sheher mein peeche wali dikhti bhi nahi.
-  const facades = [
-    { n: [0, -1], half: dep / 2, span: w },     // -v
-    { n: [1, 0], half: w / 2, span: dep },      // +u
+  // Kitni deewaron pe khidkiyan -- quality tier se. Low pe sirf saamne wali,
+  // high pe charon. Ghane sheher mein peeche wali khidkiyan aksar dikhti nahi,
+  // isliye ye sabse sasta quality knob hai.
+  const ALL = [
+    { n: [0, -1], half: dep / 2, span: w },
+    { n: [1, 0], half: w / 2, span: dep },
+    { n: [0, 1], half: dep / 2, span: w },
+    { n: [-1, 0], half: w / 2, span: dep },
   ];
+  const facades = ALL.slice(0, Math.max(1, Math.min(4, facadeCount)));
   const glassHex = rng() < 0.5 ? 0x2c3b46 : 0x38414a;
   for (const fa of facades) {
     const cols = Math.max(1, Math.min(2, Math.floor(fa.span / 2.6)));
@@ -204,8 +220,7 @@ function house(mb, terrain, x, z, d, rng, col, colliders) {
  * isliye shadow pass har frame 9000 ped dobara draw karta -- tiles se sirf
  * shadow frustum ke andar wale tiles hi draw hote hain.
  */
-function buildForest(terrain, roads, buildings, rng) {
-  const TARGET = 9000;
+function buildForest(terrain, roads, buildings, rng, TARGET = 9000) {
   const TILES = 6;
   const g = new THREE.Group();
   g.name = "forest";
@@ -297,68 +312,6 @@ function mergeCones(layers) {
   g.setAttribute("normal", new THREE.Float32BufferAttribute(nor, 3));
   g.setAttribute("uv", new THREE.Float32BufferAttribute(uv, 2));
   g.computeBoundingSphere();
-  return g;
-}
-
-/** POIs pe pehchan-yogya structures. */
-function buildLandmarks(terrain, pois) {
-  const stone = new MeshBuilder(0.3);
-  const metal = new MeshBuilder(0.4);
-  const c = new THREE.Color();
-  const L = { jakhoo_temple: [7, 52], christ_church: [12, 30], viceregal_lodge: [26, 26],
-              railway_station: [21, 10], rana_hotel: [15, 26], vidhan_sabha: [17, 15],
-              secretariat: [17, 15], isbt: [25, 8], vicky_garage: [7, 6] };
-
-  for (const p of pois.pois) {
-    const { x, z } = terrain.geo.toWorld(p.lat, p.lon);
-    const y = terrain.heightAt(x, z);
-    switch (p.id) {
-      case "jakhoo_temple":                       // 108-ft Hanuman murti
-        c.setHex(0xc06326); stone.box(x, y + 6, z, 9, 12, 9, c);
-        c.setHex(0xd97f34); stone.box(x, y + 28, z, 5.5, 33, 4.2, c);
-        c.setHex(0xeba14a); stone.box(x, y + 47, z, 4.2, 5, 4.2, c);
-        break;
-      case "christ_church":
-        c.setHex(0xbfa27a); stone.box(x, y + 7, z, 13, 14, 22, c);
-        c.setHex(0xa88a63); stone.box(x, y + 20, z, 5, 12, 5, c);
-        c.setHex(0x8a6a48); metal.pyramid(x, y + 26, z, 6, 9, c);
-        break;
-      case "viceregal_lodge":
-        c.setHex(0x8d7f68); stone.box(x, y + 8, z, 46, 16, 26, c);
-        c.setHex(0x6f6353); stone.box(x, y + 20, z, 12, 9, 12, c);
-        break;
-      case "railway_station":
-        c.setHex(0xa03a30); stone.box(x, y + 4, z, 40, 8, 13, c);
-        c.setHex(0x6b6259); metal.box(x, y + 8.6, z, 43, 1.2, 15, c);
-        break;
-      case "ridge": case "scandal_point":
-        c.setHex(0x8d857a); stone.box(x, y + 0.4, z, 42, 0.8, 26, c); break;
-      case "annandale_ground":
-        c.setHex(0x53853f); stone.box(x, y + 0.3, z, 150, 0.6, 110, c); break;
-      case "rana_hotel":
-        c.setHex(0x7d5648); stone.box(x, y + 11, z, 26, 22, 20, c);
-        c.setHex(0xa33030); metal.pyramid(x, y + 22, z, 28, 5, c); break;
-      case "vidhan_sabha": case "secretariat":
-        c.setHex(0xb8a184); stone.box(x, y + 7, z, 30, 14, 18, c); break;
-      case "isbt":
-        c.setHex(0x6b7680); stone.box(x, y + 3.5, z, 46, 7, 24, c); break;
-      case "vicky_garage":
-        c.setHex(0x8a7a60); stone.box(x, y + 2.4, z, 11, 5, 8, c);
-        c.setHex(0x3f5f7a); metal.box(x, y + 5.2, z, 12, 0.5, 9, c); break;
-      default: break;
-    }
-  }
-
-  const g = new THREE.Group();
-  g.name = "landmarks";
-  if (stone.count) {
-    const m = stone.build(TEX.standard(TEX.plaster(0xffffff, 13), { vertexColors: true }));
-    m.name = "landmark-stone"; g.add(m);
-  }
-  if (metal.count) {
-    const m = metal.build(TEX.standard(TEX.corrugatedTin(0xffffff, 9), { vertexColors: true, metalness: 0.45 }));
-    m.name = "landmark-metal"; g.add(m);
-  }
   return g;
 }
 

@@ -9,6 +9,7 @@ export function saveGame(state) {
       available: [...state.missions.available],
       pos: { x: state.player.pos.x, z: state.player.pos.z },
       hour: state.hour,
+      quality: state.quality,
       weather: state.weather.mode,
       savedAt: Date.now(),
     }));

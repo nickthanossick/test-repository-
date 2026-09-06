@@ -48,9 +48,20 @@ export class Weather {
     this.vel[i] = 0.5 + Math.random();
   }
 
-  set(mode) {
+  /**
+   * Mausam badlo. `seconds` do to badlav dheere-dheere hoga.
+   *
+   * Jhatke se badalna ajeeb lagta hai -- ek frame dhoop, agle frame barf.
+   * Isliye grip, fog aur particle count sab lerp hote hain; sirf mode turant
+   * badalta hai taaki gameplay logic (Act 3 ki barf) sahi rahe.
+   */
+  set(mode, seconds = 0) {
     const p = PRESETS[mode] || PRESETS.clear;
     this.mode = mode;
+    this._target = p;
+    this._blend = seconds > 0 ? { t: 0, dur: seconds, from: this._current || p } : null;
+    if (this._blend) { this._current = { ...this._blend.from }; return this; }
+    this._current = { ...p };
     this.grip = p.grip;
     this.active = Math.min(this.max, p.particles);
     this.points.visible = this.active > 0;
@@ -68,6 +79,22 @@ export class Weather {
   }
 
   update(dt, camera) {
+    if (this._blend) {
+      this._blend.t = Math.min(1, this._blend.t + dt / this._blend.dur);
+      const k = this._blend.t * this._blend.t * (3 - 2 * this._blend.t);   // smoothstep
+      const a = this._blend.from, b2 = this._target;
+      this.grip = a.grip + (b2.grip - a.grip) * k;
+      const fog = this.scene.fog;
+      if (fog) {
+        fog.near = a.fogNear + (b2.fogNear - a.fogNear) * k;
+        fog.far = a.fogFar + (b2.fogFar - a.fogFar) * k;
+      }
+      const want = Math.round(a.particles + (b2.particles - a.particles) * k);
+      this.active = Math.min(this.max, want);
+      this.points.visible = this.active > 0;
+      this.points.geometry.setDrawRange(0, this.active);
+      if (this._blend.t >= 1) { this._current = { ...b2 }; this._blend = null; }
+    }
     if (!this.active) return;
     const cx = camera.position.x, cy = camera.position.y, cz = camera.position.z;
     const fall = this.mode === "snow" ? 4.5 : 26;

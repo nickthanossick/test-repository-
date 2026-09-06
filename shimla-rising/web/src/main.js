@@ -6,6 +6,8 @@ import { RoadNetwork } from "./roads.js";
 import { buildCity } from "./city.js";
 import { Sky } from "./sky.js";
 import { Weather } from "./weather.js";
+import { DayNight } from "./daynight.js";
+import * as Quality from "./quality.js";
 import { Input } from "./input.js";
 import { Player } from "./player.js";
 import { Vehicle } from "./vehicle.js";
@@ -16,6 +18,12 @@ import { Dialogue } from "./dialogue.js";
 import { HUD } from "./hud.js";
 import { Audio } from "./audio.js";
 import { saveGame, loadGame } from "./save.js";
+
+/** Ghanta -> '14:30' */
+function fmtHour(h) {
+  const hh = Math.floor(h) % 24, mm = Math.floor((h % 1) * 60);
+  return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
+}
 
 /** Seeded PRNG -- sheher har baar bilkul ek jaisa banta hai. */
 function mulberry32(a) {
@@ -45,7 +53,14 @@ async function boot() {
 
   // ---------------------------------------------------------------- renderer
   const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+
+  // Device dekh kar quality tier chuno. Wahi scene jo laptop pe 60 fps deta hai
+  // phone pe 8 fps dega, isliye terrain density, ped, shadow map aur pixel ratio
+  // sab tier se aate hain. `Q` se badla ja sakta hai.
+  const savedTier = (loadGame() || {}).quality;
+  let tier = Quality.TIERS.includes(savedTier) ? savedTier : Quality.detect(renderer);
+  let Q = Quality.PRESETS[tier];
+  renderer.setPixelRatio(Math.min(devicePixelRatio, Q.pixelRatio));
   renderer.setSize(innerWidth, innerHeight);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   // ACES wapas. Round 1 mein ise band kiya tha kyunki bina texture ke shadow-side
@@ -55,6 +70,7 @@ async function boot() {
   renderer.toneMappingExposure = 0.92;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  console.info(`[Shimla] quality tier: ${Q.name}`);
   document.body.appendChild(renderer.domElement);
 
   const scene = new THREE.Scene();
@@ -68,21 +84,25 @@ async function boot() {
 
   // ------------------------------------------------------------------- world
   setProgress(0.58, "pahad tarash rahe hain…");
-  scene.add(terrain.buildMesh(8, 96));
+  scene.add(terrain.buildMesh(8, Q.terrainQuads));
 
   setProgress(0.70, "sadkein bichha rahe hain…");
   const roads = new RoadNetwork(geo, terrain, data.roads);
-  scene.add(roads.buildMesh());
+  const roadGroup = roads.buildMesh();
+  scene.add(roadGroup);
 
   setProgress(0.80, "Shimla bas raha hai…");
-  const city = buildCity(terrain, roads, data.districts, data.pois, mulberry32(31104877));
+  const city = buildCity(terrain, roads, data.districts, data.pois, mulberry32(31104877), Q);
   scene.add(city);
 
   setProgress(0.90, "aasman aur mausam…");
   const sky = new Sky(scene, terrain, renderer);
+  sky.shadowRadius = Q.shadowRadius;
+  sky.sun.shadow.mapSize.set(Q.shadowMap, Q.shadowMap);
   const weather = new Weather(scene, terrain);
   const month = new Date().getMonth() + 1;
   weather.set(Weather.forMonth(month));
+  const dayNight = new DayNight(scene, sky, weather, { hour: 8.5, month, dayMinutes: 24 });
 
   // ------------------------------------------------------------------ actors
   setProgress(0.95, "Vicky taiyaar ho raha hai…");
@@ -95,7 +115,7 @@ async function boot() {
   const spots = ["vicky_garage", "sanjauli_chowk", "isbt", "railway_station", "lakkar_bazaar",
     "chhota_shimla", "kasumpti_market", "new_shimla_loop", "guru_dhaba", "bali_yard",
     "annandale_ground", "hpu", "dhalli", "timber_depot"];
-  const kinds = ["taxi", "scooter", "bolero", "hrtc_bus", "timber_truck"];
+  const kinds = ["alto", "maruti800", "baleno", "thar", "scooter", "taxi"];
   for (const id of spots) {
     const p = data.poiById.get(id);
     if (!p) continue;
@@ -158,7 +178,8 @@ async function boot() {
   const wanted = new WantedSystem(scene, terrain, roads, data.vehicleById);
   const missions = new MissionSystem(scene, terrain, data);
 
-  const state = { money: 2500, hour: 9.5, mode: "foot", vehicle: null, player, missions, weather };
+  const state = { money: 2500, mode: "foot", get quality() { return tier; }, vehicle: null, player, missions, weather,
+                  get hour() { return dayNight.hour; }, set hour(h) { dayNight.hour = h; } };
 
   const saved = loadGame();
   if (saved) {
@@ -176,9 +197,14 @@ async function boot() {
     audio.siren(n > 0);
     if (n === 1) dialogue.play("generic:wanted");
   };
+  dayNight.bindEmissive({
+    windows: city.userData.windowMaterial,
+    signs: city.userData.glowingSigns || [],
+    lamps: roadGroup.userData.lampMaterial,
+  });
+
   hud.setStars(0);
   hud.setMoney(state.money);
-  sky.setTime(state.hour);
   if (weather.mode === "snow") dialogue.play("generic:snow");
 
   missions.onEvent = (type, payload) => {
@@ -269,6 +295,12 @@ async function boot() {
   let last = performance.now();
   let acc = 0, frames = 0, fps = 0;
   let helpOn = true;
+  let debugCam = false;    // sirf testing ke liye -- viewPOI() isse on karta hai
+  // Ctrl se bhaagna: **toggle**, hold nahi. Browser mein Ctrl+W tab band kar
+  // deta hai aur JavaScript use rok nahi sakta (preventDefault ka koi asar
+  // nahi). Ctrl dabaye rakh kar W se aage chalte to game beech mein band ho
+  // jaata. Shift hold-to-run ke liye rehta hai.
+  let runToggle = false;
 
   function frame(now) {
     requestAnimationFrame(frame);
@@ -286,12 +318,28 @@ async function boot() {
     if (input.pressed("KeyF")) toggleVehicle();
     if (input.pressed("KeyE") || input.pressed("Enter")) tryStartMission();
     if (input.pressed("KeyM")) hud.mapScale = hud.mapScale > 0.08 ? 0.055 : 0.13;
+    if (input.pressed("ControlLeft") || input.pressed("ControlRight")) {
+      runToggle = !runToggle;
+      hud.toast(runToggle ? "Daud rahe ho" : "Chal rahe ho", 1.2);
+    }
     if (input.pressed("KeyH")) {
       helpOn = !helpOn;
       document.getElementById("help").style.display = helpOn ? "" : "none";
     }
     if (input.pressed("KeyP")) { saveGame(state); hud.toast("Save ho gaya"); }
-    if (input.pressed("Digit1")) { state.hour = (state.hour + 3) % 24; sky.setTime(state.hour); weather.set(weather.mode); }
+    if (input.pressed("Digit1")) { dayNight.skip(3); hud.toast(`Waqt: ${fmtHour(dayNight.hour)}`); }
+    if (input.pressed("KeyT")) { dayNight.paused = !dayNight.paused; hud.toast(dayNight.paused ? "Waqt ruka" : "Waqt chalu"); }
+    if (input.pressed("KeyQ")) {
+      tier = Quality.next(tier);
+      Q = Quality.PRESETS[tier];
+      renderer.setPixelRatio(Math.min(devicePixelRatio, Q.pixelRatio));
+      sky.shadowRadius = Q.shadowRadius;
+      sky.sun.shadow.mapSize.set(Q.shadowMap, Q.shadowMap);
+      sky.sun.shadow.map?.dispose();
+      sky.sun.shadow.map = null;
+      hud.toast(`Quality: ${Q.name} — terrain/ped ki density agle load pe`, 3.5);
+      saveGame(state);
+    }
     if (input.pressed("Digit2")) {
       const order = ["clear", "fog", "monsoon", "snow"];
       weather.set(order[(order.indexOf(weather.mode) + 1) % order.length]);
@@ -311,25 +359,25 @@ async function boot() {
         handbrake: input.down("Space"),
       }, weather.grip);
       player.pos.copy(v.pos);
-      chase.update(dt, v.pos, "vehicle", v.yaw);
+      if (!debugCam) chase.update(dt, v.pos, "vehicle", v.yaw);
       audio.setEngine(v.kmh, v.spec.top_speed_kmh, true);
       hud.setSpeed(v.kmh, v.spec.name);
     } else {
       player.update(dt, {
         forward: input.axis("KeyS", "KeyW") || input.axis("ArrowDown", "ArrowUp"),
         strafe: input.axis("KeyA", "KeyD") || input.axis("ArrowLeft", "ArrowRight"),
-        run: input.down("ShiftLeft") || input.down("ShiftRight"),
+        run: runToggle || input.anyDown("ShiftLeft", "ShiftRight"),
         jump: input.down("Space"),
       }, chase.yaw);
-      chase.update(dt, player.pos, "foot");
+      if (!debugCam) chase.update(dt, player.pos, "foot");
       hud.setSpeed(0, player.running ? "daud rahe ho" : "paidal");
     }
 
     wanted.update(dt, pos, state.mode === "vehicle", weather.grip, district, onRoad);
     missions.update(dt, { playerPos: pos, inVehicle: state.mode === "vehicle", stars: wanted.stars });
-    weather.update(dt, camera);
+    dayNight.update(dt, camera);   // waqt, sooraj, taare, raat ki roshni, mausam
     sky.update(camera);
-    sky.fitShadow(pos);          // shadow camera khiladi ke saath chalta hai
+    sky.fitShadow(pos);            // shadow camera khiladi ke saath chalta hai
     dialogue.update(dt);
 
     // -------------------------------------------------------------- hud
@@ -351,7 +399,7 @@ async function boot() {
 
   // debugging ke liye -- Playwright test yahi padhta hai
   window.__shimla = {
-    ready: true, scene, camera, renderer, terrain, roads, city, player, missions, wanted, chase, sky,
+    ready: true, scene, camera, renderer, terrain, roads, city, player, missions, wanted, chase, sky, dayNight,
     weather, state, data, get fps() { return fps; },
     get stats() { return {
       triangles: renderer.info.render.triangles,
@@ -362,6 +410,8 @@ async function boot() {
       roadKm: roads.roads.reduce((a, r) => a + r.points.length * 10, 0) / 1000,
       vehicles: parked.length,
       colliders: colliders.count,
+      landmarks: city.userData.landmarkCount,
+      signs: city.userData.signCount,
     }; },
     teleport(poiId) {
       if (!data.poiById.get(poiId)) return false;
@@ -372,6 +422,23 @@ async function boot() {
       return true;
     },
     enterVehicle: () => { if (state.mode === "foot") toggleVehicle(); return state.mode; },
+    /**
+     * Testing ke liye free camera -- POI ko ek nishchit kone se dekho.
+     * Chase camera khiladi ke peeche rehta hai aur ghane sheher mein aksar
+     * kisi deewar ke andar aa jaata hai, jisse screenshot kaale aate hain.
+     */
+    viewPOI(poiId, dist = 40, height = 16, azimuth = 0.9) {
+      const p = data.poiById.get(poiId);
+      if (!p) return false;
+      const w = geo.toWorld(p.lat, p.lon);
+      const gy = terrain.heightAt(w.x, w.z);
+      debugCam = true;
+      camera.position.set(w.x + Math.sin(azimuth) * dist, gy + height,
+                          w.z + Math.cos(azimuth) * dist);
+      camera.lookAt(w.x, gy + Math.min(height * 0.45, 8), w.z);
+      return true;
+    },
+    freeCamOff() { debugCam = false; chase._init = false; },
     press: (code) => { input.keys.add(code); },
     release: (code) => { input.keys.delete(code); },
   };
