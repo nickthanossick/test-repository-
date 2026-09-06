@@ -1,0 +1,14 @@
+# Shimla Rising -- pipeline dependencies
+#
+#   pip install -r tools/requirements.txt
+#
+# NOTE: Blender ki apni Python hai. tools/blender/ ke scripts ko yahan ki
+# dependencies nahi chahiye -- wo sirf Blender ke bundled `bpy` par chalte hain.
+
+numpy>=1.26        # heightmap interpolation aur noise
+pillow>=10.0       # PNG read/write (16-bit sameta)
+requests>=2.31     # OpenTopography aur Overpass API
+
+# --- sirf development ---
+pytest>=8.0
+ruff>=0.6

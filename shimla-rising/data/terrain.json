@@ -1,0 +1,20 @@
+{
+  "$comment": "tools/terrain/build_heightmap.py se generate hua. Haath se edit mat karo.",
+  "size_px": 1024,
+  "world_size_m": 8192.0,
+  "metres_per_pixel": 8.0078,
+  "elevation_min_m": 1300.0,
+  "elevation_max_m": 2500.0,
+  "source": "terrain_control.json (landmark IDW interpolation + ridged multifractal detail)",
+  "files": {
+    "heightmap.png": "RGB8. elevation = min + ((R*256 + G) / 65535) * (max - min). Web game.",
+    "heightmap_16.png": "16-bit grayscale, same normalisation. Godot / Blender / GIS.",
+    "heightmap_preview.png": "Hillshaded colour preview. Sirf dekhne ke liye."
+  },
+  "orientation": "row 0 = north edge (z = -half), col 0 = west edge (x = -half)",
+  "godot_import": {
+    "$comment": "Godot HeightMapShape3D / ArrayMesh ke liye seedhe metre values.",
+    "height_scale_m": 1200.0,
+    "height_offset_m": 1300.0
+  }
+}

@@ -1,0 +1,116 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/hud.gd" id="1_hud"]
+
+[sub_resource type="StyleBoxFlat" id="Panel_bg"]
+content_margin_left = 12.0
+content_margin_top = 10.0
+content_margin_right = 12.0
+content_margin_bottom = 10.0
+bg_color = Color(0.047, 0.063, 0.086, 0.62)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 1, 1, 0.1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[node name="HUD" type="CanvasLayer"]
+script = ExtResource("1_hud")
+
+[node name="Root" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+
+[node name="TopLeft" type="VBoxContainer" parent="Root"]
+layout_mode = 1
+offset_left = 14.0
+offset_top = 14.0
+offset_right = 264.0
+offset_bottom = 110.0
+theme_override_styles/panel = SubResource("Panel_bg")
+
+[node name="Stars" type="Label" parent="Root/TopLeft"]
+layout_mode = 2
+text = "☆☆☆☆☆"
+theme_override_colors/font_color = Color(0.91, 0.765, 0.227, 1)
+theme_override_font_sizes/font_size = 19
+
+[node name="Money" type="Label" parent="Root/TopLeft"]
+layout_mode = 2
+text = "₹2,500"
+theme_override_font_sizes/font_size = 20
+
+[node name="District" type="Label" parent="Root/TopLeft"]
+layout_mode = 2
+text = "—"
+theme_override_colors/font_color = Color(0.659, 0.624, 0.573, 1)
+theme_override_font_sizes/font_size = 12
+
+[node name="Mission" type="VBoxContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -344.0
+offset_top = 14.0
+offset_right = -14.0
+offset_bottom = 190.0
+grow_horizontal = 0
+
+[node name="Title" type="Label" parent="Root/Mission"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.91, 0.765, 0.227, 1)
+theme_override_font_sizes/font_size = 14
+
+[node name="Objectives" type="Label" parent="Root/Mission"]
+layout_mode = 2
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 13
+
+[node name="Speedo" type="VBoxContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 14.0
+offset_top = -84.0
+offset_right = 160.0
+offset_bottom = -14.0
+grow_vertical = 0
+
+[node name="Kmh" type="Label" parent="Root/Speedo"]
+layout_mode = 2
+text = "0 km/h"
+theme_override_font_sizes/font_size = 30
+
+[node name="VehicleName" type="Label" parent="Root/Speedo"]
+layout_mode = 2
+text = "paidal"
+theme_override_colors/font_color = Color(0.659, 0.624, 0.573, 1)
+theme_override_font_sizes/font_size = 12
+
+[node name="Subtitle" type="Label" parent="Root"]
+visible = false
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -380.0
+offset_top = -150.0
+offset_right = 380.0
+offset_bottom = -100.0
+grow_horizontal = 2
+grow_vertical = 0
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 16

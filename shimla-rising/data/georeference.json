@@ -1,0 +1,33 @@
+{
+  "$comment": "Shared geo-reference. Web game, Godot project and the Python pipeline ALL use this. Never hardcode these numbers anywhere else.",
+  "origin": {
+    "name": "The Ridge, Shimla",
+    "lat": 31.1048,
+    "lon": 77.1734,
+    "note": "World-space (0, y, 0) sits here. Ye Shimla ka dil hai - Christ Church, Scandal Point, Mall Road sab yahin."
+  },
+  "meters_per_degree_lat": 110871.3,
+  "meters_per_degree_lon": 95360.8,
+  "$comment_mpd": "WGS-84 values evaluated at latitude 31.1048 N. Local tangent-plane approximation - 8 km ke andar error < 1 m.",
+  "axes": {
+    "x": "east, metres",
+    "y": "up, metres (absolute elevation above sea level)",
+    "z": "south, metres  (north = negative z, matches Three.js and Godot forward = -Z)"
+  },
+  "world": {
+    "size_m": 8192,
+    "half_m": 4096,
+    "bounds": {
+      "south": 31.06786,
+      "north": 31.14174,
+      "west": 77.13045,
+      "east": 77.21635
+    },
+    "$comment_bounds": "8.192 km x 8.192 km. Isme poora Shimla sheher aa jata hai: Summer Hill se Sanjauli/Dhalli tak, Annandale se New Shimla tak, aur Jakhoo (2455 m) beech mein. Mashobra, Kufri, Naldehra aur Tara Devi is box ke bahar hain - wo 'shimla_extended' preset mein hain (docs/ROADMAP.md dekho)."
+  },
+  "elevation_range_m": { "min": 1300, "max": 2500 },
+  "conversion": {
+    "lat_lon_to_world": "x = (lon - origin.lon) * meters_per_degree_lon;  z = -(lat - origin.lat) * meters_per_degree_lat",
+    "world_to_lat_lon": "lon = origin.lon + x / meters_per_degree_lon;  lat = origin.lat - z / meters_per_degree_lat"
+  }
+}

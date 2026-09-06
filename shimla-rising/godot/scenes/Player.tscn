@@ -1,0 +1,51 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/player_controller.gd" id="1_player"]
+
+[sub_resource type="CapsuleShape3D" id="Shape_body"]
+radius = 0.34
+height = 1.75
+
+[sub_resource type="BoxMesh" id="Mesh_torso"]
+size = Vector3(0.46, 0.62, 0.26)
+
+[sub_resource type="BoxMesh" id="Mesh_head"]
+size = Vector3(0.24, 0.26, 0.24)
+
+[sub_resource type="BoxMesh" id="Mesh_leg"]
+size = Vector3(0.17, 0.86, 0.19)
+
+[sub_resource type="StandardMaterial3D" id="Mat_jacket"]
+albedo_color = Color(0.784, 0.267, 0.18, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="Mat_skin"]
+albedo_color = Color(0.604, 0.42, 0.275, 1)
+roughness = 1.0
+
+[node name="Player" type="CharacterBody3D"]
+collision_layer = 2
+script = ExtResource("1_player")
+terrain_path = NodePath("../Terrain")
+
+[node name="Collision" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("Shape_body")
+
+[node name="Torso" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.16, 0)
+mesh = SubResource("Mesh_torso")
+material_override = SubResource("Mat_jacket")
+
+[node name="Head" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+mesh = SubResource("Mesh_head")
+material_override = SubResource("Mat_skin")
+
+[node name="LegL" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.12, 0.43, 0)
+mesh = SubResource("Mesh_leg")
+
+[node name="LegR" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.12, 0.43, 0)
+mesh = SubResource("Mesh_leg")

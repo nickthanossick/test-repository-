@@ -1,0 +1,39 @@
+MIT License
+
+Copyright (c) 2026 Nikhil (github.com/nickthanossick)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---------------------------------------------------------------------------
+NOTE ON SCOPE
+
+The MIT licence above covers the CODE in this repository (web/, godot/, tools/).
+
+It does NOT cover:
+
+  * The narrative content -- the story, characters, dialogue and mission
+    designs in design/ and data/missions.json, data/dialogue.json,
+    data/characters.json. Those are (c) 2026 the author, all rights reserved.
+
+  * Third-party data. See design/08-legal-and-attribution.md:
+      - OpenStreetMap data is ODbL and requires attribution.
+      - Copernicus DEM is under the ESA Copernicus licence.
+
+  * Three.js (web/vendor/) is MIT, (c) three.js authors -- see
+    web/vendor/THREE-LICENSE.txt.

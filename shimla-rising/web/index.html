@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Shimla Rising</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>🏔️</text></svg>">
+<style>
+  :root { --fg:#f2ede4; --dim:#a89f92; --accent:#e8c33a; --bad:#d9534f; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; height:100%; overflow:hidden; background:#0d1117;
+    font-family: ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif; color:var(--fg); }
+  canvas { display:block; }
+  #hud { position:fixed; inset:0; pointer-events:none; z-index:10; }
+  .panel { position:absolute; background:rgba(12,16,22,.62); backdrop-filter:blur(6px);
+    border:1px solid rgba(255,255,255,.10); border-radius:10px; padding:10px 12px; }
+  #topleft { top:14px; left:14px; min-width:230px; }
+  #stars { font-size:19px; letter-spacing:3px; color:var(--accent); height:24px; }
+  #stars .off { opacity:.18; }
+  #money { font-size:20px; font-weight:650; }
+  #district { font-size:12px; color:var(--dim); margin-top:3px; }
+  #mission { position:absolute; top:14px; right:14px; max-width:330px; }
+  #mission h3 { margin:0 0 6px; font-size:13px; letter-spacing:.06em; text-transform:uppercase; color:var(--accent); }
+  #objlist { margin:0; padding-left:16px; font-size:13px; line-height:1.55; }
+  #objlist li.done { color:#6cc27a; text-decoration:line-through; opacity:.65; }
+  #objlist li.active { color:#fff; font-weight:600; }
+  #minimap { position:absolute; bottom:14px; right:14px; padding:6px; }
+  #minimap canvas { border-radius:6px; display:block; }
+  #speedo { position:absolute; bottom:14px; left:14px; text-align:center; min-width:126px; }
+  #kmh { font-size:34px; font-weight:700; line-height:1; font-variant-numeric:tabular-nums; }
+  #kmh small { font-size:12px; font-weight:400; color:var(--dim); }
+  #vehname { font-size:11px; color:var(--dim); margin-top:4px; }
+  #bars { margin-top:7px; }
+  .bar { height:5px; background:rgba(255,255,255,.14); border-radius:3px; overflow:hidden; margin-top:4px; }
+  .bar > i { display:block; height:100%; width:100%; transition:width .18s; }
+  #hp > i { background:#d9534f; } #st > i { background:#5aa9e6; }
+  #subtitle { position:absolute; left:50%; bottom:96px; transform:translateX(-50%);
+    max-width:min(760px, 84vw); text-align:center; font-size:16px; line-height:1.5;
+    background:rgba(10,13,18,.78); padding:12px 18px; border-radius:10px; display:none; }
+  #subtitle b { color:var(--accent); }
+  #toast { position:absolute; left:50%; top:84px; transform:translateX(-50%);
+    background:rgba(10,13,18,.85); padding:9px 16px; border-radius:8px; font-size:14px;
+    opacity:0; transition:opacity .3s; border:1px solid rgba(232,195,58,.35); }
+  #toast.show { opacity:1; }
+  #help { position:absolute; left:50%; bottom:14px; transform:translateX(-50%);
+    font-size:11.5px; color:var(--dim); background:rgba(12,16,22,.55); padding:6px 14px; border-radius:8px; }
+  #loading { position:fixed; inset:0; z-index:50; display:grid; place-items:center;
+    background:linear-gradient(170deg,#131a24,#0b0f14); text-align:center; }
+  #loading h1 { margin:0; font-size:44px; letter-spacing:.14em; font-weight:300; }
+  #loading h1 b { color:var(--accent); font-weight:700; }
+  #loading p { color:var(--dim); font-size:13px; margin:10px 0 22px; letter-spacing:.05em; }
+  #lbar { width:280px; height:3px; background:rgba(255,255,255,.12); border-radius:2px; overflow:hidden; margin:0 auto; }
+  #lbar > i { display:block; height:100%; width:0; background:var(--accent); transition:width .25s; }
+  #lmsg { font-size:12px; color:var(--dim); margin-top:12px; height:16px; }
+  #err { color:var(--bad); font-size:12px; max-width:520px; margin:14px auto 0;
+    white-space:pre-wrap; text-align:left; font-family:ui-monospace,monospace; display:none; }
+</style>
+</head>
+<body>
+<div id="loading">
+  <div>
+    <h1>SHIMLA <b>RISING</b></h1>
+    <p>Queen of Hills &middot; 8.2 km&sup2; &middot; Jakhoo 2455 m</p>
+    <div id="lbar"><i></i></div>
+    <div id="lmsg">shuru ho raha hai&hellip;</div>
+    <pre id="err"></pre>
+  </div>
+</div>
+
+<div id="hud">
+  <div class="panel" id="topleft">
+    <div id="stars"></div>
+    <div id="money">&#8377;0</div>
+    <div id="district">&mdash;</div>
+    <div id="bars">
+      <div class="bar" id="hp"><i style="width:100%"></i></div>
+      <div class="bar" id="st"><i style="width:100%"></i></div>
+    </div>
+  </div>
+  <div class="panel" id="mission" hidden>
+    <h3 id="mtitle"></h3>
+    <ol id="objlist"></ol>
+  </div>
+  <div class="panel" id="minimap"><canvas width="190" height="190"></canvas></div>
+  <div class="panel" id="speedo">
+    <div id="kmh">0<small> km/h</small></div>
+    <div id="vehname">paidal</div>
+  </div>
+  <div id="subtitle"></div>
+  <div id="toast"></div>
+  <div id="help">WASD chalao &middot; Shift daudo &middot; Space kudo &middot; <b>F</b> gaadi mein baitho/utro &middot; Mouse camera &middot; M naksha &middot; H madad</div>
+</div>
+
+<script type="importmap">
+{ "imports": { "three": "./vendor/three.module.min.js" } }
+</script>
+<script type="module">
+  const err = document.getElementById("err");
+  const show = (m) => { err.style.display = "block"; err.textContent += m + "\n"; };
+  window.addEventListener("error", (e) => show("ERROR: " + (e.message || e.error)));
+  window.addEventListener("unhandledrejection", (e) => show("PROMISE: " + (e.reason?.message || e.reason)));
+  import("./src/main.js").catch((e) => show("IMPORT: " + (e?.message || e) + "\n" + (e?.stack || "")));
+</script>
+</body>
+</html>

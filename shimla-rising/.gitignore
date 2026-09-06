@@ -1,0 +1,41 @@
+# --- Godot ---
+godot/.godot/
+godot/android/
+godot/export_presets.cfg.local
+*.translation
+
+# tools/sync_godot_data.py se banta hai. Sach hamesha repo root ke data/ mein hai,
+# isliye do copies commit nahi karte.
+# NOTE: git .gitignore mein pattern ke *baad* comment nahi chalta -- '#' sirf line
+# ki shuruat mein comment hai. Isliye har comment apni line pe hai.
+godot/data/
+
+# --- builds ---
+build/
+dist/
+
+# Blender scripts se banta hai
+assets/generated/
+
+# --- pipeline cache ---
+# downloaded DEM/OSM -- bade hote hain aur dobara mil jaate hain
+tools/.cache/
+
+# --- python ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+
+# --- node ---
+node_modules/
+npm-debug.log*
+
+# --- os / editor ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp

@@ -1,0 +1,198 @@
+{
+  "$comment": "Shimla Rising ki kahani aur missions. Objective types jo engine samajhta hai: goto, drive_to, collect, evade, survive, race. Sab 'poi' fields data/pois.json ke id hain.",
+  "acts": [
+    { "id": "act1", "title": "Pahad ka Beta",     "blurb": "Sanjauli ki dhalan pe ek garage, ek maa, aur ek ladka jo abhi tak seedha hai." },
+    { "id": "act2", "title": "Mall Road ke Malik","blurb": "Rana Sahab ke darbar mein jagah mil gayi. Keemat baad mein pata chalegi." },
+    { "id": "act3", "title": "Barfeela Toofan",   "blurb": "Barf gir rahi hai, saboot pighal raha hai, aur Jakhoo pe ek aakhri raat baaki hai." }
+  ],
+  "missions": [
+    { "id": "a1_m1", "act": "act1", "order": 1, "title": "Garage ki Subah", "giver": "amma", "start_poi": "vicky_garage", "reward": 500,
+      "brief": "Amma: 'Uth ja Vicky. Neeche shutter khol, aur Sharma ji ki gaadi aaj hi deni hai. Aur haan - Cart Road se jaana, Mall se nahi.'",
+      "objectives": [
+        { "id": "o1", "type": "goto",     "poi": "vicky_garage", "radius": 12, "text": "Garage tak jao" },
+        { "id": "o2", "type": "drive_to", "poi": "sanjauli_chowk", "radius": 18, "text": "Taxi lo aur Sanjauli Chowk pahuncho" },
+        { "id": "o3", "type": "drive_to", "poi": "lakkar_bazaar", "radius": 22, "text": "Gaadi Lakkar Bazaar pahuncha do" }
+      ], "unlocks": ["a1_m2", "s_taxi"] },
+
+    { "id": "a1_m2", "act": "act1", "order": 2, "title": "Lakkar Bazaar ki Reporter", "giver": "nafisa", "start_poi": "lakkar_bazaar", "reward": 800,
+      "brief": "Nafisa: 'Tu Thakur ka ladka hai na? Tere baap ne mujhe ek list di thi. Ab wo nahi hai, aur list adhoori hai. Mujhe Dhalli ke depot ki tasveer chahiye.'",
+      "objectives": [
+        { "id": "o1", "type": "goto",     "poi": "nafisa_office", "radius": 10, "text": "Nafisa ke daftar jao" },
+        { "id": "o2", "type": "drive_to", "poi": "timber_depot", "radius": 30, "text": "Dhalli Timber Depot pahuncho" },
+        { "id": "o3", "type": "collect",  "poi": "timber_depot", "count": 4, "spread": 45, "text": "4 saboot uthao (bina pakde gaye)" }
+      ], "unlocks": ["a1_m3"] },
+
+    { "id": "a1_m3", "act": "act1", "order": 3, "title": "Cart Road Sprint", "giver": "guru", "start_poi": "guru_dhaba", "reward": 700,
+      "brief": "Guru: 'Bali ke ladke tere peeche hain. Bhaag mat - chala. Cart Road pe jo pehle pahunchega, wahi jeeta.'",
+      "objectives": [
+        { "id": "o1", "type": "goto",  "poi": "guru_dhaba", "radius": 12, "text": "Guru ke dhabe pe milo" },
+        { "id": "o2", "type": "race",  "checkpoints": ["railway_station", "scandal_point", "sanjauli_tunnel", "sanjauli_chowk"], "time_s": 240, "text": "Cart Road race jeeto" }
+      ], "unlocks": ["a1_m4", "s_race_cart"] },
+
+    { "id": "a1_m4", "act": "act1", "order": 4, "title": "Toy Train ka Maal", "giver": "chhotu", "start_poi": "railway_station", "reward": 1200,
+      "brief": "Chhotu: 'Bhaiya, 4:10 wali chhoti gaadi mein ek dabba aisa hai jo passenger ke liye nahi hai. Goods shed ke peeche.'",
+      "objectives": [
+        { "id": "o1", "type": "drive_to", "poi": "railway_station", "radius": 25, "text": "Railway Station pahuncho" },
+        { "id": "o2", "type": "collect",  "poi": "railway_station", "count": 3, "spread": 35, "text": "Dabbe se maal utaro" },
+        { "id": "o3", "type": "drive_to", "poi": "vicky_garage", "radius": 20, "text": "Maal garage le jao" }
+      ], "unlocks": ["a1_m5"] },
+
+    { "id": "a1_m5", "act": "act1", "order": 5, "title": "Chhotu ki Nazar", "giver": "chhotu", "start_poi": "chhotu_perch", "reward": 900,
+      "brief": "Chhotu: 'Jakhoo se poora Mall dikhta hai. Aur raat ko jo truck catchment se nikalta hai, wo bhi.'",
+      "objectives": [
+        { "id": "o1", "type": "goto",     "poi": "chhotu_perch", "radius": 14, "text": "Jakhoo ki chadhai chadho" },
+        { "id": "o2", "type": "goto",     "poi": "jakhoo_temple", "radius": 16, "text": "Mandir tak pahuncho (bandaron se bacho)" },
+        { "id": "o3", "type": "drive_to", "poi": "catchment_gate", "radius": 30, "text": "Catchment gate pe truck ka intezaar karo" },
+        { "id": "o4", "type": "survive",  "seconds": 45, "text": "Chhupe raho jab tak truck nikal na jaye" }
+      ], "unlocks": ["a1_m6"] },
+
+    { "id": "a1_m6", "act": "act1", "order": 6, "title": "Garage Jal Gayi", "giver": "amma", "start_poi": "vicky_garage", "reward": 0, "story_beat": true,
+      "brief": "Raat ke do baje Sanjauli mein aag ki roshni. Amma khadi hai, chappal bhi nahi pehni. 'Vicky... neeche mat jaa.' Vicky neeche jaata hai.",
+      "objectives": [
+        { "id": "o1", "type": "goto",   "poi": "vicky_garage", "radius": 14, "text": "Garage pahuncho" },
+        { "id": "o2", "type": "collect","poi": "vicky_garage", "count": 3, "spread": 25, "text": "Aag se baap ke kaagaz nikalo" },
+        { "id": "o3", "type": "evade",  "text": "Bali ke aadmiyon se bach ke nikal jao" },
+        { "id": "o4", "type": "goto",   "poi": "vicky_home", "radius": 12, "text": "Ghar wapas jao. Amma intezaar kar rahi hai." }
+      ], "unlocks": ["a2_m1"] },
+
+    { "id": "a2_m1", "act": "act2", "order": 7, "title": "Rana Sahab ka Bulawa", "giver": "rana", "start_poi": "rana_hotel", "reward": 2000,
+      "brief": "Rana Sahab: 'Beta, teri garage ka bahut dukh hua. Aisa karte hain - tu mere liye kaam kar. Nuksan bhi bhar dunga, aur Shimla bhi dikha dunga.'",
+      "objectives": [
+        { "id": "o1", "type": "goto",     "poi": "rana_hotel", "radius": 12, "text": "Hotel Deodar Palace jao (paidal - Mall pe gaadi ban hai)" },
+        { "id": "o2", "type": "drive_to", "poi": "bali_yard", "radius": 25, "text": "Bali ke yard se ek 'parcel' utha lao" },
+        { "id": "o3", "type": "drive_to", "poi": "rana_hotel", "radius": 40, "text": "Parcel Rana tak pahuncha do" }
+      ], "unlocks": ["a2_m2", "s_photo"] },
+
+    { "id": "a2_m2", "act": "act2", "order": 8, "title": "Tender Fix", "giver": "bali", "start_poi": "bali_yard", "reward": 2500,
+      "brief": "Bali: 'Secretariat mein ek file hai. Kal subah tak wo file uss almari mein nahi honi chahiye. Samjha?'",
+      "objectives": [
+        { "id": "o1", "type": "drive_to", "poi": "secretariat", "radius": 25, "text": "Ellerslie Secretariat pahuncho" },
+        { "id": "o2", "type": "collect",  "poi": "secretariat", "count": 3, "spread": 30, "text": "Tender file ke teen hisse uthao" },
+        { "id": "o3", "type": "evade",    "text": "Chaura Maidan ki police se bacho" },
+        { "id": "o4", "type": "drive_to", "poi": "bali_yard", "radius": 25, "text": "File Bali tak pahuncha do" }
+      ], "unlocks": ["a2_m3"] },
+
+    { "id": "a2_m3", "act": "act2", "order": 9, "title": "Mall Road Mein Gaadi", "giver": "rana", "start_poi": "rana_hotel", "reward": 3000,
+      "brief": "Rana: 'Aaj Mall band hai, sirf VIP ke liye. Meri gaadi Scandal Point pe khadi hai. Le aa. Aur haan - dhyaan se, wahan gaadi le jaana jurm hai.'",
+      "objectives": [
+        { "id": "o1", "type": "drive_to", "poi": "scandal_point", "radius": 18, "text": "Gaadi lekar Scandal Point pahuncho (2-star wanted milega)" },
+        { "id": "o2", "type": "drive_to", "poi": "christ_church", "radius": 18, "text": "Mall Road paar karke Christ Church tak" },
+        { "id": "o3", "type": "evade",    "text": "Police ko chhod ke nikal jao" }
+      ], "unlocks": ["a2_m4"] },
+
+    { "id": "a2_m4", "act": "act2", "order": 10, "title": "Annandale ka Helipad", "giver": "nafisa", "start_poi": "nafisa_office", "reward": 2800,
+      "brief": "Nafisa: 'Kal subah Annandale pe ek helicopter utrega. Usme koi minister nahi aa raha. Mujhe bas ye jaanna hai ki kya utar raha hai.'",
+      "objectives": [
+        { "id": "o1", "type": "drive_to", "poi": "annandale_ground", "radius": 35, "text": "Annandale maidan pahuncho" },
+        { "id": "o2", "type": "survive",  "seconds": 50, "text": "Helicopter aane tak chhupe raho" },
+        { "id": "o3", "type": "collect",  "poi": "annandale_ground", "count": 4, "spread": 50, "text": "Handover ki tasveerein lo" },
+        { "id": "o4", "type": "drive_to", "poi": "nafisa_office", "radius": 25, "text": "Nafisa tak pahuncho" }
+      ], "unlocks": ["a2_m5"] },
+
+    { "id": "a2_m5", "act": "act2", "order": 11, "title": "Viceregal Lodge", "giver": "nafisa", "start_poi": "viceregal_lodge", "reward": 4000,
+      "brief": "Nafisa: '1888 ki building mein 2026 ka ghotala. Rana ne apna asli register wahin rakha hai - kyunki wahan koi shak nahi karta.'",
+      "objectives": [
+        { "id": "o1", "type": "drive_to", "poi": "viceregal_lodge", "radius": 30, "text": "Viceregal Lodge pahuncho" },
+        { "id": "o2", "type": "collect",  "poi": "viceregal_lodge", "count": 5, "spread": 45, "text": "Register ke panne nikalo" },
+        { "id": "o3", "type": "evade",    "text": "Guards aur police se bacho" },
+        { "id": "o4", "type": "drive_to", "poi": "guru_dhaba", "radius": 25, "text": "Guru ke dhabe pe chhup jao" }
+      ], "unlocks": ["a2_m6"] },
+
+    { "id": "a2_m6", "act": "act2", "order": 12, "title": "Bali ka Yard", "giver": "guru", "start_poi": "guru_dhaba", "reward": 3500, "story_beat": true,
+      "brief": "Guru: 'Register mein tere baap ka naam bhi hai, Vicky. Galat taraf. Ab tu decide kar - kaagaz jala dega, ya Bali se poochhega.'",
+      "objectives": [
+        { "id": "o1", "type": "drive_to", "poi": "bali_yard", "radius": 25, "text": "Dhalli - Bali ke yard pahuncho" },
+        { "id": "o2", "type": "collect",  "poi": "bali_yard", "count": 4, "spread": 40, "text": "Yard ke ledger uthao" },
+        { "id": "o3", "type": "survive",  "seconds": 60, "text": "Bali ke aadmiyon ko rok ke rakho" },
+        { "id": "o4", "type": "evade",    "text": "Dhalli se nikal jao" }
+      ], "unlocks": ["a3_m1"] },
+
+    { "id": "a3_m1", "act": "act3", "order": 13, "title": "Catchment ke Andar", "giver": "chhotu", "start_poi": "catchment_gate", "reward": 5000,
+      "brief": "Chhotu: 'Bhaiya, barf shuru ho gayi. Jo latthe abhi nahi nikle, wo poore season andar rahenge. Aaj raat aakhri truck hai.'",
+      "objectives": [
+        { "id": "o1", "type": "drive_to", "poi": "catchment_gate", "radius": 30, "text": "Catchment gate pahuncho (barf gir rahi hai - grip kam hai)" },
+        { "id": "o2", "type": "collect",  "poi": "catchment_gate", "count": 5, "spread": 70, "text": "Kate hue deodar ke stump mark karo" },
+        { "id": "o3", "type": "survive",  "seconds": 70, "text": "Truck convoy ke guzarne tak ruko" },
+        { "id": "o4", "type": "evade",    "text": "Ahluwalia ki gypsy se bacho" }
+      ], "unlocks": ["a3_m2"] },
+
+    { "id": "a3_m2", "act": "act3", "order": 14, "title": "Jakhoo par Aakhri Raat", "giver": "nafisa", "start_poi": "jakhoo_temple", "reward": 10000, "story_beat": true, "finale": true,
+      "brief": "Nafisa: 'Sab kuch ek jagah pahunchana hai, aur ek hi raat hai. Jakhoo. Sabse uncha point - wahan se signal jaayega, aur wahan se sab dikhega.'",
+      "objectives": [
+        { "id": "o1", "type": "drive_to", "poi": "sanjauli_chowk", "radius": 25, "text": "Nafisa ko Sanjauli se uthao" },
+        { "id": "o2", "type": "drive_to", "poi": "chhotu_perch", "radius": 22, "text": "Jakhoo ki chadhai chadho - barfeele toofan mein" },
+        { "id": "o3", "type": "goto",     "poi": "jakhoo_temple", "radius": 15, "text": "Mandir tak paidal jao" },
+        { "id": "o4", "type": "survive",  "seconds": 90, "text": "Saboot bhejte waqt Rana ke aadmiyon ko rok ke rakho" },
+        { "id": "o5", "type": "evade",    "text": "Pahad utar jao. Kahani ab tumhare bina bhi chalegi." }
+      ], "unlocks": [] },
+
+    { "id": "s_taxi", "act": "side", "order": 100, "title": "Taxi Rani", "giver": "guru", "start_poi": "isbt", "reward": 600, "side": true,
+      "brief": "ISBT pe sawari khadi hai. Meter chalao aur pahuncha do - jitni tez, utna zyada.",
+      "objectives": [
+        { "id": "o1", "type": "drive_to", "poi": "isbt", "radius": 25, "text": "ISBT se sawari uthao" },
+        { "id": "o2", "type": "race", "checkpoints": ["railway_station", "chhota_shimla", "kasumpti_market"], "time_s": 300, "text": "Teeno sawariyan time pe pahunchao" }
+      ], "repeatable": true },
+
+    { "id": "s_bus", "act": "side", "order": 101, "title": "Guru ki Bus", "giver": "guru", "start_poi": "isbt", "reward": 900, "side": true,
+      "brief": "Guru: 'Meri kamar gayi hai. Aaj ka Dhalli route tu chala. Bus hai - dheere, par rukegi nahi.'",
+      "objectives": [
+        { "id": "o1", "type": "drive_to", "poi": "isbt", "radius": 25, "text": "ISBT se HRTC bus lo" },
+        { "id": "o2", "type": "race", "checkpoints": ["railway_station", "sanjauli_chowk", "bali_yard"], "time_s": 420, "text": "Route poora karo" }
+      ], "repeatable": true },
+
+    { "id": "s_race_ns", "act": "side", "order": 102, "title": "New Shimla Loop", "giver": "chhotu", "start_poi": "new_shimla_loop", "reward": 1500, "side": true,
+      "brief": "Shimla ki sabse chaudi sadkein. Raat ko yahan sirf ek hi cheez hoti hai.",
+      "objectives": [
+        { "id": "o1", "type": "race", "checkpoints": ["new_shimla_loop", "kasumpti_market", "chhota_shimla", "new_shimla_loop"], "time_s": 260, "text": "Loop race jeeto" }
+      ], "repeatable": true },
+
+    { "id": "s_race_cart", "act": "side", "order": 103, "title": "Cart Road Time Trial", "giver": "guru", "start_poi": "isbt", "reward": 1400, "side": true,
+      "brief": "ISBT se Sanjauli tak, Cart Road ke har mod se hokar. Ghadi chal rahi hai.",
+      "objectives": [
+        { "id": "o1", "type": "race", "checkpoints": ["isbt", "railway_station", "sanjauli_tunnel", "sanjauli_chowk"], "time_s": 230, "text": "Time trial poora karo" }
+      ], "repeatable": true },
+
+    { "id": "s_monkey", "act": "side", "order": 104, "title": "Jakhoo ke Bandar", "giver": "chhotu", "start_poi": "jakhoo_temple", "reward": 500, "side": true,
+      "brief": "Chhotu: 'Bandaron ne phir se chashme utha liye. Tourist ro rahe hain. Wapas le aao, warna mandir wale mujhe daantenge.'",
+      "objectives": [
+        { "id": "o1", "type": "goto",    "poi": "jakhoo_temple", "radius": 18, "text": "Jakhoo Mandir jao" },
+        { "id": "o2", "type": "collect", "poi": "jakhoo_temple", "count": 6, "spread": 60, "text": "Bandaron se 6 chashme wapas lo" }
+      ], "repeatable": true },
+
+    { "id": "s_courier", "act": "side", "order": 105, "title": "Sanjauli Courier", "giver": "amma", "start_poi": "sanjauli_chowk", "reward": 700, "side": true,
+      "brief": "Amma: 'Ye teen packet gali mein baant de. Scooter le jaana - bus wahan ghusti nahi.'",
+      "objectives": [
+        { "id": "o1", "type": "collect", "poi": "sanjauli_chowk", "count": 3, "spread": 20, "text": "Teen packet uthao" },
+        { "id": "o2", "type": "race", "checkpoints": ["vicky_home", "vicky_garage", "sanjauli_tunnel"], "time_s": 200, "text": "Teeno packet time pe baanto" }
+      ], "repeatable": true },
+
+    { "id": "s_photo", "act": "side", "order": 106, "title": "Nafisa ke Photo", "giver": "nafisa", "start_poi": "nafisa_office", "reward": 1100, "side": true,
+      "brief": "Nafisa: 'Har wo building jo dhalan pe khadi hai aur khadi nahi honi chahiye. Tasveer chahiye, bahaana nahi.'",
+      "objectives": [
+        { "id": "o1", "type": "collect", "poi": "sanjauli_chowk",  "count": 3, "spread": 90, "text": "Sanjauli ki avaidh building shoot karo" },
+        { "id": "o2", "type": "collect", "poi": "chhota_shimla",   "count": 3, "spread": 90, "text": "Chhota Shimla mein bhi" },
+        { "id": "o3", "type": "goto",    "poi": "nafisa_office", "radius": 12, "text": "Tasveerein Nafisa ko do" }
+      ], "repeatable": true },
+
+    { "id": "s_snow", "act": "side", "order": 107, "title": "Barf Mein Phasi Gaadi", "giver": "guru", "start_poi": "sanjauli_tunnel", "reward": 1000, "side": true,
+      "brief": "Guru: 'Tunnel ke aage do gaadiyan phas gayi hain. Barf mein grip nahi milti - dheere chalana.'",
+      "objectives": [
+        { "id": "o1", "type": "drive_to", "poi": "sanjauli_tunnel", "radius": 20, "text": "Sanjauli Tunnel pahuncho" },
+        { "id": "o2", "type": "collect",  "poi": "sanjauli_tunnel", "count": 4, "spread": 55, "text": "Phasi gaadiyon ko nikalo" }
+      ], "repeatable": true },
+
+    { "id": "s_apple", "act": "side", "order": 108, "title": "Apple Lorry", "giver": "bali", "start_poi": "bali_yard", "reward": 1300, "side": true,
+      "brief": "Dhalli mandi se peti ISBT tak. Seb hain - kaagaz bhi poore hain. Is baar sach mein.",
+      "objectives": [
+        { "id": "o1", "type": "collect", "poi": "bali_yard", "count": 5, "spread": 35, "text": "Seb ki petiyan laado" },
+        { "id": "o2", "type": "race", "checkpoints": ["sanjauli_chowk", "railway_station", "isbt"], "time_s": 330, "text": "Mandi tak time pe pahunchao" }
+      ], "repeatable": true },
+
+    { "id": "s_train", "act": "side", "order": 109, "title": "Chhoti Gaadi ka Peecha", "giver": "chhotu", "start_poi": "railway_station", "reward": 1600, "side": true,
+      "brief": "Chhotu: 'Toy train Summer Hill se aa rahi hai. Uske saath-saath chalo - dekho kaunse tunnel pe kaun chadhta hai.'",
+      "objectives": [
+        { "id": "o1", "type": "drive_to", "poi": "hpu", "radius": 30, "text": "Summer Hill pahuncho" },
+        { "id": "o2", "type": "race", "checkpoints": ["hpu", "railway_station", "scandal_point"], "time_s": 280, "text": "Train ke saath chalo" }
+      ], "repeatable": true }
+  ]
+}

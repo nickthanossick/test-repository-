@@ -1,0 +1,19 @@
+# Text ko normalise karo
+* text=auto eol=lf
+*.gd     text eol=lf
+*.tscn   text eol=lf
+*.godot  text eol=lf
+
+# --- Git LFS ---
+# Abhi repo mein sirf chhoti generated PNG hain (~1.2 MB each), isliye LFS
+# strictly zaroori nahi. Par jaise hi Blender ke .glb, audio ya bade heightmap
+# aayenge, `git lfs install` chala kar ye rules kaam karne lagengi.
+*.glb    filter=lfs diff=lfs merge=lfs -text
+*.fbx    filter=lfs diff=lfs merge=lfs -text
+*.blend  filter=lfs diff=lfs merge=lfs -text
+*.wav    filter=lfs diff=lfs merge=lfs -text
+*.ogg    filter=lfs diff=lfs merge=lfs -text
+*.tif    filter=lfs diff=lfs merge=lfs -text
+
+# Generated heightmaps -- binary, diff karne ka koi matlab nahi
+data/heightmap*.png -diff

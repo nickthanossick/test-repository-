@@ -1,0 +1,65 @@
+{
+  "$comment": "Shimla ka sadak network, asli routes trace karke. Points [lat, lon] hain - engine georeference.json se world coords banata hai. tools/shimla_pipeline/ chalao to ye file asli OpenStreetMap data se replace ho jayegi.",
+  "road_types": {
+    "arterial":   { "width_m": 9.0, "speed_kmh": 55, "color": "#3a3a3e" },
+    "street":     { "width_m": 6.0, "speed_kmh": 40, "color": "#45454a" },
+    "lane":       { "width_m": 3.6, "speed_kmh": 25, "color": "#4e4e52" },
+    "pedestrian": { "width_m": 7.0, "speed_kmh": 0,  "color": "#6b6355" },
+    "track":      { "width_m": 4.0, "speed_kmh": 30, "color": "#5a4f3c" },
+    "rail":       { "width_m": 2.6, "speed_kmh": 35, "color": "#4a4038" }
+  },
+  "roads": [
+    { "id": "cart_road", "name": "Cart Road", "type": "arterial", "oneway": false,
+      "note": "Shimla ki asli lifeline. Mall ke neeche se poore sheher ko kaatti hai.",
+      "points": [[31.0985,77.1520],[31.1005,77.1553],[31.1020,77.1578],[31.1033,77.1600],[31.1030,77.1632],[31.1025,77.1655],[31.1018,77.1690],[31.1028,77.1706],[31.1035,77.1745],[31.1048,77.1782],[31.1058,77.1830],[31.1068,77.1885],[31.1082,77.1927]] },
+
+    { "id": "the_mall", "name": "The Mall", "type": "pedestrian", "oneway": false,
+      "note": "GAADI BAN HAI. Asli Shimla mein bhi, game mein bhi - ghuse to wanted level.",
+      "points": [[31.1030,77.1700],[31.1040,77.1720],[31.1038,77.1727],[31.1048,77.1734],[31.1046,77.1740],[31.1055,77.1744],[31.1063,77.1748]] },
+
+    { "id": "circular_road", "name": "Circular Road", "type": "street", "oneway": false,
+      "note": "Jakhoo pahadi ke charon taraf ghoomti hai.",
+      "points": [[31.1048,77.1734],[31.1050,77.1780],[31.1040,77.1830],[31.1010,77.1866],[31.0975,77.1858],[31.0960,77.1830],[31.0975,77.1790],[31.1000,77.1760],[31.1025,77.1730]] },
+
+    { "id": "nh5_east", "name": "NH-5 (Hindustan-Tibet Road)", "type": "arterial", "oneway": false,
+      "note": "Sanjauli se Dhalli hote hue Kufri/Rampur ki taraf. Truck aur apple lorry ka rasta.",
+      "points": [[31.1082,77.1927],[31.1105,77.1968],[31.1128,77.2010],[31.1150,77.2050],[31.1140,77.2110],[31.1120,77.2160]] },
+
+    { "id": "summer_hill_road", "name": "Summer Hill Road", "type": "street", "oneway": false,
+      "points": [[31.0985,77.1520],[31.0995,77.1490],[31.1015,77.1478],[31.1032,77.1470],[31.1040,77.1455],[31.1043,77.1441],[31.1030,77.1400],[31.1012,77.1362],[31.0995,77.1330]] },
+
+    { "id": "annandale_road", "name": "Annandale Road", "type": "street", "oneway": false,
+      "note": "Railway station se neeche utar kar Shimla ke ek maatra maidan tak.",
+      "points": [[31.1033,77.1600],[31.1048,77.1594],[31.1068,77.1586],[31.1088,77.1576],[31.1105,77.1568]] },
+
+    { "id": "chhota_kasumpti", "name": "Chhota Shimla - Kasumpti Road", "type": "street", "oneway": false,
+      "points": [[31.0960,77.1830],[31.0940,77.1848],[31.0910,77.1868],[31.0880,77.1880],[31.0858,77.1845],[31.0840,77.1815],[31.0830,77.1790]] },
+
+    { "id": "new_shimla_loop", "name": "New Shimla Loop", "type": "street", "oneway": false,
+      "note": "Planned sector - Shimla ki sabse chaudi sadkein. Yahin street race hoti hai.",
+      "points": [[31.0830,77.1790],[31.0842,77.1748],[31.0868,77.1722],[31.0898,77.1735],[31.0912,77.1772],[31.0895,77.1808],[31.0862,77.1818],[31.0830,77.1790]] },
+
+    { "id": "sanjauli_inner", "name": "Sanjauli Bazaar Lane", "type": "lane", "oneway": false,
+      "note": "Tang gali. Bus nahi ghusti, scooter aaram se.",
+      "points": [[31.1082,77.1927],[31.1075,77.1918],[31.1080,77.1932],[31.1088,77.1941],[31.1098,77.1955],[31.1108,77.1948]] },
+
+    { "id": "jakhoo_road", "name": "Jakhoo Road", "type": "lane", "oneway": false,
+      "note": "Ridge se mandir tak seedhi chadhai. Gaadi mein first gear, paidal mein saans phool jati hai.",
+      "points": [[31.1048,77.1734],[31.1042,77.1758],[31.1035,77.1770],[31.1024,77.1798],[31.1012,77.1821],[31.0999,77.1836]] },
+
+    { "id": "catchment_track", "name": "Catchment Forest Track", "type": "track", "oneway": false,
+      "note": "Sanctuary ke andar kacchi sadak. Raat ko timber truck yahin chalte hain.",
+      "points": [[31.1150,77.2050],[31.1172,77.2064],[31.1198,77.2078],[31.1218,77.2092],[31.1230,77.2100],[31.1248,77.2072],[31.1255,77.2040]] },
+
+    { "id": "dhalli_yard_spur", "name": "Dhalli Depot Spur", "type": "lane", "oneway": false,
+      "points": [[31.1150,77.2050],[31.1155,77.2042],[31.1163,77.2031],[31.1148,77.2062]] },
+
+    { "id": "chaura_link", "name": "Chaura Maidan Link", "type": "street", "oneway": false,
+      "note": "Secretariat aur Vidhan Sabha ka rasta. Yahan hamesha police hoti hai.",
+      "points": [[31.1025,77.1655],[31.1020,77.1650],[31.1024,77.1678],[31.1030,77.1665],[31.1028,77.1706]] },
+
+    { "id": "kalka_shimla_rail", "name": "Kalka-Shimla Railway", "type": "rail", "oneway": false,
+      "note": "UNESCO World Heritage narrow gauge. 96 km, 102 tunnel, 864 pul. Sheher mein iska aakhri hissa.",
+      "points": [[31.1000,77.1315],[31.1015,77.1390],[31.1028,77.1445],[31.1032,77.1470],[31.1026,77.1508],[31.1024,77.1545],[31.1028,77.1578],[31.1033,77.1600]] }
+  ]
+}

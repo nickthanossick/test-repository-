@@ -1,0 +1,29 @@
+{
+  "$comment": "Shimla mein jo gaadiyan asli mein chalti hain. handling values arcade hain, simulation nahi - pahadi sadak pe mazedaar lagni chahiye.",
+  "vehicles": [
+    { "id": "taxi",    "name": "Shimla Taxi",       "class": "car",     "seats": 4,
+      "top_speed_kmh": 105, "accel": 7.5, "grip": 1.00, "mass_t": 1.15, "brake": 1.0,
+      "body": [1.75, 1.35, 4.10], "color": "#e8c33a", "roof_sign": true,
+      "desc": "Peeli-kaali local taxi. Har mod ki aadat hai." },
+    { "id": "hrtc_bus","name": "HRTC Bus",          "class": "bus",     "seats": 32,
+      "top_speed_kmh": 72,  "accel": 3.0, "grip": 0.80, "mass_t": 9.50, "brake": 0.7,
+      "body": [2.45, 3.05, 9.20], "color": "#1e6f4a",
+      "desc": "Himachal Road Transport. Bhaari, dheemi, par pahad pe rukti nahi. Guru ki jaan." },
+    { "id": "bolero",  "name": "Bolero Pickup",     "class": "suv",     "seats": 2,
+      "top_speed_kmh": 118, "accel": 8.0, "grip": 1.10, "mass_t": 1.90, "brake": 1.05,
+      "body": [1.90, 1.85, 4.40], "color": "#f0f0ee",
+      "desc": "Pahad ki asli gaadi. Kacchi sadak pe bhi nahi rukti." },
+    { "id": "scooter", "name": "Scooter",           "class": "bike",    "seats": 2,
+      "top_speed_kmh": 88,  "accel": 9.0, "grip": 0.92, "mass_t": 0.13, "brake": 0.95,
+      "body": [0.70, 1.15, 1.85], "color": "#3b6fb5",
+      "desc": "Sanjauli ki tang galiyon ka raja. Mall Road pe bhi nikal jaati hai." },
+    { "id": "timber_truck","name": "Timber Truck",  "class": "truck",   "seats": 2,
+      "top_speed_kmh": 78,  "accel": 2.6, "grip": 0.78, "mass_t": 12.0, "brake": 0.6,
+      "body": [2.55, 3.25, 8.60], "color": "#8a5a2b",
+      "desc": "Deodar ke latthe laadta hai. Kaagaz kabhi poore nahi hote." },
+    { "id": "police_jeep","name": "HP Police Gypsy","class": "police",  "seats": 4,
+      "top_speed_kmh": 122, "accel": 8.6, "grip": 1.12, "mass_t": 1.60, "brake": 1.1,
+      "body": [1.72, 1.90, 3.95], "color": "#2b3f63", "siren": true,
+      "desc": "Himachal Police. Pahadi mod pe tumse tez." }
+  ]
+}

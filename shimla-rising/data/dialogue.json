@@ -1,0 +1,104 @@
+{
+  "$comment": "Hinglish dialogue. Har key ek mission id + beat hai. 'speaker' characters.json ka id hai. Engine ye lines subtitle bar mein chalata hai.",
+  "lines": {
+    "a1_m1:start": [
+      { "speaker": "amma", "text": "Uth ja Vicky. Shutter khol, Sharma ji ki gaadi aaj deni hai." },
+      { "speaker": "vicky", "text": "Uth gaya Amma. Chai?" },
+      { "speaker": "amma", "text": "Chai baad mein. Aur Cart Road se jaana - Mall pe gaadi nahi." }
+    ],
+    "a1_m1:end": [
+      { "speaker": "vicky", "text": "Gaadi de aaya. Paise bhi mil gaye." },
+      { "speaker": "amma", "text": "Shabaash. Baap hota to khush hota." }
+    ],
+    "a1_m2:start": [
+      { "speaker": "nafisa", "text": "Tu Thakur ka ladka hai na? Andar aa." },
+      { "speaker": "nafisa", "text": "Tere baap ne mujhe ek list di thi. Ab wo nahi hai, aur list adhoori hai." },
+      { "speaker": "vicky", "text": "Meri baap ki list ka aapse kya lena-dena?" },
+      { "speaker": "nafisa", "text": "Wahi to pata karna hai. Dhalli ke depot ki tasveer laa de." }
+    ],
+    "a1_m3:start": [
+      { "speaker": "guru", "text": "Vicky! Bali ke ladke tere peeche hain." },
+      { "speaker": "vicky", "text": "To bhaagun?" },
+      { "speaker": "guru", "text": "Bhaag mat - chala. Cart Road pe jo pehle pahuncha, wahi jeeta." }
+    ],
+    "a1_m4:start": [
+      { "speaker": "chhotu", "text": "Bhaiya, 4:10 wali chhoti gaadi. Goods shed ke peeche wala dabba." },
+      { "speaker": "vicky", "text": "Usme kya hai?" },
+      { "speaker": "chhotu", "text": "Passenger to nahi hai. Itna mujhe pata hai." }
+    ],
+    "a1_m5:start": [
+      { "speaker": "chhotu", "text": "Jakhoo se poora Mall dikhta hai. Aur raat ko jo truck catchment se nikalta hai, wo bhi." },
+      { "speaker": "vicky", "text": "Tu yahan roz baithta hai?" },
+      { "speaker": "chhotu", "text": "Bandar mujhe pehchante hain. Aadmi nahi pehchante. Dono theek hai." }
+    ],
+    "a1_m6:start": [
+      { "speaker": "amma", "text": "Vicky... neeche mat jaa." },
+      { "speaker": "vicky", "text": "Amma, wo baap ki garage hai." },
+      { "speaker": "amma", "text": "Thi. Ab sirf aag hai." }
+    ],
+    "a1_m6:end": [
+      { "speaker": "vicky", "text": "Kaagaz bach gaye." },
+      { "speaker": "amma", "text": "Aur tu bhi. Abhi tak." }
+    ],
+    "a2_m1:start": [
+      { "speaker": "rana", "text": "Beta, teri garage ka bahut dukh hua. Baith." },
+      { "speaker": "vicky", "text": "Aap ko kaise pata chala?" },
+      { "speaker": "rana", "text": "Shimla chhota sheher hai. Yahan sab pata chal jaata hai." },
+      { "speaker": "rana", "text": "Tu mere liye kaam kar. Nuksan bhi bhar dunga, aur sheher bhi dikha dunga." }
+    ],
+    "a2_m2:start": [
+      { "speaker": "bali", "text": "Secretariat mein ek file hai. Kal subah tak almari mein nahi honi chahiye." },
+      { "speaker": "vicky", "text": "Aur agar mil gaya to?" },
+      { "speaker": "bali", "text": "To tu pakda gaya. Rana Sahab ka naam mat lena." }
+    ],
+    "a2_m3:start": [
+      { "speaker": "rana", "text": "Aaj Mall band hai. Meri gaadi Scandal Point pe khadi hai - le aa." },
+      { "speaker": "vicky", "text": "Mall pe gaadi le jaana jurm hai, Rana Sahab." },
+      { "speaker": "rana", "text": "Haan. Isiliye tu ja raha hai, main nahi." }
+    ],
+    "a2_m4:start": [
+      { "speaker": "nafisa", "text": "Kal subah Annandale pe helicopter utrega. Usme koi minister nahi aa raha." },
+      { "speaker": "vicky", "text": "Aap ab bhi mujh pe bharosa karti hain?" },
+      { "speaker": "nafisa", "text": "Nahi. Par tere paas ab Rana ka pass hai. Wahi kaafi hai." }
+    ],
+    "a2_m5:start": [
+      { "speaker": "nafisa", "text": "1888 ki building mein 2026 ka ghotala." },
+      { "speaker": "nafisa", "text": "Rana ne asli register wahin rakha hai - kyunki wahan koi shak nahi karta." }
+    ],
+    "a2_m6:start": [
+      { "speaker": "guru", "text": "Register mein tere baap ka naam bhi hai, Vicky." },
+      { "speaker": "vicky", "text": "Kya?" },
+      { "speaker": "guru", "text": "Galat taraf. Ab tu decide kar - kaagaz jala dega, ya Bali se poochhega." }
+    ],
+    "a2_m6:end": [
+      { "speaker": "vicky", "text": "Usne kaha baap ne kabhi paisa nahi liya. Sirf gaadi theek ki thi. Har baar." },
+      { "speaker": "guru", "text": "Aur har baar wahi gaadi. Wahi rasta. Wahi raat." },
+      { "speaker": "vicky", "text": "Wo jaanta tha." }
+    ],
+    "a3_m1:start": [
+      { "speaker": "chhotu", "text": "Bhaiya, barf shuru ho gayi." },
+      { "speaker": "chhotu", "text": "Jo latthe abhi nahi nikle, wo poore season andar rahenge. Aaj raat aakhri truck hai." },
+      { "speaker": "vicky", "text": "To aaj raat hi sahi." }
+    ],
+    "a3_m2:start": [
+      { "speaker": "nafisa", "text": "Sab kuch ek jagah pahunchana hai. Aur ek hi raat hai." },
+      { "speaker": "vicky", "text": "Jakhoo." },
+      { "speaker": "nafisa", "text": "Sabse uncha point. Wahan se signal jaayega, aur wahan se sab dikhega." }
+    ],
+    "a3_m2:end": [
+      { "speaker": "nafisa", "text": "Chala gaya. Subah tak har akhbaar mein hoga." },
+      { "speaker": "vicky", "text": "Aur Rana?" },
+      { "speaker": "nafisa", "text": "Rana Shimla nahi hai, Vicky. Rana sirf Shimla mein tha." },
+      { "speaker": "vicky", "text": "Amma ko bata dena main der se aaunga." }
+    ],
+    "generic:wanted": [
+      { "speaker": "vicky", "text": "Police! Nikalna padega." }
+    ],
+    "generic:mall_violation": [
+      { "speaker": "vicky", "text": "Mall pe gaadi... ab to pakka pakde jaayenge." }
+    ],
+    "generic:snow": [
+      { "speaker": "vicky", "text": "Barf pad rahi hai. Sambhal ke chalana padega." }
+    ]
+  }
+}

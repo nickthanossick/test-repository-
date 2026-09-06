@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  python:
+    name: Python lint + tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        run: pip install -r tools/requirements.txt
+      - name: Lint
+        run: python -m ruff check tools/
+      - name: Regenerate heightmap (deterministic -- output badalna nahi chahiye)
+        run: python tools/terrain/build_heightmap.py --size 512
+      - name: Sync Godot data
+        run: python tools/sync_godot_data.py
+      - name: Tests
+        run: python -m pytest tools/tests -q
+
+  web:
+    name: Web game smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install Playwright
+        run: |
+          npm init -y >/dev/null
+          npm i -D playwright >/dev/null
+          npx playwright install --with-deps chromium
+      - name: Boot the game and assert zero errors
+        run: |
+          node web/serve.mjs &
+          sleep 2
+          node tools/tests/smoke_web.mjs
+
+# NOTE: Godot project ko CI mein *chalaya* nahi ja sakta bina engine download kiye.
+# tools/tests/test_godot_project.py structural checks karta hai (res:// paths,
+# scene resource bookkeeping, GDScript indentation) -- wo python job mein chalta hai.
