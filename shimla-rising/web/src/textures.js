@@ -390,8 +390,9 @@ export function needles(seed = 83) {
  * theek -Z disha par aata hai, aur -Z hi character ka forward hai -- isliye
  * bina kisi rotation ke chehra saamne aa jaata hai.
  */
-export function face(hex = 0xc08a5e, seed = 19) {
-  return cached(`face${hex}`, () => {
+export function face(hex = 0xc08a5e, seed = 19, o = {}) {
+  const elder = !!o.elder, female = !!o.female;
+  return cached(`face${hex}${seed}${elder ? "E" : ""}${female ? "F" : ""}`, () => {
     const W = 512, H = 256;
     const cv = canvas(W);
     cv.height = H;
@@ -477,12 +478,13 @@ export function face(hex = 0xc08a5e, seed = 19) {
 
     // --- bhauhein: moti, koney pe neeche ----------------------------------
     for (const s2 of [-1, 1]) {
-      ctx.fillStyle = "#241a10";
+      ctx.fillStyle = elder ? "#a9a296" : "#241a10";
       ctx.beginPath();
       const bx = cx + s2 * ex, by = dy(-0.052);
-      ctx.moveTo(bx - s2 * W * 0.030, by + H * 0.012);
+      const bw = female ? 0.78 : 1;
+      ctx.moveTo(bx - s2 * W * 0.030, by + H * 0.012 * bw);
       ctx.quadraticCurveTo(bx, by - H * 0.014, bx + s2 * W * 0.026, by + H * 0.002);
-      ctx.quadraticCurveTo(bx, by + H * 0.002, bx - s2 * W * 0.030, by + H * 0.020);
+      ctx.quadraticCurveTo(bx, by + H * 0.002, bx - s2 * W * 0.030, by + H * 0.020 * bw);
       ctx.fill();
     }
 
@@ -505,13 +507,15 @@ export function face(hex = 0xc08a5e, seed = 19) {
     // --- moochh: SA ke ped ki sabse badi pehchan -------------------------
     // Patli aur chaudi, honth ko chhue bina. Pehle ye moti kaali thi aur
     // 3D mein khule mooh jaisi dikhti thi.
-    ctx.fillStyle = "#33241a";
+    ctx.fillStyle = elder ? "#b9b2a6" : "#33241a";
+    if (!female) {
     ctx.beginPath();
     ctx.moveTo(cx - W * 0.046, dy(0.208));
     ctx.quadraticCurveTo(cx, dy(0.194), cx + W * 0.046, dy(0.208));
     ctx.quadraticCurveTo(cx + W * 0.028, dy(0.228), cx, dy(0.220));
     ctx.quadraticCurveTo(cx - W * 0.028, dy(0.228), cx - W * 0.046, dy(0.208));
     ctx.fill();
+    }
 
     // --- hont: halke, sirf rekha aur thoda rang --------------------------
     ctx.fillStyle = "rgba(146,90,74,.34)";
@@ -523,6 +527,27 @@ export function face(hex = 0xc08a5e, seed = 19) {
     ctx.moveTo(cx - W * 0.031, dy(0.276));
     ctx.quadraticCurveTo(cx, dy(0.286), cx + W * 0.031, dy(0.276));
     ctx.stroke();
+
+    // buzurgon pe jhurriyan -- maathe aur aankhon ke kone pe
+    if (elder) {
+      ctx.strokeStyle = rgb(0.72, 0.38); ctx.lineWidth = 1.4; ctx.lineCap = "round";
+      for (let i = 0; i < 3; i++) {
+        const y = dy(-0.150 + i * 0.030);
+        ctx.beginPath();
+        ctx.moveTo(cx - W * 0.045, y);
+        ctx.quadraticCurveTo(cx, y - H * 0.006, cx + W * 0.045, y);
+        ctx.stroke();
+      }
+      for (const s2 of [-1, 1]) {
+        for (let i = 0; i < 3; i++) {
+          const a = 0.34 + i * 0.30;
+          ctx.beginPath();
+          ctx.moveTo(cx + s2 * W * 0.070, dy(0.005));
+          ctx.lineTo(cx + s2 * W * (0.070 + 0.020 * Math.cos(a)), dy(0.005 + 0.055 * Math.sin(a)));
+          ctx.stroke();
+        }
+      }
+    }
 
     // Jabde pe daadhi ka patch jaan-boojh kar nahi hai: ellipse chehre ke
     // curve pe daag jaisa dikhta tha. Halki chhaya hi kaafi hai.
@@ -630,23 +655,91 @@ export function signboard(text, sub = "", kind = "shop", seed = 0) {
  * Himachali topi ka kapda -- gehre rang ki oon, aur aage alag rang ka velvet band.
  * Ye ek hi cheez poore sheher ko turant Himachal jaisa bana deti hai.
  */
-export function topi(bodyHex = 0x4a5d3a, bandHex = 0x8c2f2f, seed = 29) {
-  return cached(`topi${bodyHex}${bandHex}`, () => {
+/**
+ * Bushehri topi ke do kapde.
+ *
+ * Asli topi: gehre hare **velvet** ka body, upar **bhoora buna hua band**, aur
+ * dono ke beech laal-sunehri patti. Pehle main ise oon ka ek hi tukda maanta
+ * tha jiske base pe maroon band tha -- wo galat tha.
+ */
+
+/** Velvet -- mahin resha, halki chamak, isliye noise bahut kam. */
+export function velvet(hex = 0x14543c, seed = 29) {
+  return cached(`velvet${hex}`, () => {
     const S = 128;
-    const wool = fbm(S, 30, 3, seed);
+    const nap = fbm(S, 56, 3, seed);
     const cv = canvas(S);
     const ctx = cv.getContext("2d");
-    const body = srgb(bodyHex);
-    const band = srgb(bandHex);
+    const c = srgb(hex);
     const img = ctx.createImageData(S, S);
+    for (let i = 0; i < S * S; i++) {
+      const k = 0.90 + nap[i] * 0.20;
+      img.data[i * 4] = c.r * 255 * k;
+      img.data[i * 4 + 1] = c.g * 255 * k;
+      img.data[i * 4 + 2] = c.b * 255 * k;
+      img.data[i * 4 + 3] = 255;
+    }
+    ctx.putImageData(img, 0, 0);
+    return {
+      map: texture(cv, 1, true),
+      normalMap: texture(normalMapFrom(nap, S, 0.7)),
+      roughnessMap: texture(grey(nap, S, 0.52, 0.74)),   // velvet halka chamakta hai
+    };
+  });
+}
+
+/** Buna hua band -- aada-bana dhaaga, jaise topi ke upar ka bhoora hissa. */
+export function wovenBand(hex = 0x8a6a4c, seed = 37) {
+  return cached(`woven${hex}`, () => {
+    const S = 128, THREADS = 26;
+    const fuzz = fbm(S, 40, 3, seed);
+    const h = new Float32Array(S * S);
     for (let y = 0; y < S; y++) {
       for (let x = 0; x < S; x++) {
+        // do dishaon ki lehrein ek doosre ke upar-neeche -- bunai ka pattern
+        const u = Math.sin((x / S) * Math.PI * 2 * THREADS);
+        const v = Math.sin((y / S) * Math.PI * 2 * THREADS);
+        const weave = ((x / S * THREADS | 0) + (y / S * THREADS | 0)) % 2 ? u : v;
+        h[y * S + x] = 0.5 + weave * 0.4 + fuzz[y * S + x] * 0.12;
+      }
+    }
+    const cv = canvas(S);
+    const ctx = cv.getContext("2d");
+    const c = srgb(hex);
+    const img = ctx.createImageData(S, S);
+    for (let i = 0; i < S * S; i++) {
+      const k = 0.74 + h[i] * 0.44;
+      img.data[i * 4] = c.r * 255 * k;
+      img.data[i * 4 + 1] = c.g * 255 * k;
+      img.data[i * 4 + 2] = c.b * 255 * k;
+      img.data[i * 4 + 3] = 255;
+    }
+    ctx.putImageData(img, 0, 0);
+    return {
+      map: texture(cv, 1, true),
+      normalMap: texture(normalMapFrom(h, S, 2.6)),
+      roughnessMap: texture(grey(h, S, 0.80, 0.98)),
+    };
+  });
+}
+
+/** Laal-sunehri patti jo velvet aur bunai ke beech chalti hai. */
+export function topiStripe(seed = 41) {
+  return cached("topiStripe", () => {
+    const S = 64;
+    const n = fbm(S, 30, 2, seed);
+    const cv = canvas(S);
+    const ctx = cv.getContext("2d");
+    const img = ctx.createImageData(S, S);
+    const RED = srgb(0x8e2b26), GOLD = srgb(0xd9a441);
+    for (let y = 0; y < S; y++) {
+      // uv.y neeche 0 se upar 1, aur texture flipY hai
+      const t = y / S;
+      const gold = (t > 0.20 && t < 0.30) || (t > 0.68 && t < 0.78);
+      const c = gold ? GOLD : RED;
+      for (let x = 0; x < S; x++) {
         const i = y * S + x;
-        // neeche ka ~32% velvet band hai (topi ke aage wala patta), baaki oon.
-        // Cylinder ki uv.y neeche 0 se upar 1 jaati hai aur texture flipY hai,
-        // isliye canvas ki aakhri rows topi ke *nichle* kinare pe aati hain.
-        const c = y > S * 0.68 ? band : body;
-        const k = 0.86 + wool[i] * 0.26;
+        const k = 0.88 + n[i] * 0.24;
         img.data[i * 4] = c.r * 255 * k;
         img.data[i * 4 + 1] = c.g * 255 * k;
         img.data[i * 4 + 2] = c.b * 255 * k;
@@ -654,10 +747,31 @@ export function topi(bodyHex = 0x4a5d3a, bandHex = 0x8c2f2f, seed = 29) {
       }
     }
     ctx.putImageData(img, 0, 0);
+    return { map: texture(cv, 1, true), normalMap: texture(normalMapFrom(n, S, 1.0)) };
+  });
+}
+
+/** Phundi (pompom) -- roomdaar oon ka gucha. */
+export function pompom(hex = 0x8e2b6b, seed = 53) {
+  return cached(`pompom${hex}`, () => {
+    const S = 64;
+    const n = fbm(S, 26, 3, seed);
+    const cv = canvas(S);
+    const ctx = cv.getContext("2d");
+    const c = srgb(hex);
+    const img = ctx.createImageData(S, S);
+    for (let i = 0; i < S * S; i++) {
+      const k = 0.66 + n[i] * 0.62;
+      img.data[i * 4] = c.r * 255 * k;
+      img.data[i * 4 + 1] = c.g * 255 * k;
+      img.data[i * 4 + 2] = c.b * 255 * k;
+      img.data[i * 4 + 3] = 255;
+    }
+    ctx.putImageData(img, 0, 0);
     return {
       map: texture(cv, 1, true),
-      normalMap: texture(normalMapFrom(wool, S, 1.2)),
-      roughnessMap: texture(grey(wool, S, 0.86, 0.99)),
+      normalMap: texture(normalMapFrom(n, S, 3.2)),
+      roughnessMap: texture(grey(n, S, 0.90, 1.0)),
     };
   });
 }

@@ -94,7 +94,7 @@ const MODULES = [
   "util.js", "textures.js", "geo.js", "grid.js", "geometry.js", "terrain.js", "roads.js",
   "landmarks.js", "signs.js", "quality.js", "city.js", "sky.js", "weather.js",
   "daynight.js", "input.js",
-  "vehicle.js", "player.js",
+  "vehicle.js", "human.js", "animals.js", "player.js",
   "chase-camera.js", "wanted.js", "missions.js", "dialogue.js", "hud.js",
   "audio.js", "save.js", "main.js",
 ];

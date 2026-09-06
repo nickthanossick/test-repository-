@@ -10,6 +10,8 @@ import { DayNight } from "./daynight.js";
 import * as Quality from "./quality.js";
 import { Input } from "./input.js";
 import { Player } from "./player.js";
+import { buildHuman } from "./human.js";
+import { buildDog, buildCow, animateQuadruped } from "./animals.js";
 import { Vehicle } from "./vehicle.js";
 import { ChaseCamera } from "./chase-camera.js";
 import { WantedSystem } from "./wanted.js";
@@ -301,6 +303,7 @@ async function boot() {
   // nahi). Ctrl dabaye rakh kar W se aage chalte to game beech mein band ho
   // jaata. Shift hold-to-run ke liye rehta hai.
   let runToggle = false;
+  let showcaseGroup = null;
 
   function frame(now) {
     requestAnimationFrame(frame);
@@ -379,6 +382,12 @@ async function boot() {
     sky.update(camera);
     sky.fitShadow(pos);            // shadow camera khiladi ke saath chalta hai
     dialogue.update(dt);
+    if (showcaseGroup) {
+      const ts = performance.now() / 1000;
+      for (const m of showcaseGroup.children) {
+        if (m.userData.rig?.kind) animateQuadruped(m, ts, false);
+      }
+    }
 
     // -------------------------------------------------------------- hud
     let extra = "";
@@ -439,6 +448,55 @@ async function boot() {
       return true;
     },
     freeCamOff() { debugCam = false; chase._init = false; },
+    /**
+     * Kirdaaron ki line-up -- sirf screenshot/review ke liye. Sadak pe chalne
+     * wali bheed abhi nahi hai; ye sirf models dikhata hai.
+     */
+    showcase(spacing = 1.5) {
+      // Khuli jagah dhoondo -- warna line-up kisi deewar ke andar khadi hoti hai
+      const p0 = { x: player.pos.x, z: player.pos.z };
+      outer:
+      for (let r = 0; r <= 14; r++) {
+        for (let a = 0; a < 16; a++) {
+          const th = (a / 16) * Math.PI * 2;
+          const cx = player.pos.x + Math.cos(th) * r * 6;
+          const cz = player.pos.z + Math.sin(th) * r * 6;
+          let clear = true;
+          for (let i = -4; i <= 4 && clear; i++) {
+            const tx = cx + i * spacing, tz = cz - 4.5;
+            const ty = terrain.heightAt(tx, tz);
+            if (colliders.inside(tx, ty + 1, tz, 2.2)) clear = false;
+            if (Math.abs(terrain.heightAt(tx, tz) - ty) > 1.5) clear = false;
+          }
+          if (clear) { p0.x = cx; p0.z = cz; break outer; }
+        }
+      }
+      const grp = new THREE.Group();
+      grp.name = "showcase";
+      const row = [
+        buildHuman({ build: "male", top: 0x2f5d8a, bottom: 0x3b3b42, topi: true }),
+        buildHuman({ build: "male", skin: 0xa9744a, top: 0xbb3a2a, bottom: 0x35425e, topi: true }),
+        buildHuman({ build: "female", skin: 0xc9946a, top: 0xa8324f, bottom: 0x2f3b52,
+                     dupatta: 0xd8b23f, topi: false }),
+        buildHuman({ build: "female", skin: 0xb98255, top: 0x2f7d63, bottom: 0x453a52,
+                     dupatta: 0xe08a3c, topi: false }),
+        buildHuman({ build: "elder", skin: 0xb07a52, top: 0x6f6a5c, bottom: 0x4a4438,
+                     shawl: 0x8a8574, topi: true }),
+        buildDog({ coat: 0xa97f56 }),
+        buildDog({ coat: 0x6f5a44 }),
+        buildCow({ hide: 0xb59a76 }),
+      ];
+      row.forEach((m, i) => {
+        const x = p0.x + (i - (row.length - 1) / 2) * spacing;
+        const z = p0.z - 4.5;
+        m.position.set(x, terrain.heightAt(x, z), z);
+        m.rotation.y = Math.PI;      // camera ki taraf mooh
+        grp.add(m);
+      });
+      scene.add(grp);
+      showcaseGroup = grp;
+      return { count: row.length, x: p0.x, z: p0.z, y: terrain.heightAt(p0.x, p0.z) };
+    },
     press: (code) => { input.keys.add(code); },
     release: (code) => { input.keys.delete(code); },
   };
