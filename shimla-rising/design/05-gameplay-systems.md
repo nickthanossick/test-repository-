@@ -68,9 +68,9 @@ Iske bajaye: heading + speed integrate karte hain, gaadi ko terrain pe chipka
 dete hain, aur dhalan ko seedha throttle mein feed karte hain:
 
 ```
-a  = accel * throttle
-a -= 9.81 * grade * 0.85        // gravity -- chadhai pe dheemi
-a -= speed * 0.30 + sign(speed) * 0.55   // drag + rolling
+a = accel * throttle
+a -= 9.81 * grade * 0.85 // gravity -- chadhai pe dheemi
+a -= speed * 0.30 + sign(speed) * 0.55 // drag + rolling
 cap = top_speed * (grade > 0.06 ? 0.72 : 1)
 ```
 

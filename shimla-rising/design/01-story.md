@@ -7,13 +7,13 @@ Teen act. Chaudah story missions. Hinglish.
 ## Act 1 — **Pahad ka Beta**
 *Sanjauli, Lakkar Bazaar, Cart Road*
 
-Vikram "Vicky" Thakur, 24, Sanjauli ki dhalan pe apne baap ki garage chalata hai —
+Vicky, 24, Sanjauli ki dhalan pe apne baap ki garage chalata hai —
 Thakur Motor Works, Cart Road ke kinare, ek teen-manzila ghar ke neeche jisme
 upar Amma rehti hai. Baap gaya, karza rah gaya, aur wo aadat rah gayi ki gaadi
-kaisi bhi ho, Thakur usse chala deta hai.
+kaisi bhi ho, usse chala deta hai.
 
 Kaam aata rehta hai. Chhoti delivery. Lakkar Bazaar tak parts. Ek reporter,
-Nafisa Qureshi, jo kehti hai ki uske baap ne kabhi use ek list di thi — aur ab
+Nafisa, jo kehti hai ki uske baap ne kabhi use ek list di thi — aur ab
 wo list adhoori hai. Ek ladka, Chhotu, jo Jakhoo ki chadhai pe baithta hai aur
 raat ko catchment se nikalne wale truck ginta hai.
 
@@ -31,7 +31,7 @@ hai, aur aag se apne baap ke kaagaz nikaal laata hai.
 ## Act 2 — **Mall Road ke Malik**
 *The Mall, Ridge, Chaura Maidan, Annandale, Viceregal Lodge*
 
-Rana Sahab bulaata hai. Hotel Deodar Palace, Mall Road pe — teesri manzil,
+Devinder Sahab bulaata hai. Hotel Deodar Palace, Mall Road pe — teesri manzil,
 deodar ki khidki, aur ek aadmi jo pehle afsos jataata hai phir naukri deta hai.
 
 Vicky andar chala jaata hai, aur andar se sheher alag dikhta hai. Secretariat
@@ -48,7 +48,7 @@ thi. Har baar. Wahi gaadi, wahi rasta, wahi raat — bees saal tak.
 
 Wo jaanta tha.
 
-**Missions:** `a2_m1` Rana Sahab ka Bulawa · `a2_m2` Tender Fix ·
+**Missions:** `a2_m1` Devinder Sahab ka Bulawa · `a2_m2` Tender Fix ·
 `a2_m3` Mall Road Mein Gaadi · `a2_m4` Annandale ka Helipad ·
 `a2_m5` Viceregal Lodge · `a2_m6` Bali ka Yard
 
@@ -62,7 +62,7 @@ season andar rahenge — aur us se pehle ek aakhri convoy nikalna chahta hai.
 Grip 0.55. Sadak wahi hai, par ab wo saath nahi de rahi.
 
 Aakhri raat Nafisa ke paas sab kuch hai, par bhejne ke liye jagah nahi. Sheher
-ka network Rana ke haath mein hai. Ek hi jagah bachi hai jahan se signal jaata
+ka network Devinder ke haath mein hai. Ek hi jagah bachi hai jahan se signal jaata
 hai aur jahan se poora sheher dikhta hai.
 
 Jakhoo. 2455 m. Sabse ooncha point.
@@ -70,7 +70,7 @@ Jakhoo. 2455 m. Sabse ooncha point.
 Wo chadhte hain, toofan mein. Vicky rukta hai, Nafisa bhejti hai. Subah tak har
 akhbaar mein hota hai.
 
-Rana pakda nahi jaata. Rana Shimla nahi hai — Rana sirf Shimla mein tha.
+Devinder pakda nahi jaata. Devinder Shimla nahi hai — Devinder sirf Shimla mein tha.
 
 **Missions:** `a3_m1` Catchment ke Andar · `a3_m2` Jakhoo par Aakhri Raat
 
@@ -80,7 +80,7 @@ Rana pakda nahi jaata. Rana Shimla nahi hai — Rana sirf Shimla mein tha.
 
 - **Virasat.** Jo garage tumhein mili hai usme sirf auzaar nahi hote.
 - **Dhalan.** Sheher apni hi zameen ke liye bhaari ho gaya hai — aur har saal
-  monsoon usse yaad dilaata hai.
-- **Sach ka wazan.** Kahani chhapna Rana ko nahi rokta. Phir bhi chhapna zaroori hai.
+ monsoon usse yaad dilaata hai.
+- **Sach ka wazan.** Kahani chhapna Devinder ko nahi rokta. Phir bhi chhapna zaroori hai.
 
 Aakhiri line Vicky ki hai: *"Amma ko bata dena main der se aaunga."*

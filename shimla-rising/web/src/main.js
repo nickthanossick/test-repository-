@@ -48,11 +48,13 @@ async function boot() {
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.setSize(innerWidth, innerHeight);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
-  // ACES film ke liye achha hai par shadow-side ko itna crush karta hai ki
-  // imaaraton ke bina-dhoop wale mukh bilkul kaale ho jaate the. Stylized
-  // low-poly look mein rang jaisa authored hai waisa hi chahiye, isliye
-  // tone mapping band -- intensity neeche se hi control ki hai.
-  renderer.toneMapping = THREE.NoToneMapping;
+  // ACES wapas. Round 1 mein ise band kiya tha kyunki bina texture ke shadow-side
+  // bilkul kaala ho jaata tha -- ab har surface pe albedo/normal/roughness map
+  // hai aur sky se image-based lighting aati hai, to ACES ka roll-off sahi lagta hai.
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 0.92;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   document.body.appendChild(renderer.domElement);
 
   const scene = new THREE.Scene();
@@ -77,7 +79,7 @@ async function boot() {
   scene.add(city);
 
   setProgress(0.90, "aasman aur mausam…");
-  const sky = new Sky(scene, terrain);
+  const sky = new Sky(scene, terrain, renderer);
   const weather = new Weather(scene, terrain);
   const month = new Date().getMonth() + 1;
   weather.set(Weather.forMonth(month));
@@ -327,6 +329,7 @@ async function boot() {
     missions.update(dt, { playerPos: pos, inVehicle: state.mode === "vehicle", stars: wanted.stars });
     weather.update(dt, camera);
     sky.update(camera);
+    sky.fitShadow(pos);          // shadow camera khiladi ke saath chalta hai
     dialogue.update(dt);
 
     // -------------------------------------------------------------- hud
@@ -348,7 +351,7 @@ async function boot() {
 
   // debugging ke liye -- Playwright test yahi padhta hai
   window.__shimla = {
-    ready: true, scene, camera, renderer, terrain, roads, city, player, missions, wanted,
+    ready: true, scene, camera, renderer, terrain, roads, city, player, missions, wanted, chase, sky,
     weather, state, data, get fps() { return fps; },
     get stats() { return {
       triangles: renderer.info.render.triangles,

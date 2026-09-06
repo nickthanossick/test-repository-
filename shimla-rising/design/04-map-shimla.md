@@ -76,13 +76,13 @@ Chaura Maidan Link.
 `tools/terrain/build_heightmap.py`:
 
 1. **IDW interpolation** — 45 control points se, Gaussian-tapered
-   (`w = exp(-r²/2s²) / (r² + eps²)`). Control point pe value *exact* aati hai,
-   aur output hamesha min/max ke andar rehta hai — koi ringing nahi.
+ (`w = exp(-r²/2s²) / (r² + eps²)`). Control point pe value *exact* aati hai,
+ aur output hamesha min/max ke andar rehta hai — koi ringing nahi.
 2. **Ridged multifractal** detail — har octave alag se ridge hoti hai aur agli
-   se multiply hoti hai. Yahi asli pahadon wali dendritic ridge-line deti hai.
+ se multiply hoti hai. Yahi asli pahadon wali dendritic ridge-line deti hai.
 3. **Khad carving** — nichli jagah gehri aur V-shaped.
 4. **Residual correction** — detail ne landmarks ko hilaaya hoga, to error naap
-   kar smooth correction wapas jodte hain.
+ kar smooth correction wapas jodte hain.
 
 **Landmark elevation error: mean 0.7 m** (worst: Christ Church +2.9 m).
 

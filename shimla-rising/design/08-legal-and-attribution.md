@@ -81,7 +81,7 @@ Naksha asli Shimla ka hai — Christ Church, Gaiety Theatre, Viceregal Lodge,
 Jakhoo Mandir, HPU, Vidhan Sabha, ISBT Tutikandi. Ye sarvajanik jagah hain aur
 inhe naam se dikhana theek hai.
 
-**Par sab kirdaar kalpanik hain.** Rana Sahab, Bali, DSP Ahluwalia, Nafisa,
+**Par sab kirdaar kalpanik hain.** Devinder Sahab, Bali, DSP Karan, Nafisa,
 Vicky — koi bhi asli vyakti nahi hai, aur na hi kisi asli vyakti par based hai.
 Timber-mafia aur illegal-construction ki kahani Himachal ki asli samasyaon se
 prerit hai, par isme dikhaye gaye ghatnayein, sansthaayein aur log poori tarah

@@ -41,31 +41,31 @@ Bas Node chahiye. Koi `npm install` nahi — three.js repo mein vendored hai.
 Ye sirf ek reskin nahi hai — mechanics Shimla ke asli haalat se aaye hain:
 
 - **Mall Road pe gaadi le jaana jurm hai.** Asli Shimla mein Mall pedestrian-only
-  hai. Game mein wahan gaadi ghusaate hi wanted level chadhta hai.
+ hai. Game mein wahan gaadi ghusaate hi wanted level chadhta hai.
 - **Chadhai pe stamina teen guna tez khatam hoti hai.** Ridge (2205 m) se Jakhoo
-  (2455 m) tak 1.1 km mein 250 m ki chadhai hai. Mission `a1_m5` isi pe bana hai.
+ (2455 m) tak 1.1 km mein 250 m ki chadhai hai. Mission `a1_m5` isi pe bana hai.
 - **Barf pe grip 0.55 rah jaati hai.** Act 3 ("Barfeela Toofan") December mein
-  hota hai, aur mausam khud ek dushman hai.
+ hota hai, aur mausam khud ek dushman hai.
 - **Toy train** — Kalka–Shimla narrow gauge (UNESCO, 102 tunnel, 864 pul) map
-  mein hai, aur missions mein bhi.
+ mein hai, aur missions mein bhi.
 
 ---
 
 ## Repo ka structure
 
 ```
-data/          ← SHARED. Dono engines yahi padhte hain.
-               georeference · heightmap · roads · districts · pois
-               missions · dialogue · characters · vehicles
-web/           Three.js browser game (no build step)
-godot/         Godot 4.7 project (.tscn + .gd, sab text)
+data/ ← SHARED. Dono engines yahi padhte hain.
+ georeference · heightmap · roads · districts · pois
+ missions · dialogue · characters · vehicles
+web/ Three.js browser game (no build step)
+godot/ Godot 4.7 project (.tscn + .gd, sab text)
 tools/
-  terrain/     landmark elevations se heightmap generator
-  shimla_pipeline/  asli Copernicus DEM + OpenStreetMap → data/
-  blender/     procedural imaaratein aur props → .glb
-  tests/       pytest (geo math, data integrity, Godot structure)
-design/        vision, kahani, kirdaar, missions, naksha, art, audio, legal
-docs/          SETUP · PIPELINE · ENGINE-CHOICE · ROADMAP
+ terrain/ landmark elevations se heightmap generator
+ shimla_pipeline/ asli Copernicus DEM + OpenStreetMap → data/
+ blender/ procedural imaaratein aur props → .glb
+ tests/ pytest (geo math, data integrity, Godot structure)
+design/ vision, kahani, kirdaar, missions, naksha, art, audio, legal
+docs/ SETUP · PIPELINE · ENGINE-CHOICE · ROADMAP
 ```
 
 **Ek hi data layer** poore project ka core idea hai. Kahani `data/missions.json`
@@ -101,7 +101,7 @@ Unreal Engine ki jagah Godot hai. Wajah: MIT license, download sirf ~120 MB
 sakta hai. Poori tulna: [docs/ENGINE-CHOICE.md](docs/ENGINE-CHOICE.md)
 
 ```bash
-python tools/sync_godot_data.py     # data/ → godot/data/
+python tools/sync_godot_data.py # data/ → godot/data/
 # godotengine.org se Godot 4.7 download karo, godot/project.godot kholo, F5
 ```
 
@@ -110,9 +110,9 @@ python tools/sync_godot_data.py     # data/ → godot/data/
 ## Testing
 
 ```bash
-python -m pytest tools/tests -q     # 72 tests: geo math, data integrity, Godot structure
+python -m pytest tools/tests -q # 72 tests: geo math, data integrity, Godot structure
 python -m ruff check tools/
-node web/serve.mjs & node tools/tests/smoke_web.mjs   # headless browser smoke test
+node web/serve.mjs & node tools/tests/smoke_web.mjs # headless browser smoke test
 ```
 
 ---

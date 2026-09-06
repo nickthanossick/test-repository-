@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import * as TEX from "./textures.js";
 
 /**
  * Arcade gaadi.
@@ -114,69 +115,157 @@ export class Vehicle {
 
     const w = this.mesh.userData.wheels;
     if (w) {
-      const spin = this.speed * 0.55;
-      for (const wh of w) {
-        wh.rotation.x += spin * 0.016;
-        if (wh.userData.steers) wh.rotation.y = this.steer * 0.5;
+      const spin = this.speed * 0.045;
+      for (const hub of w) {
+        if (hub.userData.steers) hub.rotation.y = this.steer * 0.42;
+        for (const part of hub.children) part.rotation.x += spin;
       }
     }
   }
 }
 
+/**
+ * Gaadi ka model.
+ *
+ * Pehle ye do box aur chaar cylinder tha. Ab: chamfered body (teekhe kone
+ * hataakar), alag greenhouse (sheeshe), asli tyre + rim, headlight/taillight
+ * (emissive), bumper, aur number plate. Paint clear-coat jaisa hai.
+ */
 function buildBody(spec) {
   const g = new THREE.Group();
   const [w, h, l] = spec.body;
-  const col = new THREE.Color(spec.color);
-  const mat = new THREE.MeshLambertMaterial({ color: col, flatShading: true });
-  const dark = new THREE.MeshLambertMaterial({ color: 0x22242a, flatShading: true });
-  const glass = new THREE.MeshLambertMaterial({ color: 0x2b3a4a, flatShading: true });
 
-  const bodyH = h * 0.55;
-  const body = new THREE.Mesh(new THREE.BoxGeometry(w, bodyH, l), mat);
+  const paintMat = TEX.standard(TEX.carPaint(spec.color), { roughness: 0.3, metalness: 0.55 });
+  const glassMat = new THREE.MeshStandardMaterial({
+    color: 0x18242e, roughness: 0.06, metalness: 0.1,
+    transparent: true, opacity: 0.72,
+  });
+  const trimMat = new THREE.MeshStandardMaterial({ color: 0x1b1e22, roughness: 0.55, metalness: 0.35 });
+  const chromeMat = new THREE.MeshStandardMaterial({ color: 0xb9bec4, roughness: 0.22, metalness: 0.9 });
+  const rubberMat = new THREE.MeshStandardMaterial({ color: 0x14161a, roughness: 0.95 });
+  const rimMat = new THREE.MeshStandardMaterial({ color: 0x9aa0a6, roughness: 0.3, metalness: 0.85 });
+
+  const add = (mesh, parent = g) => {
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    parent.add(mesh);
+    return mesh;
+  };
+
+  const isBike = spec.class === "bike";
+  const isBig = spec.class === "bus" || spec.class === "truck";
+  const bodyH = h * (isBig ? 0.68 : 0.5);
+
+  // --- body: chamfered box, teekhe kone nahi ---------------------------
+  const body = add(new THREE.Mesh(chamferBox(w, bodyH, l, Math.min(0.16, w * 0.12)), paintMat));
   body.position.y = bodyH / 2;
-  g.add(body);
 
-  const cabL = spec.class === "bus" || spec.class === "truck" ? l * 0.82 : l * 0.46;
-  const cab = new THREE.Mesh(new THREE.BoxGeometry(w * 0.9, h * 0.42, cabL), glass);
-  cab.position.set(0, bodyH + h * 0.21, spec.class === "bike" ? 0 : -l * 0.04);
-  g.add(cab);
+  if (!isBike) {
+    // bumper + chrome patti
+    for (const dz of [l / 2 - 0.06, -l / 2 + 0.06]) {
+      const b = add(new THREE.Mesh(new THREE.BoxGeometry(w * 0.96, bodyH * 0.24, 0.14), trimMat));
+      b.position.set(0, bodyH * 0.3, dz);
+    }
+    const strip = add(new THREE.Mesh(new THREE.BoxGeometry(w * 1.005, 0.035, l * 0.82), chromeMat));
+    strip.position.y = bodyH * 0.82;
+  }
+
+  // --- greenhouse (sheeshe) ---------------------------------------------
+  const cabL = isBig ? l * 0.82 : l * 0.5;
+  const cabH = h * (isBig ? 0.42 : 0.4);
+  const cab = add(new THREE.Mesh(
+    chamferBox(w * 0.87, cabH, cabL, Math.min(0.12, w * 0.1)), glassMat));
+  cab.position.set(0, bodyH + cabH / 2 - 0.02, isBike ? 0 : -l * 0.05);
+  const roof = add(new THREE.Mesh(new THREE.BoxGeometry(w * 0.80, 0.06, cabL * 0.86), paintMat));
+  roof.position.set(0, bodyH + cabH - 0.01, isBike ? 0 : -l * 0.05);
+
+  // --- lights ------------------------------------------------------------
+  if (!isBike) {
+    const headMat = new THREE.MeshStandardMaterial({
+      color: 0xfff3d0, emissive: 0xffe9b0, emissiveIntensity: 0.9, roughness: 0.2 });
+    const tailMat = new THREE.MeshStandardMaterial({
+      color: 0x7a1410, emissive: 0xd6301f, emissiveIntensity: 0.7, roughness: 0.3 });
+    for (const dx of [-1, 1]) {
+      const hl = add(new THREE.Mesh(new THREE.BoxGeometry(w * 0.2, bodyH * 0.2, 0.06), headMat));
+      hl.position.set(dx * w * 0.32, bodyH * 0.62, -l / 2 - 0.01);
+      const tl = add(new THREE.Mesh(new THREE.BoxGeometry(w * 0.17, bodyH * 0.16, 0.05), tailMat));
+      tl.position.set(dx * w * 0.34, bodyH * 0.66, l / 2 + 0.01);
+    }
+    // HP number plate
+    const plate = add(new THREE.Mesh(new THREE.BoxGeometry(w * 0.34, 0.1, 0.02),
+      new THREE.MeshStandardMaterial({ color: 0xe9e6dd, roughness: 0.7 })));
+    plate.position.set(0, bodyH * 0.34, l / 2 + 0.05);
+  }
 
   if (spec.roof_sign) {
-    const s = new THREE.Mesh(new THREE.BoxGeometry(w * 0.42, 0.26, 0.5),
-      new THREE.MeshLambertMaterial({ color: 0x1b1b1b }));
-    s.position.y = bodyH + h * 0.45;
-    g.add(s);
+    const sign = add(new THREE.Mesh(new THREE.BoxGeometry(w * 0.4, 0.2, 0.42),
+      new THREE.MeshStandardMaterial({ color: 0xf2e6c8, emissive: 0x554626,
+        emissiveIntensity: 0.4, roughness: 0.6 })));
+    sign.position.y = bodyH + cabH + 0.09;
   }
   if (spec.siren) {
-    const s = new THREE.Mesh(new THREE.BoxGeometry(w * 0.6, 0.2, 0.34),
-      new THREE.MeshLambertMaterial({ color: 0x1b1b1b }));
-    s.position.y = bodyH + h * 0.45;
-    g.add(s);
-    for (const [dx, hex] of [[-0.28, 0xff3b30], [0.28, 0x2f7de0]]) {
-      const b = new THREE.Mesh(new THREE.BoxGeometry(w * 0.22, 0.16, 0.3),
-        new THREE.MeshBasicMaterial({ color: hex }));
-      b.position.set(dx * w, bodyH + h * 0.53, 0);
+    const bar = add(new THREE.Mesh(new THREE.BoxGeometry(w * 0.62, 0.09, 0.24), trimMat));
+    bar.position.y = bodyH + cabH + 0.07;
+    for (const [dx, hex] of [[-0.24, 0xff3b30], [0.24, 0x2f7de0]]) {
+      const b = new THREE.Mesh(new THREE.BoxGeometry(w * 0.24, 0.13, 0.2),
+        new THREE.MeshStandardMaterial({ color: hex, emissive: hex,
+          emissiveIntensity: 1.6, roughness: 0.35 }));
+      b.position.set(dx * w, bodyH + cabH + 0.14, 0);
       g.add(b);
       (g.userData.beacons ||= []).push(b);
     }
   }
 
-  // pahiye
+  // --- pahiye: tyre + rim ------------------------------------------------
   const wheels = [];
-  const isBike = spec.class === "bike";
-  const rad = Math.min(0.52, h * 0.26);
-  const geo = new THREE.CylinderGeometry(rad, rad, isBike ? 0.16 : 0.28, 8);
-  geo.rotateZ(Math.PI / 2);
+  const rad = Math.min(isBig ? 0.55 : 0.36, h * 0.26);
+  const width = isBike ? 0.14 : 0.24;
+  const tyreGeo = new THREE.CylinderGeometry(rad, rad, width, 18, 1);
+  tyreGeo.rotateZ(Math.PI / 2);
+  const rimGeo = new THREE.CylinderGeometry(rad * 0.58, rad * 0.58, width * 1.04, 10, 1);
+  rimGeo.rotateZ(Math.PI / 2);
+
   const axles = isBike ? [[0, l * 0.34], [0, -l * 0.34]]
     : [[-w / 2, l * 0.32], [w / 2, l * 0.32], [-w / 2, -l * 0.32], [w / 2, -l * 0.32]];
   for (const [dx, dz] of axles) {
-    const m = new THREE.Mesh(geo, dark);
-    m.position.set(dx * 0.92, rad, dz);
-    m.userData.steers = dz > 0;
-    g.add(m);
-    wheels.push(m);
+    const hub = new THREE.Group();
+    hub.position.set(dx * 0.94, rad, dz);
+    hub.userData.steers = dz < 0;          // aage ke pahiye (-Z forward hai)
+    add(new THREE.Mesh(tyreGeo, rubberMat), hub);
+    add(new THREE.Mesh(rimGeo, rimMat), hub);
+    g.add(hub);
+    wheels.push(hub);
   }
   g.userData.wheels = wheels;
+  return g;
+}
+
+/**
+ * Chamfered box -- teekhe kinaron ko halka kaat deta hai.
+ *
+ * Asli gaadi ka koi kinara bilkul teekha nahi hota; sharp box turant "programmer
+ * art" jaisa dikhta hai. BoxGeometry ke vertices ko andar ki taraf khiskana
+ * sabse sasta tareeka hai, bina kisi bevel modifier ke.
+ */
+function chamferBox(w, h, d, c) {
+  const g = new THREE.BoxGeometry(w, h, d, 2, 2, 2);
+  const p = g.attributes.position;
+  const hx = w / 2, hy = h / 2, hz = d / 2;
+  const v = new THREE.Vector3();
+  for (let i = 0; i < p.count; i++) {
+    v.fromBufferAttribute(p, i);
+    const ex = Math.abs(Math.abs(v.x) - hx) < 1e-4;
+    const ey = Math.abs(Math.abs(v.y) - hy) < 1e-4;
+    const ez = Math.abs(Math.abs(v.z) - hz) < 1e-4;
+    const edges = (ex ? 1 : 0) + (ey ? 1 : 0) + (ez ? 1 : 0);
+    if (edges >= 2) {
+      if (ex) v.x -= Math.sign(v.x) * c;
+      if (ey) v.y -= Math.sign(v.y) * c * 0.7;
+      if (ez) v.z -= Math.sign(v.z) * c;
+      p.setXYZ(i, v.x, v.y, v.z);
+    }
+  }
+  g.computeVertexNormals();
   return g;
 }
 

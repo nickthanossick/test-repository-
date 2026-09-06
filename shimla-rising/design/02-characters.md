@@ -4,7 +4,7 @@
 
 ---
 
-## Vikram "Vicky" Thakur — khiladi
+## Vicky — khiladi
 24 saal. Sanjauli. Mechanic, aur zaroorat pade to taxi driver.
 
 Baap ki garage Cart Road pe hai — thi. Gusse mein tez, dil se seedha, aur us tarah
@@ -20,11 +20,11 @@ bolti hai wo sach hota hai. Vicky ka safehouse uska ghar hai — save wahin hota
 
 > "Baap hota to khush hota." — `a1_m1:end`
 
-## Nafisa Qureshi — sahyogi
+## Nafisa — sahyogi
 *Pahari Awaaz* ki reporter, Lakkar Bazaar ke upar ek-kamre ka daftar.
 
 Vicky pe bharosa nahi karti, aur karne ka dikhawa bhi nahi karti. Use saboot
-chahiye, kahani nahi. Yahi usse Rana se alag banata hai — Rana sabko wo bolta
+chahiye, kahani nahi. Yahi usse Devinder se alag banata hai — Devinder sabko wo bolta
 hai jo wo sunna chahte hain.
 
 ## Chhotu — sahyogi
@@ -36,27 +36,27 @@ phir Act 3 ka sabse zaroori aadmi.
 
 > "Bandar mujhe pehchante hain. Aadmi nahi pehchante. Dono theek hai."
 
-## Gurmeet "Guru" Singh — sahyogi
+## Guru — sahyogi
 HRTC bus driver, 22 saal se. ISBT Tutikandi ke peeche dhaba.
 
 Har mod jaanta hai — literally. Getaway ke liye isse behtar koi nahi. Guru wo
 kirdaar hai jo Vicky ko register padh kar bataata hai, aur usse hazam karne ka
 waqt bhi deta hai.
 
-## Devinder "Rana Sahab" Rana — antagonist
+## Devinder "Devinder Sahab" Devinder — antagonist
 Hotel Deodar Palace, Mall Road. Zameen, timber, tender.
 
 Kabhi dhamki nahi deta. Har baar afsos jataata hai, phir madad karta hai, phir
 tumhein apna hissa bana leta hai. Wo villain nahi lagta — aur kahani ka point
 yahi hai. Wo pakda nahi jaata, kyunki wo intezaam hai, aadmi nahi.
 
-## Contractor Bali — antagonist
+## Bali — antagonist
 Dhalli mein yard: cement, sariya, aur bahut saara bina-kaagaz ka deodar.
 
-Rana ka haath. Bali ko malaal hai, aur wahi usse khatarnak banata hai — wo
+Devinder ka haath. Bali ko malaal hai, aur wahi usse khatarnak banata hai — wo
 jaanta hai ki wo kya kar raha hai.
 
-## DSP Ahluwalia — antagonist
-Vardi mein Rana ka aadmi. Police HQ, Chaura Maidan.
+## DSP Karan — antagonist
+Vardi mein Devinder ka aadmi. Police HQ, Chaura Maidan.
 
-FIR likhta hai. Bas Rana ke ishaare pe.
+FIR likhta hai. Bas Devinder ke ishaare pe.

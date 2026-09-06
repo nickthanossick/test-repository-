@@ -28,7 +28,7 @@ implement hai, aur naya type add karne se pehle dono mein aana chahiye.
 | `a1_m4` | Toy Train ka Maal | Railway Station | toy train, cargo |
 | `a1_m5` | Chhotu ki Nazar | Jakhoo | **slope stamina**, chhupna |
 | `a1_m6` | Garage Jal Gayi | Sanjauli | **pehla evade** — act climax |
-| `a2_m1` | Rana Sahab ka Bulawa | Mall Road | Mall pedestrian-only hai |
+| `a2_m1` | Devinder Sahab ka Bulawa | Mall Road | Mall pedestrian-only hai |
 | `a2_m2` | Tender Fix | Secretariat | high police density |
 | `a2_m3` | Mall Road Mein Gaadi | The Mall | **jaanboojh kar wanted level** |
 | `a2_m4` | Annandale ka Helipad | Annandale | survive + pickups |
@@ -39,7 +39,7 @@ implement hai, aur naya type add karne se pehle dono mein aana chahiye.
 
 `a2_m3` **Mall Road Mein Gaadi** design ka centrepiece hai: mission tumse
 jaanboojh kar wo jurm karwaata hai jo asli Shimla mein sabse pehchana hai.
-Rana khud nahi jaata — wo tumhein bhejta hai. Kahani aur mechanic ek hi cheez hai.
+Devinder khud nahi jaata — wo tumhein bhejta hai. Kahani aur mechanic ek hi cheez hai.
 
 ## Side missions
 

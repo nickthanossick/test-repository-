@@ -1,28 +1,70 @@
 {
   "characters": [
-    { "id": "vicky",   "name": "Vikram 'Vicky' Thakur", "role": "player", "age": 24, "home": "vicky_home",
+    {
+      "id": "vicky",
+      "name": "Vicky",
+      "role": "player",
+      "age": 24,
+      "home": "vicky_home",
       "desc": "Sanjauli ka mechanic. Baap ki garage sambhaalta hai, taxi bhi chala leta hai. Gusse mein tez, dil se seedha.",
-      "color": "#c8442e" },
-    { "id": "amma",    "name": "Amma", "role": "family", "home": "vicky_home",
+      "color": "#c8442e"
+    },
+    {
+      "id": "amma",
+      "name": "Amma",
+      "role": "family",
+      "home": "vicky_home",
       "desc": "Vicky ki maa. Sanjauli ki teen-manzila ke upar wale kamre mein. Sach sabse pehle wahi bolti hai.",
-      "color": "#d8b26a" },
-    { "id": "nafisa",  "name": "Nafisa Qureshi", "role": "ally", "home": "nafisa_office",
+      "color": "#d8b26a"
+    },
+    {
+      "id": "nafisa",
+      "name": "Nafisa",
+      "role": "ally",
+      "home": "nafisa_office",
       "desc": "'Pahari Awaaz' ki reporter. Lakkar Bazaar ke upar ek-kamre ka daftar. Saboot maangti hai, kahani nahi.",
-      "color": "#2f7d6b" },
-    { "id": "chhotu",  "name": "Chhotu", "role": "ally", "age": 15, "home": "chhotu_perch",
+      "color": "#2f7d6b"
+    },
+    {
+      "id": "chhotu",
+      "name": "Chhotu",
+      "role": "ally",
+      "age": 15,
+      "home": "chhotu_perch",
       "desc": "Jakhoo ki chadhai pe rehta hai. Bandaron se baat karta hai, aur poore Mall pe nazar rakhta hai.",
-      "color": "#e0a44c" },
-    { "id": "guru",    "name": "Gurmeet 'Guru' Singh", "role": "ally", "home": "guru_dhaba",
+      "color": "#e0a44c"
+    },
+    {
+      "id": "guru",
+      "name": "Guru",
+      "role": "ally",
+      "home": "guru_dhaba",
       "desc": "HRTC bus driver, 22 saal se. Har mod jaanta hai. Getaway ke liye isse behtar koi nahi.",
-      "color": "#4a6fa5" },
-    { "id": "rana",    "name": "Devinder 'Rana Sahab' Rana", "role": "antagonist", "home": "rana_hotel",
+      "color": "#4a6fa5"
+    },
+    {
+      "id": "rana",
+      "name": "Devinder",
+      "role": "antagonist",
+      "home": "rana_hotel",
       "desc": "Hotel Deodar Palace ka maalik. Mall Road pe darbar lagta hai. Zameen, timber, tender - sab uska.",
-      "color": "#7a2331" },
-    { "id": "bali",    "name": "Contractor Bali", "role": "antagonist", "home": "bali_yard",
-      "desc": "Rana ka haath. Dhalli mein yard, cement aur sariya - aur bahut saara bina-kaagaz ka deodar.",
-      "color": "#5c5240" },
-    { "id": "ahluwalia","name": "DSP Ahluwalia", "role": "antagonist", "home": "police_hq",
-      "desc": "Vardi mein Rana ka aadmi. FIR likhta hai to bhi Rana ke ishaare pe.",
-      "color": "#26374f" }
+      "color": "#7a2331"
+    },
+    {
+      "id": "bali",
+      "name": "Bali",
+      "role": "antagonist",
+      "home": "bali_yard",
+      "desc": "Devinder ka haath. Dhalli mein yard, cement aur sariya - aur bahut saara bina-kaagaz ka deodar.",
+      "color": "#5c5240"
+    },
+    {
+      "id": "ahluwalia",
+      "name": "Karan",
+      "role": "antagonist",
+      "home": "police_hq",
+      "desc": "Vardi mein Devinder ka aadmi. FIR likhta hai to bhi uske ishaare pe.",
+      "color": "#26374f"
+    }
   ]
 }
