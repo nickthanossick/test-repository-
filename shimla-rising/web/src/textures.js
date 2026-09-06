@@ -573,8 +573,10 @@ export function topi(bodyHex = 0x4a5d3a, bandHex = 0x8c2f2f, seed = 29) {
     for (let y = 0; y < S; y++) {
       for (let x = 0; x < S; x++) {
         const i = y * S + x;
-        // upar ka ~30% band hai (topi ke aage wala patta), baaki oon
-        const c = y < S * 0.3 ? band : body;
+        // neeche ka ~32% velvet band hai (topi ke aage wala patta), baaki oon.
+        // Cylinder ki uv.y neeche 0 se upar 1 jaati hai aur texture flipY hai,
+        // isliye canvas ki aakhri rows topi ke *nichle* kinare pe aati hain.
+        const c = y > S * 0.68 ? band : body;
         const k = 0.86 + wool[i] * 0.26;
         img.data[i * 4] = c.r * 255 * k;
         img.data[i * 4 + 1] = c.g * 255 * k;

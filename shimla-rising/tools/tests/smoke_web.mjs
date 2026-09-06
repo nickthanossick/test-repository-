@@ -16,7 +16,10 @@ page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
 page.on("pageerror", (e) => pageErrors.push(e.message));
 
 await page.goto(URL, { waitUntil: "domcontentloaded", timeout: 60000 });
-await page.waitForFunction(() => window.__shimla?.ready === true, { timeout: 180000 });
+// waitForFunction(fn, arg, options) -- teesra argument hi options hai.
+// Dusre pe dene se timeout chup-chaap default 30 s reh jaata tha, jo
+// software rendering (SwiftShader) pe boot ke liye kaafi nahi hai.
+await page.waitForFunction(() => window.__shimla?.ready === true, null, { timeout: 300000 });
 await page.waitForTimeout(2000);
 
 const s = await page.evaluate(() => window.__shimla.stats);

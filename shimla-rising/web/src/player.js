@@ -148,14 +148,18 @@ function buildAvatar() {
   head.scale.set(1, 1.16, 0.94);
   head.position.y = 1.60;
   // baal -- upar aur peeche ka hissa dhak dete hain
-  const hair = add(new THREE.Mesh(new THREE.SphereGeometry(0.121, 18, 14,
-    0, Math.PI * 2, 0, Math.PI * 0.56), hairMat));
+  // Hairline aankhon se upar rukni chahiye: face texture mein aankhen
+  // phi = 0.44*PI pe hain, isliye baal 0.38*PI pe khatam karte hain.
+  const hair = add(new THREE.Mesh(new THREE.SphereGeometry(0.119, 18, 14,
+    0, Math.PI * 2, 0, Math.PI * 0.38), hairMat));
   hair.scale.set(1, 1.14, 0.98);
   hair.position.y = 1.605;
-  const nape = add(new THREE.Mesh(new THREE.SphereGeometry(0.113, 14, 10,
-    Math.PI * 0.25, Math.PI * 0.5, Math.PI * 0.30, Math.PI * 0.42), hairMat));
-  nape.position.set(0, 1.585, 0.008);
-  nape.scale.set(1, 1.1, 1.02);
+  // Sir ke peeche ke baal. Theta-range ke bajaye ek alag chhota gola --
+  // iska sabse aage ka bindu z = -0.017 pe hai aur chehra z = -0.108 pe,
+  // isliye ye kabhi gaal pe nahi aa sakta.
+  const nape = add(new THREE.Mesh(new THREE.SphereGeometry(0.100, 16, 12), hairMat));
+  nape.position.set(0, 1.578, 0.055);
+  nape.scale.set(1.04, 0.94, 0.72);
 
   add(new THREE.Mesh(new THREE.CylinderGeometry(0.052, 0.062, 0.09, 10), skinMat))
     .position.y = 1.487;
@@ -163,16 +167,31 @@ function buildAvatar() {
   // --- Himachali topi ----------------------------------------------------
   // Chapti gol wool ki topi, aur aage ek alag rang ka velvet band. Yahi ek
   // cheez poore sheher ko turant Himachal jaisa bana deti hai.
-  const topiMat = TEX.standard(TEX.topi(0x4a5d3a, 0x8c2f2f), { roughness: 0.95 });
-  const bandMat = new THREE.MeshStandardMaterial({ color: 0x8c2f2f, roughness: 0.72 });
-  const cap = add(new THREE.Mesh(new THREE.CylinderGeometry(0.132, 0.126, 0.105, 20), topiMat));
-  cap.position.y = 1.735;
-  const brim = add(new THREE.Mesh(new THREE.CylinderGeometry(0.142, 0.142, 0.022, 20), topiMat));
-  brim.position.y = 1.686;
-  // aage ka velvet patta -- topi ki pehchan
-  const band = add(new THREE.Mesh(new THREE.CylinderGeometry(0.134, 0.129, 0.062, 20, 1, true,
-    -0.62, 1.24), bandMat));
-  band.position.y = 1.716;
+  // Bushehri topi chapti hai -- lagbhag 6 cm oonchi, sapaat chhat, aur base pe
+  // velvet ka band jo *aage* chauda hota hai. Khopdi ka sira y = 1.733 pe hai,
+  // isliye topi 1.690 se shuru hoti hai taaki sir pe baithi lage, tairti nahi.
+  const topiMat = TEX.standard(TEX.topi(0x59684a, 0x7e2b2b), { roughness: 0.95 });
+  const bandMat = new THREE.MeshStandardMaterial({ color: 0x7e2b2b, roughness: 0.68 });
+
+  const topi = new THREE.Group();
+  topi.position.y = 1.60;              // pivot sir ke kendra pe
+  topi.rotation.x = -0.05;             // halka aage jhuka hua, jaise pehna jaata hai
+  g.add(topi);
+  const onTopi = (m) => add(m, topi);
+
+  const cap = onTopi(new THREE.Mesh(
+    new THREE.CylinderGeometry(0.133, 0.141, 0.058, 24), topiMat));
+  cap.position.y = 0.119;              // 1.719 absolute -- base 1.690, sira 1.748
+  // base ka lipta hua kinara
+  const rim = onTopi(new THREE.Mesh(
+    new THREE.CylinderGeometry(0.144, 0.141, 0.017, 24), bandMat));
+  rim.position.y = 0.0955;             // 1.6955 absolute
+  // aage ka chauda velvet patta -- topi ki pehchan.
+  // CylinderGeometry mein theta 0 = +Z, aur kirdaar ka aage -Z hai.
+  const flap = onTopi(new THREE.Mesh(
+    new THREE.CylinderGeometry(0.1435, 0.1455, 0.040, 20, 1, true,
+      Math.PI - 0.78, 1.56), bandMat));
+  flap.position.y = 0.106;             // 1.706 absolute
 
   // --- dhad --------------------------------------------------------------
   const torso = add(new THREE.Mesh(new THREE.CapsuleGeometry(0.155, 0.30, 6, 14), jacketMat));
