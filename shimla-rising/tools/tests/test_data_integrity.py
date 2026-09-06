@@ -134,3 +134,34 @@ def test_vehicles_have_shapes(bundle):
     SHAPES = {"tallboy", "classic", "hatch", "offroad", "bus", "truck", "bike"}
     bad = [v["id"] for v in bundle["vehicles"]["vehicles"] if v.get("shape") not in SHAPES]
     assert bad == []
+
+def test_sanjauli_geography_nikhil_asked_for():
+    """Sanjauli Chowk ek chauraha hona chahiye, aur IGMC/Dhalli maujood."""
+    roads = load("roads.json")
+    pois = {p["id"] for p in load("pois.json")["pois"]}
+    for need in ("igmc", "dhalli_chowk", "sanjauli_bus_stop"):
+        assert need in pois, f"{need} POI nahi mila"
+
+    chowk = [31.1082, 77.1927]
+    arms = [r["id"] for r in roads["roads"]
+            if r["points"][0] == chowk or r["points"][-1] == chowk]
+    assert len(arms) >= 4, f"Sanjauli Chowk pe sirf {len(arms)} sadak: {arms}"
+
+
+def test_roads_are_wide_enough():
+    """Nikhil ne wide sadkein maangi thi."""
+    t = load("roads.json")["road_types"]
+    assert t["arterial"]["width_m"] >= 12
+    assert t["street"]["width_m"] >= 8
+    assert t["lane"]["width_m"] >= 4.5
+
+
+def test_shops_have_the_names_nikhil_named():
+    shops = load("shops.json")
+    names = {s["name"] for s in shops["shops"]}
+    for need in ("NEGI TEA STALL", "TRIPTI BAKERY", "VIVI BANK", "ATM"):
+        assert need in names, f"{need} dukan nahi mili"
+    assert len(shops["shops"]) >= 30, "busy bazaar ke liye aur naam chahiye"
+    for s in shops["shops"]:
+        assert s["kind"] in shops["kinds"], f"{s['name']}: kism {s['kind']} defined nahi"
+        assert len(s["name"]) <= 24, f"{s['name']} board pe fit nahi hoga"

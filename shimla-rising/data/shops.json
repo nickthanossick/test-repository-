@@ -1,0 +1,317 @@
+{
+  "_comment": "Sanjauli Chowk se Dhalli tak ke bazaar ki dukanein. Naam data mein hain, code mein nahi -- bazaar.js corridor ke saath in par cycle karta hai. Chaar naam Nikhil ne diye (Negi Tea Stall, Tripti Bakery, Vivi Bank, ATM); baaki wo kism hain jo Shimla ke kisi bhi bazaar mein milti hain.",
+  "kinds": {
+    "dhaba": {
+      "awning": "#8c3b2e",
+      "counter": "steel",
+      "glow": "#ffb45c"
+    },
+    "bakery": {
+      "awning": "#c98a2e",
+      "counter": "glass",
+      "glow": "#ffd08a"
+    },
+    "bank": {
+      "awning": "#1d4f8c",
+      "counter": "glass",
+      "glow": "#cfe0ff"
+    },
+    "atm": {
+      "awning": "#2f6b4a",
+      "counter": "glass",
+      "glow": "#d8ffe8"
+    },
+    "general": {
+      "awning": "#3f6b47",
+      "counter": "crates",
+      "glow": "#ffe0a8"
+    },
+    "medical": {
+      "awning": "#2f7d63",
+      "counter": "glass",
+      "glow": "#dfffe8"
+    },
+    "mobile": {
+      "awning": "#2f5d8a",
+      "counter": "glass",
+      "glow": "#cfe8ff"
+    },
+    "sweets": {
+      "awning": "#b8532a",
+      "counter": "glass",
+      "glow": "#ffcf8a"
+    },
+    "cloth": {
+      "awning": "#7a3b6b",
+      "counter": "cloth",
+      "glow": "#ffd8f0"
+    },
+    "hardware": {
+      "awning": "#6b6b70",
+      "counter": "crates",
+      "glow": "#e8e0d0"
+    },
+    "sabzi": {
+      "awning": "#4a7d2f",
+      "counter": "crates",
+      "glow": "#e8ffcf"
+    },
+    "photocopy": {
+      "awning": "#4a4a8c",
+      "counter": "glass",
+      "glow": "#dcdcff"
+    },
+    "salon": {
+      "awning": "#a8324f",
+      "counter": "glass",
+      "glow": "#ffd0dc"
+    },
+    "books": {
+      "awning": "#8a6a2e",
+      "counter": "crates",
+      "glow": "#ffe8bc"
+    },
+    "meat": {
+      "awning": "#8c2f2f",
+      "counter": "steel",
+      "glow": "#ffc0c0"
+    },
+    "jewel": {
+      "awning": "#8a6a1e",
+      "counter": "glass",
+      "glow": "#ffe8a0"
+    }
+  },
+  "shops": [
+    {
+      "name": "NEGI TEA STALL",
+      "sub": "Chai · Samosa · Bun",
+      "kind": "dhaba"
+    },
+    {
+      "name": "TRIPTI BAKERY",
+      "sub": "Fresh Cakes & Patties",
+      "kind": "bakery"
+    },
+    {
+      "name": "VIVI BANK",
+      "sub": "Sanjauli Branch",
+      "kind": "bank"
+    },
+    {
+      "name": "ATM",
+      "sub": "24 Hours",
+      "kind": "atm"
+    },
+    {
+      "name": "HIMALAYA STORES",
+      "sub": "General Merchant",
+      "kind": "general"
+    },
+    {
+      "name": "THAKUR MEDICOS",
+      "sub": "Chemist & Druggist",
+      "kind": "medical"
+    },
+    {
+      "name": "SHARMA MOBILE POINT",
+      "sub": "Recharge · Repair",
+      "kind": "mobile"
+    },
+    {
+      "name": "KRISHNA SWEETS",
+      "sub": "Mithai & Namkeen",
+      "kind": "sweets"
+    },
+    {
+      "name": "VERMA CLOTH HOUSE",
+      "sub": "Readymade Garments",
+      "kind": "cloth"
+    },
+    {
+      "name": "NEW PUNJAB DHABA",
+      "sub": "Veg · Non-Veg",
+      "kind": "dhaba"
+    },
+    {
+      "name": "SANJAULI HARDWARE",
+      "sub": "Paint · Sanitary",
+      "kind": "hardware"
+    },
+    {
+      "name": "CHAUHAN VEGETABLES",
+      "sub": "Sabzi · Phal",
+      "kind": "sabzi"
+    },
+    {
+      "name": "SHIMLA PHOTOSTAT",
+      "sub": "Xerox · Lamination",
+      "kind": "photocopy"
+    },
+    {
+      "name": "GUPTA KIRANA STORE",
+      "sub": "Ration & Dairy",
+      "kind": "general"
+    },
+    {
+      "name": "STYLE POINT SALOON",
+      "sub": "Hair & Beauty",
+      "kind": "salon"
+    },
+    {
+      "name": "PAHADI WOOLLENS",
+      "sub": "Shawl · Topi · Muffler",
+      "kind": "cloth"
+    },
+    {
+      "name": "BHARDWAJ BOOK DEPOT",
+      "sub": "Books & Stationery",
+      "kind": "books"
+    },
+    {
+      "name": "RANA ELECTRICALS",
+      "sub": "Wiring · Fittings",
+      "kind": "hardware"
+    },
+    {
+      "name": "ANNAPURNA BHOJNALAYA",
+      "sub": "Ghar Jaisa Khana",
+      "kind": "dhaba"
+    },
+    {
+      "name": "SANJAULI MEAT SHOP",
+      "sub": "Fresh Chicken · Mutton",
+      "kind": "meat"
+    },
+    {
+      "name": "KAPOOR JEWELLERS",
+      "sub": "Gold & Silver",
+      "kind": "jewel"
+    },
+    {
+      "name": "HP TELECOM · STD PCO",
+      "sub": "ISD · Local",
+      "kind": "mobile"
+    },
+    {
+      "name": "MEHTA FOOTWEAR",
+      "sub": "Shoes & Chappals",
+      "kind": "cloth"
+    },
+    {
+      "name": "GREEN VALLEY FRUITS",
+      "sub": "Seb · Santra",
+      "kind": "sabzi"
+    },
+    {
+      "name": "DEV DARSHAN POOJA",
+      "sub": "Pooja Samagri",
+      "kind": "general"
+    },
+    {
+      "name": "SANJAULI CYBER CAFE",
+      "sub": "Internet · Printing",
+      "kind": "photocopy"
+    },
+    {
+      "name": "NEGI AUTO PARTS",
+      "sub": "Spares & Service",
+      "kind": "hardware"
+    },
+    {
+      "name": "MAA DURGA TAILORS",
+      "sub": "Silai · Alteration",
+      "kind": "cloth"
+    },
+    {
+      "name": "FRESH POINT DAIRY",
+      "sub": "Doodh · Paneer",
+      "kind": "general"
+    },
+    {
+      "name": "SHIVAM OPTICALS",
+      "sub": "Chashma · Eye Test",
+      "kind": "medical"
+    },
+    {
+      "name": "PARADISE RESTAURANT",
+      "sub": "Chinese · Indian",
+      "kind": "dhaba"
+    },
+    {
+      "name": "SANJAULI GAS AGENCY",
+      "sub": "LPG Booking",
+      "kind": "hardware"
+    },
+    {
+      "name": "LUCKY TOY HOUSE",
+      "sub": "Gifts & Toys",
+      "kind": "general"
+    },
+    {
+      "name": "RAJPUT SPORTS",
+      "sub": "Cricket · Trekking",
+      "kind": "general"
+    },
+    {
+      "name": "SNOWLAND BAKERY",
+      "sub": "Bread · Rusk",
+      "kind": "bakery"
+    },
+    {
+      "name": "CHANDEL WATCH CO",
+      "sub": "Repair & Sale",
+      "kind": "jewel"
+    },
+    {
+      "name": "HIMACHAL HANDLOOM",
+      "sub": "Kullu Shawls",
+      "kind": "cloth"
+    },
+    {
+      "name": "SUNRISE MEDICAL",
+      "sub": "24 Hrs Chemist",
+      "kind": "medical"
+    },
+    {
+      "name": "SANJAULI JUICE BAR",
+      "sub": "Fresh Juice · Shakes",
+      "kind": "dhaba"
+    },
+    {
+      "name": "KUMAR XEROX",
+      "sub": "Print · Bind",
+      "kind": "photocopy"
+    },
+    {
+      "name": "APPLE VALLEY STORE",
+      "sub": "Dry Fruits",
+      "kind": "sabzi"
+    },
+    {
+      "name": "SANJAULI HAIR CUT",
+      "sub": "Men's Saloon",
+      "kind": "salon"
+    },
+    {
+      "name": "NEW MODERN CLOTH",
+      "sub": "Suiting · Shirting",
+      "kind": "cloth"
+    },
+    {
+      "name": "BALAJI PROVISION",
+      "sub": "Wholesale · Retail",
+      "kind": "general"
+    },
+    {
+      "name": "MOUNTAIN CAFE",
+      "sub": "Coffee & Maggi",
+      "kind": "dhaba"
+    },
+    {
+      "name": "SANJAULI HOSIERY",
+      "sub": "Innerwear · Socks",
+      "kind": "cloth"
+    }
+  ]
+}

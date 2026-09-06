@@ -112,7 +112,9 @@ export class DayNight {
     // --- raat ki roshni --------------------------------------------------
     if (this._emissive.windows) this._emissive.windows.emissiveIntensity = n * 1.7;
     if (this._emissive.lamps) this._emissive.lamps.emissiveIntensity = n * 2.4;
-    for (const m of this._emissive.signs) m.emissiveIntensity = n * 0.95;
+    // Din mein bhi ek base rakhte hain: bazaar ke board awning ki chhaya mein
+    // hote hain aur bina iske dopahar mein bhi padhe nahi jaate.
+    for (const m of this._emissive.signs) m.emissiveIntensity = 0.28 + n * 0.85;
 
     // --- mausam apne aap badalta hai --------------------------------------
     if (this.hour > this._nextWeatherHour

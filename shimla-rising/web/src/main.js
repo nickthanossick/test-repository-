@@ -4,6 +4,7 @@ import { GeoReference } from "./geo.js";
 import { Terrain } from "./terrain.js";
 import { RoadNetwork } from "./roads.js";
 import { buildCity } from "./city.js";
+import { buildBazaar } from "./bazaar.js";
 import { Sky } from "./sky.js";
 import { Weather } from "./weather.js";
 import { DayNight } from "./daynight.js";
@@ -94,7 +95,21 @@ async function boot() {
   scene.add(roadGroup);
 
   setProgress(0.80, "Shimla bas raha hai…");
-  const city = buildCity(terrain, roads, data.districts, data.pois, mulberry32(31104877), Q);
+  // Sanjauli ka bazaar: Chowk se Dhalli tak dono taraf lagatar dukanein.
+  // Ye city ke generic scatter se *pehle* banta hai taaki `buildCity` ko pata ho
+  // ki corridor mein ghar nahi rakhne -- warna dukanein aur ghar aapas mein
+  // ghus jaate hain.
+  const BAZAAR_CORRIDORS = [
+    { road: "sanjauli_bazaar_road", denseUntil: 500 },
+    { road: "nh5_east", denseUntil: 420 },
+    { road: "sanjauli_inner", denseUntil: 260 },
+    { road: "dhalli_bazaar_road", denseUntil: 320 },
+  ];
+  const bazaar = buildBazaar(terrain, roads, data.shops, BAZAAR_CORRIDORS, Q);
+  scene.add(bazaar);
+
+  const city = buildCity(terrain, roads, data.districts, data.pois, mulberry32(31104877), Q,
+                         { keepClear: bazaar.userData.stalls });
   scene.add(city);
 
   setProgress(0.90, "aasman aur mausam…");
@@ -201,7 +216,7 @@ async function boot() {
   };
   dayNight.bindEmissive({
     windows: city.userData.windowMaterial,
-    signs: city.userData.glowingSigns || [],
+    signs: [...(city.userData.glowingSigns || []), ...(bazaar.userData.glowingSigns || [])],
     lamps: roadGroup.userData.lampMaterial,
   });
 
@@ -421,6 +436,8 @@ async function boot() {
       colliders: colliders.count,
       landmarks: city.userData.landmarkCount,
       signs: city.userData.signCount,
+      shops: bazaar.userData.shopCount,
+      shopSigns: bazaar.userData.signCount,
     }; },
     teleport(poiId) {
       if (!data.poiById.get(poiId)) return false;
@@ -448,6 +465,17 @@ async function boot() {
       return true;
     },
     freeCamOff() { debugCam = false; chase._init = false; },
+    /** Ek dukan ke theek saamne khade ho jao -- bazaar ki jaanch ke liye. */
+    viewShop(i = 0, dist = 9, height = 3.2, skew = 0) {
+      const st = bazaar.userData.stalls[i % bazaar.userData.stalls.length];
+      if (!st) return null;
+      const a = st.yaw + skew;
+      const fx = Math.sin(a), fz = -Math.cos(a);             // dukan ka mukh
+      debugCam = true;
+      camera.position.set(st.x + fx * dist, st.y + height, st.z + fz * dist);
+      camera.lookAt(st.x, st.y + 3.4, st.z);
+      return { i, x: st.x, y: st.y, z: st.z, yaw: st.yaw, kind: st.kind };
+    },
     /**
      * Kirdaaron ki line-up -- sirf screenshot/review ke liye. Sadak pe chalne
      * wali bheed abhi nahi hai; ye sirf models dikhata hai.

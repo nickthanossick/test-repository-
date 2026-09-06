@@ -19,7 +19,7 @@ import { buildSigns } from "./signs.js";
 const ROOFS = [0x8c3b2e, 0x2f5d8a, 0x3f6b47, 0x6b6b70, 0x9c5a2b];
 const WALLS = [0xb8ad98, 0xa99d86, 0x9f8e75, 0xb2a48d, 0x8a7b6c, 0xc0b6a4];
 
-export function buildCity(terrain, roads, districts, pois, rng, quality = {}) {
+export function buildCity(terrain, roads, districts, pois, rng, quality = {}, opts = {}) {
   const group = new THREE.Group();
   group.name = "city";
 
@@ -31,6 +31,10 @@ export function buildCity(terrain, roads, districts, pois, rng, quality = {}) {
   const trim = new MeshBuilder(0.7);         // balcony, railing, chimney, floor bands
   const col = new THREE.Color();
   const placed = new SpatialGrid(16);
+  // Bazaar corridor ki dukanein pehle ban chuki hain (bazaar.js). Unki jagahein
+  // usi grid mein daal do taaki generic ghar unke andar na ghusein -- `occupied()`
+  // ka check pehle se hai, bas isse feed karna tha.
+  for (const st of opts.keepClear || []) placed.add(st.x, st.z);
   const colliders = new Colliders(24);
   let placedCount = 0;
 
