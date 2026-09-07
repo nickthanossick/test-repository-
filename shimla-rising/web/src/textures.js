@@ -602,6 +602,8 @@ export function signboard(text, sub = "", kind = "shop", seed = 0) {
       shop:     { bg: "#1d3f5c", fg: "#f4e9cf", accent: "#e8c33a", border: "#e8c33a" },
       stone:    { bg: "#9a938a", fg: "#2c2721", accent: "#4a4239", border: "#7b746b" },
       road:     { bg: "#14663d", fg: "#ffffff", accent: "#ffffff", border: "#ffffff" },
+      // college ke block ka board -- safed plate, gehra text, sarkari look
+      block:    { bg: "#f2f1ec", fg: "#1f2a33", accent: "#8a2b22", border: "#8a8578" },
       dhaba:    { bg: "#8f2418", fg: "#ffeccc", accent: "#f0c246", border: "#f0c246" },
       bakery:   { bg: "#f0e2c4", fg: "#5a3218", accent: "#a8341f", border: "#a8341f" },
       bank:     { bg: "#123a70", fg: "#ffffff", accent: "#e8c33a", border: "#dfe6f0" },
@@ -818,6 +820,38 @@ function cached(key, make) {
 }
 
 /** Texture set -> MeshStandardMaterial. */
+/**
+ * Chain-link jaali -- college ke court ki boundary par.
+ *
+ * Ye alpha wali texture hai: taar wahin dikhte hain jahan diamond ki rekha
+ * hai, baaki plane paardarshi. Isse ek hi patli plane se poori jaali ban
+ * jaati hai -- har taar ka apna mesh banane par court ki boundary hi hazaaron
+ * draw call kha jaati.
+ */
+export function chainLink(seed = 17) {
+  return cached(`chainlink${seed}`, () => {
+    const S = 128;
+    const cv = canvas(S);
+    const ctx = cv.getContext("2d");
+    ctx.clearRect(0, 0, S, S);
+    ctx.strokeStyle = "#b8bec6";
+    ctx.lineWidth = 2.4;
+    ctx.lineCap = "round";
+    // do tirchhi kataarein -- yahi diamond banati hain
+    const step = S / 4;
+    for (let i = -4; i <= 8; i++) {
+      ctx.beginPath();
+      ctx.moveTo(i * step, 0); ctx.lineTo(i * step + S, S);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(i * step, S); ctx.lineTo(i * step + S, 0);
+      ctx.stroke();
+    }
+    const t = texture(cv, 1, true);
+    return { map: t, roughness: 0.6, metalness: 0.7, alpha: true };
+  });
+}
+
 export function standard(set, extra = {}) {
   const m = new THREE.MeshStandardMaterial({
     map: set.map,

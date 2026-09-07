@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { MeshBuilder } from "./geometry.js";
 import { SpatialGrid, Colliders } from "./grid.js";
 import * as TEX from "./textures.js";
-import { buildLandmarks } from "./landmarks.js";
+import { buildLandmarks, landmarkClearance } from "./landmarks.js";
 import { buildSigns } from "./signs.js";
 
 /**
@@ -35,6 +35,10 @@ export function buildCity(terrain, roads, districts, pois, rng, quality = {}, op
   // usi grid mein daal do taaki generic ghar unke andar na ghusein -- `occupied()`
   // ka check pehle se hai, bas isse feed karna tha.
   for (const st of opts.keepClear || []) placed.add(st.x, st.z);
+  // College ka poora campus bhi reserve -- warna forecourt aur basketball
+  // court ke beech generic ghar khade ho jaate hain (landmarks neeche bante
+  // hain, is scatter ke baad).
+  for (const st of landmarkClearance(terrain, pois)) placed.add(st.x, st.z);
   // Colliders ab main.js banata hai aur bazaar ke saath saanjha hai
   const colliders = opts.colliders || new Colliders(24);
   let placedCount = 0;

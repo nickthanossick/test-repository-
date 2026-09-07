@@ -106,6 +106,349 @@ function campus(c, mb) {
   }
 }
 
+/**
+ * Government College Sanjauli -- apna campus, generic block nahi.
+ *
+ * Nikhil ne asli college ki tasveer bheji aur kaha "exact aisa environment".
+ * Jo cheezein us tasveer mein pehchan banati hain, sab yahan hain: patthar ki
+ * main building jiske dono taraf **athkona bay tower** aur beech mein mehraab
+ * wala dohra darwaza, saamne chaudi seedhiyan, peeche **science block** jispe
+ * CHEMISTRY se COMPUTER SCIENCE tak paanch board, neeche wale terrace par
+ * ARTS / B.COM / LIBRARY, aur daayen taraf poora **basketball court** jiske
+ * paar oonchi patthar ki deewar par chain-link jaali aur razor wire.
+ *
+ * Poora campus dhalan par teen terrace mein baitha hai. Har terrace ka farsh
+ * us hisse ki *sabse oonchi* zameen par rakha jaata hai aur slab kaafi neeche
+ * tak jaata hai -- isse na terrace tairta hai, na pahad usme se nikalta hai.
+ *
+ * Tasveer pencil drawing hai. Wo madhyam hai, look nahi -- usse layout aur
+ * architecture uthaya gaya hai, banaya game ke apne modern look mein (Nikhil:
+ * "graphics yr retro mat rkh modern kr ise").
+ *
+ * Local frame: -v sadak/dhalan ki taraf hai (wahi `facing()` wala rukh), +v
+ * pahad ki taraf. Isliye main building +v par hai aur uska mukh -v ki taraf.
+ */
+function college(c, mb) {
+  const { yaw, terrain, boards, fences, colliders } = c;
+
+  /*
+   * Poora campus dhalan par **upar** khiskaya hua hai.
+   *
+   * 1852 wala Sanjauli tunnel POI se sirf 21 m door hai -- asli Shimla mein
+   * bhi utna hi paas hai. Bina is offset ke uska patthar ka portal seedha
+   * college ki mukhya seedhiyon ke beech aa khada hota tha. Asli jagah wahi
+   * hai: sadak aur tunnel neeche, campus unke upar ki dhalan par. Isliye POI
+   * ka coordinate wahi rehta hai aur imaaratein +v (pahad ki taraf) shift ho
+   * jaati hain.
+   */
+  const VOFF = 17;
+  const L = (u, v) => c.L(u, v + VOFF);
+
+  /** Kisi hisse ki sabse oonchi zameen -- terrace ka farsh isi par baithta hai. */
+  const padMax = (u0, u1, v0, v1) => {
+    let m = -Infinity;
+    for (let i = 0; i <= 4; i++) {
+      for (let j = 0; j <= 4; j++) {
+        const [px, pz] = L(u0 + ((u1 - u0) * i) / 4, v0 + ((v1 - v0) * j) / 4);
+        m = Math.max(m, terrain.heightAt(px, pz));
+      }
+    }
+    return m;
+  };
+
+  // Yahan Y **absolute** hai (relative nahi) -- campus ke teen alag farsh hain.
+  const B = (which, u, yy, v, sx, sy, sz, h, spin = 0) => {
+    const [px, pz] = L(u, v);
+    hex(h);
+    mb[which].box(px, yy, pz, sx, sy, sz, C, yaw + spin);
+  };
+
+  const PLAZA = padMax(-16, 40, -16, 12) + 0.25;   // forecourt + court, ek hi satah
+  const MAIN = PLAZA + 3.2;                        // main building ka plinth
+  const LOWER = PLAZA - 6.4;                       // arts / b.com / library
+
+  const STONE = 0xa89981, STONE_D = 0x8c7d68, TRIM = 0xd0c4ab;
+  const WHITE = 0xe6e4dc, BAND = 0xc9c5bb, SLATE = 0x555b63;
+  const PAVE = 0xa8a49c, GLASSC = 0x2e4350, IRON = 0x3a3f45;
+
+  // =============================================================== terrace
+  B("stone", 11, PLAZA - 3.2, -1, 54, 6.4, 28, PAVE);            // upar ka farsh
+  B("stone", -31, LOWER - 4.4, -22, 32, 8.8, 20, PAVE);          // neeche ka farsh
+  // dono terrace ke beech retaining wall
+  B("stone", -31, (PLAZA + LOWER) / 2 - 0.2, -12.0, 32, PLAZA - LOWER + 0.5, 1.5, STONE_D);
+  B("stone", -31, PLAZA + 0.18, -12.0, 32, 0.36, 1.9, TRIM);     // coping
+
+  // ============================================================ main block
+  const MW = 17, MD = 12, MH = 9.4, MV = 10;
+  B("stone", 0, MAIN + MH / 2, MV, MW, MH, MD, STONE);
+  B("stone", 0, MAIN + 4.6, MV, MW + 0.35, 0.34, MD + 0.35, TRIM);          // string course
+  B("stone", 0, MAIN + MH + 0.34, MV, MW + 1.1, 0.68, MD + 1.1, STONE_D);   // cornice
+  hex(SLATE);
+  {
+    const [rx, rz] = L(0, MV);
+    mb.tin.gableRoof(rx, MAIN + MH + 0.68, rz, MW + 1.1, MD + 1.1, 2.7, 0.5, C, yaw, true);
+  }
+
+  const FV = MV - MD / 2;                          // main block ka aage ka mukh
+
+  // ---- mehraab wala dohra darwaza ----
+  for (const s of [-1, 1]) {
+    const u0 = s * 2.55;
+    B("stone", u0, MAIN + 2.25, FV - 0.20, 3.3, 4.5, 0.45, TRIM);           // frame
+    B("wood", u0, MAIN + 2.05, FV - 0.42, 2.5, 4.1, 0.16, 0x4a3a28);        // patt
+    B("metal", u0, MAIN + 2.05, FV - 0.50, 0.10, 3.9, 0.06, 0x2a2420);      // beech ki dandi
+    // mehraab -- voussoir ki patti, wahi tareeka jo tunnel ke portal par hai
+    for (let i = 0; i <= 7; i++) {
+      const a = (i / 7) * Math.PI;
+      B("stone", u0 + Math.cos(a) * 1.65, MAIN + 4.5 + Math.sin(a) * 1.45, FV - 0.22,
+        0.54, 0.52, 0.5, i === 3 || i === 4 ? TRIM : STONE_D);
+    }
+  }
+  // darwaze ke upar ki khidkiyon ki kataar
+  for (let i = 0; i < 5; i++) {
+    const u = (i / 4 - 0.5) * 9.2;
+    B("stone", u, MAIN + 7.2, FV - 0.05, 1.35, 1.9, 0.2, TRIM);
+    B("glass", u, MAIN + 7.2, FV - 0.16, 1.05, 1.55, 0.1, GLASSC);
+  }
+
+  // ---- dono taraf athkona bay tower ----
+  // Athkone ke liye do box: ek seedha, ek 45 degree ghuma hua. Door se poora
+  // athkona padhta hai aur do box mein ban jaata hai.
+  for (const s of [-1, 1]) {
+    const tu = s * 10.6, tv = MV - 4.2, TWD = 6.6, TH = 12.4;
+    B("stone", tu, MAIN + TH / 2, tv, TWD, TH, TWD, STONE);
+    // 45 degree wala box **chhota** hona chahiye. Barabar rakhne par uske kone
+    // seedhe box ke mukh se kaafi bahar nikal jaate hain aur silhouette athkona
+    // nahi, aath-noki taara ban jaata hai. 0.74 par kone bas zara se nikalte hain.
+    B("stone", tu, MAIN + TH / 2, tv, TWD * 0.74, TH, TWD * 0.74, STONE_D, Math.PI / 4);
+    B("stone", tu, MAIN + 4.6, tv, TWD + 0.3, 0.34, TWD + 0.3, TRIM);
+    B("stone", tu, MAIN + TH + 0.3, tv, TWD + 0.9, 0.6, TWD + 0.9, STONE_D);   // cornice
+    hex(SLATE);
+    {
+      const [px, pz] = L(tu, tv);
+      mb.tin.pyramid(px, MAIN + TH + 0.6, pz, TWD + 1.0, 3.0, C, yaw);
+    }
+    // teen mukh par lambi khidkiyan -- bay ki pehchan
+    for (let f = 0; f < 3; f++) {
+      for (const [du, dv] of [[0, -TWD / 2 - 0.05], [-TWD / 2 - 0.05, 0], [TWD / 2 + 0.05, 0]]) {
+        B("stone", tu + du * 0.98, MAIN + 1.9 + f * 3.5, tv + dv * 0.98,
+          dv ? 2.0 : 0.18, 2.4, dv ? 0.18 : 2.0, TRIM);
+        B("glass", tu + du, MAIN + 1.9 + f * 3.5, tv + dv,
+          dv ? 1.6 : 0.1, 2.0, dv ? 0.1 : 1.6, GLASSC);
+      }
+    }
+  }
+
+  // ---- chaudi patthar ki seedhiyan, forecourt se plinth tak ----
+  const STEPS = 11, SW = 10.5;
+  for (let i = 0; i < STEPS; i++) {
+    const t = i / STEPS;
+    B("stone", 0, PLAZA + (MAIN - PLAZA) * t + 0.18, FV - 0.8 - (1 - t) * 6.4,
+      SW - t * 1.6, 0.38, 0.68, i % 2 ? TRIM : STONE);
+  }
+  // seedhiyon ke dono taraf plinth, uspar gamle aur lamp
+  for (const s of [-1, 1]) {
+    // seedhi ke saath dhalwan parapet -- kandha bhar oonchi, taaki mukh dikhe
+    for (let i = 0; i < STEPS; i++) {
+      const t = i / STEPS;
+      const yy = PLAZA + (MAIN - PLAZA) * t;
+      B("stone", s * (SW / 2 + 0.55), yy - 0.5, FV - 0.8 - (1 - t) * 6.4,
+        1.0, 2.6, 0.68, STONE_D);
+      B("stone", s * (SW / 2 + 0.55), yy + 0.86, FV - 0.8 - (1 - t) * 6.4,
+        1.25, 0.22, 0.72, TRIM);
+    }
+    // seedhi ke sire par patthar ka khamba, uspar gamla
+    B("stone", s * (SW / 2 + 0.55), PLAZA + 0.75, FV - 7.4, 1.35, 2.2, 1.35, STONE_D);
+    B("stone", s * (SW / 2 + 0.55), PLAZA + 2.05, FV - 7.4, 0.72, 0.55, 0.72, 0xa8907a);
+    B("plaster", s * (SW / 2 + 0.55), PLAZA + 2.48, FV - 7.4, 0.78, 0.42, 0.78, 0x2f4f2a);
+    B("plaster", s * (SW / 2 + 0.55), PLAZA + 2.80, FV - 7.4, 0.52, 0.40, 0.52, 0x3a6033);
+  }
+
+  // ========================================================= science block
+  // Tasveer mein ye peeche-baayen khada hai aur ispe paanch board hain.
+  const SBU = -24.5, SBV = 15, SBW = 15, SBD = 11, FLOORS = 6, FLH = 3.4;
+  const SBH = FLOORS * FLH;
+  B("plaster", SBU, MAIN + SBH / 2, SBV, SBW, SBH, SBD, WHITE);
+  B("plaster", SBU, MAIN + SBH + 0.45, SBV, SBW + 0.7, 0.9, SBD + 0.7, BAND);      // parapet
+  for (let f = 0; f < FLOORS; f++) {
+    const fy = MAIN + f * FLH;
+    B("plaster", SBU, fy + 0.12, SBV, SBW + 0.24, 0.24, SBD + 0.24, BAND);         // floor band
+    for (let i = 0; i < 5; i++) {
+      const u = SBU + (i / 4 - 0.5) * (SBW - 2.6);
+      B("glass", u, fy + 1.85, SBV - SBD / 2 - 0.06, 1.55, 1.85, 0.12, GLASSC);
+      B("glass", u, fy + 1.85, SBV + SBD / 2 + 0.06, 1.55, 1.85, 0.12, GLASSC);
+    }
+  }
+  // paanch board, upar se neeche -- theek jaise tasveer mein hain
+  const LABELS = ["CHEMISTRY BLOCK", "PHYSICS BLOCK", "BIOLOGY BLOCK",
+                  "MATHEMATICS BLOCK", "COMPUTER SCIENCE BLOCK"];
+  LABELS.forEach((text, i) => {
+    const [bx, bz] = L(SBU, SBV - SBD / 2 - 0.22);
+    boards.push({ x: bx, z: bz, y: MAIN + SBH - 2.4 - i * FLH, yaw,
+                  text, sub: "", kind: "block", width: 9.6 });
+  });
+
+  // ==================================================== neeche ka terrace
+  // ARTS BLOCK, B.COM BLOCK -- safed teen-manzila; LIBRARY -- chhoti gable wali
+  const teach = (u, v, w, d, floors, text) => {
+    const h = floors * 3.3;
+    B("plaster", u, LOWER + h / 2, v, w, h, d, WHITE);
+    B("plaster", u, LOWER + h + 0.4, v, w + 0.6, 0.8, d + 0.6, BAND);
+    for (let f = 0; f < floors; f++) {
+      const fy = LOWER + f * 3.3;
+      B("plaster", u, fy + 0.11, v, w + 0.22, 0.22, d + 0.22, BAND);
+      for (let i = 0; i < 4; i++) {
+        const uu = u + (i / 3 - 0.5) * (w - 2.2);
+        B("glass", uu, fy + 1.75, v - d / 2 - 0.06, 1.4, 1.7, 0.12, GLASSC);
+      }
+      // balcony railing -- pahadi college ki pehchan
+      if (f > 0) {
+        B("metal", u, fy + 0.55, v - d / 2 - 0.5, w * 0.9, 0.08, 0.06, IRON);
+        B("metal", u, fy + 1.0, v - d / 2 - 0.5, w * 0.9, 0.08, 0.06, IRON);
+      }
+    }
+    const [bx, bz] = L(u, v - d / 2 - 0.2);
+    boards.push({ x: bx, z: bz, y: LOWER + h - 1.5, yaw, text, sub: "",
+                  kind: "block", width: Math.min(w * 0.8, 7.6) });
+  };
+  teach(-42, -24, 13, 10, 3, "ARTS BLOCK");
+  teach(-28, -26, 12, 10, 3, "B.COM BLOCK");
+
+  // library -- patthar, gable chhat, apna board
+  {
+    const u = -16.5, v = -27.5, w = 10, d = 7.5, h = 5.8;
+    B("stone", u, LOWER + h / 2, v, w, h, d, STONE);
+    B("stone", u, LOWER + h + 0.25, v, w + 0.7, 0.5, d + 0.7, STONE_D);
+    hex(SLATE);
+    {
+      const [rx, rz] = L(u, v);
+      mb.tin.gableRoof(rx, LOWER + h + 0.5, rz, w + 0.7, d + 0.7, 2.1, 0.45, C, yaw, true);
+    }
+    for (let i = 0; i < 3; i++) {
+      const uu = u + (i - 1) * 2.9;
+      B("stone", uu, LOWER + 2.6, v - d / 2 - 0.05, 1.7, 2.3, 0.2, TRIM);
+      B("glass", uu, LOWER + 2.6, v - d / 2 - 0.16, 1.35, 1.9, 0.1, GLASSC);
+    }
+    const [bx, bz] = L(u, v - d / 2 - 0.2);
+    boards.push({ x: bx, z: bz, y: LOWER + 4.5, yaw, text: "LIBRARY", sub: "",
+                  kind: "block", width: 5.6 });
+  }
+
+  // ====================================================== basketball court
+  const CU = 22, CV = -1, CW = 26, CD = 16;       // court ka kendra aur naap
+  B("stone", CU, PLAZA + 0.06, CV, CW, 0.12, CD, 0xa89b88);    // court ka farsh
+  const line = (u, v, lu, lv) => B("plaster", u, PLAZA + 0.14, v, lu, 0.05, lv, 0xf0efe9);
+  // baahri lakeer
+  line(CU, CV - CD / 2 + 0.6, CW - 1.2, 0.16);
+  line(CU, CV + CD / 2 - 0.6, CW - 1.2, 0.16);
+  line(CU - CW / 2 + 0.6, CV, 0.16, CD - 1.2);
+  line(CU + CW / 2 - 0.6, CV, 0.16, CD - 1.2);
+  line(CU, CV, 0.16, CD - 1.2);                   // halfway line
+  // beech ka ghera
+  for (let i = 0; i < 28; i++) {
+    const a = (i / 28) * Math.PI * 2;
+    B("plaster", CU + Math.cos(a) * 2.4, PLAZA + 0.14, CV + Math.sin(a) * 2.4,
+      0.42, 0.05, 0.16, 0xf0efe9, a);
+  }
+  // dono taraf key aur three-point arc
+  for (const s of [-1, 1]) {
+    const ku = CU + s * (CW / 2 - 3.4);
+    line(ku, CV - 2.45, 5.2, 0.14);
+    line(ku, CV + 2.45, 5.2, 0.14);
+    line(ku + s * 2.6, CV, 0.14, 5.0);
+    for (let i = 0; i <= 16; i++) {
+      const a = -Math.PI / 2 + (i / 16) * Math.PI;
+      B("plaster", ku + s * 2.6 - s * Math.cos(a) * 6.4, PLAZA + 0.14, CV + Math.sin(a) * 6.4,
+        0.16, 0.05, 0.5, 0xf0efe9, a);
+    }
+    // hoop -- khamba, backboard, ring
+    const hu = CU + s * (CW / 2 - 1.0);
+    B("metal", hu, PLAZA + 1.9, CV, 0.22, 3.8, 0.22, 0x6a7078);
+    B("metal", hu - s * 0.6, PLAZA + 3.55, CV, 1.2, 0.12, 0.12, 0x6a7078);        // arm
+    B("plaster", hu - s * 1.2, PLAZA + 3.6, CV, 0.1, 1.05, 1.8, 0xf2f2ee);        // backboard
+    B("metal", hu - s * 1.55, PLAZA + 3.25, CV, 0.06, 0.06, 0.9, 0xd06a2a);       // ring
+  }
+
+  // ====================== boundary: patthar ki deewar + chain-link + razor
+  const WALLH = 4.6;
+  const runs = [
+    { u: CU + CW / 2 + 3.2, v: CV, w: 1.1, l: CD + 10, spin: 0 },     // court ke paar
+    { u: CU, v: CV + CD / 2 + 3.2, w: CW + 8, l: 1.1, spin: 0 },      // peeche
+  ];
+  for (const r of runs) {
+    B("stone", r.u, PLAZA + WALLH / 2 - 1.2, r.v, r.w, WALLH + 2.4, r.l, STONE_D, r.spin);
+    B("stone", r.u, PLAZA + WALLH - 0.9, r.v, r.w + 0.4, 0.36, r.l + 0.4, TRIM, r.spin);
+    // jaali -- alag transparent mesh mein jaati hai
+    const [fx2, fz2] = L(r.u, r.v);
+    /*
+     * Jaali ka rukh: quad apne yaw ke local +X ke saath failta hai. Jo run
+     * `v` ke saath lamba hai (l > w) usko 90 degree ghumana padta hai --
+     * pehle ye ulta tha aur dono jaaliyan deewar ke aar-paar tirchhi latak
+     * rahi thi.
+     */
+    fences.push({ x: fx2, z: fz2, y: PLAZA + WALLH + 0.35,
+                  yaw: yaw + (r.l > r.w ? Math.PI / 2 : 0),
+                  width: Math.max(r.w, r.l), height: 2.4 });
+    // upar razor wire ki coil -- chhote tirchhe tukdon se
+    const len = Math.max(r.w, r.l);
+    const n = Math.round(len / 0.55);
+    for (let i = 0; i < n; i++) {
+      const t = (i / (n - 1) - 0.5) * (len - 0.6);
+      const du = r.w > r.l ? t : 0, dv = r.w > r.l ? 0 : t;
+      B("metal", r.u + du, PLAZA + WALLH + 1.75, r.v + dv, 0.30, 0.30, 0.04, 0xb4bac2,
+        i % 2 ? 0.7 : -0.7);
+    }
+  }
+
+  // ====================================== railing, lamp post, gali ka kinara
+  // forecourt ka kinara -- neeche wale terrace ki taraf
+  for (let i = 0; i < 14; i++) {
+    const u = -45 + i * 2.2;
+    B("metal", u, PLAZA + 0.55, -11.8, 0.09, 1.1, 0.09, IRON);
+    B("metal", u + 1.1, PLAZA + 0.95, -11.8, 2.2, 0.07, 0.07, IRON);
+    B("metal", u + 1.1, PLAZA + 0.52, -11.8, 2.2, 0.06, 0.06, IRON);
+  }
+  const lamp = (u, v, base) => {
+    B("metal", u, base + 1.9, v, 0.16, 3.8, 0.16, 0x2f343a);
+    B("metal", u, base + 3.95, v, 0.5, 0.42, 0.5, 0x2f343a);
+    B("glass", u, base + 3.72, v, 0.34, 0.34, 0.34, 0xfff0cf);
+  };
+  lamp(-8.5, -10.2, PLAZA);
+  lamp(2.5, -6.5, PLAZA);
+  lamp(13.5, -10.2, PLAZA);
+  lamp(CU + CW / 2 + 1.4, CV - 6, PLAZA);
+  lamp(CU + CW / 2 + 1.4, CV + 6, PLAZA);
+  lamp(-36, -15.5, LOWER);
+  lamp(-21, -17.5, LOWER);
+
+  // ================================================================ collider
+  /*
+   * Campus ke collider haath se, `FOOTPRINT` se nahi.
+   *
+   * Ek gol footprint (POI ke kendra par) forecourt, seedhiyan aur poora
+   * basketball court band kar deta -- yaani khiladi apne hi college mein
+   * ghus hi nahi paata. Isliye collider sirf **imaaraton aur boundary wall
+   * par**, aur chalne ki jagah khali.
+   */
+  const solid = (u, v, r, base, top) => {
+    const [px, pz] = L(u, v);
+    colliders?.add(px, pz, r, base - 2, base + top);
+  };
+  for (let i = -1; i <= 1; i++) solid(i * 5.5, MV, 4.2, MAIN, 14);      // main block
+  for (const s of [-1, 1]) solid(s * 10.6, MV - 4.2, 3.6, MAIN, 16);    // bay tower
+  for (let i = -1; i <= 1; i++) solid(SBU + i * 4.5, SBV, 4.4, MAIN, 24);  // science block
+  solid(-42, -24, 6.0, LOWER, 12);                                       // arts
+  solid(-28, -26, 5.6, LOWER, 12);                                       // b.com
+  solid(-16.5, -27.5, 4.6, LOWER, 8);                                    // library
+  for (const r of runs) {                                                // boundary wall
+    const n = Math.round(Math.max(r.w, r.l) / 6);
+    for (let i = 0; i < n; i++) {
+      const t = (i / Math.max(1, n - 1) - 0.5) * (Math.max(r.w, r.l) - 2);
+      solid(r.u + (r.w > r.l ? t : 0), r.v + (r.w > r.l ? 0 : t), 2.0, PLAZA, WALLH + 3);
+    }
+  }
+}
+
 /** Bazaar ki kataar -- sadak ke saath sitti hui dukanein, upar ghar. */
 function bazaar(c, mb) {
   const { x, z, y, terrain, rng, poi } = c;
@@ -293,7 +636,7 @@ function yard(c, mb) {
 }
 
 const BUILDERS = {
-  campus, bazaar, shopfront, colonial, temple, junction, plaza, yard,
+  college, campus, bazaar, shopfront, colonial, temple, junction, plaza, yard,
   // tunnel ab `tunnel.js` banata hai -- poora bore, sirf portal nahi
   tunnel_old: () => {},
   tunnel_new: () => {},
@@ -360,6 +703,9 @@ const BUILDERS = {
  * hota hai. Wahan cylinder rakhne se sadak hi band ho jaati.
  */
 const FOOTPRINT = {
+  // college apne collider khud lagata hai (imaarat par, court khaali) --
+  // ek gol footprint poore forecourt aur court ko band kar deta
+  college: { r: 0, h: 0 },
   campus: { r: 18, h: 14 },
   shopfront: { r: 5.0, h: 8 },
   colonial: { r: 14, h: 17 },
@@ -377,6 +723,36 @@ const FOOTPRINT = {
   tunnel_old: { r: 0 }, tunnel_new: { r: 0 }, ground: { r: 0 }, gate: { r: 0 },
 };
 
+/**
+ * Jin jagahon par generic ghar nahi banne chahiye.
+ *
+ * `city.js` pehle sadak ke kinare procedural ghar bikherta hai aur uske *baad*
+ * named landmark banate hain -- isliye college ke forecourt aur basketball
+ * court ke beecho-beech ek naali-daar chhat wala ghar khada mil raha tha.
+ * Ab campus ki zameen pehle hi reserve ho jaati hai.
+ *
+ * `SpatialGrid` bindu-aadharit hai, isliye poore daayre par bindu chhaapte hain.
+ * Abhi sirf `college` ke liye -- baaki landmark apni chhoti footprint se hi kaam
+ * chala lete hain, aur sabke liye lagane se sheher POI ke aas-paas khaali ho
+ * jaata.
+ */
+const CLEAR = { college: 42 };
+
+export function landmarkClearance(terrain, pois) {
+  const out = [];
+  for (const p of pois.pois) {
+    const r = CLEAR[p.landmark];
+    if (!r) continue;
+    const { x, z } = terrain.geo.toWorld(p.lat, p.lon);
+    for (let dx = -r; dx <= r; dx += 7) {
+      for (let dz = -r; dz <= r; dz += 7) {
+        if (dx * dx + dz * dz <= r * r) out.push({ x: x + dx, z: z + dz });
+      }
+    }
+  }
+  return out;
+}
+
 export function buildLandmarks(terrain, roads, pois, colliders = null) {
   const mb = {
     stone: new MeshBuilder(0.32), plaster: new MeshBuilder(0.42),
@@ -384,6 +760,15 @@ export function buildLandmarks(terrain, roads, pois, colliders = null) {
     glass: new MeshBuilder(0.9), metal: new MeshBuilder(0.8),
   };
   const signs = [];
+  /*
+   * Imaarat *par* lage board (college ke CHEMISTRY BLOCK, LIBRARY...) aur
+   * chain-link jaali. Ye `mb` ke merged batch mein nahi ja sakte -- board ko
+   * apni texture chahiye aur jaali ko alpha. Builders inme push karte hain
+   * aur aakhir mein ek-ek merged mesh ban jaata hai, bazaar ke shop-board
+   * wale tareeke se.
+   */
+  const boards = [];
+  const fences = [];
 
   for (const p of pois.pois) {
     const fn = BUILDERS[p.landmark];
@@ -393,7 +778,7 @@ export function buildLandmarks(terrain, roads, pois, colliders = null) {
     const yaw = facing(roads, x, z);
     const cy = Math.cos(yaw), sy = Math.sin(yaw);
     const ctx = {
-      x, z, y, yaw, terrain, roads, poi: p, rng: seeded(p.id), mbRef: mb,
+      x, z, y, yaw, terrain, roads, poi: p, rng: seeded(p.id), mbRef: mb, boards, fences, colliders,
       L: (u, v) => [x + u * cy - v * sy, z + u * sy + v * cy],
     };
     fn(ctx, mb);
@@ -442,8 +827,88 @@ export function buildLandmarks(terrain, roads, pois, colliders = null) {
     mesh.name = `landmark-${key}`;
     g.add(mesh);
   }
+  if (boards.length) g.add(buildWallBoards(boards));
+  if (fences.length) g.add(buildFences(fences));
+
   g.userData.signs = signs;
   g.userData.landmarkCount = pois.pois.filter((p) => BUILDERS[p.landmark]).length;
+  return g;
+}
+
+/**
+ * Imaarat ki deewar par lage board -- ek texture, ek mesh.
+ *
+ * Wahi batching jo bazaar ke dukan-board mein chali: `TEX.signboard()` naam se
+ * cache hota hai, isliye ek jaise naam wale saare board ek hi BufferGeometry
+ * mein jud jaate hain. College ke 8 board = 8 draw call, 8 alag mesh nahi.
+ */
+function buildWallBoards(boards) {
+  const g = new THREE.Group();
+  g.name = "wall-boards";
+  const groups = new Map();
+
+  for (const b of boards) {
+    const key = `${b.kind}|${b.text}|${b.sub}`;
+    let grp = groups.get(key);
+    if (!grp) {
+      grp = { set: TEX.signboard(b.text, b.sub, b.kind, 0), pos: [], uv: [], idx: [], n: 0 };
+      groups.set(key, grp);
+    }
+    const h = b.width / 4;                      // texture 1024x256 = 4:1
+    const cs = Math.cos(b.yaw), sn = Math.sin(b.yaw);
+    for (const [u, v] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) {
+      grp.pos.push(b.x + u * (b.width / 2) * cs, b.y + v * (h / 2), b.z + u * (b.width / 2) * sn);
+    }
+    // Board ka mukh local -Z par hai; us taraf se dekhne wale ko local +X
+    // baayen dikhta hai, isliye u ulta -- warna naam aaine jaisa palat jaata hai.
+    grp.uv.push(1, 0, 0, 0, 0, 1, 1, 1);
+    grp.idx.push(grp.n, grp.n + 1, grp.n + 2, grp.n, grp.n + 2, grp.n + 3);
+    grp.n += 4;
+  }
+
+  for (const grp of groups.values()) {
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute("position", new THREE.Float32BufferAttribute(grp.pos, 3));
+    geo.setAttribute("uv", new THREE.Float32BufferAttribute(grp.uv, 2));
+    geo.setIndex(grp.idx);
+    geo.computeVertexNormals();
+    geo.computeBoundingSphere();
+    g.add(new THREE.Mesh(geo, new THREE.MeshStandardMaterial({
+      map: grp.set.map, roughness: grp.set.roughness ?? 0.85,
+      side: THREE.DoubleSide,
+    })));
+  }
+  return g;
+}
+
+/** Chain-link jaali -- ek transparent plane, alpha texture se taar. */
+function buildFences(fences) {
+  const g = new THREE.Group();
+  g.name = "fences";
+  const pos = [], uv = [], idx = [];
+  let n = 0;
+  for (const f of fences) {
+    const cs = Math.cos(f.yaw), sn = Math.sin(f.yaw);
+    for (const [u, v] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) {
+      pos.push(f.x + u * (f.width / 2) * cs, f.y + v * (f.height / 2), f.z + u * (f.width / 2) * sn);
+    }
+    // texture ko doori ke hisaab se dohrao, warna diamond khinch jaate hain
+    const ru = f.width / 2.2, rv = f.height / 2.2;
+    uv.push(0, 0, ru, 0, ru, rv, 0, rv);
+    idx.push(n, n + 1, n + 2, n, n + 2, n + 3);
+    n += 4;
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+  geo.setAttribute("uv", new THREE.Float32BufferAttribute(uv, 2));
+  geo.setIndex(idx);
+  geo.computeVertexNormals();
+  geo.computeBoundingSphere();
+  const set = TEX.chainLink();
+  g.add(new THREE.Mesh(geo, new THREE.MeshStandardMaterial({
+    map: set.map, transparent: true, alphaTest: 0.35, depthWrite: false,
+    roughness: set.roughness, metalness: set.metalness, side: THREE.DoubleSide,
+  })));
   return g;
 }
 
