@@ -9,7 +9,8 @@
   "attribution": "AWS Terrain Tiles (terrarium) -- SRTM/NED/GMTED se bana, AWS Open Data Registry par khula. Koi API key nahi.",
   "files": {
     "heightmap.png": "RGB8. elevation = min + ((R*256 + G) / 65535) * (max - min). Web game.",
-    "heightmap_16.png": "16-bit grayscale, same normalisation. Godot / Blender / GIS."
+    "heightmap_16.png": "16-bit grayscale, same normalisation. Godot / Blender / GIS.",
+    "heightmap_web.png": "Wahi, par 1024 px -- single-file artifact ke liye (base64 inline hota hai, isliye size maayne rakhta hai)."
   },
   "orientation": "row 0 = north edge (z = -half), col 0 = west edge (x = -half)",
   "godot_import": {

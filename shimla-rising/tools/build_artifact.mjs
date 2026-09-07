@@ -9,8 +9,8 @@
  *
  *   node tools/build_artifact.mjs [out.html]
  */
-import { readFileSync, writeFileSync } from "node:fs";
-import { join, dirname } from "node:path";
+import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import { join, dirname, basename } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -127,7 +127,20 @@ function inlineData() {
                  "missions", "characters", "vehicles", "dialogue", "shops", "sanjauli", "routes"];
   const blob = {};
   for (const f of files) blob[f] = JSON.parse(read(join(DATA, `${f}.json`)));
-  const png = readFileSync(join(DATA, "heightmap.png")).toString("base64");
+  /*
+   * Artifact halka heightmap leta hai.
+   *
+   * `data/heightmap.png` 2048 px ka hai (4 m/px) -- 5.8 MB, aur yahan wo
+   * base64 mein inline hota hai (+33%). Terrain ka mesh sabse ooncha tier par
+   * bhi 8 m prati quad par sample karta hai, isliye us barikee ka faayda sirf
+   * `heightAt()` ko hai, aankh ko nahi. Pipeline saath mein 1024 px ka
+   * `heightmap_web.png` bhi likhta hai -- 1.6 MB. Wo na ho (purana data) to
+   * poora wala hi chalega.
+   */
+  const light = join(DATA, "heightmap_web.png");
+  const hmPath = existsSync(light) ? light : join(DATA, "heightmap.png");
+  const png = readFileSync(hmPath).toString("base64");
+  console.log(`  heightmap: ${basename(hmPath)} (${(png.length / 1.37e6).toFixed(1)} MB)`);
   return { blob, png };
 }
 

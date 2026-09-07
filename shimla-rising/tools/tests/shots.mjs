@@ -6,8 +6,8 @@
  * lo. Loop ka intezaar karne se sab jama hua dikhta hai.
  *
  * **Chalne wala shot asli chase camera se hi liya jaata hai** -- haath se
- * camera rakh kar nahi. Pichhle round ki galti yahi thi: camera khud rakha
- * tha, isliye tasveer sahi lagi jabki khel mein camera bande ke saamne tha.
+ * camera rakh kar nahi. Round 14 ki galti yahi thi: camera khud rakha tha,
+ * isliye tasveer sahi lagi jabki khel mein camera bande ke saamne tha.
  *
  *   node web/serve.mjs &   node tools/tests/shots.mjs
  */
@@ -27,14 +27,19 @@ page.setDefaultTimeout(150000);   // SwiftShader par ek frame 30 s se zyada le s
 await page.goto(URL, { waitUntil: "domcontentloaded", timeout: 60000 });
 await page.waitForFunction(() => window.__shimla?.ready === true, null, { timeout: 300000 });
 
-const shot = async (name, waitMs = 3000) => {
+const shot = async (name, waitMs = 3200) => {
   await page.waitForTimeout(waitMs);
   await page.screenshot({ path: `${OUT}/${name}.png` });
   console.log("  ", name);
 };
 
+/** Kisi POI ko ek nishchit kone se dekho. */
+const view = (poi, dist, height, az) => page.evaluate(
+  ([p, d, h, a]) => { window.__shimla.teleport(p); window.__shimla.viewPOI(p, d, h, a); },
+  [poi, dist, height, az]);
+
 // ---- 1. pehla frame: intro card ----
-await shot("r15-shuruaat");
+await shot("r16-shuruaat");
 await page.evaluate(() => window.__shimla.skipCards());
 await page.waitForTimeout(1500);
 
@@ -59,11 +64,30 @@ const walk = await page.evaluate(() => {
   return { faceDotCam: +face.dot(toCam).toFixed(2) };   // -1 = peeth camera ki taraf (sahi)
 });
 console.log("   chehra-camera dot:", walk.faceDotCam, "(-1 = peeth dikhni chahiye)");
-await shot("r15-chalte-hue");
+await shot("r16-chalte-hue");
 
-// ---- 3. sadak par traffic -- naak ke bal, seedhi ----
+// ---- 3. Sanjauli Chowk -- bazaar, bheed, traffic ----
+await page.evaluate(() => {
+  const S = window.__shimla;
+  S.freeCamOff();
+  S.teleport("sanjauli_chowk");
+  for (let i = 0; i < 80; i++) S.traffic.update(0.05, S.player.pos, S.camera.position);
+  S.viewPOI("sanjauli_chowk", 58, 26, 2.2);
+});
+await shot("r16-sanjauli-chowk");
+
+// ---- 4. college ka aas-paas ----
+await view("college_gate", 46, 18, 1.15);
+await shot("r16-college");
+
+// ---- 5. door se pahad -- hawa aur layered ridge ----
+await view("jakhoo_temple", 620, 260, 2.6);
+await shot("r16-pahad");
+
+// ---- 6. sadak par traffic, paas se ----
 const tr = await page.evaluate(() => {
   const S = window.__shimla;
+  S.freeCamOff();
   for (let i = 0; i < 80; i++) S.traffic.update(0.05, S.player.pos, S.camera.position);
   let best = null, bd = Infinity;
   for (const c of S.traffic.cars) {
@@ -73,54 +97,40 @@ const tr = await page.evaluate(() => {
   }
   if (!best) return null;
   const p = best.mesh.position;
-  S.lookAt(p.x, p.y + 1.3, p.z, 13, 0.3);
+  S.lookAt(p.x, p.y + 1.3, p.z, 14, 0.3);
   for (let i = 0; i < 4; i++) S.traffic.update(0.05, S.player.pos, S.camera.position);
   return { spec: best.spec.id, dist: +bd.toFixed(1), full: best.full.visible };
 });
 console.log("   traffic:", JSON.stringify(tr));
-await shot("r15-traffic");
+await shot("r16-traffic");
 
-/*
- * ---- 4. gaadi kheencho: driver bahar, bhaagta hua ----
- * Camera gaadi aur bhaagte driver dono ko pakadta hai.
- */
-const jack = await page.evaluate(() => {
+// ---- 7. zameen paas se -- ghaas ka daana, mitti ke dhabbe ----
+await page.evaluate(() => {
   const S = window.__shimla;
-  S.freeCamOff();
-  for (let i = 0; i < 40; i++) S.traffic.update(0.05, S.player.pos, S.camera.position);
-  const car = S.traffic.cars.find((c) => c.lane);
-  const p = car.mesh.position.clone();
-  S.player.placeAt(p.x + 1.6, p.z + 1.6);
-  const mode = S.enterVehicle();
-  // driver ko do second bhaagne do
-  for (let i = 0; i < 40; i++) S.traffic.update(0.05, S.player.pos, S.camera.position);
-  const f = S.traffic.fleeing[S.traffic.fleeing.length - 1];
-  const look = f ? f.mesh.position : p;
-  S.lookAt((look.x + p.x) / 2, p.y + 1.4, (look.z + p.z) / 2, 11, 0.45);
-  return { mode, fleeing: S.traffic.fleeing.length, stars: S.wanted.stars,
-           heat: Math.round(S.wanted.heat) };
+  S.teleport("annandale_ground");
+  const q = S.player.pos;
+  S.lookAt(q.x + 7, q.y + 0.5, q.z + 7, 11, 0.14);
 });
-console.log("   gaadi kheenchi:", JSON.stringify(jack));
-await shot("r15-gaadi-cheen");
+await shot("r16-zameen");
 
-// ---- 5. campus: student slab par, hawa mein nahi ----
-const campus = await page.evaluate(() => {
+// ---- 8. raat -- headlight, board, lamp ----
+await page.evaluate(() => {
   const S = window.__shimla;
-  S.freeCamOff();
-  S.teleport("college_gate");
-  for (let i = 0; i < 200; i++) S.crowd.update(0.05, S.player.pos);
-  let air = 0, on = 0;
-  for (const w of S.crowd.walkers) {
-    if (!w.mesh.visible || !w.home) continue;
-    on++;
-    const P = w.mesh.position;
-    if (Math.abs(P.y - S.roads.groundAt(P.x, P.z)) > 0.4
-        && !S.colliders.inside(P.x, P.y - 0.25, P.z, 0.3)) air++;
+  S.dayNight.hour = 20.6;
+  S.sky.setTime(20.6, true);
+  S.teleport("sanjauli_chowk");
+  for (let i = 0; i < 80; i++) {
+    S.traffic.update(0.05, S.player.pos, S.camera.position, { night: true });
   }
-  S.viewPOI("college_gate", 44, 17, 1.15);
-  return { campusWalkers: on, air };
+  let best = null, bd = Infinity;
+  for (const c of S.traffic.cars) {
+    if (!c.lane) continue;
+    const d = c.mesh.position.distanceTo(S.player.pos);
+    if (d < bd) { bd = d; best = c; }
+  }
+  const p = best ? best.mesh.position : S.player.pos;
+  S.lookAt(p.x, p.y + 1.2, p.z, 15, 0.3);
 });
-console.log("   campus:", JSON.stringify(campus));
-await shot("r15-campus");
+await shot("r16-raat", 5000);
 
 await browser.close();

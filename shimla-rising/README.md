@@ -36,6 +36,7 @@ handbrake · `F` gaadi mein baitho/utro · `E` mission · `G` danda · `R` patha
 | | |
 |---|---|
 | **Map** | 8.2 km × 8.2 km asli Shimla — Summer Hill se Sanjauli/Dhalli tak, Annandale se New Shimla tak, Jakhoo (2455 m) beech mein |
+| **Terrain** | **Asli DEM** — AWS Terrain Tiles (SRTM/NED se bana, khula data, koi API key nahi). 2048 px, 4 m/px. Naye heightmap ka max 2457 m nikla; Jakhoo ki asli oonchai 2455 m hai. Sadak ke corridor mein cut-and-fill bhi hai, warna 30 m ka DEM sadak ko pahad ke upar oopar-neeche daudata hai |
 | **Asli jagahein** | 47 POI, **45 ki apni imaarat aur naam ka board** — Sanjauli Chowk, St. Bede's College, Buddy's Food Joint, Government College Sanjauli, Jakhu Mandir, Mall Road, Sanjauli–Dhalli tunnel |
 | **Din-raat** | Lagataar chalta hai — poora din **24 minute** mein. Raat ko street lamp, khidkiyan aur dukanon ke board jal jaate hain, taare nikalte hain |
 | **Mausam** | Apne aap badalta hai, 18 second mein smooth transition. Mahine ke hisaab se — December mein barf, July mein monsoon |
@@ -86,6 +87,29 @@ duplication nahi.
 
 ---
 
+## Frame budget
+
+Round 16 ka naap (low tier, wahi scene, pehle → baad):
+
+| | pehle | baad |
+|---|---|---|
+| CPU prati frame | 1265 µs | **693 µs** |
+| main-pass draw calls | 482 | 493 |
+| main-pass triangles | 1.91 M | **1.42 M** |
+| shadow-pass triangles | 1.49 M | **0.44 M** |
+| material | 1,197 | **479** |
+| `nearestNode()` | 15–18 µs | **2.4–2.9 µs** |
+| ped | 3,500 | **9,000** |
+
+Ped 2.6 guna hone ke **baad bhi** triangle kam hue — 240 m ke aage har ped
+72 triangle se 12 par aa jaata hai.
+
+Sabse bada structural sudhaar: merged batch ka bounding sphere 3,930 m ka tha,
+yaani poora sheher kabhi frustum-cull hota hi nahi tha — na asli pass mein, na
+shadow pass mein. `ChunkedBuilder` wahi merging 1 km ke khaanon mein karta hai.
+
+---
+
 ## Asli satellite terrain aur asli OSM sadkein
 
 Repo mein jo terrain aata hai wo **landmark-accurate approximation** hai: 45 asli
@@ -126,9 +150,23 @@ python -m pytest tools/tests -q # 89 tests: geo math, data integrity, Godot stru
 python -m ruff check .
 node tools/tests/translit.mjs                       # Devanagari transliteration
 node web/serve.mjs & node tools/tests/smoke_web.mjs # headless browser smoke test
+node tools/tests/perf.mjs                           # frame budget -- CPU, draw calls, material
 node tools/tests/shots.mjs                          # screenshots -> build/shots/
 node tools/build_artifact.mjs && node tools/tests/artifact_check.mjs   # single-file build
 ```
+
+`perf.mjs` alag se zaroori hai. `smoke_web` batata hai duniya **bani** ya nahi;
+ye batata hai wo **kitni mehngi** hai — aur wahi asli sawaal tha jab khel
+atakne laga. Headless mein SwiftShader ~1 fps deta hai, isliye FPS naapna
+bekaar hai; ye machine se azad cheezein naapta hai: har system ke `update()`
+ka waqt, `nearestNode()` ka throughput, draw call ka **asli pass bनाम shadow
+pass** batwara (jo `renderer.info` alag nahi karta), aur material/geometry ki
+ginti.
+
+Round 16 mein isi ne lag ki jad pakdi — `roads.js` ka `nearestNode()` 3,603
+node par seedha loop tha aur `groundAt()` ke zariye har frame 30–50 baar chalta
+tha, yaani **~1.5 lakh doori ka hisaab prati frame**, jo `renderer.info` mein
+kabhi dikhta hi nahi.
 
 Smoke test sirf "boot ho gaya" nahi dekhta — wo **simulation ki ganit** jaanchta
 hai, kyunki headless mein frame rate ~1 fps hai aur aankh se kuch dikhta nahi:
@@ -160,7 +198,8 @@ Sach saaf rakhna behtar hai:
 | ⚠️ **Pahadi lehja** | **Nahi mil sakta.** Kisi bhi TTS engine mein Himachali accent hota hi nahi — Hindi voice mil jaati hai, lehja nahi. Jo ho sakta tha wo kiya hai: line Devanagari mein jaati hai (uchcharan theek), `hi-IN` voice pehle chunti hai, pitch thoda neeche, aur lehja *likhawat* mein hai (`bawa`, `bedafu`, `bendaga`). Isse zyada ka vaada nahi. |
 | ⚠️ **Downloaded awaaz** | Is environment se har free-sound host (freesound, opengameart, pixabay) aur har TTS API `000` deta hai — proxy block. Isliye har awaaz WebAudio se **bani** hai, kahin se laayi nahi gayi. |
 | ⚠️ **Godot project** | **Kabhi chalaya nahi gaya.** Godot editor is environment mein download nahi ho saka. Scripts Godot 4.7 API ke against dhyan se likhe hain, aur structural checks (res:// paths, scene bookkeeping, indentation) automated hain — par pehla asli run aapke PC pe hoga. |
-| ⚠️ **DEM/OSM pipeline** | Network se asli fetch test nahi hua (APIs is environment se blocked hain). Code aur error handling likhi hai; pehla asli run aapke PC pe. |
+| ✅ **Asli DEM** | **Chal gaya.** `tools/shimla_pipeline/build_real_terrain.py` ne AWS Terrain Tiles se 81 tile utha kar `data/heightmap.png` bana diya. Jaanch: naye heightmap ka max 2457 m, Jakhoo ki asli oonchai 2455 m. |
+| ⚠️ **OSM sadkein aur footprints** | Abhi bhi nahi. Overpass, Nominatim, Geofabrik — sab blocked. Overture Maps ka S3 pahunchta hai (range request bhi chalti hai) par uski files 400–540 MB ki hain, isliye wo alag kaam hai. Sadkein filhaal haath se trace ki hui hain (24 sadak, 163 point). |
 | ⚠️ **Blender scripts** | Blender install nahi hai. Syntax verified, execution nahi. |
 
 ---

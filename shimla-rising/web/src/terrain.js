@@ -232,7 +232,15 @@ export class Terrain {
          */
         const sl = this.slopeAt(x, z);
         const rockW = THREE.MathUtils.smoothstep(sl, 0.45, 0.85);
-        const dry = THREE.MathUtils.smoothstep(y, 2180, 2400);
+        /*
+         * Sookhi ghaas sirf sabse upar.
+         *
+         * Pehle 2180 m se shuru thi -- par asli DEM par Shimla ka poora basa
+         * hua ridge hi 2100-2200 m par hai, isliye aadha sheher sookhi peeli
+         * dhalan par baith gaya tha. Shimla ki ridge deodar se dhaki hai;
+         * khulapan Jakhoo (2455 m) ke aas-paas hi shuru hota hai.
+         */
+        const dry = THREE.MathUtils.smoothstep(y, 2330, 2480) * 0.75;
         splat[t] = rockW;
         splat[t + 1] = dry * (1 - rockW);
         p += 3; t += 2;
@@ -271,18 +279,41 @@ export class Terrain {
     const t = (y - this.elevMin) / (this.elevMax - this.elevMin);
     const slope = this.slopeAt(x, z);
 
-    if (t < 0.30) out.setRGB(0.075, 0.155, 0.072);        // khad -- ghana chir pine
-    else if (t < 0.52) out.setRGB(0.095, 0.185, 0.085);   // dhalan -- mila jungle
-    else if (t < 0.72) out.setRGB(0.125, 0.205, 0.098);   // deodar belt
-    else if (t < 0.86) out.setRGB(0.205, 0.225, 0.125);   // ridge -- sookhi ghaas
-    else out.setRGB(0.30, 0.295, 0.27);                 // uncha -- chattan
+    /*
+     * Band ab **metre** se hain, normalised `t` se nahi.
+     *
+     * `t` poore elevation range par phailta hai, aur asli DEM ke saath wo
+     * range 1350-2500 ho gayi -- yaani purane bhinn (0.30, 0.52...) ab bilkul
+     * doosri oonchai par gir rahe the. Asli metre likhne se ye kabhi galat
+     * nahi hoga, chahe DEM dobara bane.
+     */
+    if (y < 1700) out.setRGB(0.075, 0.155, 0.072);        // khad -- ghana chir pine
+    else if (y < 1950) out.setRGB(0.095, 0.185, 0.085);   // dhalan -- mila jungle
+    else if (y < 2280) out.setRGB(0.118, 0.200, 0.096);   // deodar belt -- yahin sheher hai
+    else if (y < 2430) out.setRGB(0.165, 0.208, 0.112);   // ridge ke upar, patla jungle
+    else out.setRGB(0.235, 0.235, 0.185);                 // choti -- khuli ghaas
 
     if (slope > 0.55) {                                 // khadi chattan nangi hoti hai
       const k = Math.min(1, (slope - 0.55) / 0.45);
       out.lerp(_rock, k * 0.8);
     }
-    if (y > 2330) {                                     // barf ki rekha
-      out.lerp(_snow, Math.min(1, (y - 2330) / 110) * 0.85);
+    /*
+     * Barf ki rekha -- Shimla mein **hai hi nahi**.
+     *
+     * Ye pehle 2330 m par thi, jab terrain synthetic tha aur uska upar ka
+     * hissa alag baithta tha. Asli DEM aane par ye galat sabit hui: Shimla ka
+     * basa hua ridge hi 2100-2200 m par hai aur Jakhoo 2455 m -- yaani poora
+     * upar ka sheher saal bhar barf se dhaka dikhne laga. Screenshot mein
+     * Jakhoo ki choti safed ho gayi thi, jabki wo asal mein temple tak deodar
+     * se dhaki hai.
+     *
+     * Is naksha par kahin bhi sthayi barf nahi hoti. Sardi ka safed
+     * `weather.js` sambhalta hai (barf ke particle aur fog ka tint), vertex
+     * colour nahi -- kyunki vertex colour build par ek baar bakta hai aur
+     * mausam ke saath badal nahi sakta.
+     */
+    if (y > 2560) {
+      out.lerp(_snow, Math.min(1, (y - 2560) / 140) * 0.85);
     }
     return out;
   }

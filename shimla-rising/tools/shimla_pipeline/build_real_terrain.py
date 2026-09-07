@@ -159,6 +159,25 @@ def write_heightmap(h: np.ndarray, preset: Preset, source: str, extra: dict) -> 
     rgb[..., 1] = (u16 & 0xFF).astype(np.uint8)
     Image.fromarray(rgb, mode="RGB").save(DATA / "heightmap.png", optimize=True)
 
+    # Halka roop -- single-file artifact ke liye.
+    #
+    # 2048 px ka PNG 5.8 MB ka hai, aur artifact use base64 mein inline karta
+    # hai (+33%). Terrain ka mesh sabse ooncha tier par bhi 8 m prati quad par
+    # hi sample karta hai, yaani 4 m/px ki poori barikee dikhti nahi -- wo sirf
+    # `heightAt()`/`slopeAt()` ki sateekta ke liye hai. Isliye artifact 1024 px
+    # (8 m/px) leta hai: 5.8 MB se 1.6 MB, aur aankh ko farak nahi.
+    #
+    # Seedha RGB resize galat hota: R high byte hai aur G low byte, dono ko
+    # alag-alag interpolate karne se value toot jaati hai. Isliye pehle 16-bit
+    # value banao, phir resize, phir dobara encode.
+    if n > 1024:
+        small = np.asarray(
+            Image.fromarray(u16).resize((1024, 1024), Image.LANCZOS), dtype=np.uint32)
+        srgb = np.zeros((1024, 1024, 3), dtype=np.uint8)
+        srgb[..., 0] = (small >> 8).astype(np.uint8)
+        srgb[..., 1] = (small & 0xFF).astype(np.uint8)
+        Image.fromarray(srgb, mode="RGB").save(DATA / "heightmap_web.png", optimize=True)
+
     meta = {
         "$comment": "shimla_pipeline/build_real_terrain.py se generate hua "
                     "(asli DEM). Haath se edit mat karo.",
@@ -172,6 +191,8 @@ def write_heightmap(h: np.ndarray, preset: Preset, source: str, extra: dict) -> 
         "files": {
             "heightmap.png": "RGB8. elevation = min + ((R*256 + G) / 65535) * (max - min). Web game.",
             "heightmap_16.png": "16-bit grayscale, same normalisation. Godot / Blender / GIS.",
+            "heightmap_web.png": "Wahi, par 1024 px -- single-file artifact ke liye "
+                                 "(base64 inline hota hai, isliye size maayne rakhta hai).",
         },
         "orientation": "row 0 = north edge (z = -half), col 0 = west edge (x = -half)",
         "godot_import": {"height_scale_m": hi - lo, "height_offset_m": lo},
