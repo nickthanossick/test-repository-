@@ -60,7 +60,8 @@ export function buildCity(terrain, roads, districts, pois, rng, quality = {}, op
         if (placed.occupied(x, z, 8.5)) continue;
         placed.add(x, z);
         placedCount++;
-        house({ walls, roofs, plinths, windows, trim }, terrain, x, z, d, rng, col, colliders, facades);
+        house({ walls, roofs, plinths, windows, trim }, terrain, x, z, d, rng, col, colliders, facades,
+              off - n.road.spec.width_m / 2 - 1.0);
       }
     }
   }
@@ -114,7 +115,7 @@ export function buildCity(terrain, roads, districts, pois, rng, quality = {}, op
  *   - **gable chhat** bahar nikle eaves ke saath (pyramid nahi)
  *   - kabhi-kabhi **chimney**
  */
-function house(mb, terrain, x, z, d, rng, col, colliders, facadeCount = 2) {
+function house(mb, terrain, x, z, d, rng, col, colliders, facadeCount = 2, roadClear = 99) {
   const w = 5 + rng() * 4.5;
   const dep = 5 + rng() * 4.5;
   const floors = 2 + Math.floor(rng() * (d.wealth > 0.7 ? 3 : 2.6));
@@ -146,7 +147,11 @@ function house(mb, terrain, x, z, d, rng, col, colliders, facadeCount = 2) {
   col.setHex(wallHex);
   mb.walls.box(x, base + bodyH / 2, z, w, bodyH, dep, col, yaw);
 
-  colliders?.add(x, z, Math.max(w, dep) * 0.62, base - drop - 1, base + bodyH + 4);
+  // Collider sadak tak na pahunche: ghar centreline se `off` door hai, aur
+  // road ka aadha hissa khaali rehna chahiye warna gaadi kinare par hi atak
+  // jaati hai.
+  const cr = Math.min(Math.max(w, dep) * 0.62, Math.max(0, roadClear));
+  if (cr >= 2) colliders?.add(x, z, cr, base - drop - 1, base + bodyH + 4);
 
   // --- har manzil ka chajja ----------------------------------------------
   col.setHex(0xbfb6a8);

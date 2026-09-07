@@ -235,3 +235,23 @@ def test_panga_dialogue_exists_at_every_level():
             assert beat["text"].strip(), f"{key}: khaali line"
             assert beat["speaker"] in speakers, \
                 f"{key}: speaker {beat['speaker']} characters.json mein nahi"
+
+
+def test_map_segments_all_have_a_road():
+    """Naksha ka har segment roads.json mein bhi hona chahiye.
+
+    upper_sanjauli aur dhingu_mata_road pehle sirf naksha mein the, roads.json
+    mein nahi -- isliye wahan na sadak banti thi na ghar, aur Sanjauli ka poora
+    upar ka rehaishi ilaaka khaali reh jaata tha.
+    """
+    segs = load("sanjauli.json")["segments"]
+    roads = {r["id"] for r in load("roads.json")["roads"]}
+    for s in segs:
+        assert s.get("road"), f"{s['id']}: road pointer khaali"
+        assert s["road"] in roads, f"{s['id']}: road {s['road']} roads.json mein nahi"
+
+
+def test_ambulance_and_bus_fleet():
+    v = {x["id"]: x for x in load("vehicles.json")["vehicles"]}
+    assert "ambulance" in v, "IGMC ambulance nahi mili"
+    assert v["ambulance"]["siren"] is True

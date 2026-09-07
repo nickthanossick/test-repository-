@@ -222,7 +222,7 @@
     {
       "id": "upper_sanjauli",
       "name": "Upper Sanjauli Road",
-      "road": null,
+      "road": "upper_sanjauli",
       "type": "street",
       "width_m": 8.5,
       "oneway": false,
@@ -258,7 +258,7 @@
     {
       "id": "dhingu_mata_road",
       "name": "Dhingu Mata Road",
-      "road": null,
+      "road": "dhingu_mata_road",
       "type": "lane",
       "width_m": 5.0,
       "oneway": false,

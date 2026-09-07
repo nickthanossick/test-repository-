@@ -135,7 +135,9 @@ export function buildBazaar(terrain, roads, shopsJson, mapJson, quality = {}, co
      * ke andar aa jaata tha). Radius aadha diagonal se thoda kam, taaki paas se
      * guzarte waqt gaadi khaamakha na atke.
      */
-    colliders?.add(bx, bz, Math.hypot(W, D) * 0.42, gy - drop - 1, gy + 14);
+    // Radius sadak tak na pahunche: dukan centreline se (halfW + 3.4) door hai.
+    const shopR = Math.min(Math.hypot(W, D) * 0.42, off - halfW - 0.8);
+    if (shopR >= 2) colliders?.add(bx, bz, shopR, gy - drop - 1, gy + 14);
 
     const fx2 = Math.sin(fyaw), fz2 = -Math.cos(fyaw);   // local -Z = sadak ki taraf
     /*
@@ -149,12 +151,23 @@ export function buildBazaar(terrain, roads, shopsJson, mapJson, quality = {}, co
         yaw: fyaw + turn, text: spec.name, sub: spec.sub, width: 2.9,
       });
     }
-    if (slot.dense) {
-      signs.push({
-        x: bx + fx2 * 3.34, z: bz + fz2 * 3.34, y: gy + 5.25,
-        yaw: fyaw, text: spec.sub || spec.name, sub: "", width: 3.0 + rng() * 1.0,
-      });
-    }
+    /*
+     * Mukhya board -- shutter aur awning ke **beech**, jahan asli dukan par
+     * hota hai.
+     *
+     * Pehle ye awning ke upar 3.95 m par tha. Wahan se ye dikhta to tha, par
+     * sadak ke beech se (aankh 1.7 m, doori ~6 m) itna tirchha ki 1024x256 ka
+     * texture kuch hi pixel ooncha reh jaata tha -- naam padha hi nahi jaata.
+     * Neeche laane se board seedha saamne aata hai:
+     *   shutter ka neecha kinara 2.31 m, awning 3.47 m
+     *   board 2.53-3.51 m -- theek beech mein
+     *   aankh se seedh awning ke bahri kinare (5.5 m, 3.52 m) ke *neeche* se
+     *   guzarti hai, isliye awning use dhakti bhi nahi
+     */
+    signs.push({
+      x: bx + fx2 * 3.28, z: bz + fz2 * 3.28, y: gy + 3.02,
+      yaw: fyaw, text: spec.name, sub: spec.sub, width: 3.9,
+    });
 
     stalls.push({
       id: slot.id, x: bx, y: gy, z: bz, yaw: fyaw,
@@ -279,9 +292,9 @@ function shopUnit(mb, interior, o) {
   mb.plaster.box(x, y + gh + (bodyH - gh) / 2, z, w, bodyH - gh, d, C, yaw);
 
   // awning
-  const [ax, az] = F(0, fz - 0.65);
+  const [ax, az] = F(0, fz - 0.50);
   hex(parseInt(kind.awning.slice(1), 16));
-  mb.tin.box(ax, y + gh + 0.12, az, w * 0.99, 0.10, 1.25, C, yaw);
+  mb.tin.box(ax, y + gh + 0.12, az, w * 0.99, 0.10, 0.95, C, yaw);
   hex(0x5a5148);
   for (const s2 of [-1, 1]) {                      // tirchhe brace, deewar se
     const [bx2, bz2] = F(s2 * w * 0.40, fz - 0.45);

@@ -196,3 +196,30 @@ export function animateQuadruped(mesh, t, moving) {
   if (rig.tail) rig.tail.rotation.z = Math.sin(t * (moving ? 6 : 2.2)) * (moving ? 0.30 : 0.14);
   if (rig.head) rig.head.rotation.x = Math.sin(t * 1.4) * 0.05;
 }
+
+/**
+ * Bandar -- Shimla ki apni pehchan. Jakhoo aur bazaar dono mein har taraf hote
+ * hain, aur samaan uthake bhaag jaate hain.
+ *
+ * Kutte ka hi dhaancha, par chhota, lambi poonch aur gulaabi mooh.
+ */
+export function buildMonkey(o = {}) {
+  const g = buildDog({ coat: o.coat ?? 0x7d6a4f });
+  g.scale.setScalar(0.62);
+  const rig = g.userData.rig;
+  rig.kind = "monkey";
+  // poonch lambi aur upar uthi hui
+  if (rig.tail) {
+    rig.tail.rotation.x = -1.15;
+    rig.tail.scale.set(0.8, 1.9, 0.8);
+  }
+  // gulaabi mooh
+  const face = new THREE.Mesh(new THREE.SphereGeometry(0.048, 10, 8),
+    new THREE.MeshStandardMaterial({ color: 0xc98a76, roughness: 0.75 }));
+  face.position.set(0, -0.010, -0.098);
+  face.scale.set(0.86, 0.92, 0.72);
+  face.castShadow = true;
+  rig.head.add(face);
+  g.userData.speed = 1.9;
+  return g;
+}

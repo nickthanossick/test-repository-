@@ -497,6 +497,40 @@ async function boot() {
       return true;
     },
     freeCamOff() { debugCam = false; chase._init = false; },
+    /**
+     * Kisi bindu ko dekho, par camera kisi imaarat ke andar na ho.
+     *
+     * Ghane bazaar mein haath se camera rakhna kaam nahi karta -- har jagah
+     * koi dukan hai. Ab colliders maujood hain, to kai koney aazma kar pehla
+     * khaali chun lete hain. Screenshot ke liye yahi bharosemand tareeka hai.
+     */
+    lookAt(tx, ty, tz, dist = 6, elev = 1.2, preferAz = null) {
+      debugCam = true;
+      const tries = 24;
+      // Pasandeeda disha se shuru karo (jaise board ka normal), taaki cheez
+      // saamne se dikhe -- warna pehla khaali kona peeche ka bhi ho sakta hai
+      const base = preferAz ?? 0;
+      for (let ring = 0; ring < 3; ring++) {
+        const d = dist * (1 + ring * 0.5);
+        for (let i = 0; i < tries; i++) {
+          // pehle pasandeeda disha, phir uske dono taraf badhte hue
+          const off = Math.ceil(i / 2) * (i % 2 ? 1 : -1);
+          const a = base + (off / tries) * Math.PI * 2;
+          const cx = tx + Math.cos(a) * d;
+          const cz = tz + Math.sin(a) * d;
+          const cy = ty + elev;
+          if (colliders.inside(cx, cy, cz, 0.6)) continue;
+          if (cy < terrain.heightAt(cx, cz) + 0.5) continue;
+          camera.position.set(cx, cy, cz);
+          camera.lookAt(tx, ty, tz);
+          return { x: cx, y: cy, z: cz, dist: d, azimuth: a };
+        }
+      }
+      // kuch nahi mila -- seedha upar se dekho
+      camera.position.set(tx, ty + dist * 1.6, tz + dist * 0.5);
+      camera.lookAt(tx, ty, tz);
+      return null;
+    },
     /** Ek dukan ke theek saamne khade ho jao -- bazaar ki jaanch ke liye. */
     viewShop(i = 0, dist = 9, height = 3.2, skew = 0) {
       const st = bazaar.userData.stalls[i % bazaar.userData.stalls.length];

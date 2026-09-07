@@ -231,6 +231,26 @@
       ],
       "color": "#d8a52a",
       "desc": "Peeli-maroon deluxe. Lambi doori -- Shimla se Delhi raat bhar."
+    },
+    {
+      "id": "ambulance",
+      "name": "IGMC Ambulance",
+      "class": "van",
+      "shape": "offroad",
+      "seats": 4,
+      "top_speed_kmh": 118,
+      "accel": 6.0,
+      "grip": 0.94,
+      "mass_t": 2.3,
+      "brake": 1.0,
+      "body": [
+        2.05,
+        2.35,
+        5.4
+      ],
+      "color": "#f2f4f6",
+      "siren": true,
+      "desc": "IGMC ki ambulance. Sanjauli se hospital tak ka rasta yahi roz naapti hai."
     }
   ]
 }

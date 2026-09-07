@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { buildHuman } from "./human.js";
-import { buildDog, buildCow, animateQuadruped } from "./animals.js";
+import { buildDog, buildCow, buildMonkey, animateQuadruped } from "./animals.js";
 
 /**
  * Sheher ki bheed -- dukandaar, paidal log, aur sadak ke jaanwar.
@@ -54,17 +54,24 @@ const BOTTOM = [0x35425e, 0x2f3b52, 0x453a52, 0x3b3b42];
  */
 function makePerson(i) {
   const r = seeded(i * 7919 + 13);
+  // Sanjauli mein St. Bede's aur Government College dono hain, isliye bazaar
+  // mein student sabse zyada dikhte hain.
   const roll = r();
-  const build = roll < 0.46 ? "male" : roll < 0.84 ? "female" : "elder";
+  const build = roll < 0.26 ? "boy"
+    : roll < 0.50 ? "girl"
+    : roll < 0.70 ? "male"
+    : roll < 0.88 ? "female"
+    : "elder";
   const pick = (arr) => arr[(r() * arr.length) | 0];
   const opts = {
     build,
     skin: pick(SKIN),
-    top: build === "female" ? pick(FEMALE_TOP) : pick(MALE_TOP),
+    top: (build === "female" || build === "girl") ? pick(FEMALE_TOP) : pick(MALE_TOP),
     bottom: pick(BOTTOM),
     dupatta: pick(DUPATTA),
     // Pahadi topi zyadatar aadmiyon aur buzurgon ke sar pe
-    topi: build !== "female" && r() < 0.72,
+    // Topi zyadatar badi umr ke aadmiyon par -- jawaan londe kam pehente hain
+    topi: (build === "male" || build === "elder") ? r() < 0.78 : (build === "boy" && r() < 0.18),
     height: 0.95 + r() * 0.1,
   };
   return {
@@ -129,6 +136,12 @@ export class Crowd {
       mesh.visible = false;
       this.group.add(mesh);
       this.animals.push({ mesh, kind: "dog", stall: null, phase: Math.random() * 10 });
+    }
+    for (let i = 0; i < (budget.monkeys ?? 0); i++) {
+      const mesh = buildMonkey({ coat: [0x7d6a4f, 0x8c7856][i % 2] });
+      mesh.visible = false;
+      this.group.add(mesh);
+      this.animals.push({ mesh, kind: "monkey", stall: null, phase: Math.random() * 10 });
     }
     for (let i = 0; i < budget.cows; i++) {
       const mesh = buildCow({ hide: [0xb59a76, 0xc9bda8][i % 2] });
@@ -225,7 +238,7 @@ export class Crowd {
         if (!got) continue;
         a.stall = got;
         const fx = Math.sin(got.s.yaw), fz = -Math.cos(got.s.yaw);
-        const out = a.kind === "cow" ? 7.5 : 6.0;
+        const out = a.kind === "cow" ? 7.5 : a.kind === "monkey" ? 4.6 : 6.0;
         const x = got.s.x + fx * out, z = got.s.z + fz * out;
         a.mesh.position.set(x, this.terrain.heightAt(x, z), z);
         a.mesh.rotation.y = got.s.yaw + (Math.random() - 0.5) * 1.6;

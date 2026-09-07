@@ -397,10 +397,26 @@ export function buildLandmarks(terrain, roads, pois, colliders = null) {
     };
     fn(ctx, mb);
 
-    // Pehle 51 named landmark mein se ek bhi collider list mein nahi tha --
-    // gaadi St. Bede's aur hospital dono ke aar-paar nikal jaati thi.
+    /*
+     * Pehle 51 named landmark mein se ek bhi collider list mein nahi tha --
+     * gaadi St. Bede's aur hospital dono ke aar-paar nikal jaati thi.
+     *
+     * Par collider sadak par nahi chadhna chahiye. Bus stop (r 10), police
+     * station (r 14) aur mandir (r 10) sadak ke bilkul kinare hain, aur unke
+     * poore radius se sadak ka centreline hi block ho jaata tha -- gaadi wahan
+     * se guzar hi nahi sakti thi. Isliye radius ko nazdeek ki sadak ke kinare
+     * tak kaat dete hain, aur bahut chhota bache to collider hi nahi rakhte.
+     */
     const fp = FOOTPRINT[p.landmark];
-    if (colliders && fp && fp.r > 0) colliders.add(x, z, fp.r, y - 3, y + fp.h);
+    if (colliders && fp && fp.r > 0) {
+      const near = roads.nearestNode(x, z, (r) => r.type !== "rail");
+      let r = fp.r;
+      if (near) {
+        const clear = near.dist - near.node.road.spec.width_m / 2 - 1.0;
+        r = Math.min(r, clear);
+      }
+      if (r >= 3) colliders.add(x, z, r, y - 3, y + fp.h);
+    }
 
     if (p.sign) {
       signs.push({ x, z, y, yaw, text: p.sign, sub: p.sign_sub || "",

@@ -57,11 +57,11 @@ SEGMENTS = [
          points=[CHOWK, (31.1086, 77.1935), (31.1090, 77.1942), (31.1095, 77.1949),
                  (31.1101, 77.1956), (31.1106, 77.1951)]),
     # Chowk se upar -- Upper Sanjauli ka rehaishi ilaaka aur Dhingu Mata
-    dict(id="upper_sanjauli", name="Upper Sanjauli Road", road=None,
+    dict(id="upper_sanjauli", name="Upper Sanjauli Road", road="upper_sanjauli",
          type="street", width_m=8.5, oneway=False, accuracy="approx",
          points=[CHOWK, (31.1090, 77.1924), (31.1098, 77.1920), (31.1107, 77.1918),
                  (31.1116, 77.1921), (31.1124, 77.1928)]),
-    dict(id="dhingu_mata_road", name="Dhingu Mata Road", road=None,
+    dict(id="dhingu_mata_road", name="Dhingu Mata Road", road="dhingu_mata_road",
          type="lane", width_m=5.0, oneway=False, accuracy="approx",
          points=[(31.1116, 77.1921), (31.1124, 77.1912), (31.1132, 77.1906),
                  (31.1140, 77.1903)]),

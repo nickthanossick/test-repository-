@@ -83,7 +83,8 @@ const HEAD_R = 0.098;
  */
 export function buildHuman(o = {}) {
   const build = o.build || "male";
-  const female = build === "female";
+  const female = build === "female" || build === "girl";
+  const young = build === "girl" || build === "boy";
   const lite = o.lod === "crowd";
   const elder = build === "elder";
   const SKIN = o.skin ?? 0xc08a5e;
@@ -150,17 +151,26 @@ export function buildHuman(o = {}) {
   // baal: aankhein face texture mein phi = 0.44*PI pe hain, isliye hairline
   // uske upar rukni chahiye warna wo aankhon ko dhak leti hai.
   if (female) {
-    // poora cap + peeche juda
     const cap = add(new THREE.Mesh(new THREE.SphereGeometry(HEAD_R * 1.06, 22, 16,
       0, Math.PI * 2, 0, Math.PI * 0.40), hairMat));
     cap.scale.set(1.03, 1.24, 1.03);
     cap.position.y = HEAD_Y;
-    const bun = add(new THREE.Mesh(new THREE.SphereGeometry(0.058, 14, 12), hairMat));
-    bun.position.set(0, HEAD_Y - 0.048, 0.098);
-    bun.scale.set(1.0, 1.05, 0.86);
-    // kandhon tak aati lat
-    const braid = add(new THREE.Mesh(new THREE.CylinderGeometry(0.026, 0.016, 0.20, 8), hairMat));
-    braid.position.set(0, HEAD_Y - 0.155, 0.088);
+    if (young) {
+      // Khule baal kandhon tak -- college wali ladkiyon ka aam roop
+      const fall = add(new THREE.Mesh(new THREE.CylinderGeometry(0.108, 0.094, 0.30, 14, 1, true), hairMat));
+      fall.position.set(0, HEAD_Y - 0.175, 0.020);
+      fall.scale.set(1.0, 1, 0.88);
+      const back = add(new THREE.Mesh(new THREE.SphereGeometry(0.104, 16, 12,
+        0, Math.PI * 2, Math.PI * 0.32, Math.PI * 0.30), hairMat));
+      back.position.set(0, HEAD_Y, 0.016);
+      back.scale.set(1.0, 1.3, 1.0);
+    } else {
+      const bun = add(new THREE.Mesh(new THREE.SphereGeometry(0.058, 14, 12), hairMat));
+      bun.position.set(0, HEAD_Y - 0.048, 0.098);
+      bun.scale.set(1.0, 1.05, 0.86);
+      const braid = add(new THREE.Mesh(new THREE.CylinderGeometry(0.026, 0.016, 0.20, 8), hairMat));
+      braid.position.set(0, HEAD_Y - 0.155, 0.088);
+    }
   } else {
     const hair = add(new THREE.Mesh(new THREE.SphereGeometry(HEAD_R * 1.045, 22, 14,
       0, Math.PI * 2, Math.PI * 0.24, Math.PI * 0.16), hairMat));
@@ -194,7 +204,8 @@ export function buildHuman(o = {}) {
 
   // ================================================================= dhad
   // Seena chauda, kamar patli. Aurton mein kandhe saankre aur kamar aur patli.
-  const SH = female ? 1.13 : 1.30;                 // kandhe ka chaudai guna
+  // Jawaan log patle: kandhe thode saankre, kamar aur patli
+  const SH = (female ? 1.13 : 1.30) - (young ? 0.06 : 0);
   const torsoGeo = deform(new THREE.CapsuleGeometry(0.145, 0.30, 8, 20), (v) => {
     const t = THREE.MathUtils.clamp(v.y / 0.22, -1, 1);
     const w = SH + 0.20 * Math.max(0, t) - (female ? 0.30 : 0.22) * Math.max(0, -t);
@@ -211,9 +222,14 @@ export function buildHuman(o = {}) {
 
   if (female) {
     // kameez: kamar se ghutnon ke beech tak lamba kurta
-    const kurta = add(new THREE.Mesh(new THREE.CylinderGeometry(0.152, 0.186, 0.36, 18), topMat));
-    kurta.position.y = 0.955;
+    // Jawaan: chhoti kurti (kamar se thoda neeche). Badi umr: ghutnon tak kurta.
+    const kl = young ? 0.24 : 0.36;
+    const kurta = add(new THREE.Mesh(new THREE.CylinderGeometry(0.152, young ? 0.168 : 0.186, kl, 18), topMat));
+    kurta.position.y = young ? 1.015 : 0.955;
     kurta.scale.set(1.10, 1, 0.80);
+    // Dupatta sirf badi umr ki auraton par. Jawaan ladkiyan kurti + jeans mein
+    // dupatta nahi lagati -- college ke aas-paas yahi aam hai.
+    if (!young) {
     // Dupatta ek kandhe se tirchha girta hai. Pehle ye poora cylinder tha, jo
     // saamne se ek chapte peele panel (bib) jaisa dikhta tha.
     const dupMat = TEX.standard(TEX.setRepeat(TEX.fabric(o.dupatta ?? 0xd8b23f, 91), 2),
@@ -234,6 +250,7 @@ export function buildHuman(o = {}) {
     const tailEnd = add(new THREE.Mesh(new THREE.BoxGeometry(0.115, 0.24, 0.012), dupMat));
     tailEnd.position.set(0.108, 1.075, 0.116);
     tailEnd.rotation.z = -0.14;
+    }
   } else {
     if (!lite) {
       const zip = add(new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.30, 0.010),
