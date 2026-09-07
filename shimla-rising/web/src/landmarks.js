@@ -129,7 +129,7 @@ function campus(c, mb) {
  * pahad ki taraf. Isliye main building +v par hai aur uska mukh -v ki taraf.
  */
 function college(c, mb) {
-  const { yaw, terrain, boards, fences, colliders } = c;
+  const { yaw, terrain, boards, fences, colliders, crowdSpots, banners } = c;
 
   /*
    * Poora campus dhalan par **upar** khiskaya hua hai.
@@ -512,6 +512,47 @@ function college(c, mb) {
   lamp(GU - 4.6, GV + 1.0, GY);
 
   /*
+   * Students kahan khade hon. Nikhil: "students b dal andar college me".
+   * Ye wahi jagahein hain jahan asli college mein bheed hoti hai -- gate,
+   * seedhiyon ka neecha sira, court ke kinare, aur canteen ke aage.
+   */
+  /*
+   * "Centre of Excellence" ka banner -- seedhiyon ke upar, do khambon ke beech.
+   *
+   * Ye board nahi hai. Board patthar ki sapaat plate hai aur `boards` ke merged
+   * quad se banta hai; banner kapda hai aur beech se **jhoolta** hai, isliye
+   * uska apna geometry chahiye (`buildBanners()`).
+   */
+  for (const s2 of [-1, 1]) {
+    const [px, pz] = L(s2 * 9.2, FV - 5.6);
+    hex(0x8c7d68);
+    mb.stone.box(px, PLAZA + 4.0, pz, 0.42, 8.0, 0.42, C, yaw);
+    hex(0xd0c4ab);
+    mb.stone.box(px, PLAZA + 8.15, pz, 0.62, 0.3, 0.62, C, yaw);
+  }
+  {
+    const [ax, az] = L(-9.2, FV - 5.6);
+    const [bx, bz] = L(9.2, FV - 5.6);
+    banners.push({
+      ax, az, bx, bz, y: PLAZA + 7.4, height: 1.55, sag: 0.52,
+      text: "GOVERNMENT COLLEGE SANJAULI", sub: "CENTRE OF EXCELLENCE",
+    });
+  }
+
+  for (const [u, v, base] of [
+    [GU + 3, GV + 3, GY], [GU - 3, GV + 4, GY],           // gate ke bahar
+    [0, FV - 9, PLAZA], [4, FV - 8, PLAZA], [-5, FV - 10, PLAZA],   // seedhiyon ke neeche
+    [CU - CW / 2 + 3, CV - CD / 2 + 2, PLAZA],            // court ke kone
+    [CU - CW / 2 + 2, CV + CD / 2 - 3, PLAZA],
+    [CU + 2, CV - CD / 2 - 2.5, PLAZA],                   // court ke kinare
+    [-14, -6, PLAZA], [-10, -9, PLAZA],                   // forecourt
+    [-30, -16, LOWER], [-24, -18, LOWER],                 // neeche ka terrace
+  ]) {
+    const [px, pz] = L(u, v);
+    crowdSpots.push({ x: px, z: pz, y: base, kind: "campus" });
+  }
+
+  /*
    * ============================ campus ki hariyali =========================
    *
    * Har round ka +5% ka hissa. Campus ab tak nangi paving par khada tha --
@@ -578,6 +619,86 @@ function college(c, mb) {
       solid(r.u + (r.w > r.l ? t : 0), r.v + (r.w > r.l ? 0 : t), 2.0, PLAZA, WALLH + 3);
     }
   }
+}
+
+/**
+ * Police chowki -- Himachal Pradesh Police ka chhota thana.
+ *
+ * Nikhil: "Sanjauli me police chowki bna de." Pehle `sanjauli_police` ka
+ * landmark `institution` tha, jo `colonial()` par chala jaata tha -- yaani wo
+ * angrezon ke zamane ka bada block jaisa dikhta tha, chowki jaisa bilkul nahi.
+ *
+ * Asli chowki chhoti hoti hai: do manzil, saamne khambon wala baramda, neeli
+ * patti, board, aur bahar ek barrier jispar raat ko laal-neeli batti. Arrest
+ * ke baad khiladi yahin chhodta hai (`main.js` ka `wanted.onArrest`), isliye
+ * ye ab kahani ki jagah bhi hai.
+ */
+function chowki(c, mb) {
+  const { x, z, y, yaw, L, boards, poi } = c;
+  const W = 13, D = 9.5, H = 6.6;
+
+  const B = (which, u, yy, v, sx, sy, sz, h, spin = 0) => {
+    const [px, pz] = L(u, v);
+    hex(h);
+    mb[which].box(px, y + yy, pz, sx, sy, sz, C, yaw + spin);
+  };
+
+  const WHITE = 0xe8e4d8, BLUE = 0x1d4a7a, TRIM = 0xcfc7b4, IRON = 0x3a3f45;
+
+  // plinth aur dhad
+  B("stone", 0, -0.6, 0, W + 1.6, 4.0, D + 1.6, 0x9a9086);   // dhalan par gehra
+  B("plaster", 0, 0.9 + H / 2, 0, W, H, D, WHITE);
+  // HP Police ki neeli patti -- do manzilon ke beech
+  B("plaster", 0, 0.9 + H * 0.52, 0, W + 0.2, 0.75, D + 0.2, BLUE);
+  B("plaster", 0, 0.9 + H + 0.3, 0, W + 0.9, 0.6, D + 0.9, TRIM);      // cornice
+  hex(0x5c626b);
+  {
+    const [rx, rz] = L(0, 0);
+    mb.tin.gableRoof(rx, y + 0.9 + H + 0.6, rz, W + 0.9, D + 0.9, 1.9, 0.5, C, yaw, true);
+  }
+
+  const FV = -(D / 2);            // saamne ka mukh (sadak ki taraf)
+
+  // baramda -- chhah khambe aur upar chhajja
+  for (let i = 0; i < 6; i++) {
+    const u = (i / 5 - 0.5) * (W - 1.4);
+    B("plaster", u, 2.4, FV - 1.9, 0.34, 3.0, 0.34, TRIM);
+  }
+  B("plaster", 0, 4.05, FV - 1.9, W, 0.3, 4.0, TRIM);
+  B("stone", 0, 1.0, FV - 1.9, W, 0.3, 4.0, 0xb0a894);                 // baramde ka farsh
+
+  // darwaza aur khidkiyan
+  B("wood", 0, 2.0, FV + 0.05, 1.6, 2.4, 0.16, 0x4a3a28);
+  for (const s of [-1, 1]) {
+    for (let f = 0; f < 2; f++) {
+      B("plaster", s * 3.6, 2.2 + f * 3.0, FV + 0.04, 1.5, 1.5, 0.14, TRIM);
+      B("glass", s * 3.6, 2.2 + f * 3.0, FV - 0.04, 1.2, 1.2, 0.1, 0x2e4350);
+    }
+  }
+
+  // board -- baramde ke upar, wahi batching jo college ke block board ki hai
+  {
+    const [bx, bz] = L(0, FV - 2.1);
+    boards.push({ x: bx, z: bz, y: y + 5.9, yaw, width: 7.2, kind: "police",
+                  text: "HIMACHAL PRADESH POLICE", sub: poi?.sign_sub || "POLICE CHOWKI SANJAULI" });
+  }
+
+  // jhanda
+  B("metal", -W / 2 - 1.6, 4.4, FV - 3.2, 0.12, 8.0, 0.12, 0xb9bec4);
+  B("plaster", -W / 2 - 1.0, 7.9, FV - 3.2, 1.3, 0.85, 0.06, 0xe8734a);
+  B("plaster", -W / 2 - 1.0, 7.05, FV - 3.2, 1.3, 0.85, 0.06, 0xf0efe9);
+  B("plaster", -W / 2 - 1.0, 6.2, FV - 3.2, 1.3, 0.85, 0.06, 0x2f7d4a);
+
+  // barrier -- laal-safed dandi, ek taraf uthi hui
+  B("metal", W / 2 + 1.2, 1.0, FV - 5.0, 0.4, 2.0, 0.4, 0xd8d2c4);
+  for (let i = 0; i < 7; i++) {
+    B("metal", W / 2 + 0.2 - i * 0.9, 1.75 + i * 0.16, FV - 5.0, 0.9, 0.16, 0.16,
+      i % 2 ? 0xd94f3a : 0xf0efe9);
+  }
+  // sentry box
+  B("plaster", W / 2 + 2.6, 2.0, FV - 1.2, 1.7, 2.6, 1.7, WHITE);
+  B("plaster", W / 2 + 2.6, 3.4, FV - 1.2, 2.0, 0.3, 2.0, BLUE);
+  B("glass", W / 2 + 2.6, 2.3, FV - 2.05, 1.1, 1.3, 0.08, 0x2e4350);
 }
 
 /** Bazaar ki kataar -- sadak ke saath sitti hui dukanein, upar ghar. */
@@ -767,7 +888,7 @@ function yard(c, mb) {
 }
 
 const BUILDERS = {
-  college, campus, bazaar, shopfront, colonial, temple, junction, plaza, yard,
+  college, chowki, campus, bazaar, shopfront, colonial, temple, junction, plaza, yard,
   // tunnel ab `tunnel.js` banata hai -- poora bore, sirf portal nahi
   tunnel_old: () => {},
   tunnel_new: () => {},
@@ -837,6 +958,7 @@ const FOOTPRINT = {
   // college apne collider khud lagata hai (imaarat par, court khaali) --
   // ek gol footprint poore forecourt aur court ko band kar deta
   college: { r: 0, h: 0 },
+  chowki: { r: 9, h: 9 },
   campus: { r: 18, h: 14 },
   shopfront: { r: 5.0, h: 8 },
   colonial: { r: 14, h: 17 },
@@ -867,14 +989,27 @@ const FOOTPRINT = {
  * chala lete hain, aur sabke liye lagane se sheher POI ke aas-paas khaali ho
  * jaata.
  */
-const CLEAR = { college: 42 };
+// Police chowki bhi: ye ghane bazaar ke beech hai, aur clearance ke bina
+// generic ghar iske chaaron taraf khade ho jaate the -- bahar barrier aur
+// jeep ke liye jagah hi nahi bachti thi, aur arrest ke baad khiladi kisi
+// deewar ke beech nikalta tha.
+const CLEAR = { college: 42, chowki: 22 };
 
-export function landmarkClearance(terrain, pois) {
+export function landmarkClearZones(terrain, pois) {
   const out = [];
   for (const p of pois.pois) {
     const r = CLEAR[p.landmark];
     if (!r) continue;
     const { x, z } = terrain.geo.toWorld(p.lat, p.lon);
+    out.push({ x, z, r });
+  }
+  return out;
+}
+
+/** Wahi zones, par bindu ki shakl mein -- `SpatialGrid` bindu-aadharit hai. */
+export function landmarkClearance(terrain, pois) {
+  const out = [];
+  for (const { x, z, r } of landmarkClearZones(terrain, pois)) {
     for (let dx = -r; dx <= r; dx += 7) {
       for (let dz = -r; dz <= r; dz += 7) {
         if (dx * dx + dz * dz <= r * r) out.push({ x: x + dx, z: z + dz });
@@ -900,6 +1035,14 @@ export function buildLandmarks(terrain, roads, pois, colliders = null) {
    */
   const boards = [];
   const fences = [];
+  /*
+   * Bheed ke thehrne ki jagahein. `crowd.js` paidal logon ko sadak ke segment
+   * par rakhta hai -- college campus kisi segment par nahi hai, isliye wahan
+   * koi nahi pahunchta tha. Builder khud batata hai ki uske andar kahan log
+   * khade hone chahiye.
+   */
+  const crowdSpots = [];
+  const banners = [];
 
   for (const p of pois.pois) {
     const fn = BUILDERS[p.landmark];
@@ -921,7 +1064,7 @@ export function buildLandmarks(terrain, roads, pois, colliders = null) {
                                      : facing(roads, x, z);
     const cy = Math.cos(yaw), sy = Math.sin(yaw);
     const ctx = {
-      x, z, y, yaw, terrain, roads, poi: p, rng: seeded(p.id), mbRef: mb, boards, fences, colliders,
+      x, z, y, yaw, terrain, roads, poi: p, rng: seeded(p.id), mbRef: mb, boards, fences, colliders, crowdSpots, banners,
       L: (u, v) => [x + u * cy - v * sy, z + u * sy + v * cy],
     };
     fn(ctx, mb);
@@ -972,7 +1115,9 @@ export function buildLandmarks(terrain, roads, pois, colliders = null) {
   }
   if (boards.length) g.add(buildWallBoards(boards));
   if (fences.length) g.add(buildFences(fences));
+  if (banners.length) g.add(buildBanners(banners));
 
+  g.userData.crowdSpots = crowdSpots;
   g.userData.signs = signs;
   g.userData.landmarkCount = pois.pois.filter((p) => BUILDERS[p.landmark]).length;
   return g;
@@ -1020,6 +1165,55 @@ function buildWallBoards(boards) {
       map: grp.set.map, roughness: grp.set.roughness ?? 0.85,
       side: THREE.DoubleSide,
     })));
+  }
+  return g;
+}
+
+/**
+ * Kapde ke banner -- do khambon ke beech latka hua, beech se jhoolta.
+ *
+ * Sapaat quad se ye plastic ki plate jaisa lagta hai. Asli banner ki pehchan
+ * uska **sag** hai, isliye ise kai patti mein banate hain aur har patti ka
+ * kinara sine ke hisaab se neeche khiskta hai.
+ */
+function buildBanners(banners) {
+  const g = new THREE.Group();
+  g.name = "banners";
+  for (const b of banners) {
+    const pos = [], uv = [], idx = [];
+    const SEG = 14;
+    const sagAt = (t) => Math.sin(t * Math.PI) * b.sag;      // sire par 0, beech mein poora
+    for (let i = 0; i <= SEG; i++) {
+      const t = i / SEG;
+      const x = b.ax + (b.bx - b.ax) * t;
+      const z = b.az + (b.bz - b.az) * t;
+      const top = b.y - sagAt(t);
+      pos.push(x, top, z, x, top - b.height, z);
+      /*
+       * `u` ulta.
+       *
+       * Banner ka mukh us taraf hai jahan se dekha jaata hai, aur us disha se
+       * dekhne wale ko local +X *baayen* dikhta hai -- seedha `t` dene par naam
+       * aaine jaisa palat kar padhta hai. Yahi bug shop board mein bhi tha.
+       */
+      uv.push(1 - t, 1, 1 - t, 0);
+    }
+    for (let i = 0; i < SEG; i++) {
+      const a = i * 2;
+      idx.push(a, a + 1, a + 3, a, a + 3, a + 2);
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+    geo.setAttribute("uv", new THREE.Float32BufferAttribute(uv, 2));
+    geo.setIndex(idx);
+    geo.computeVertexNormals();
+    geo.computeBoundingSphere();
+    const set = TEX.banner(b.text, b.sub);
+    const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({
+      map: set.map, roughness: set.roughness, side: THREE.DoubleSide,
+    }));
+    m.castShadow = true;
+    g.add(m);
   }
   return g;
 }

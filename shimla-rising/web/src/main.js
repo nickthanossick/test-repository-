@@ -10,6 +10,7 @@ import { buildTunnels } from "./tunnel.js";
 import { BusSystem } from "./buses.js";
 import { Crowd } from "./crowd.js";
 import { Panga } from "./panga.js";
+import { Combat } from "./combat.js";
 import { Sky } from "./sky.js";
 import { Weather } from "./weather.js";
 import { DayNight } from "./daynight.js";
@@ -112,7 +113,7 @@ async function boot() {
   // bazaar -- jo city se pehle banta hai -- usme kuch daal hi nahi sakta tha,
   // aur uski 672 dukanein poori duniya ke liye ghost thi.
   const colliders = new Colliders(24);
-  const bazaar = buildBazaar(terrain, roads, data.shops, data.sanjauliMap, Q, colliders);
+  const bazaar = buildBazaar(terrain, roads, data.shops, data.sanjauliMap, data.pois, Q, colliders);
   scene.add(bazaar);
 
   const tunnels = buildTunnels(terrain, roads, data.pois, colliders);
@@ -205,7 +206,9 @@ async function boot() {
   // paidal log usi par chalte hain, taaki dono ek hi naksha follow karein.
   const crowd = new Crowd(scene, terrain, roads, bazaar.userData.stalls,
                           Q.crowd ?? { keepers: 42, walkers: 28, dogs: 3, cows: 2 },
-                          buses.segs);
+                          // campus jaisi jagahein jo kisi sadak-segment par nahi hain --
+                          // college ke andar students inhi par khade hote hain
+                          buses.segs, city.userData.crowdSpots);
 
   const dialogue = new Dialogue(document.getElementById("subtitle"), data);
   const audio = new Audio();
@@ -262,6 +265,35 @@ async function boot() {
 
   // NPC se takrane par jhagda. Ye missions se bilkul alag hai.
   const panga = new Panga(crowd, { dialogue, hud, audio, wanted, player });
+  /*
+   * Danda aur pathar. `panga` NPC -> khiladi hai, `combat` khiladi -> NPC.
+   * Dono ek hi bheed par chalte hain aur ek hi `wanted` mein heat daalte hain.
+   */
+  const combat = new Combat({ crowd, wanted, hud, audio, dialogue, player,
+                              scene, terrain, panga });
+
+  /*
+   * Pakde jaana.
+   *
+   * Nikhil: "jaise e marega waise arrest hoga". `wanted.js` ka constable 2.2 m
+   * ke andar 1.2 second rahe to yahan aa jaata hai: wanted 0, saara pathar
+   * saaf, chowki ke bahar, aur 30% paise jurmane mein.
+   */
+  wanted.onArrest = () => {
+    const fine = Math.round(state.money * 0.30);
+    state.money = Math.max(0, state.money - fine);
+    hud.setMoney(state.money);
+    wanted.clear();
+    combat.clear();
+    player.health = Math.max(35, player.health);
+    const sp = safeSpot("sanjauli_police", 12);
+    player.placeAt(sp.x, sp.z);
+    if (state.mode === "vehicle") toggleVehicle();
+    chase._init = false;
+    hud.toast(`BUSTED — Sanjauli chowki. Jurmana ₹${fine.toLocaleString("en-IN")}`, 5);
+    audio.blip(140, 0.5, 0.35);
+    saveGame(state);
+  };
 
   wanted.onStarsChanged = (n) => {
     hud.setStars(n);
@@ -480,6 +512,11 @@ async function boot() {
     panga.update(dt, state.mode === "vehicle"
       ? { pos: state.vehicle.pos, radius: 1.5, inVehicle: true }
       : { pos: player.pos, radius: 0.42, inVehicle: false });
+    // Danda/pathar sirf paidal -- gaadi mein baith kar lathi nahi chalti
+    combat.update(dt, {
+      hit: state.mode === "foot" && input.pressed("KeyG"),
+      throw: state.mode === "foot" && input.pressed("KeyR"),
+    });
     dayNight.update(dt, camera);   // waqt, sooraj, taare, raat ki roshni, mausam
     sky.update(camera);
     sky.fitShadow(pos);            // shadow camera khiladi ke saath chalta hai
@@ -511,7 +548,7 @@ async function boot() {
   // debugging ke liye -- Playwright test yahi padhta hai
   window.__shimla = {
     ready: true, scene, camera, renderer, terrain, roads, city, player, missions, wanted, chase, sky, dayNight,
-    bazaar, buses, crowd, panga, colliders, parked,
+    bazaar, buses, crowd, panga, combat, colliders, parked,
     weather, state, data, get fps() { return fps; },
     get stats() { return {
       triangles: renderer.info.render.triangles,

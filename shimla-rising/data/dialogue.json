@@ -346,6 +346,16 @@
         "speaker": "vicky",
         "text": "Rozana."
       }
+    ],
+    "generic:hit_police": [
+      {
+        "speaker": "rahgeer",
+        "text": "Arre! Police pe haath utha diya isne!"
+      },
+      {
+        "speaker": "vicky",
+        "text": "Ab bhaagna hi padega."
+      }
     ]
   }
 }

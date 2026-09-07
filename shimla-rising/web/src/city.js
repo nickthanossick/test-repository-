@@ -97,6 +97,7 @@ export function buildCity(terrain, roads, districts, pois, rng, quality = {}, op
 
   // Asli jagahein: har named POI ki apni imaarat, aur uske naam ka board.
   const lm = buildLandmarks(terrain, roads, pois, colliders);
+  group.userData.crowdSpots = lm.userData.crowdSpots;
   group.add(lm);
   const signs = buildSigns(lm.userData.signs, terrain);
   group.add(signs);

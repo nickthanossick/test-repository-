@@ -677,10 +677,9 @@
       "lat": 31.108,
       "lon": 77.1915,
       "district": "sanjauli",
-      "landmark": "institution",
+      "landmark": "chowki",
       "accuracy": "approx",
-      "sign": "POLICE STATION",
-      "sign_sub": "Sanjauli"
+      "sign_sub": "POLICE CHOWKI SANJAULI"
     },
     {
       "id": "sanjauli_temple",

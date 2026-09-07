@@ -54,6 +54,8 @@ const BOTTOM = [0x35425e, 0x2f3b52, 0x453a52, 0x3b3b42];
  * Ek kirdaar ke dono roop -- seed se, taaki dono bilkul ek jaise dikhein aur
  * har load par wahi mile.
  */
+const young = (b) => b === "boy" || b === "girl";
+
 function makePerson(i) {
   const r = seeded(i * 7919 + 13);
   // Sanjauli mein St. Bede's aur Government College dono hain, isliye bazaar
@@ -74,6 +76,10 @@ function makePerson(i) {
     // Pahadi topi zyadatar aadmiyon aur buzurgon ke sar pe
     // Topi zyadatar badi umr ke aadmiyon par -- jawaan londe kam pehente hain
     topi: (build === "male" || build === "elder") ? r() < 0.78 : (build === "boy" && r() < 0.18),
+    // Jawaan log zyadatar student hain (Sanjauli mein do college hain) -- jhola
+    // hi wo ek cheez hai jisse door se bhi student pehchana jaata hai.
+    bag: young(build) && r() < 0.72
+      ? [0x2f4a6b, 0x7a3b3b, 0x2f5230, 0x3d3550][(r() * 4) | 0] : false,
     height: 0.95 + r() * 0.1,
   };
   return {
@@ -111,12 +117,15 @@ export class Crowd {
    * @param stalls bazaar.userData.stalls -- har dukan ka counter aur mooh
    * @param budget {keepers, walkers, dogs, cows}
    */
-  constructor(scene, terrain, roads, stalls, budget, segs = null) {
+  constructor(scene, terrain, roads, stalls, budget, segs = null, spots = null) {
     this.terrain = terrain;
     this.roads = roads;
     this.stalls = stalls;
     // sadak ke segment (buses wale hi) -- paidal log inpar chalte hain
     this.segs = segs && segs.size ? [...segs.values()] : null;
+    // Campus jaisi jagahein jo kisi sadak-segment par nahi hain (landmarks.js
+    // ke builder khud batate hain ki unke andar log kahan khade hone chahiye)
+    this.spots = spots && spots.length ? spots : null;
     this.group = new THREE.Group();
     this.group.name = "crowd";
     scene.add(this.group);
@@ -189,6 +198,38 @@ export class Crowd {
       w.placed = true; w.mesh.visible = true;
       return true;
     }
+    /*
+     * Pehle campus jaisi jagah, agar khiladi uske paas hai.
+     *
+     * Ye segment par nahi hain, isliye purana tareeka wahan kisi ko rakhta hi
+     * nahi tha -- college ke andar ek bhi student nahi hota tha.
+     */
+    if (this.spots && Math.random() < 0.55) {
+      const near = this.spots.filter((sp) => {
+        const d = Math.hypot(sp.x - pos.x, sp.z - pos.z);
+        return d < KEEPER_RANGE && d > 4;
+      });
+      if (near.length) {
+        const sp = near[(Math.random() * near.length) | 0];
+        w.x = sp.x + (Math.random() - 0.5) * 5;
+        w.z = sp.z + (Math.random() - 0.5) * 5;
+        /*
+         * Campus ka farsh **zameen se ooncha** hai (college ka terrace cut-and-
+         * fill se banta hai, kahin 5-6 m upar). Isliye yahan terrain ki oonchai
+         * nahi chalti -- uspar rakhne se student slab ke *andar* dab jaata hai
+         * aur ek bhi nazar nahi aata. Spot apni oonchai khud bata deta hai.
+         */
+        w.fixedY = sp.y;
+        const a = Math.random() * Math.PI * 2;
+        w.dir = 1;
+        // campus mein log tehelte hain, kisi lakeer par nahi chalte
+        w.ux = Math.cos(a) * 0.35; w.uz = Math.sin(a) * 0.35;
+        w.placed = true;
+        w.mesh.visible = true;
+        return true;
+      }
+    }
+
     for (let tries = 0; tries < 24; tries++) {
       const seg = this.segs[(Math.random() * this.segs.length) | 0];
       const d = Math.random() * seg.total;
@@ -218,6 +259,7 @@ export class Crowd {
       if (dist > NEAR_BAND && Math.random() < 0.7) continue;
       w.dir = Math.random() < 0.5 ? 1 : -1;
       w.x = x; w.z = z;
+      w.fixedY = null;              // sadak par terrain hi sahi hai
       w.ux = ux * w.dir; w.uz = uz * w.dir;
       w.placed = true;
       w.mesh.visible = true;
@@ -276,7 +318,7 @@ export class Crowd {
       }
       w.x += w.ux * WALK_SPEED * dt;
       w.z += w.uz * WALK_SPEED * dt;
-      w.mesh.position.set(w.x, this.terrain.heightAt(w.x, w.z), w.z);
+      w.mesh.position.set(w.x, w.fixedY ?? this.terrain.heightAt(w.x, w.z), w.z);
       w.mesh.rotation.y = Math.atan2(w.ux, w.uz);
       const d = Math.hypot(w.x - playerPos.x, w.z - playerPos.z);
       setDetail(w, d);

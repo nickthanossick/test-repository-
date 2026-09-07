@@ -604,6 +604,8 @@ export function signboard(text, sub = "", kind = "shop", seed = 0) {
       road:     { bg: "#14663d", fg: "#ffffff", accent: "#ffffff", border: "#ffffff" },
       // college ke block ka board -- safed plate, gehra text, sarkari look
       block:    { bg: "#f2f1ec", fg: "#1f2a33", accent: "#8a2b22", border: "#8a8578" },
+      // HP Police -- neela board, safed text, ashoka-chakra jaisa sunehra kinara
+      police:   { bg: "#12365e", fg: "#ffffff", accent: "#d8c88a", border: "#d8c88a" },
       dhaba:    { bg: "#8f2418", fg: "#ffeccc", accent: "#f0c246", border: "#f0c246" },
       bakery:   { bg: "#f0e2c4", fg: "#5a3218", accent: "#a8341f", border: "#a8341f" },
       bank:     { bg: "#123a70", fg: "#ffffff", accent: "#e8c33a", border: "#dfe6f0" },
@@ -849,6 +851,76 @@ export function chainLink(seed = 17) {
     }
     const t = texture(cv, 1, true);
     return { map: t, roughness: 0.6, metalness: 0.7, alpha: true };
+  });
+}
+
+/**
+ * Kapde ka banner -- college ke saamne latakne wala.
+ *
+ * Board se alag cheez hai: board patthar/tin ki sapaat plate hai, banner kapda
+ * hai. Isliye ismein bunai ka daana, kinare par jhalar, aur beech mein do
+ * lakeerein hain -- jaise asli chhapa hua flex hota hai.
+ */
+export function banner(text, sub = "", seed = 3) {
+  return cached(`banner:${text}:${sub}`, () => {
+    const W = 1024, H = 256;
+    const cv = canvas(W);
+    cv.height = H;
+    const ctx = cv.getContext("2d");
+
+    // gehra neela maidan, halka bunai ka daana
+    const base = srgb(0x123a70);
+    const grain = fbm(64, 16, 3, seed);
+    const img = ctx.createImageData(W, H);
+    for (let y = 0; y < H; y++) {
+      for (let x = 0; x < W; x++) {
+        const k = 0.90 + grain[(y % 64) * 64 + (x % 64)] * 0.20;
+        const i = (y * W + x) * 4;
+        img.data[i] = base.r * 255 * k;
+        img.data[i + 1] = base.g * 255 * k;
+        img.data[i + 2] = base.b * 255 * k;
+        img.data[i + 3] = 255;
+      }
+    }
+    ctx.putImageData(img, 0, 0);
+
+    // kinare ki sunehri patti
+    ctx.strokeStyle = "#d8b23f";
+    ctx.lineWidth = 7;
+    ctx.strokeRect(16, 16, W - 32, H - 32);
+    ctx.lineWidth = 2;
+    ctx.strokeRect(28, 28, W - 56, H - 56);
+
+    const family = '"IBM Plex Sans Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif';
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    ctx.fillStyle = "#ffffff";
+    let size = 78;
+    do {
+      ctx.font = `700 ${size}px ${family}`;
+      if (ctx.measureText(text).width <= W - 110) break;
+      size -= 3;
+    } while (size > 26);
+    ctx.fillText(text, W / 2, sub ? H * 0.38 : H * 0.5);
+
+    if (sub) {
+      ctx.fillStyle = "#f0d27a";
+      let ss = 46;
+      do {
+        ctx.font = `600 ${ss}px ${family}`;
+        if (ctx.measureText(sub).width <= W - 140) break;
+        ss -= 2;
+      } while (ss > 16);
+      ctx.fillText(sub, W / 2, H * 0.70);
+      ctx.strokeStyle = "#d8b23f";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(W * 0.30, H * 0.545);
+      ctx.lineTo(W * 0.70, H * 0.545);
+      ctx.stroke();
+    }
+    return { map: texture(cv, 1, true), roughness: 0.88, metalness: 0.0 };
   });
 }
 

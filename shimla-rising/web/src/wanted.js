@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { Vehicle } from "./vehicle.js";
+import { buildHuman } from "./human.js";
 
 /**
  * Himachal Police ka heat system. 0-5 sitare.
@@ -19,10 +20,29 @@ export class WantedSystem {
     this.chasers = [];
     this.maxChasers = 5;
     this.onStarsChanged = () => {};
+
+    /*
+     * Paidal constable.
+     *
+     * Nikhil: "public m b agr jyda logo s marega to police aegi". Jeep se wo
+     * nahi hota -- gali mein, seedhiyon par, bazaar ke beech gaadi pahunchti
+     * hi nahi. Isliye khiladi paidal ho to khaki wardi wale paidal aate hain,
+     * aur wahi pakadte bhi hain.
+     */
+    this.constables = [];
+    this.maxConstables = 3;
+    this.arrestTimer = 0;
+    this.onArrest = () => {};
   }
 
   add(amount) { this.heat = Math.min(100, this.heat + amount); this._sync(); }
-  clear() { this.heat = 0; this._sync(); this._despawnAll(); }
+  clear() {
+    this.heat = 0;
+    this.arrestTimer = 0;
+    this._sync();
+    this._despawnAll();
+    while (this.constables.length) this._despawnConstable(0);
+  }
 
   _sync() {
     // Pehla sitara 8 heat pe. Warna zaraa si heat (jaise ek frame ka glitch) bhi
@@ -46,6 +66,91 @@ export class WantedSystem {
     while (this.chasers.length > want) this._despawn(this.chasers.length - 1);
 
     for (const c of this.chasers) this._drive(c, dt, playerPos, weatherGrip);
+
+    this._updateConstables(dt, playerPos, inVehicle);
+  }
+
+  // ------------------------------------------------------------- paidal police
+
+  _updateConstables(dt, playerPos, inVehicle) {
+    // Gaadi mein ho to paidal constable ka koi matlab nahi -- jeep peecha karti hai
+    const want = (!inVehicle && this.stars > 0)
+      ? Math.min(this.maxConstables, this.stars) : 0;
+    while (this.constables.length < want) this._spawnConstable(playerPos);
+    while (this.constables.length > want) this._despawnConstable(this.constables.length - 1);
+
+    let closest = Infinity;
+    for (const c of this.constables) {
+      const m = c.mesh;
+      const dx = playerPos.x - m.position.x, dz = playerPos.z - m.position.z;
+      const d = Math.hypot(dx, dz);
+      closest = Math.min(closest, d);
+      if (d > 1.4) {
+        const sp = Math.min(4.6, 2.6 + this.stars * 0.5);
+        m.position.x += (dx / d) * sp * dt;
+        m.position.z += (dz / d) * sp * dt;
+      }
+      m.position.y = this.terrain.heightAt(m.position.x, m.position.z);
+      m.rotation.y = Math.atan2(dx, dz);
+      // chalne ki halki chaal
+      c.phase += dt * 9;
+      const rig = m.userData.rig;
+      if (rig) {
+        const s = Math.sin(c.phase) * 0.5;
+        rig.legs[0].hip.rotation.x = s;
+        rig.legs[1].hip.rotation.x = -s;
+        rig.arms[0].shoulder.rotation.x = -s * 0.6;
+        rig.arms[1].shoulder.rotation.x = s * 0.6;
+      }
+      // bahut door reh gaya to paas le aao, warna peecha khatam lagta hai
+      if (d > 160) this._placeConstable(c, playerPos);
+    }
+
+    /*
+     * Pakad. Constable itne paas itni der raha to BUSTED.
+     *
+     * Ek hi frame ke touch par arrest karna kharab lagta hai -- bhaagne ka
+     * mauka milna chahiye, isliye ghadi chalti hai aur door hote hi wapas
+     * girti hai.
+     */
+    if (closest < 2.2) {
+      this.arrestTimer += dt;
+      if (this.arrestTimer >= 1.2) { this.arrestTimer = 0; this.onArrest(); }
+    } else {
+      this.arrestTimer = Math.max(0, this.arrestTimer - dt * 1.5);
+    }
+  }
+
+  _spawnConstable(playerPos) {
+    const mesh = buildHuman({
+      build: "male", lod: "crowd",
+      skin: 0xb07c4f,
+      top: 0x8a7f5a,        // khaki wardi
+      bottom: 0x6f6647,
+      topi: false,
+    });
+    mesh.castShadow = true;
+    const c = { mesh, phase: Math.random() * 6, police: true };
+    this.scene.add(mesh);
+    this.constables.push(c);
+    this._placeConstable(c, playerPos);
+  }
+
+  /** Khiladi ke aas-paas, par nazar ke bilkul saamne nahi. */
+  _placeConstable(c, playerPos) {
+    const a = Math.random() * Math.PI * 2;
+    const r = 26 + Math.random() * 16;
+    const x = playerPos.x + Math.cos(a) * r;
+    const z = playerPos.z + Math.sin(a) * r;
+    c.mesh.position.set(x, this.terrain.heightAt(x, z), z);
+  }
+
+  _despawnConstable(i) {
+    const c = this.constables[i];
+    if (!c) return;
+    this.scene.remove(c.mesh);
+    c.mesh.traverse((o) => o.geometry?.dispose?.());
+    this.constables.splice(i, 1);
   }
 
   _spawn(playerPos) {

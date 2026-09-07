@@ -140,5 +140,6 @@ function buildAvatar() {
     top: 0xbb3a2a,        // laal jacket
     bottom: 0x35425e,     // neeli jeans
     topi: true,
+    danda: true,          // daayein haath mein -- `combat.js` isse ghumata hai
   });
 }

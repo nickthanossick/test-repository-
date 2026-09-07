@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import * as TEX from "./textures.js";
 import { MeshBuilder } from "./geometry.js";
+import { landmarkClearZones } from "./landmarks.js";
 
 /**
  * Sanjauli ka bazaar corridor.
@@ -46,7 +47,7 @@ const SHUTTERS = [0x3a4149, 0x4a4038, 0x2f3b46, 0x45403a];
  * Jab tak slot khaali hain, unme cycle karke naam bhar diye jaate hain -- kaam
  * rukta nahi.
  */
-export function buildBazaar(terrain, roads, shopsJson, mapJson, quality = {}, colliders = null) {
+export function buildBazaar(terrain, roads, shopsJson, mapJson, pois, quality = {}, colliders = null) {
   const g = new THREE.Group();
   g.name = "bazaar";
 
@@ -100,11 +101,29 @@ export function buildBazaar(terrain, roads, shopsJson, mapJson, quality = {}, co
   const rng = seeded("bazaar:slots");
   let wireCounter = 0;
 
+  /*
+   * Jin jagahon par koi named landmark khud khada hai, wahan dukan nahi.
+   *
+   * Police chowki `chowk_tunnel` ke shop-stretch ke theek beech mein padti
+   * hai, isliye uske chaaron taraf dukanein khadi ho jaati thi -- barrier,
+   * jeep aur jhande ke liye jagah hi nahi bachti thi, aur camera kisi bhi
+   * kone se andar nahi dekh paata tha.
+   */
+  const clearZones = landmarkClearZones(terrain, pois);
+
   for (const slot of mapJson.slots) {
     const seg = segs.get(slot.segment);
     if (!seg) continue;
     // Halke hisse mein har teesri dukan -- asli bazaar chowk ke paas ghana hai
     if (!slot.dense && rng() > 0.34) continue;
+    // landmark ki apni zameen -- yahan dukan nahi lagti
+    {
+      const q = at(seg, slot.t);
+      const halfW0 = seg.spec.width_m / 2;
+      const sx = q.x + q.nx * slot.side * (halfW0 + 3.4);
+      const sz = q.z + q.nz * slot.side * (halfW0 + 3.4);
+      if (clearZones.some((c) => Math.hypot(c.x - sx, c.z - sz) < c.r)) continue;
+    }
 
     const spec = (slot.shop && byName.get(slot.shop)) || shops[shopIndex++ % shops.length];
     const kind = kinds[spec.kind] || kinds.general;

@@ -312,7 +312,47 @@ export function buildHuman(o = {}) {
       fingers.position.set(0, -0.298, -0.004);
       fingers.rotation.x = 0.22;
     }
+    /*
+     * Danda -- seedha `elbow` group se latakta hai, isliye kohni ke saath
+     * ghoomta hai aur swing ke liye alag se kuch animate nahi karna padta.
+     * Sirf daayein haath mein.
+     */
+    if (o.danda && side === 1) {
+      const dandaMat = new THREE.MeshStandardMaterial({ color: 0x6b4a2a, roughness: 0.86 });
+      const stick = add(new THREE.Mesh(new THREE.CylinderGeometry(0.019, 0.023, 0.95, 8), dandaMat), elbow);
+      stick.position.set(0, -0.30, -0.10);
+      stick.rotation.x = Math.PI / 2 - 0.25;         // haath mein aage ki taraf
+      // dono sire par lohe ki patti -- asli lathi par yahi hoti hai
+      const ring = new THREE.MeshStandardMaterial({ color: 0x4a4f55, roughness: 0.5, metalness: 0.6 });
+      for (const t of [-0.42, 0.42]) {
+        const r = add(new THREE.Mesh(new THREE.CylinderGeometry(0.024, 0.024, 0.04, 8), ring), elbow);
+        r.position.set(0, -0.30 - Math.sin(0.25) * t, -0.10 + Math.cos(0.25) * t);
+        r.rotation.x = Math.PI / 2 - 0.25;
+      }
+    }
+
     arms.push({ shoulder, elbow });
+  }
+
+  /*
+   * Student ka jhola -- ek kandhe par latka bag aur tirchhi patti.
+   *
+   * Campus par sab ek jaise rahgeer lagte the; bag hi wo ek cheez hai jisse
+   * door se bhi student pehchana jaata hai.
+   */
+  if (o.bag) {
+    const bagMat = TEX.standard(TEX.setRepeat(TEX.fabric(o.bag === true ? 0x2f4a6b : o.bag, 37), 2),
+                                { roughness: 0.92 });
+    const body = add(new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.30, 0.13), bagMat));
+    body.position.set(0.10, 1.10, -0.17);
+    body.rotation.z = -0.10;
+    const flap = add(new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.10, 0.145), bagMat));
+    flap.position.set(0.10, 1.24, -0.17);
+    flap.rotation.z = -0.10;
+    // patti -- ek kandhe se doosri kamar tak
+    const strap = add(new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.46, 0.03), bagMat));
+    strap.position.set(-0.02, 1.28, -0.045);
+    strap.rotation.set(0.16, 0, 0.52);
   }
 
   // ============================================================== taangein
