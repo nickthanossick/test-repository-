@@ -22,7 +22,9 @@ export class BusSystem {
    * @param mapJson data/sanjauli.json
    * @param routesJson data/routes.json
    */
-  constructor(scene, terrain, mapJson, routesJson, vehicleById, budget = 6) {
+  constructor(scene, terrain, mapJson, routesJson, vehicleById, budget = 6, ground = null) {
+    // sadak ki satah samet -- bina iske bus sadak par tairti dikhti hai
+    this.ground = ground || ((x, z) => terrain.heightAt(x, z));
     this.terrain = terrain;
     this.group = new THREE.Group();
     this.group.name = "buses";
@@ -137,8 +139,9 @@ export class BusSystem {
       // Left-hand traffic: apni disha ke hisaab se baayein lane mein raho
       const off = LANE_OFFSET * bus.dir;
       const x = p.x + nx * off, z = p.z + nz * off;
-      const y = this.terrain.heightAt(x, z);
-      bus.mesh.position.set(x, y + bus.spec.body[1] * 0.5 - 0.35, z);
+      const y = this.ground(x, z);
+      // origin pahiye ke neeche hai -- koi offset nahi, warna bus tairti hai
+      bus.mesh.position.set(x, y, z);
 
       const heading = Math.atan2(p.ux * bus.dir, -(p.uz * bus.dir));
       const n = this.terrain.normalAt(x, z, _n);

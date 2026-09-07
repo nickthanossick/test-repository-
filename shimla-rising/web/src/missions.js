@@ -80,7 +80,9 @@ export class MissionSystem {
       const m = this.byId.get(id);
       if (!m || (this.completed.has(id) && !m.repeatable)) continue;
       const p = this.poiPos(m.start_poi);
-      if (p && p.distanceTo(pos) < 20) return m;
+      // Nikhil: "mission easy hojae shuru" -- 20 m par marker ke bilkul
+      // upar khada hona padta tha; 32 m par bas paas jaana kaafi hai
+      if (p && p.distanceTo(pos) < 32) return m;
     }
     return null;
   }

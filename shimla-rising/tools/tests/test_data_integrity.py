@@ -79,9 +79,10 @@ def test_dialogue_speakers_and_keys(bundle):
     chars = {c["id"] for c in bundle["characters"]["characters"]}
     missions = {m["id"] for m in bundle["missions"]["missions"]}
     problems = []
-    # "generic:" aur "panga:" mission se bandhe nahi hain -- pehla sheher ke aam
-    # halaat ke liye, doosra NPC se takrane wale jhagde ke liye.
-    free = ("generic:", "panga:")
+    # "generic:", "panga:" aur "vicky:idle:" mission se bandhe nahi hain --
+    # pehla sheher ke aam halaat ke liye, doosra NPC se takrane wale jhagde ke
+    # liye, teesra wo jo Vicky khud se bolta rehta hai.
+    free = ("generic:", "panga:", "vicky:idle:")
     for key, lines in bundle["dialogue"]["lines"].items():
         if not key.startswith(free) and key.split(":")[0] not in missions:
             problems.append(f"key {key}")

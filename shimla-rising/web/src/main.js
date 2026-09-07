@@ -8,6 +8,7 @@ import { Colliders } from "./grid.js";
 import { buildBazaar } from "./bazaar.js";
 import { buildTunnels } from "./tunnel.js";
 import { BusSystem } from "./buses.js";
+import { Traffic } from "./traffic.js";
 import { Crowd } from "./crowd.js";
 import { Panga } from "./panga.js";
 import { Combat } from "./combat.js";
@@ -101,6 +102,13 @@ async function boot() {
   const roadGroup = roads.buildMesh();
   scene.add(roadGroup);
 
+  /*
+   * Zameen ki asli oonchai -- sadak ki satah samet. Khiladi, gaadi aur bus
+   * sab isse lete hain; sirf terrain lene par sadak par sab aadha dhansa
+   * rehta tha (sadak ka mesh terrain se 0.5 m upar hai).
+   */
+  const groundAt = (x, z) => roads.groundAt(x, z);
+
   setProgress(0.80, "Shimla bas raha hai…");
   // Sanjauli ka bazaar: Chowk se Dhalli tak dono taraf lagatar dukanein.
   // Ye city ke generic scatter se *pehle* banta hai taaki `buildCity` ko pata ho
@@ -134,7 +142,7 @@ async function boot() {
 
   // ------------------------------------------------------------------ actors
   setProgress(0.95, "Vicky taiyaar ho raha hai…");
-  const player = new Player(terrain, colliders);
+  const player = new Player(terrain, colliders, groundAt);
   scene.add(player.mesh);
 
   // aas-paas kuch gaadiyan khadi kar do
@@ -152,7 +160,7 @@ async function boot() {
     if (!n) continue;
     const kind = id === "isbt" ? "hrtc_bus" : id === "timber_depot" ? "timber_truck"
       : kinds[(rng() * kinds.length) | 0];
-    const v = new Vehicle(data.vehicleById.get(kind), terrain, { colliders });
+    const v = new Vehicle(data.vehicleById.get(kind), terrain, { colliders, ground: groundAt });
     v.placeAt(n.node.pos.x + (rng() - 0.5) * 6, n.node.pos.z + (rng() - 0.5) * 6, rng() * Math.PI * 2);
     scene.add(v.mesh);
     parked.push(v);
@@ -171,10 +179,20 @@ async function boot() {
     return colliders.freeSpotNear(w.x + fallbackOffset, w.z + fallbackOffset, y, 2.5);
   }
   {
-    // Spawn: garage ke paas sadak pe, aur camera sadak ke saath align.
-    // Pehle camera default yaw=0 pe hota tha, jo Sanjauli ki dhalan mein
-    // seedha pahad ke andar dekhta tha -- pehla frame ek hari deewar tha.
-    const s0 = safeSpot("vicky_garage");
+    /*
+     * Spawn: **Sanjauli College ke gate par**.
+     *
+     * Nikhil: *"game random location s shuru nahi hogi, sanjauli college se
+     * shuru hogi -- phle back story cards fir mission"*. Pehle ye
+     * `vicky_garage` tha, jo kahani ke hisaab se ghar hai par pehla mission
+     * (`m01_pehla_din`) college ke gate par shuru hota hai -- yaani khel shuru
+     * hote hi khiladi ko poora Sanjauli paar karke aana padta tha.
+     *
+     * Camera sadak ke saath align hota hai: default yaw=0 Sanjauli ki dhalan
+     * mein seedha pahad ke andar dekhta hai, aur pehla frame ek hari deewar
+     * ban jaata hai.
+     */
+    const s0 = safeSpot(data.poiById.get("college_gate") ? "college_gate" : "vicky_garage");
     player.placeAt(s0.x, s0.z);
     const rn = roads.nearestNode(s0.x, s0.z, (r) => r.type !== "rail");
     if (rn) {
@@ -191,7 +209,7 @@ async function boot() {
   }
   {
     // Vicky ki apni taxi, garage ke bahar. Khiladi ko dhoondhna na pade.
-    const home = new Vehicle(data.vehicleById.get("taxi"), terrain, { colliders });
+    const home = new Vehicle(data.vehicleById.get("taxi"), terrain, { colliders, ground: groundAt });
     // sadak pe khadi karo, ghaas pe nahi
     const rn = roads.nearestNode(player.pos.x, player.pos.z, (r) => r.type !== "pedestrian" && r.type !== "rail");
     const base = rn ? rn.node.pos : { x: player.pos.x + 4, z: player.pos.z + 3 };
@@ -201,7 +219,18 @@ async function boot() {
     parked.push(home);
   }
   const buses = new BusSystem(scene, terrain, data.sanjauliMap, data.routes,
-                              data.vehicleById, Q.buses ?? 5);
+                              data.vehicleById, Q.buses ?? 5, groundAt);
+  /*
+   * Chalti hui traffic.
+   *
+   * Nikhil: *"road p koi car nahi h na kuch"*. Buses route par chalti thi aur
+   * `parked` gaadiyan khadi -- beech ki aam traffic thi hi nahi. `traffic.js`
+   * wahi polyline wala tareeka istemaal karta hai, aur door ki gaadi ek merged
+   * mesh ban jaati hai taaki draw call na phate.
+   */
+  const traffic = new Traffic(scene, terrain, roads, data.vehicleById, {
+    count: Q.traffic ?? 12, ground: groundAt, audio: null, rng: mulberry32(5150321),
+  });
   // Bus system pehle se saare segment world-space mein resample kar chuka hai --
   // paidal log usi par chalte hain, taaki dono ek hi naksha follow karein.
   const crowd = new Crowd(scene, terrain, roads, bazaar.userData.stalls,
@@ -212,6 +241,9 @@ async function boot() {
 
   const dialogue = new Dialogue(document.getElementById("subtitle"), data);
   const audio = new Audio();
+  // traffic audio se pehle banti hai (usse roads chahiye), isliye horn ka
+  // raasta yahan judta hai
+  traffic.audio = audio;
   const wanted = new WantedSystem(scene, terrain, roads, data.vehicleById);
   const missions = new MissionSystem(scene, terrain, data);
   /*
@@ -235,8 +267,17 @@ async function boot() {
   const state = { money: 2500, mode: "foot", get quality() { return tier; }, vehicle: null, player, missions, weather,
                   get hour() { return dayNight.hour; }, set hour(h) { dayNight.hour = h; } };
 
+  // Awaaz state ke saath jaati hai, taaki `saveGame` use likh sake
+  state.audio = audio;
+  audio.onVolume = (v, m) => hud.setVolume(v, m);
+
   const saved = loadGame();
   if (saved) {
+    // Awaaz abhi shuru nahi hui (browser pehle gesture maangta hai), isliye
+    // seedha field bhar dete hain -- `start()` inhi se master gain lagata hai.
+    if (typeof saved.volume === "number") audio.volume = Math.max(0, Math.min(1, saved.volume));
+    if (typeof saved.muted === "boolean") audio.muted = saved.muted;
+    if (saved.voice) audio.voiceName = saved.voice;
     state.money = saved.money ?? state.money;
     state.hour = saved.hour ?? state.hour;
     if (saved.completed) missions.completed = new Set(saved.completed);
@@ -256,11 +297,29 @@ async function boot() {
    * Sirf naye khel par: save maujood hai to khiladi ye pehle dekh chuka hai
    * aur har baar dobara dikhana chidhane wala hota.
    */
-  if (!saved && data.missions.intro?.length) {
-    requestAnimationFrame(() => flashcards.play(data.missions.intro, () => {
-      debugCam = false;
-      chase._init = false;
-    }));
+  if (!saved) {
+    /*
+     * Nikhil: *"phle back story cards fir mission s shuru"*. Intro deck ke
+     * band hote hi pehla mission apne aap chalu -- khiladi ko marker dhoondhne
+     * ki zaroorat nahi, wo college ke gate par khada hi hai.
+     *
+     * `missions.start()` khud `cards` event bhejta hai, isliye m01 ka apna
+     * deck bhi apne aap chalta hai. Do deck ke beech ek frame ka antar rakha
+     * hai -- warna jis Space se intro band hua wahi agla card bhi palat deta.
+     */
+    const begin = () => {
+      const first = missions.byId.get(data.missions.start_mission);
+      if (first && !missions.active) requestAnimationFrame(() => missions.start(first));
+    };
+    if (data.missions.intro?.length) {
+      requestAnimationFrame(() => flashcards.play(data.missions.intro, () => {
+        debugCam = false;
+        chase._init = false;
+        begin();
+      }));
+    } else {
+      requestAnimationFrame(begin);
+    }
   }
 
   // NPC se takrane par jhagda. Ye missions se bilkul alag hai.
@@ -319,6 +378,8 @@ async function boot() {
   function startAudio() {
     audio.start();
     audio.startMusic();
+    audio.startAmbience();
+    hud.setVolume(audio.volume, audio.muted);
   }
   addEventListener("keydown", startAudio, { once: true });
   addEventListener("pointerdown", startAudio, { once: true });
@@ -421,6 +482,35 @@ async function boot() {
     return state.mode === "vehicle" ? _pp.copy(state.vehicle.pos) : _pp.copy(player.pos);
   }
 
+  /**
+   * Vicky is waqt kis baare mein bade-bade bolega.
+   *
+   * Sabse zaroori haal pehle: police, gaadi, thakan. Uske baad jagah aur
+   * waqt. Ye kram maayne rakhta hai -- police peeche ho aur wo bazaar ke
+   * rate ki baat kare to bewakoof lagta hai.
+   */
+  function idleKey(pos, district) {
+    if (wanted.stars > 0) return "vicky:idle:police";
+    if (state.mode === "vehicle") return "vicky:idle:gaadi";
+    if (player.stamina < 22) return "vicky:idle:thaka";
+    if (weather.mode === "snow" || weather.mode === "rain") return "vicky:idle:thanda";
+    const h = dayNight.hour;
+    if (h >= 20.5 || h < 5.5) return "vicky:idle:raat";
+    const college = data.poiById.get("college_gate");
+    if (college) {
+      const w = geo.toWorld(college.lat, college.lon);
+      if (Math.hypot(pos.x - w.x, pos.z - w.z) < 120) return "vicky:idle:college";
+    }
+    if (district && /bazaar|chowk|mall|market/i.test(district.name || "")) return "vicky:idle:bazaar";
+    let keepersNear = 0;
+    for (const k of crowd.keepers) {
+      if (k.mesh.visible && k.mesh.position.distanceTo(pos) < 26) keepersNear++;
+    }
+    if (keepersNear >= 4) return "vicky:idle:bazaar";
+    if (missions.active && Math.random() < 0.45) return "vicky:idle:kaam";
+    return "vicky:idle:aam";
+  }
+
   function districtAt(pos) {
     let best = null, bd = Infinity;
     for (const d of data.districts.districts) {
@@ -440,6 +530,7 @@ async function boot() {
   let helpOn = true;
   let debugCam = false;    // sirf testing ke liye -- viewPOI() isse on karta hai
   let ambientTimer = 1.0;  // aas-paas ki awaaz ki ghadi
+  let selfTalkTimer = 6;
   // Ctrl se bhaagna: **toggle**, hold nahi. Browser mein Ctrl+W tab band kar
   // deta hai aur JavaScript use rok nahi sakta (preventDefault ka koi asar
   // nahi). Ctrl dabaye rakh kar W se aage chalte to game beech mein band ho
@@ -483,9 +574,32 @@ async function boot() {
       runToggle = !runToggle;
       hud.toast(runToggle ? "Daud rahe ho" : "Chal rahe ho", 1.2);
     }
-    if (input.pressed("KeyH")) {
+    // `H` phone le chuka hai (round 13), isliye help ab `/` par hai --
+    // pehle dono ek hi key par the aur phone nikalte hi help gayab ho jaati thi
+    if (input.pressed("Slash")) {
       helpOn = !helpOn;
       document.getElementById("help").style.display = helpOn ? "" : "none";
+    }
+    /*
+     * Awaaz ka control.
+     *
+     * Nikhil: *"game ki sound b thodi jyda rkhni h ... wo option b de sound
+     * badhane ka"*. `M` naksha le chuka hai, isliye mute `N` par hai.
+     */
+    if (input.pressed("Comma")) { startAudio(); hud.setVolume(audio.nudge(-0.06), audio.muted); }
+    if (input.pressed("Period")) { startAudio(); hud.setVolume(audio.nudge(+0.06), audio.muted); }
+    if (input.pressed("KeyN")) { startAudio(); hud.setVolume(audio.volume, audio.toggleMute()); }
+    /*
+     * `V` -- agli awaaz.
+     *
+     * Har machine par alag voice hoti hain, aur kaun si sabse achhi lagti hai
+     * ye code se tay nahi ho sakta. Isliye list ghumti hai aur khiladi khud
+     * chunta hai; chuni hui awaaz save mein rehti hai.
+     */
+    if (input.pressed("KeyV")) {
+      const v = audio.cycleVoice();
+      hud.toast(v ? `Awaaz: ${v.name} (${v.lang})` : "Is browser mein koi awaaz nahi", 3);
+      if (v) { dialogue.playOne("vicky:idle:aam"); saveGame(state); }
     }
     if (input.pressed("KeyP")) { saveGame(state); hud.toast("Save ho gaya"); }
     if (input.pressed("Digit1")) { dayNight.skip(3); hud.toast(`Waqt: ${fmtHour(dayNight.hour)}`); }
@@ -556,6 +670,8 @@ async function boot() {
     wanted.update(dt, pos, state.mode === "vehicle", weather.grip, district, onRoad);
     missions.update(dt, { playerPos: pos, inVehicle: state.mode === "vehicle", stars: wanted.stars });
     buses.update(dt);
+    traffic.update(dt, pos, camera.position,
+                   { night: dayNight.hour >= 18.4 || dayNight.hour <= 6.2 });
     crowd.update(dt, pos);
     panga.update(dt, state.mode === "vehicle"
       ? { pos: state.vehicle.pos, radius: 1.5, inVehicle: true }
@@ -585,6 +701,26 @@ async function boot() {
       // horn tabhi jab sadak paas ho -- pahad ke beech horn ajeeb lagta hai
       if (onRoad && Math.random() < 0.22) audio.horn(0.3 + Math.random() * 0.3, 0.10);
       ambientTimer = 0.7 + Math.random() * 1.4;
+    }
+    // Shimla ka apna mahaul -- hawa, chidiya, mandir ki ghanti, raat ko kutte
+    audio.updateAmbience(dt, { hour: dayNight.hour, inCar: state.mode === "vehicle" });
+
+    /*
+     * Vicky khud se bolta hai.
+     *
+     * Nikhil: *"vicky khud se b bat krega har 5 second me"*. Theek 5 second par
+     * bolna ghadi jaisa lagta hai, isliye 5 se 8 ke beech, aur tabhi jab koi
+     * aur baat na chal rahi ho -- warna wo mission ke samvaad ke upar bolta
+     * hai.
+     *
+     * Line jagah aur haal se chunti hai: police peeche ho to alag, gaadi mein
+     * alag, thak gaya ho to alag. Isse ye script padhne jaisa nahi, sochne
+     * jaisa lagta hai.
+     */
+    selfTalkTimer -= dt;
+    if (selfTalkTimer <= 0) {
+      selfTalkTimer = 5 + Math.random() * 3;
+      if (!dialogue.busy && !flashcards.active) dialogue.playOne(idleKey(pos, district));
     }
 
     dayNight.update(dt, camera);   // waqt, sooraj, taare, raat ki roshni, mausam
@@ -617,8 +753,8 @@ async function boot() {
 
   // debugging ke liye -- Playwright test yahi padhta hai
   window.__shimla = {
-    ready: true, scene, camera, renderer, terrain, roads, city, player, missions, wanted, chase, sky, dayNight,
-    bazaar, buses, crowd, panga, combat, colliders, parked,
+    ready: true, THREE, scene, camera, renderer, terrain, roads, city, player, missions, wanted, chase, sky, dayNight,
+    bazaar, buses, traffic, crowd, panga, combat, colliders, parked, flashcards, audio,
     weather, state, data, get fps() { return fps; },
     get stats() { return {
       triangles: renderer.info.render.triangles,
@@ -634,6 +770,8 @@ async function boot() {
       shops: bazaar.userData.shopCount,
       tunnels: tunnels.userData.tunnelCount,
       buses: buses.count,
+      traffic: traffic.count,
+      trafficNear: traffic.movingNear(player.pos),
       keepers: crowd.count.keepers,
       full: crowd.count.full,
       lite: crowd.count.lite,
@@ -642,6 +780,23 @@ async function boot() {
       walkers: crowd.count.walkers,
       shopSigns: bazaar.userData.signCount,
     }; },
+    /*
+     * Test ke liye: saare khule flashcards band karo.
+     *
+     * Naye khel par ab intro deck apne aap chalta hai aur uske turant baad m01
+     * ka deck -- aur card khule hone par main loop poora ruka rehta hai
+     * (`if (flashcards.active) return`). Isliye har headless test ko pehle ye
+     * bulana padta hai, warna duniya jami hui rehti hai aur traffic/bheed hilti
+     * hi nahi.
+     */
+    async skipCards(max = 8) {
+      for (let i = 0; i < max; i++) {
+        if (flashcards.active) flashcards.finish();
+        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+        if (!flashcards.active) break;
+      }
+      return !flashcards.active;
+    },
     teleport(poiId) {
       if (!data.poiById.get(poiId)) return false;
       const s0 = safeSpot(poiId, 10);
@@ -706,10 +861,20 @@ async function boot() {
         }
         return true;
       };
-      for (let lift = 0; lift < 6; lift++) {
-        const cy = ty + elev + lift * 3.5;
-        for (let ring = 0; ring < 3; ring++) {
-          const d = dist * (1 + ring * 0.45);
+      /*
+       * Pehle **door** jao, phir **upar**.
+       *
+       * Pehle ye ulta tha (lift bahar, ring andar), isliye ghane Sanjauli
+       * mein camera 17 m upar chadh jaata tha aur flashcard ek top-down
+       * tasveer ban jaati thi -- chhatein hi chhatein, jagah pehchani hi nahi
+       * jaati thi. Door se neeche wala shot hamesha behtar padhta hai:
+       * silhouette dikhta hai, pahad dikhta hai, aur camera ka jhukav aam
+       * aadmi ki nazar jaisa rehta hai.
+       */
+      for (let ring = 0; ring < 5; ring++) {
+        const d = dist * (1 + ring * 0.6);
+        for (let lift = 0; lift < 4; lift++) {
+          const cy = ty + elev + lift * 2.6;
           for (let i = 0; i < AZ; i++) {
             // pasandeeda disha se shuru, phir dono taraf badhte hue
             const off = Math.ceil(i / 2) * (i % 2 ? 1 : -1);
@@ -722,8 +887,11 @@ async function boot() {
           }
         }
       }
-      // kahin se nahi dikha -- seedha upar se
-      camera.position.set(tx, ty + dist * 2.2, tz + dist * 0.4);
+      // Kahin se saaf nahi dikha. Ab bhi seedha upar se nahi -- door se aur
+      // thoda ooncha, taaki jagah phir bhi pehchani jaaye.
+      const a = base + 0.6;
+      camera.position.set(tx + Math.cos(a) * dist * 2.4, ty + elev + dist * 0.55,
+                          tz + Math.sin(a) * dist * 2.4);
       camera.lookAt(tx, ty, tz);
       return { overhead: true, why };
     },

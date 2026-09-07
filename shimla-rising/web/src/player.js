@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { buildHuman } from "./human.js";
+import { buildHuman, faceYaw } from "./human.js";
 
 /**
  * Paidal Vicky.
@@ -10,9 +10,15 @@ import { buildHuman } from "./human.js";
  * daudne ka kharch dhalan ke saath teen guna tak badh jaata hai.
  */
 export class Player {
-  constructor(terrain, colliders = null) {
+  constructor(terrain, colliders = null, ground = null) {
     this.colliders = colliders;
     this.terrain = terrain;
+    /*
+     * Zameen kahan hai. Sadak ka mesh terrain se 0.5 m upar bichta hai, isliye
+     * sirf `terrain.heightAt()` lene par khiladi sadak mein dhans jaata tha.
+     * `roads.groundAt()` sadak ki satah samet deta hai.
+     */
+    this.ground = ground || ((x, z) => terrain.heightAt(x, z));
     this.pos = new THREE.Vector3();
     this.yaw = 0;
     this.vy = 0;
@@ -37,7 +43,7 @@ export class Player {
   }
 
   placeAt(x, z, yaw = 0) {
-    this.pos.set(x, this.terrain.heightAt(x, z), z);
+    this.pos.set(x, this.ground(x, z), z);
     this.yaw = yaw; this.vy = 0;
     this.mesh.position.copy(this.pos);
     return this;
@@ -91,9 +97,9 @@ const TURN_RATE = 2.6;      // radian/second, arrows se ghoomne ki raftaar
     }
 
     // --- dhalan aur stamina ----------------------------------------------
-    const h0 = this.terrain.heightAt(this.pos.x, this.pos.z);
+    const h0 = this.ground(this.pos.x, this.pos.z);
     const probe = 1.5;
-    const hAhead = this.terrain.heightAt(this.pos.x + dx * probe, this.pos.z + dz * probe);
+    const hAhead = this.ground(this.pos.x + dx * probe, this.pos.z + dz * probe);
     const grade = moving ? (hAhead - h0) / probe : 0;      // + = chadhai
 
     this.running = ctl.run && this.stamina > 1 && moving;
@@ -130,7 +136,7 @@ const TURN_RATE = 2.6;      // radian/second, arrows se ghoomne ki raftaar
     this.pos.z = THREE.MathUtils.clamp(this.pos.z, -lim, lim);
 
     // --- gravity / jump ---------------------------------------------------
-    const ground = this.terrain.heightAt(this.pos.x, this.pos.z);
+    const ground = this.ground(this.pos.x, this.pos.z);
     if (ctl.jump && this.grounded) { this.vy = 5.2; this.grounded = false; }
     this.vy -= 19.6 * dt;
     this.pos.y += this.vy * dt;
@@ -140,7 +146,9 @@ const TURN_RATE = 2.6;      // radian/second, arrows se ghoomne ki raftaar
     }
 
     this.mesh.position.copy(this.pos);
-    this.mesh.rotation.y = this.yaw;
+    // `yaw` heading hai (combat aur arrows isi par chalte hain); model ka
+    // apna rukh alag nikalta hai kyunki uska aage -Z hai
+    this.mesh.rotation.y = faceYaw(Math.sin(this.yaw), Math.cos(this.yaw));
 
     this._updateStates(dt, moving);
     this._animate(moving);

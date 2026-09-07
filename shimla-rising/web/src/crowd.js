@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { buildHuman, buildHumanFar } from "./human.js";
+import { buildHuman, buildHumanFar, faceYaw } from "./human.js";
 import { buildDog, buildCow, buildMonkey, animateQuadruped } from "./animals.js";
 
 /**
@@ -118,6 +118,8 @@ export class Crowd {
    * @param budget {keepers, walkers, dogs, cows}
    */
   constructor(scene, terrain, roads, stalls, budget, segs = null, spots = null) {
+    // sadak ki satah samet -- footpath par chalte log warna dhanse rehte the
+    this.ground = (x, z) => roads.groundAt(x, z);
     this.terrain = terrain;
     this.roads = roads;
     this.stalls = stalls;
@@ -318,8 +320,8 @@ export class Crowd {
       }
       w.x += w.ux * WALK_SPEED * dt;
       w.z += w.uz * WALK_SPEED * dt;
-      w.mesh.position.set(w.x, w.fixedY ?? this.terrain.heightAt(w.x, w.z), w.z);
-      w.mesh.rotation.y = Math.atan2(w.ux, w.uz);
+      w.mesh.position.set(w.x, w.fixedY ?? this.ground(w.x, w.z), w.z);
+      w.mesh.rotation.y = faceYaw(w.ux, w.uz);
       const d = Math.hypot(w.x - playerPos.x, w.z - playerPos.z);
       setDetail(w, d);
       // far roop ka rig nahi hota -- itni door chaal waise bhi dikhti nahi

@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { Vehicle } from "./vehicle.js";
-import { buildHuman } from "./human.js";
+import { buildHuman, faceYaw } from "./human.js";
 
 /**
  * Himachal Police ka heat system. 0-5 sitare.
@@ -14,6 +14,8 @@ export class WantedSystem {
     this.scene = scene;
     this.terrain = terrain;
     this.roads = roads;
+    // sadak ki satah samet -- warna jeep sadak mein aadhi ghusi rehti hai
+    this.ground = (x, z) => roads.groundAt(x, z);
     this.spec = vehicleSpecs.get("police_jeep");
     this.stars = 0;
     this.heat = 0;              // 0..100, sitare isi se nikalte hain
@@ -90,8 +92,8 @@ export class WantedSystem {
         m.position.x += (dx / d) * sp * dt;
         m.position.z += (dz / d) * sp * dt;
       }
-      m.position.y = this.terrain.heightAt(m.position.x, m.position.z);
-      m.rotation.y = Math.atan2(dx, dz);
+      m.position.y = this.ground(m.position.x, m.position.z);
+      m.rotation.y = faceYaw(dx, dz);
       // chalne ki halki chaal
       c.phase += dt * 9;
       const rig = m.userData.rig;
@@ -142,7 +144,7 @@ export class WantedSystem {
     const r = 26 + Math.random() * 16;
     const x = playerPos.x + Math.cos(a) * r;
     const z = playerPos.z + Math.sin(a) * r;
-    c.mesh.position.set(x, this.terrain.heightAt(x, z), z);
+    c.mesh.position.set(x, this.ground(x, z), z);
   }
 
   _despawnConstable(i) {
@@ -161,7 +163,8 @@ export class WantedSystem {
     const tz = playerPos.z + Math.sin(ang) * r;
     const n = this.roads.nearestNode(tx, tz, (rd) => rd.type !== "pedestrian" && rd.type !== "rail");
     const p = n ? n.node.pos : { x: tx, z: tz };
-    const v = new Vehicle(this.spec, this.terrain, { police: true });
+    const v = new Vehicle(this.spec, this.terrain,
+                          { police: true, ground: this.ground });
     v.placeAt(p.x, p.z, Math.random() * Math.PI * 2);
     this.scene.add(v.mesh);
     this.chasers.push(v);

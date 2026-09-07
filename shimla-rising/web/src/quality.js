@@ -19,6 +19,7 @@ export const PRESETS = {
     shadows: true,
     crowd: { keepers: 20, walkers: 14, dogs: 2, cows: 1, monkeys: 1 },
     buses: 3,
+    traffic: 8,            // sadak par chalti gaadiyan
   },
   medium: {
     name: "Medium",
@@ -32,6 +33,7 @@ export const PRESETS = {
     shadows: true,
     crowd: { keepers: 42, walkers: 28, dogs: 3, cows: 2, monkeys: 2 },
     buses: 5,
+    traffic: 12,
   },
   high: {
     name: "High",
@@ -45,6 +47,7 @@ export const PRESETS = {
     shadows: true,
     crowd: { keepers: 72, walkers: 48, dogs: 4, cows: 3, monkeys: 4 },
     buses: 8,
+    traffic: 16,
   },
 };
 

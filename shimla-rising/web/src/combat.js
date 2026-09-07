@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { faceYaw } from "./human.js";
 
 /**
  * Vicky ka danda aur pathar.
@@ -194,7 +195,7 @@ export class Combat {
     m.position.x += nx * push;
     m.position.z += nz * push;
     if (npc.x !== undefined) { npc.x += nx * push; npc.z += nz * push; }
-    m.rotation.y = Math.atan2(-nx, -nz);       // palat kar dekhta hai
+    m.rotation.y = faceYaw(-nx, -nz);          // palat kar dekhta hai
     m.userData.angry = true;
 
     const police = !!npc.police;
@@ -226,8 +227,8 @@ export class Combat {
       const om = other.mesh;
       if (om === m || !om.visible) continue;
       if (om.position.distanceTo(m.position) < WATCH_RADIUS) {
-        om.rotation.y = Math.atan2(m.position.x - om.position.x,
-                                   m.position.z - om.position.z);
+        om.rotation.y = faceYaw(m.position.x - om.position.x,
+                                m.position.z - om.position.z);
       }
     }
   }

@@ -1,9 +1,50 @@
+import { toDevanagari } from "./translit.js";
+
 /**
  * Procedural WebAudio. Koi external sound file nahi -- repo self-contained rehta hai.
  * Engine ki awaaz do oscillator (saw + square) se, RPM ke saath pitch/gain badalta hai.
  */
+
+/** Nikhil: *"game ki sound b thodi jyda rkhni h"* -- 0.16 se yahan tak. */
+export const DEFAULT_VOLUME = 0.34;
+
 export class Audio {
-  constructor() { this.ctx = null; this.enabled = false; }
+  constructor(opts = {}) {
+    this.ctx = null;
+    this.enabled = false;
+    this.volume = clamp01(opts.volume ?? DEFAULT_VOLUME);
+    this.muted = !!opts.muted;
+    this.voiceName = opts.voice || null;      // khiladi ki chuni hui awaaz
+    this._amb = null;
+    this._birdT = 3; this._bellT = 60; this._barkT = 25;
+    this.onVolume = () => {};                 // HUD isse padhta hai
+  }
+
+  // ------------------------------------------------------------ volume
+  /** 0..1. Save mein yaad rehta hai. */
+  setVolume(v) {
+    this.volume = clamp01(v);
+    this.muted = false;
+    this._applyVolume();
+    this.onVolume(this.volume, this.muted);
+    return this.volume;
+  }
+
+  /** `,` aur `.` se ghatao-badhao. */
+  nudge(d) { return this.setVolume(this.volume + d); }
+
+  toggleMute() {
+    this.muted = !this.muted;
+    this._applyVolume();
+    if (this.muted && window.speechSynthesis?.speaking) window.speechSynthesis.cancel();
+    this.onVolume(this.volume, this.muted);
+    return this.muted;
+  }
+
+  _applyVolume() {
+    if (!this.master) return;
+    this.master.gain.setTargetAtTime(this.muted ? 0 : this.volume, this.ctx.currentTime, 0.06);
+  }
 
   /** Browser autoplay policy: pehle user gesture pe hi start ho sakta hai. */
   start() {
@@ -12,7 +53,7 @@ export class Audio {
     if (!AC) return;
     this.ctx = new AC();
     this.master = this.ctx.createGain();
-    this.master.gain.value = 0.16;
+    this.master.gain.value = this.muted ? 0 : this.volume;
     this.master.connect(this.ctx.destination);
 
     this.engineGain = this.ctx.createGain();
@@ -29,6 +70,14 @@ export class Audio {
       o.start();
       this.osc.push(o);
     }
+    // Ek hi shor ka buffer sab jagah: dholak, bheed, hawa, chidiya, kutta.
+    // Pehle ye sirf `startMusic()` mein banta tha, isliye music band hone par
+    // baaki sab bhi chup ho jaata tha.
+    const nb = this.ctx.createBuffer(1, this.ctx.sampleRate * 1.0, this.ctx.sampleRate);
+    const nd = nb.getChannelData(0);
+    for (let i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
+    this._noise = nb;
+
     this.enabled = true;
   }
 
@@ -105,12 +154,6 @@ export class Audio {
     const vib = ctx.createOscillator(); const vg = ctx.createGain();
     vib.frequency.value = 5.2; vg.gain.value = 4.5;
     vib.connect(vg); vg.connect(lOsc.detune); vib.start();
-
-    // --- dholak: filtered noise ka jhonka ---
-    const nb = ctx.createBuffer(1, ctx.sampleRate * 0.4, ctx.sampleRate);
-    const nd = nb.getChannelData(0);
-    for (let i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
-    this._noise = nb;
 
     // Sa re ma pa dha -- pahadi pentatonic, do lehar
     const PHRASE = [392, 440, 523, 587, 523, 440, 392, 330,
@@ -211,30 +254,216 @@ export class Audio {
     src.start(t); src.stop(t + 0.4);
   }
 
+  // ==================================================== Shimla ki apni awaaz
+  /**
+   * Aas-paas ka mahaul -- deodar mein hawa, chidiya, door mandir ki ghanti,
+   * raat ko kutte.
+   *
+   * Nikhil: *"game ki sound b thodi jyda rkhni h shimla vibe type"*. Sirf
+   * volume badhane se music tez hota hai, Shimla nahi lagta. Shimla ki
+   * pehchan uska **khaali-pan** hai: hawa deodar se guzarti hai, subah
+   * chidiyan, aur beech-beech mein bahut door se ghanti.
+   *
+   * Sab wahi ek noise buffer + filter se. Koi file download nahi.
+   */
+  startAmbience() {
+    if (!this.enabled || this._amb) return;
+    const ctx = this.ctx;
+    const bus = ctx.createGain();
+    bus.gain.value = 0;
+    bus.connect(this.master);
+
+    // hawa: ek lagatar chalta hua noise, lowpass ke saath -- deodar ki sarsarahat
+    const src = ctx.createBufferSource();
+    src.buffer = this._noise;
+    src.loop = true;
+    const lp = ctx.createBiquadFilter();
+    lp.type = "lowpass"; lp.frequency.value = 420; lp.Q.value = 0.6;
+    const wind = ctx.createGain();
+    wind.gain.value = 0.09;
+    // jhonka: bahut dheemi lehar, warna hawa pankhe jaisi lagti hai
+    const gust = ctx.createOscillator();
+    const gg = ctx.createGain();
+    gust.frequency.value = 0.07; gg.gain.value = 0.055;
+    gust.connect(gg); gg.connect(wind.gain);
+    src.connect(lp); lp.connect(wind); wind.connect(bus);
+    src.start(); gust.start();
+
+    this._amb = { bus, src, wind, gust, lp };
+    bus.gain.setTargetAtTime(1.0, ctx.currentTime, 3.0);
+  }
+
+  /**
+   * Ghadi ke hisaab se mahaul. Har frame bulaya jaata hai.
+   * @param ctxInfo {hour, inCar}
+   */
+  updateAmbience(dt, { hour = 12, inCar = false } = {}) {
+    if (!this.enabled || !this._amb) return;
+    // gaadi ke andar bahar ka shor dab jaata hai
+    this._amb.bus.gain.setTargetAtTime(inCar ? 0.30 : 1.0, this.ctx.currentTime, 0.8);
+    // raat ko hawa thodi thandi/patli lagti hai
+    this._amb.lp.frequency.setTargetAtTime(hour > 19 || hour < 6 ? 300 : 460,
+                                           this.ctx.currentTime, 2.0);
+
+    const day = hour >= 5.2 && hour <= 19.2;
+    const dawn = hour >= 5.2 && hour <= 8.6;
+    const dusk = hour >= 16.5 && hour <= 19.2;
+
+    this._birdT -= dt;
+    if (this._birdT <= 0) {
+      this._birdT = day ? (dawn || dusk ? 1.4 : 4.5) * (0.5 + Math.random()) : 30;
+      if (day && !inCar) this.bird();
+    }
+
+    this._bellT -= dt;
+    if (this._bellT <= 0) {
+      this._bellT = 75 + Math.random() * 120;
+      // aarti ka waqt -- subah aur shaam
+      if ((hour >= 6 && hour <= 8) || (hour >= 18 && hour <= 20)) this.bell();
+    }
+
+    this._barkT -= dt;
+    if (this._barkT <= 0) {
+      this._barkT = 22 + Math.random() * 50;
+      if (!day && !inCar) this.bark();
+    }
+  }
+
+  /** Chidiya ki ek chahchahat -- do-teen tez sur. */
+  bird() {
+    const ctx = this.ctx, t0 = ctx.currentTime;
+    const n = 2 + ((Math.random() * 3) | 0);
+    const base = 2400 + Math.random() * 1600;
+    for (let i = 0; i < n; i++) {
+      const t = t0 + i * (0.07 + Math.random() * 0.06);
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = "sine";
+      o.frequency.setValueAtTime(base * (0.9 + Math.random() * 0.35), t);
+      o.frequency.exponentialRampToValueAtTime(base * 1.5, t + 0.05);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.045, t + 0.012);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.07);
+      o.connect(g); g.connect(this._amb ? this._amb.bus : this.master);
+      o.start(t); o.stop(t + 0.12);
+    }
+  }
+
+  /**
+   * Door mandir ki ghanti (Jakhoo/Sankat Mochan).
+   *
+   * Ghanti ke sur aapas mein poore nahi baithte -- yahi use dhaatu ki awaaz
+   * deta hai. Isliye partials jaan-boojh kar be-mel hain.
+   */
+  bell() {
+    const ctx = this.ctx, t = ctx.currentTime;
+    const f0 = 520 + Math.random() * 60;
+    const out = ctx.createGain();
+    out.gain.value = 0.055;
+    const lp = ctx.createBiquadFilter();
+    lp.type = "lowpass"; lp.frequency.value = 2600;     // door se aa rahi hai
+    out.connect(lp); lp.connect(this._amb ? this._amb.bus : this.master);
+    for (const [mult, amp, dur] of [[1, 1, 3.4], [2.06, 0.5, 2.4],
+                                    [2.71, 0.32, 1.8], [3.94, 0.2, 1.2]]) {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = "sine"; o.frequency.value = f0 * mult;
+      g.gain.setValueAtTime(amp * 0.5, t);
+      g.gain.exponentialRampToValueAtTime(0.0005, t + dur);
+      o.connect(g); g.connect(out);
+      o.start(t); o.stop(t + dur + 0.1);
+    }
+  }
+
+  /** Gali ka kutta -- do-teen bhaunk. */
+  bark() {
+    if (!this._noise) return;
+    const ctx = this.ctx, t0 = ctx.currentTime;
+    const n = 2 + ((Math.random() * 2) | 0);
+    for (let i = 0; i < n; i++) {
+      const t = t0 + i * (0.24 + Math.random() * 0.12);
+      const src = ctx.createBufferSource();
+      src.buffer = this._noise;
+      src.playbackRate.value = 0.5 + Math.random() * 0.3;
+      const bp = ctx.createBiquadFilter();
+      bp.type = "bandpass"; bp.frequency.value = 380 + Math.random() * 180; bp.Q.value = 3.4;
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.07, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0004, t + 0.16);
+      src.connect(bp); bp.connect(g); g.connect(this._amb ? this._amb.bus : this.master);
+      src.start(t); src.stop(t + 0.3);
+    }
+  }
+
+  // ============================================================== bolna
   /**
    * Bolna -- browser ki apni awaaz se (Web Speech API).
    *
-   * Nikhil ne gaaliyan sunai dene ko kaha tha. Sound file download nahi ho
-   * sakti, par speech synthesis har browser mein pehle se hai -- koi download
-   * nahi, koi API key nahi. Hindi voice mile to Hindi, warna default; voice
-   * na mile to chup rehta hai aur subtitle waise bhi chalta rehta hai.
+   * Sound file download nahi ho sakti (is machine se har free-sound host aur
+   * har TTS API block hai), par speech synthesis har browser mein pehle se
+   * hai -- koi download nahi, koi API key nahi.
+   *
+   * Nikhil: *"jo voices tune di h wo ajeeb lgri"*. Uski asli wajah lipi thi:
+   * hum roman Hinglish (`"dekh ke chal"`) ek angrezi awaaz ko de rahe the aur
+   * wo use angrezi ki tarah padh rahi thi. Ab teen cheezein badli hain:
+   *
+   *   1. line pehle **Devanagari** mein badalti hai (`translit.js`)
+   *   2. voice `hi-IN` pehle, phir `en-IN`, phir default
+   *   3. khiladi `V` se apni pasand ki awaaz chun sakta hai (save ho jaati hai)
+   *
+   * **Pahadi lehja kisi TTS engine mein nahi hota** -- Hindi mil jaati hai,
+   * lehja nahi. Ye saaf keh dena zaroori hai.
    */
   say(text, { rate = 1.0, pitch = 1.0, volume = 0.9 } = {}) {
     const synth = window.speechSynthesis;
-    if (!synth || !text) return false;
+    if (!synth || !text || this.muted) return false;
     try {
       if (synth.speaking) synth.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-      const voices = synth.getVoices() || [];
-      const hi = voices.find((v) => /^hi/i.test(v.lang))
-        || voices.find((v) => /^en-IN/i.test(v.lang));
-      if (hi) { u.voice = hi; u.lang = hi.lang; }
-      u.rate = rate; u.pitch = pitch; u.volume = volume;
+      const u = new SpeechSynthesisUtterance(toDevanagari(text));
+      const v = this.pickVoice();
+      if (v) { u.voice = v; u.lang = v.lang; }
+      else u.lang = "hi-IN";
+      u.rate = rate;
+      // Pahadi lehja to nahi mil sakta, par pitch thoda neeche rakhne se
+      // awaaz "news reader" jaisi nahi lagti.
+      u.pitch = pitch * 0.94;
+      u.volume = Math.min(1, volume * (0.55 + this.volume));
       synth.speak(u);
       return true;
     } catch {
       return false;   // kisi browser mein band ho to khel rukna nahi chahiye
     }
+  }
+
+  /** Sab maujood awaazein -- Hindi/Indian pehle. */
+  voices() {
+    const all = window.speechSynthesis?.getVoices?.() || [];
+    const rank = (v) => (/^hi/i.test(v.lang) ? 0 : /^(en-IN|bn|mr|ta|te|gu|pa)/i.test(v.lang) ? 1 : 2);
+    return [...all].sort((a, b) => rank(a) - rank(b));
+  }
+
+  pickVoice() {
+    const all = window.speechSynthesis?.getVoices?.() || [];
+    if (!all.length) return null;
+    if (this.voiceName) {
+      const chosen = all.find((v) => v.name === this.voiceName);
+      if (chosen) return chosen;
+    }
+    return all.find((v) => /^hi/i.test(v.lang))
+        || all.find((v) => /^en-IN/i.test(v.lang))
+        || null;
+  }
+
+  /** `V` -- agli awaaz. Naam lautata hai taaki HUD dikha sake. */
+  cycleVoice() {
+    const list = this.voices();
+    if (!list.length) return null;
+    const cur = this.pickVoice();
+    const i = cur ? list.findIndex((v) => v.name === cur.name) : -1;
+    const next = list[(i + 1) % list.length];
+    this.voiceName = next.name;
+    return next;
   }
 
   siren(on) {
@@ -257,3 +486,5 @@ export class Audio {
     }
   }
 }
+
+const clamp01 = (v) => Math.max(0, Math.min(1, v));

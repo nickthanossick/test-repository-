@@ -1,3 +1,5 @@
+import { faceYaw } from "./human.js";
+
 /**
  * Panga -- NPC se takrane par jhagda.
  *
@@ -71,7 +73,7 @@ export class Panga {
         } else {
           angry++;
           // gusse mein khiladi ki taraf mooh kiye rehta hai
-          m.rotation.y = Math.atan2(px - m.position.x, pz - m.position.z);
+          m.rotation.y = faceYaw(px - m.position.x, pz - m.position.z);
         }
       }
 
@@ -108,8 +110,8 @@ export class Panga {
 
   _react(level, mesh, mover, nx, nz) {
     const { dialogue, hud, audio, wanted, player } = this.d;
-    mesh.rotation.y = Math.atan2(mover.pos.x - mesh.position.x,
-                                 mover.pos.z - mesh.position.z);
+    mesh.rotation.y = faceYaw(mover.pos.x - mesh.position.x,
+                              mover.pos.z - mesh.position.z);
 
     if (mover.inVehicle) {
       this._say("panga:car", 3.0);
@@ -148,8 +150,8 @@ export class Panga {
         const dd = Math.hypot(om.position.x - mesh.position.x,
                               om.position.z - mesh.position.z);
         if (dd < WATCH_RADIUS) {
-          om.rotation.y = Math.atan2(mesh.position.x - om.position.x,
-                                     mesh.position.z - om.position.z);
+          om.rotation.y = faceYaw(mesh.position.x - om.position.x,
+                                  mesh.position.z - om.position.z);
         }
       }
     }

@@ -17,10 +17,15 @@ export class HUD {
       st: document.querySelector("#st > i"),
       toast: document.getElementById("toast"),
       minimap: document.querySelector("#minimap canvas"),
+      vol: document.getElementById("vol"),
+      volBar: document.querySelector("#vol .vbar > i"),
+      volNum: document.getElementById("vnum"),
+      volIcon: document.getElementById("vicon"),
     };
     this.ctx = this.el.minimap.getContext("2d");
     this.mapScale = 0.055;          // px per metre
     this._toastTimer = 0;
+    this._volTimer = 0;
     this._prepMinimap();
   }
 
@@ -71,10 +76,29 @@ export class HUD {
     this._toastTimer = seconds;
   }
 
+  /**
+   * Awaaz ka indicator. Volume badalte hi dikhta hai aur do second baad ghul
+   * jaata hai -- HUD par hamesha ek aur cheez nahi chahiye.
+   */
+  setVolume(v, muted) {
+    const el = this.el.vol;
+    if (!el) return;
+    this.el.volBar.style.width = `${Math.round(v * 100)}%`;
+    this.el.volNum.textContent = muted ? "mute" : `${Math.round(v * 100)}%`;
+    this.el.volIcon.innerHTML = muted ? "&#128263;" : v < 0.34 ? "&#128265;" : "&#128266;";
+    el.classList.toggle("mute", !!muted);
+    el.classList.add("show");
+    this._volTimer = 2.2;
+  }
+
   update(dt, playerPos, playerYaw, markers) {
     if (this._toastTimer > 0) {
       this._toastTimer -= dt;
       if (this._toastTimer <= 0) this.el.toast.classList.remove("show");
+    }
+    if (this._volTimer > 0) {
+      this._volTimer -= dt;
+      if (this._volTimer <= 0) this.el.vol?.classList.remove("show");
     }
     this._drawMinimap(playerPos, playerYaw, markers);
   }

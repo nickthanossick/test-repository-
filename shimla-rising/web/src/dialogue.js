@@ -19,6 +19,28 @@ export class Dialogue {
     return true;
   }
 
+  /**
+   * Ek hi line -- us key mein se koi ek, bina turant dohraye.
+   *
+   * `play()` poora beat queue kar deta hai, jo mission ke samvaad ke liye
+   * theek hai. Par Vicky jab khud se bolta hai to ek baar mein ek hi line
+   * chahiye, aur wahi line baar-baar nahi -- isliye pichhli line yaad rehti
+   * hai (`_last`).
+   */
+  playOne(key) {
+    const beat = this.lines[key];
+    if (!beat || !beat.length) return false;
+    this._last ||= new Map();
+    let line = beat[(Math.random() * beat.length) | 0];
+    if (beat.length > 1 && line === this._last.get(key)) {
+      line = beat[(beat.indexOf(line) + 1) % beat.length];
+    }
+    this._last.set(key, line);
+    this.queue.push(line);
+    if (!this.timer) this._next();
+    return true;
+  }
+
   say(speaker, text, seconds = 3.2) {
     this.queue.push({ speaker, text, seconds });
     if (!this.timer) this._next();

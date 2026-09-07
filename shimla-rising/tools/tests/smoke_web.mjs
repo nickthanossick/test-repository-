@@ -20,6 +20,9 @@ await page.goto(URL, { waitUntil: "domcontentloaded", timeout: 60000 });
 // Dusre pe dene se timeout chup-chaap default 30 s reh jaata tha, jo
 // software rendering (SwiftShader) pe boot ke liye kaafi nahi hai.
 await page.waitForFunction(() => window.__shimla?.ready === true, null, { timeout: 300000 });
+// Naye khel par intro + m01 ke flashcards khud chalte hain, aur card khule
+// hone par main loop ruka rehta hai. Test ko pehle unhe band karna padta hai.
+await page.evaluate(() => window.__shimla.skipCards());
 await page.waitForTimeout(2000);
 
 const s = await page.evaluate(() => window.__shimla.stats);
@@ -127,6 +130,85 @@ console.log("control:", JSON.stringify({
   wDot: +ctl.wDot.toFixed(2), turned: +ctl.turned.toFixed(2), upDz: +ctl.upDz.toFixed(2),
 }));
 
+/*
+ * Rukh -- chehra aage ya peeche?
+ *
+ * Nikhil: *"jis side face h wo tune back kr di h, jis side feet h wo age krdi
+ * h"*. `human.js` mein kirdaar ka **aage `-Z`** hai (naak `-Z` par banti hai),
+ * par rukh har jagah `Math.atan2(dx, dz)` se likha tha -- jisse model ka `-Z`
+ * theek ulti taraf chala jaata tha. Ab `faceYaw()` ye sambhalta hai.
+ *
+ * Jaanch code padh kar nahi, **matrix se** hoti hai: khiladi ko ek disha mein
+ * chalao, phir mesh ka apna `-Z` world mein nikaal kar chalne ki disha se dot
+ * lo. Sahi hone par ~+1, ulta hone par ~-1.
+ */
+const facing = await page.evaluate(() => {
+  const S = window.__shimla;
+  const THREE = S.THREE;
+  const base = { forward: 0, strafe: 0, walk: 0, turn: 0, run: false, jump: false };
+  S.player.yaw = 0;                          // apna rukh +Z
+  const p0 = S.player.pos.clone();
+  for (let i = 0; i < 30; i++) S.player.update(0.05, { ...base, walk: 1 }, S.chase.yaw);
+  const move = S.player.pos.clone().sub(p0);
+  move.y = 0;
+  if (move.length() < 0.5) return { moved: move.length(), dot: 0 };
+  move.normalize();
+  S.player.mesh.updateMatrixWorld(true);
+  // model ka aage = local -Z, world mein
+  const fwd = new THREE.Vector3(0, 0, -1)
+    .applyQuaternion(S.player.mesh.getWorldQuaternion(new THREE.Quaternion()));
+  fwd.y = 0; fwd.normalize();
+  return { moved: p0.distanceTo(S.player.pos), dot: fwd.dot(move) };
+});
+const facingOk = facing.moved > 1 && facing.dot > 0.9;
+console.log("rukh:", JSON.stringify({ dot: +facing.dot.toFixed(2) }));
+
+/*
+ * Zameen -- sadak ke andar dhansa hua to nahi?
+ *
+ * Nikhil: *"banda sadk k andr e ghus gya... ye gravity physics k law k hisab s
+ * rehna chchie"*. Sadak ka mesh terrain se 0.5 m upar bichta hai, par khiladi
+ * aur gaadi dono `terrain.heightAt()` se zameen lete the -- yaani sadak ki
+ * satah se aadha metre neeche. Ab sab `roads.groundAt()` se lete hain.
+ *
+ * Sadak ke beech khada karke satah aur pair ka farak naapte hain, aur wahi
+ * gaadi ke liye bhi.
+ */
+const grounded = await page.evaluate(() => {
+  const S = window.__shimla;
+  // ek arterial sadak ka beech ka point
+  const road = S.roads.roads.find((r) => r.type === "arterial") || S.roads.roads[0];
+  const p = road.points[(road.points.length / 2) | 0];
+  const surface = S.roads.groundAt(p.x, p.z);
+  const lift = surface - S.terrain.heightAt(p.x, p.z);
+
+  S.player.placeAt(p.x, p.z);
+  for (let i = 0; i < 40; i++) {
+    S.player.update(0.05, { forward: 0, strafe: 0, walk: 0, turn: 0, run: false, jump: false },
+                    S.chase.yaw);
+  }
+  const foot = Math.abs(S.player.pos.y - S.roads.groundAt(S.player.pos.x, S.player.pos.z));
+
+  // gaadi: pahiye ka nichla sira sadak ki satah par baithna chahiye
+  const v = S.parked[0];
+  v.placeAt(p.x, p.z, 0);
+  v.syncMesh();
+  const wheelBottom = v.mesh.position.y;      // buildBody ka origin = pahiye ke neeche
+  const car = Math.abs(wheelBottom - S.roads.groundAt(v.pos.x, v.pos.z));
+
+  // bus bhi -- yahi float kar rahi thi
+  let bus = 0;
+  const b = S.buses.buses[0];
+  if (b) bus = Math.abs(b.mesh.position.y - S.roads.groundAt(b.mesh.position.x, b.mesh.position.z));
+  return { lift, foot, car, bus };
+});
+const groundOk = grounded.lift > 0.3 && grounded.foot < 0.05
+  && grounded.car < 0.05 && grounded.bus < 0.6;
+console.log("zameen:", JSON.stringify({
+  lift: +grounded.lift.toFixed(2), foot: +grounded.foot.toFixed(3),
+  car: +grounded.car.toFixed(3), bus: +grounded.bus.toFixed(2),
+}));
+
 const checks = [
   ["console errors", errors.length === 0, errors.slice(0, 3).join(" | ")],
   ["page errors", pageErrors.length === 0, pageErrors.slice(0, 3).join(" | ")],
@@ -138,6 +220,9 @@ const checks = [
   ["texture colour-space", skinOk, `${JSON.stringify(skin)} != ${JSON.stringify(want)}`],
   ["gaadi ka rang", paintOk, JSON.stringify(paint)],
   ["control ki disha", ctlOk, JSON.stringify(ctl)],
+  ["rukh saamne", facingOk, JSON.stringify(facing)],
+  ["zameen par khada", groundOk, JSON.stringify(grounded)],
+  ["sadak par traffic", s.trafficNear > 0, `${s.trafficNear} / ${s.traffic}`],
 ];
 
 let failed = 0;

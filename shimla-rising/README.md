@@ -21,8 +21,10 @@ node web/serve.mjs
 Bas Node chahiye. Koi `npm install` nahi — three.js repo mein vendored hai.
 
 **Controls:** `↑↓←→` / `WASD` chalo · **`Ctrl` daudo** (toggle) · `Space` kudo /
-handbrake · `F` gaadi mein baitho/utro · `E` mission · Mouse camera · `M` naksha ·
-`1` waqt +3h · `T` waqt rok · `2` mausam · `Q` quality · `P` save
+handbrake · `F` gaadi mein baitho/utro · `E` mission · `G` danda · `R` pathar ·
+`H` phone · Mouse camera · `M` naksha · `1` waqt +3h · `T` waqt rok · `2` mausam ·
+`Q` quality · `P` save · **`,` / `.` awaaz kam/zyada** · **`N` mute** ·
+**`V` bolne wali awaaz badlo** · `/` help
 
 > `Ctrl` **toggle** hai, hold nahi — browser mein `Ctrl+W` tab band kar deta hai
 > aur JavaScript use rok nahi sakta. Hold-to-run chahiye to `Shift` hai.
@@ -40,6 +42,9 @@ handbrake · `F` gaadi mein baitho/utro · `E` mission · Mouse camera · `M` na
 | **Kahani** | 3 act, 14 story missions + 10 side missions, Hinglish dialogue |
 | **Gaadiyan** | Alto (taxi bhi), Maruti 800, Baleno, Thar, scooter, HRTC bus, timber truck, HP Police Gypsy — har ek ka apna aakar |
 | **Systems** | Wanted level (0–5), slope stamina, save/load, **quality tiers** (device dekh kar auto, `Q` se badlo) |
+| **Traffic** | Sadak par chalti gaadiyan — aage wali se doori rakhti hain, raat ko headlight jalti hai, brake par taillight. Paas ki gaadi poori detail mein, door wali ek merged mesh (draw call bachane ke liye) |
+| **Awaaz** | Sab WebAudio se banti hai, koi file download nahi — pahadi nati, engine, horn, bheed ki bud-bud, aur Shimla ka mahaul (deodar mein hawa, chidiya, door mandir ki ghanti, raat ko kutte). Volume `,`/`.` se, mute `N` |
+| **Bolna** | Browser ki apni Web Speech se. Line pehle **Devanagari** mein badalti hai (`web/src/translit.js`), warna Hindi voice roman Hinglish ko angrezi ki tarah padhti hai. Voice `V` se chuni ja sakti hai |
 | **Engines** | Three.js (browser) + Godot 4.7 (desktop/web export) — ek hi data layer |
 
 ### Shimla-specific gameplay
@@ -116,10 +121,25 @@ python tools/sync_godot_data.py # data/ → godot/data/
 ## Testing
 
 ```bash
-python -m pytest tools/tests -q # 72 tests: geo math, data integrity, Godot structure
-python -m ruff check tools/
+python -m pytest tools/tests -q # 89 tests: geo math, data integrity, Godot structure
+python -m ruff check .
+node tools/tests/translit.mjs                       # Devanagari transliteration
 node web/serve.mjs & node tools/tests/smoke_web.mjs # headless browser smoke test
+node tools/tests/shots.mjs                          # screenshots -> build/shots/
+node tools/build_artifact.mjs && node tools/tests/artifact_check.mjs   # single-file build
 ```
+
+Smoke test sirf "boot ho gaya" nahi dekhta — wo **simulation ki ganit** jaanchta
+hai, kyunki headless mein frame rate ~1 fps hai aur aankh se kuch dikhta nahi:
+
+| check | kya pakadta hai |
+|---|---|
+| `control ki disha` | W camera ke aage jaaye, arrows se ghoome |
+| `rukh saamne` | mesh ka apna `-Z` chalne ki disha se dot ≈ +1 (chehra aage, pair peeche) |
+| `zameen par khada` | khiladi/gaadi/bus sadak ki **satah** par — terrain par nahi (sadak 0.5 m upar bichti hai) |
+| `sadak par traffic` | khiladi ke 120 m ke andar chalti gaadiyan > 0 |
+| `gaadi ka rang` | paint texture ka asli pixel |
+| `texture colour-space` | sRGB double-conversion |
 
 ---
 
@@ -131,7 +151,9 @@ Sach saaf rakhna behtar hai:
 |---|---|
 | ✅ **Web game** | Headless Chromium mein chala kar verify kiya — 0 console errors, 0 page errors, 2600+ imaaratein, 45 landmark, 43 naam ke board, 27 km sadkein. Screenshots liye gaye. |
 | ✅ **Heightmap generator** | Chala kar output dekha gaya. Landmark elevation error: mean 0.7 m. |
-| ✅ **Tests + lint** | 72 pytest pass, ruff clean. |
+| ✅ **Tests + lint** | 89 pytest pass, ruff clean, 13 smoke checks pass, transliteration test pass. |
+| ⚠️ **Pahadi lehja** | **Nahi mil sakta.** Kisi bhi TTS engine mein Himachali accent hota hi nahi — Hindi voice mil jaati hai, lehja nahi. Jo ho sakta tha wo kiya hai: line Devanagari mein jaati hai (uchcharan theek), `hi-IN` voice pehle chunti hai, pitch thoda neeche, aur lehja *likhawat* mein hai (`bawa`, `bedafu`, `bendaga`). Isse zyada ka vaada nahi. |
+| ⚠️ **Downloaded awaaz** | Is environment se har free-sound host (freesound, opengameart, pixabay) aur har TTS API `000` deta hai — proxy block. Isliye har awaaz WebAudio se **bani** hai, kahin se laayi nahi gayi. |
 | ⚠️ **Godot project** | **Kabhi chalaya nahi gaya.** Godot editor is environment mein download nahi ho saka. Scripts Godot 4.7 API ke against dhyan se likhe hain, aur structural checks (res:// paths, scene bookkeeping, indentation) automated hain — par pehla asli run aapke PC pe hoga. |
 | ⚠️ **DEM/OSM pipeline** | Network se asli fetch test nahi hua (APIs is environment se blocked hain). Code aur error handling likhi hai; pehla asli run aapke PC pe. |
 | ⚠️ **Blender scripts** | Blender install nahi hai. Syntax verified, execution nahi. |

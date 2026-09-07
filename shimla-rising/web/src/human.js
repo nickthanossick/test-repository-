@@ -67,6 +67,18 @@ export function buildTopi(r = 0.128, lite = false) {
   return g;
 }
 
+/**
+ * Kisi disha ki taraf mooh karne ka yaw.
+ *
+ * Kirdaar ka **aage `-Z`** hai (naak `-Z` par banti hai). `rotation.y = yaw`
+ * ke baad model ka `-Z` `(-sin yaw, -cos yaw)` par jaata hai. Seedha
+ * `atan2(dx, dz)` daalne se wo `(-dx, -dz)` ban jaata tha -- **theek ulta**,
+ * yaani chehra peeche aur pair aage. Nikhil ne yahi pakda tha.
+ *
+ * Isliye har jagah rukh yahin se aana chahiye.
+ */
+export const faceYaw = (dx, dz) => Math.atan2(-dx, -dz);
+
 const HEAD_R = 0.098;
 
 /**

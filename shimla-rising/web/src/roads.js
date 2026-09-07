@@ -51,6 +51,23 @@ export class RoadNetwork {
   }
 
   /** Point kis road pe hai (agar width ke andar ho). Mall Road check ke liye. */
+  /**
+   * Zameen ki asli oonchai -- sadak ki satah samet.
+   *
+   * Sadak ka mesh terrain se **0.5 m upar** bichta hai (neeche `lift`), par
+   * khiladi aur gaadi dono `terrain.heightAt()` se zameen lete the -- yaani
+   * sadak ki satah se aadha metre neeche. Isiliye sadak par chalte hi banda
+   * usme dhans jaata tha aur gaadi aadhi ghusi rehti thi.
+   *
+   * Sab isi se zameen lein: khiladi, gaadi, bus aur bheed.
+   */
+  groundAt(x, z) {
+    const base = this.terrain.heightAt(x, z);
+    const r = this.roadAt(x, z, 1.0);
+    if (!r) return base;
+    return base + (r.spec.type === "rail" ? 0.35 : 0.5);
+  }
+
   roadAt(x, z, slack = 3) {
     const n = this.nearestNode(x, z);
     if (!n) return null;

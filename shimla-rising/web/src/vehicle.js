@@ -13,6 +13,9 @@ import * as TEX from "./textures.js";
  */
 export class Vehicle {
   constructor(spec, terrain, opts = {}) {
+    // Sadak ki satah terrain se 0.5 m upar hai -- bina iske gaadi sadak mein
+    // aadhi ghusi rehti thi (aur bus tairti dikhti thi)
+    this.ground = opts.ground || ((x, z) => terrain.heightAt(x, z));
     this.colliders = opts.colliders || null;
     this.spec = spec;
     this.terrain = terrain;
@@ -30,7 +33,7 @@ export class Vehicle {
   get kmh() { return Math.abs(this.speed) * 3.6; }
 
   placeAt(x, z, yaw = 0) {
-    this.pos.set(x, this.terrain.heightAt(x, z), z);
+    this.pos.set(x, this.ground(x, z), z);
     this.yaw = yaw;
     this.speed = 0; this.slip = 0;
     this.syncMesh();
@@ -52,8 +55,8 @@ export class Vehicle {
     // --- dhalan: Shimla mein yahi sab kuch decide karta hai --------------
     const f = this.forward(_f);
     const ahead = 3;
-    const hHere = this.terrain.heightAt(this.pos.x, this.pos.z);
-    const hAhead = this.terrain.heightAt(this.pos.x + f.x * ahead, this.pos.z + f.z * ahead);
+    const hHere = this.ground(this.pos.x, this.pos.z);
+    const hAhead = this.ground(this.pos.x + f.x * ahead, this.pos.z + f.z * ahead);
     const grade = (hAhead - hHere) / ahead;             // + = chadhai
 
     let a = 0;
@@ -121,7 +124,7 @@ export class Vehicle {
     // bahut khadi dhalan pe gaadi nahi chadhti
     if (grade > 0.62 && this.speed > 0) this.speed *= 0.90;
 
-    this.pos.y = this.terrain.heightAt(this.pos.x, this.pos.z);
+    this.pos.y = this.ground(this.pos.x, this.pos.z);
     this.syncMesh();
   }
 
@@ -129,8 +132,17 @@ export class Vehicle {
   syncMesh() {
     const t = this.terrain;
     const n = t.normalAt(this.pos.x, this.pos.z, _n);
+    /*
+     * Koi offset nahi.
+     *
+     * Nikhil: *"bus float krri"*. `buildBody()` ka origin **pahiye ke neeche**
+     * hai (hub `y = rad` par, tyre ka radius wahi `rad`), yaani model apne
+     * aap zameen par baithta hai. Yahan `body[1] * 0.5 - 0.35` jodna purane
+     * waqt ka bacha hua tha jab dhad ek box tha jiska center origin par hota
+     * tha -- ab wo gaadi ko taxi ke liye 0.39 m aur bus ke liye 1.18 m upar
+     * uthata tha. Bus par yahi saaf dikhta tha.
+     */
     this.mesh.position.copy(this.pos);
-    this.mesh.position.y += this.spec.body[1] * 0.5 - 0.35;
 
     _q.setFromAxisAngle(_up, this.yaw);
     _align.setFromUnitVectors(_up, n);
@@ -261,6 +273,10 @@ export function buildBody(spec) {
     const plate = add(new THREE.Mesh(new THREE.BoxGeometry(w * 0.34, 0.1, 0.02),
       new THREE.MeshStandardMaterial({ color: 0xe9e6dd, roughness: 0.7 })));
     plate.position.set(0, bodyH * 0.34, l / 2 + 0.05);
+    // Battiyon ka material bahar dikha do -- traffic raat ko headlight jalata
+    // hai aur brake par taillight tez karta hai. Har gaadi ka apna material
+    // hai (yahin bana), isliye ek ki batti doosri par nahi jaati.
+    g.userData.lightMats = { head: headMat, tail: tailMat };
   }
 
   if (spec.roof_sign) {

@@ -11,6 +11,10 @@ export function saveGame(state) {
       hour: state.hour,
       quality: state.quality,
       weather: state.weather.mode,
+      // awaaz -- Nikhil ne volume ka option maanga tha, wo yaad rehna chahiye
+      volume: state.audio?.volume,
+      muted: state.audio?.muted,
+      voice: state.audio?.voiceName || null,
       savedAt: Date.now(),
     }));
     return true;
