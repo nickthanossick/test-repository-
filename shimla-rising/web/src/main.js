@@ -22,6 +22,7 @@ import { Vehicle } from "./vehicle.js";
 import { ChaseCamera } from "./chase-camera.js";
 import { WantedSystem } from "./wanted.js";
 import { MissionSystem } from "./missions.js";
+import { Flashcards } from "./flashcards.js";
 import { Dialogue } from "./dialogue.js";
 import { HUD } from "./hud.js";
 import { Audio } from "./audio.js";
@@ -210,6 +211,23 @@ async function boot() {
   const audio = new Audio();
   const wanted = new WantedSystem(scene, terrain, roads, data.vehicleById);
   const missions = new MissionSystem(scene, terrain, data);
+  /*
+   * Flashcards. Card ke peeche us jagah ka asli shot aata hai: camera wahin
+   * `lookAt()` se jaata hai (wahi ray-march wala jo deewar ke peeche nahi
+   * phasta) aur ek frame seedha render hota hai -- main loop us waqt ruka
+   * hua hota hai, isliye render yahan se karana padta hai.
+   */
+  const flashcards = new Flashcards(document.getElementById("flash"), {
+    poiExists: (id) => !!data.poiById.get(id),
+    lookAt: (id, dist, elev) => {
+      const p = data.poiById.get(id);
+      const w = geo.toWorld(p.lat, p.lon);
+      const y = terrain.heightAt(w.x, w.z);
+      debugCam = true;
+      window.__shimla?.lookAt?.(w.x, y + 2.2, w.z, dist, elev);
+    },
+    render: () => renderer.render(scene, camera),
+  });
 
   const state = { money: 2500, mode: "foot", get quality() { return tier; }, vehicle: null, player, missions, weather,
                   get hour() { return dayNight.hour; }, set hour(h) { dayNight.hour = h; } };
@@ -227,6 +245,19 @@ async function boot() {
     }
     if (saved.weather) weather.set(saved.weather);
     missions._refreshStartMarkers();
+  }
+
+  /*
+   * Pehli baar khelne par intro deck -- Vicky ki back story.
+   *
+   * Sirf naye khel par: save maujood hai to khiladi ye pehle dekh chuka hai
+   * aur har baar dobara dikhana chidhane wala hota.
+   */
+  if (!saved && data.missions.intro?.length) {
+    requestAnimationFrame(() => flashcards.play(data.missions.intro, () => {
+      debugCam = false;
+      chase._init = false;
+    }));
   }
 
   // NPC se takrane par jhagda. Ye missions se bilkul alag hai.
@@ -251,9 +282,20 @@ async function boot() {
   missions.onEvent = (type, payload) => {
     switch (type) {
       case "mission_start":
+        // Raat wala mission (m05 baudi) apna waqt khud set karta hai
+        if (payload.night) { dayNight.hour = 23.4; sky.setTime(23.4, true); }
         dialogue.play(`${payload.id}:start`);
         hud.toast("Mission shuru: " + payload.title, 3);
         audio.blip(880, 0.12);
+        break;
+      case "cards":
+        // Objectives card band hone ke baad hi shuru hote hain. Card camera ko
+        // debugCam par le jaata hai, isliye band hote hi chase camera wapas.
+        flashcards.play(payload.cards, () => {
+          debugCam = false;
+          chase._init = false;
+          payload.done();
+        });
         break;
       case "mission_complete":
         state.money += payload.reward || 0;
@@ -354,6 +396,16 @@ async function boot() {
     last = now;
     acc += dt; frames++;
     if (acc >= 0.5) { fps = frames / acc; acc = 0; frames = 0; }
+
+    /*
+     * Flashcard khula ho to duniya rukti hai.
+     *
+     * `last` upar hi update ho chuka hai, isliye card band hone par dt chhota
+     * hi aayega -- ek bada dt khiladi ko deewar ke paar phenk deta. Camera
+     * card khud rakhta hai aur render bhi khud karta hai, isliye yahan se
+     * seedha lautna theek hai.
+     */
+    if (flashcards.active) return;
 
     // ------------------------------------------------------------ input
     chase.handleMouse(input.mouseDX, input.mouseDY);

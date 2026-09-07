@@ -54,6 +54,21 @@
   #lmsg { font-size:12px; color:var(--dim); margin-top:12px; height:16px; }
   #err { color:var(--bad); font-size:12px; max-width:520px; margin:14px auto 0;
     white-space:pre-wrap; text-align:left; font-family:ui-monospace,monospace; display:none; }
+  /* Flashcard -- mission se pehle. Peeche us jagah ka asli, ruka hua frame
+     rehta hai, isliye parda poora kaala nahi, sirf gehra hai. */
+  #flash { position:fixed; inset:0; z-index:40; display:grid; align-items:end;
+    cursor:pointer; background:linear-gradient(to top,
+      rgba(8,11,15,.94) 0%, rgba(8,11,15,.78) 34%, rgba(8,11,15,.12) 72%, transparent 100%); }
+  #flash[hidden] { display:none; }
+  /* Card khule hone par HUD hat jaata hai -- sitare, paisa aur minimap
+     kahani ke frame ke upar taire rehte the. */
+  body.carding #hud { display:none; }
+  .fcard { max-width:640px; margin:0 auto 12vh; padding:0 28px; text-align:left; }
+  .fnum { font-size:11px; letter-spacing:.22em; color:var(--accent); margin-bottom:14px; }
+  .fcard h2 { margin:0 0 14px; font-size:34px; font-weight:300; letter-spacing:.03em;
+    line-height:1.15; text-wrap:balance; }
+  .fcard p { margin:0; font-size:16px; line-height:1.62; color:#d8dde4; max-width:52ch; }
+  .fhint { margin-top:26px; font-size:11.5px; letter-spacing:.14em; color:var(--dim); }
 </style>
 </head>
 <body>
@@ -92,6 +107,8 @@
     <b>&uarr;&darr;&larr;&rarr;</b> / WASD chalao &middot; <b>Ctrl</b> daudo &middot; <b>Space</b> kudo &middot; <b>F</b> gaadi &middot; <b>E</b> mission &middot; <b>M</b> naksha &middot; <b>1</b> waqt &middot; <b>T</b> waqt rok &middot; <b>2</b> mausam &middot; <b>Q</b> quality &middot; <b>P</b> save
   </div>
 </div>
+
+<div id="flash" hidden></div>
 
 <script type="importmap">
 { "imports": { "three": "./vendor/three.module.min.js" } }

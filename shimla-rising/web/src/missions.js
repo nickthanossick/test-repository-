@@ -17,7 +17,9 @@ export class MissionSystem {
     this.terrain = terrain;
     this.data = data;
     this.byId = new Map(data.missions.missions.map((m) => [m.id, m]));
-    this.available = new Set(["a1_m1"]);
+    // Pehla mission data se aata hai, yahan hardcode nahi -- missions ke naam
+    // badalne par engine aur test dono ko alag-alag theek karna padta tha.
+    this.available = new Set([data.missions.start_mission]);
     this.completed = new Set();
     this.active = null;
     this.objIndex = 0;
@@ -83,13 +85,28 @@ export class MissionSystem {
     return null;
   }
 
+  /**
+   * Mission shuru.
+   *
+   * Objectives seedha shuru nahi hote: pehle mission ke flashcards chalte hain
+   * ("har mission p phle flashcards ake thoda btaenge ki kya h"), aur unke
+   * band hone par hi ghadi chalti hai. Card ke bina -- ya bina card wale
+   * mission mein -- `done` turant chal jaata hai, isliye purana bartav wahi
+   * rehta hai.
+   */
   start(m) {
     this.active = m;
     this.objIndex = 0;
     this.raceIndex = 0;
     this.timer = 0;
-    this._beginObjective();
-    this.onEvent("mission_start", m);
+    this.cardsUp = !!(m.cards && m.cards.length);
+    const begin = () => {
+      this.cardsUp = false;
+      this._beginObjective();
+      this.onEvent("mission_start", m);
+    };
+    if (this.cardsUp) this.onEvent("cards", { cards: m.cards, done: begin });
+    else begin();
   }
 
   _beginObjective() {
@@ -149,7 +166,9 @@ export class MissionSystem {
     for (const c of this.markers.children) {
       if (c.userData.spin) { c.rotation.y += dt * 1.4; c.position.y = c.userData.baseY + Math.sin(t * 2) * 0.35; }
     }
-    if (!this.active) return;
+    // Card khule hone par objective ki ghadi nahi chalti -- warna "survive"
+    // aur "race" ka waqt padhne mein hi nikal jaata.
+    if (!this.active || this.cardsUp) return;
 
     const o = this.currentObjective;
     if (!o) { this._complete(); return; }

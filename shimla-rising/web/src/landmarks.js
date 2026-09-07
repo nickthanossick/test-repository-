@@ -511,6 +511,47 @@ function college(c, mb) {
   lamp(GU + 4.6, GV + 1.0, GY);
   lamp(GU - 4.6, GV + 1.0, GY);
 
+  /*
+   * ============================ campus ki hariyali =========================
+   *
+   * Har round ka +5% ka hissa. Campus ab tak nangi paving par khada tha --
+   * asli college mein seedhiyon ke saath hedge, kinare par deodar, aur court
+   * ke paar ki deewar ke saath jhaadiyan hoti hain. Sab wahi merged batch
+   * mein jaata hai, isliye draw call nahi badhta.
+   */
+  const deodar = (u, v, base, h = 9) => {
+    B("wood", u, base + h * 0.22, v, 0.42, h * 0.44, 0.42, 0x4a3a2a);   // tana
+    for (let i = 0; i < 3; i++) {
+      const t = i / 2;
+      const w = (1 - t) * 3.2 + 0.9;
+      B("plaster", u, base + h * (0.42 + t * 0.24), v, w, h * 0.2, w,
+        [0x2b4a2a, 0x30522f, 0x264224][i]);
+    }
+  };
+  /** Seedhi ya deewar ke saath katti hui hedge. */
+  const hedge = (u0, v0, u1, v1, base, n) => {
+    for (let i = 0; i < n; i++) {
+      const t = i / (n - 1);
+      B("plaster", u0 + (u1 - u0) * t, base + 0.55, v0 + (v1 - v0) * t,
+        1.5, 1.1, 1.1, i % 2 ? 0x2f5230 : 0x35592f);
+    }
+  };
+  // seedhiyon ke dono taraf -- reference tasveer mein bhi yahi hai
+  for (const s of [-1, 1]) {
+    hedge(s * 8.4, FV - 1.5, s * 8.4, FV - 7.5, PLAZA, 5);
+  }
+  // court ke paar deewar ke saath
+  hedge(CU - CW / 2 + 1, CV + CD / 2 + 2.2, CU + CW / 2 - 1, CV + CD / 2 + 2.2, PLAZA, 12);
+  // neeche wale terrace ke kinare
+  hedge(-44, -12.8, -18, -12.8, PLAZA, 12);
+  // deodar -- campus ke kinare, imaaraton se door
+  deodar(-14, 6, MAIN, 11);
+  deodar(-15.5, -8, PLAZA, 10);
+  deodar(CU + CW / 2 + 1.6, CV - CD / 2 - 1.5, PLAZA, 9);
+  deodar(-46, -18, LOWER, 10);
+  deodar(-9, -30, LOWER, 9);
+  deodar(GU + 6.5, GV - 3, GY, 8);
+
   // ================================================================ collider
   /*
    * Campus ke collider haath se, `FOOTPRINT` se nahi.

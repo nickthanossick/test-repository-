@@ -54,9 +54,16 @@ def test_mission_references(bundle):
 
 
 def test_every_story_mission_is_reachable(bundle):
-    """a1_m1 se shuru karke har story mission unlock chain se milna chahiye."""
+    """Pehle mission se shuru karke har story mission unlock chain se mile.
+
+    Shuruaati id `start_mission` se aati hai, yahan hardcode nahi hai -- warna
+    har baar missions ka naam badalne par test aur engine dono jagah alag-alag
+    badalna padta hai.
+    """
     missions = {m["id"]: m for m in bundle["missions"]["missions"]}
-    seen, stack = set(), ["a1_m1"]
+    start = bundle["missions"]["start_mission"]
+    assert start in missions, f"start_mission {start} maujood nahi"
+    seen, stack = set(), [start]
     while stack:
         mid = stack.pop()
         if mid in seen:
@@ -168,6 +175,40 @@ def test_shops_have_the_names_nikhil_named():
     for s in shops["shops"]:
         assert s["kind"] in shops["kinds"], f"{s['name']}: kism {s['kind']} defined nahi"
         assert len(s["name"]) <= 24, f"{s['name']} board pe fit nahi hoga"
+
+
+def test_every_mission_has_flashcards(bundle):
+    """Nikhil: "har mission p phle flashcards ake thoda btaenge ki kya h".
+
+    Card ke bina mission seedha objective se shuru ho jaata hai aur khiladi ko
+    pata hi nahi chalta ki kyun ja raha hai. Har card ki jagah bhi asli honi
+    chahiye -- card us POI par camera le jaakar frame freeze karta hai, to POI
+    galat hone par card kaale parde jaisa aata.
+    """
+    pois = {p["id"] for p in bundle["pois"]["pois"]}
+    problems = []
+    decks = [("intro", bundle["missions"]["intro"])]
+    decks += [(m["id"], m.get("cards", [])) for m in bundle["missions"]["missions"]]
+    for name, deck in decks:
+        if not deck:
+            problems.append(f"{name}: koi card nahi")
+        for i, c in enumerate(deck):
+            if c.get("poi") not in pois:
+                problems.append(f"{name}[{i}]: poi {c.get('poi')} maujood nahi")
+            if not c.get("title") or not c.get("text"):
+                problems.append(f"{name}[{i}]: title/text khaali")
+    assert problems == []
+
+
+def test_missions_are_the_ten_nikhil_asked_for(bundle):
+    """"Sirf 10 missions", 5 Sanjauli mein aur baki bahar."""
+    ms = bundle["missions"]["missions"]
+    assert len(ms) == 10, f"{len(ms)} missions hain, 10 hone chahiye"
+    by_id = {p["id"]: p for p in bundle["pois"]["pois"]}
+    sanjauli = [m for m in ms if by_id[m["start_poi"]].get("district") == "sanjauli"]
+    assert len(sanjauli) >= 5, f"Sanjauli mein sirf {len(sanjauli)} missions"
+    # koi side mission nahi bacha
+    assert not [m for m in ms if m.get("side")]
 
 
 def test_every_shop_kind_stocks_its_own_goods():

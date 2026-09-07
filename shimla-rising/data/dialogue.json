@@ -1,258 +1,6 @@
 {
   "$comment": "Hinglish dialogue. Har key ek mission id + beat hai. 'speaker' characters.json ka id hai. Engine ye lines subtitle bar mein chalata hai.",
   "lines": {
-    "a1_m1:start": [
-      {
-        "speaker": "amma",
-        "text": "Uth ja Vicky. Shutter khol, Sharma ji ki gaadi aaj deni hai."
-      },
-      {
-        "speaker": "vicky",
-        "text": "Uth gaya Amma. Chai?"
-      },
-      {
-        "speaker": "amma",
-        "text": "Chai baad mein. Aur Cart Road se jaana - Mall pe gaadi nahi."
-      }
-    ],
-    "a1_m1:end": [
-      {
-        "speaker": "vicky",
-        "text": "Gaadi de aaya. Paise bhi mil gaye."
-      },
-      {
-        "speaker": "amma",
-        "text": "Shabaash. Baap hota to khush hota."
-      }
-    ],
-    "a1_m2:start": [
-      {
-        "speaker": "nafisa",
-        "text": "Tu ka ladka hai na? Andar aa."
-      },
-      {
-        "speaker": "nafisa",
-        "text": "Tere baap ne mujhe ek list di thi. Ab wo nahi hai, aur list adhoori hai."
-      },
-      {
-        "speaker": "vicky",
-        "text": "Meri baap ki list ka aapse kya lena-dena?"
-      },
-      {
-        "speaker": "nafisa",
-        "text": "Wahi to pata karna hai. Dhalli ke depot ki tasveer laa de."
-      }
-    ],
-    "a1_m3:start": [
-      {
-        "speaker": "guru",
-        "text": "Vicky! Bali ke ladke tere peeche hain."
-      },
-      {
-        "speaker": "vicky",
-        "text": "To bhaagun?"
-      },
-      {
-        "speaker": "guru",
-        "text": "Bhaag mat - chala. Cart Road pe jo pehle pahuncha, wahi jeeta."
-      }
-    ],
-    "a1_m4:start": [
-      {
-        "speaker": "chhotu",
-        "text": "Bhaiya, 4:10 wali chhoti gaadi. Goods shed ke peeche wala dabba."
-      },
-      {
-        "speaker": "vicky",
-        "text": "Usme kya hai?"
-      },
-      {
-        "speaker": "chhotu",
-        "text": "Passenger to nahi hai. Itna mujhe pata hai."
-      }
-    ],
-    "a1_m5:start": [
-      {
-        "speaker": "chhotu",
-        "text": "Jakhoo se poora Mall dikhta hai. Aur raat ko jo truck catchment se nikalta hai, wo bhi."
-      },
-      {
-        "speaker": "vicky",
-        "text": "Tu yahan roz baithta hai?"
-      },
-      {
-        "speaker": "chhotu",
-        "text": "Bandar mujhe pehchante hain. Aadmi nahi pehchante. Dono theek hai."
-      }
-    ],
-    "a1_m6:start": [
-      {
-        "speaker": "amma",
-        "text": "Vicky... neeche mat jaa."
-      },
-      {
-        "speaker": "vicky",
-        "text": "Amma, wo baap ki garage hai."
-      },
-      {
-        "speaker": "amma",
-        "text": "Thi. Ab sirf aag hai."
-      }
-    ],
-    "a1_m6:end": [
-      {
-        "speaker": "vicky",
-        "text": "Kaagaz bach gaye."
-      },
-      {
-        "speaker": "amma",
-        "text": "Aur tu bhi. Abhi tak."
-      }
-    ],
-    "a2_m1:start": [
-      {
-        "speaker": "rana",
-        "text": "Beta, teri garage ka bahut dukh hua. Baith."
-      },
-      {
-        "speaker": "vicky",
-        "text": "Aap ko kaise pata chala?"
-      },
-      {
-        "speaker": "rana",
-        "text": "Shimla chhota sheher hai. Yahan sab pata chal jaata hai."
-      },
-      {
-        "speaker": "rana",
-        "text": "Tu mere liye kaam kar. Nuksan bhi bhar dunga, aur sheher bhi dikha dunga."
-      }
-    ],
-    "a2_m2:start": [
-      {
-        "speaker": "bali",
-        "text": "Secretariat mein ek file hai. Kal subah tak almari mein nahi honi chahiye."
-      },
-      {
-        "speaker": "vicky",
-        "text": "Aur agar mil gaya to?"
-      },
-      {
-        "speaker": "bali",
-        "text": "To tu pakda gaya. Devinder Sahab ka naam mat lena."
-      }
-    ],
-    "a2_m3:start": [
-      {
-        "speaker": "rana",
-        "text": "Aaj Mall band hai. Meri gaadi Scandal Point pe khadi hai - le aa."
-      },
-      {
-        "speaker": "vicky",
-        "text": "Mall pe gaadi le jaana jurm hai, Devinder Sahab."
-      },
-      {
-        "speaker": "rana",
-        "text": "Haan. Isiliye tu ja raha hai, main nahi."
-      }
-    ],
-    "a2_m4:start": [
-      {
-        "speaker": "nafisa",
-        "text": "Kal subah Annandale pe helicopter utrega. Usme koi minister nahi aa raha."
-      },
-      {
-        "speaker": "vicky",
-        "text": "Aap ab bhi mujh pe bharosa karti hain?"
-      },
-      {
-        "speaker": "nafisa",
-        "text": "Nahi. Par tere paas ab Devinder ka pass hai. Wahi kaafi hai."
-      }
-    ],
-    "a2_m5:start": [
-      {
-        "speaker": "nafisa",
-        "text": "1888 ki building mein 2026 ka ghotala."
-      },
-      {
-        "speaker": "nafisa",
-        "text": "Devinder ne asli register wahin rakha hai - kyunki wahan koi shak nahi karta."
-      }
-    ],
-    "a2_m6:start": [
-      {
-        "speaker": "guru",
-        "text": "Register mein tere baap ka naam bhi hai, Vicky."
-      },
-      {
-        "speaker": "vicky",
-        "text": "Kya?"
-      },
-      {
-        "speaker": "guru",
-        "text": "Galat taraf. Ab tu decide kar - kaagaz jala dega, ya Bali se poochhega."
-      }
-    ],
-    "a2_m6:end": [
-      {
-        "speaker": "vicky",
-        "text": "Usne kaha baap ne kabhi paisa nahi liya. Sirf gaadi theek ki thi. Har baar."
-      },
-      {
-        "speaker": "guru",
-        "text": "Aur har baar wahi gaadi. Wahi rasta. Wahi raat."
-      },
-      {
-        "speaker": "vicky",
-        "text": "Wo jaanta tha."
-      }
-    ],
-    "a3_m1:start": [
-      {
-        "speaker": "chhotu",
-        "text": "Bhaiya, barf shuru ho gayi."
-      },
-      {
-        "speaker": "chhotu",
-        "text": "Jo latthe abhi nahi nikle, wo poore season andar rahenge. Aaj raat aakhri truck hai."
-      },
-      {
-        "speaker": "vicky",
-        "text": "To aaj raat hi sahi."
-      }
-    ],
-    "a3_m2:start": [
-      {
-        "speaker": "nafisa",
-        "text": "Sab kuch ek jagah pahunchana hai. Aur ek hi raat hai."
-      },
-      {
-        "speaker": "vicky",
-        "text": "Jakhoo."
-      },
-      {
-        "speaker": "nafisa",
-        "text": "Sabse uncha point. Wahan se signal jaayega, aur wahan se sab dikhega."
-      }
-    ],
-    "a3_m2:end": [
-      {
-        "speaker": "nafisa",
-        "text": "Chala gaya. Subah tak har akhbaar mein hoga."
-      },
-      {
-        "speaker": "vicky",
-        "text": "Aur Devinder?"
-      },
-      {
-        "speaker": "nafisa",
-        "text": "Devinder Shimla nahi hai, Vicky. Devinder sirf Shimla mein tha."
-      },
-      {
-        "speaker": "vicky",
-        "text": "Amma ko bata dena main der se aaunga."
-      }
-    ],
     "generic:wanted": [
       {
         "speaker": "vicky",
@@ -345,6 +93,258 @@
       {
         "speaker": "rahgeer",
         "text": "Bendaga tod di meri, bedafu!"
+      }
+    ],
+    "m01_pehla_din:start": [
+      {
+        "speaker": "deepika",
+        "text": "Aa gaya finally. Gate pe khade rehne se attendance nahi lagti."
+      },
+      {
+        "speaker": "vicky",
+        "text": "Bheed thi. Photocopy wale ke saamne teesre saal wale khade the."
+      },
+      {
+        "speaker": "deepika",
+        "text": "Roz khade rehte hain. Dekhna mat, bas chal."
+      }
+    ],
+    "m01_pehla_din:end": [
+      {
+        "speaker": "professor",
+        "text": "Naam?"
+      },
+      {
+        "speaker": "vicky",
+        "text": "Vicky. Sanjauli se hi hoon sir."
+      },
+      {
+        "speaker": "professor",
+        "text": "Sab Sanjauli se hi hain. Dekhte hain tu kitne din rukta hai."
+      }
+    ],
+    "m02_union_parcha:start": [
+      {
+        "speaker": "deepika",
+        "text": "Parche laga de campus bhar mein. Sameer ke ladke phaad rahe hain."
+      },
+      {
+        "speaker": "vicky",
+        "text": "Aur agar mil gaye to?"
+      },
+      {
+        "speaker": "deepika",
+        "text": "To phaad denge. Tu bas lagata ja."
+      }
+    ],
+    "m02_union_parcha:end": [
+      {
+        "speaker": "sameer",
+        "text": "Naya hai na tu? Naam yaad rakhunga."
+      },
+      {
+        "speaker": "vicky",
+        "text": "Rakh le."
+      }
+    ],
+    "m03_court_ka_faisla:start": [
+      {
+        "speaker": "professor",
+        "text": "Court par vote hoga. Do sau ladke honge."
+      },
+      {
+        "speaker": "professor",
+        "text": "Bhaagna mat. Jo bhaagta hai, usse yahan koi yaad nahi rakhta."
+      }
+    ],
+    "m03_court_ka_faisla:end": [
+      {
+        "speaker": "deepika",
+        "text": "Jeet gaya tu."
+      },
+      {
+        "speaker": "vicky",
+        "text": "Court pe khada raha bas."
+      },
+      {
+        "speaker": "deepika",
+        "text": "Yahan wahi jeet hai."
+      }
+    ],
+    "m04_bazaar_ka_hafta:start": [
+      {
+        "speaker": "dukandaar",
+        "text": "Beta, tu ab union ka aadmi hai na?"
+      },
+      {
+        "speaker": "dukandaar",
+        "text": "Har hafte koi aata hai paise lene. Bas ek baar keh de ki nahi dena."
+      }
+    ],
+    "m04_bazaar_ka_hafta:end": [
+      {
+        "speaker": "dukandaar",
+        "text": "Aaj koi nahi aaya. Pehli baar."
+      },
+      {
+        "speaker": "vicky",
+        "text": "Kal bhi nahi aayega."
+      }
+    ],
+    "m05_baudi_ki_chudail:start": [
+      {
+        "speaker": "chhotu",
+        "text": "Shart lagi thi. Aadhi raat, purani baudi, akele."
+      },
+      {
+        "speaker": "vicky",
+        "text": "Ek ghanta hi na?"
+      },
+      {
+        "speaker": "chhotu",
+        "text": "Ek ghanta. Aur bhaag mat jaana, mujhe pata chal jaayega."
+      }
+    ],
+    "m05_baudi_ki_chudail:end": [
+      {
+        "speaker": "chudail",
+        "text": "Itni raat ko paani bharne aaya hai?"
+      },
+      {
+        "speaker": "vicky",
+        "text": "..."
+      },
+      {
+        "speaker": "chudail",
+        "text": "Ja. Aur is baudi ka naam kisi ko mat batana."
+      },
+      {
+        "speaker": "chhotu",
+        "text": "Bhai tu safed pad gaya hai. Kya hua wahan?"
+      },
+      {
+        "speaker": "vicky",
+        "text": "Kuch nahi. Kuch bhi nahi."
+      }
+    ],
+    "m06_igmc_ki_raat:start": [
+      {
+        "speaker": "deepika",
+        "text": "Chhotu ko maara hai unhone. Bazaar ke peeche."
+      },
+      {
+        "speaker": "deepika",
+        "text": "Gaadi nikaal. IGMC, abhi. Ambulance ka intezaar mat kar."
+      }
+    ],
+    "m06_igmc_ki_raat:end": [
+      {
+        "speaker": "deepika",
+        "text": "Bach gaya wo."
+      },
+      {
+        "speaker": "vicky",
+        "text": "Jisne maara hai, usko main jaanta hoon."
+      },
+      {
+        "speaker": "deepika",
+        "text": "Vicky. Yahin ruk ja. Aage kuch nahi hai."
+      }
+    ],
+    "m07_navbahar_naka:start": [
+      {
+        "speaker": "sameer",
+        "text": "Ab tu bhi usi taraf hai jidhar main hoon."
+      },
+      {
+        "speaker": "sameer",
+        "text": "Naka laga hai Navbahar pe. Nikal ke dikha."
+      }
+    ],
+    "m07_navbahar_naka:end": [
+      {
+        "speaker": "sameer",
+        "text": "College mein tujhse ladta tha. Ab tere saath hoon."
+      },
+      {
+        "speaker": "vicky",
+        "text": "Farak kya pada?"
+      },
+      {
+        "speaker": "sameer",
+        "text": "Farak ye ki ab upar wale hamare naam jaante hain."
+      }
+    ],
+    "m08_jakhoo_ka_sauda:start": [
+      {
+        "speaker": "netaji",
+        "text": "Upar aa jao. Jakhoo pe baat hoti hai."
+      },
+      {
+        "speaker": "netaji",
+        "text": "Mall pe sirf tasveer khinchti hai."
+      }
+    ],
+    "m08_jakhoo_ka_sauda:end": [
+      {
+        "speaker": "netaji",
+        "text": "Neeche dekho. Poora sheher."
+      },
+      {
+        "speaker": "netaji",
+        "text": "Har das saal mein main ek ladka dhoondta hoon. Is baar tum ho."
+      },
+      {
+        "speaker": "vicky",
+        "text": "Aur pichhli baar jo tha?"
+      },
+      {
+        "speaker": "netaji",
+        "text": "Wo sawal nahi poochhta tha."
+      }
+    ],
+    "m09_mall_ka_julus:start": [
+      {
+        "speaker": "netaji",
+        "text": "Kal Mall pe julus hai."
+      },
+      {
+        "speaker": "netaji",
+        "text": "Bheed teri honi chahiye, naam mera. Abhi ke liye."
+      }
+    ],
+    "m09_mall_ka_julus:end": [
+      {
+        "speaker": "vicky",
+        "text": "Bheed meri thi."
+      },
+      {
+        "speaker": "netaji",
+        "text": "Aaj thi. Kal dekhenge."
+      }
+    ],
+    "m10_vidhan_sabha:start": [
+      {
+        "speaker": "netaji",
+        "text": "Andar seat ek hi hai."
+      },
+      {
+        "speaker": "netaji",
+        "text": "Aaj tay hoga ki uspe kaun baithega."
+      }
+    ],
+    "m10_vidhan_sabha:end": [
+      {
+        "speaker": "vicky",
+        "text": "College ke gate se yahan tak paanch saal lage."
+      },
+      {
+        "speaker": "deepika",
+        "text": "Aur us ladke ko yaad hai jo us gate se andar gaya tha?"
+      },
+      {
+        "speaker": "vicky",
+        "text": "Rozana."
       }
     ]
   }

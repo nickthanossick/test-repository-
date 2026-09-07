@@ -4,9 +4,9 @@
       "id": "vicky",
       "name": "Vicky",
       "role": "player",
-      "age": 24,
+      "age": 19,
       "home": "vicky_home",
-      "desc": "Sanjauli ka mechanic. Baap ki garage sambhaalta hai, taxi bhi chala leta hai. Gusse mein tez, dil se seedha.",
+      "desc": "Sanjauli ka ladka, Government College mein pehla saal. Baap ki garage abhi bhi chalti hai, par Vicky ka raasta ab college ke gate se hokar jaata hai.",
       "color": "#c8442e"
     },
     {
@@ -18,14 +18,6 @@
       "color": "#d8b26a"
     },
     {
-      "id": "nafisa",
-      "name": "Nafisa",
-      "role": "ally",
-      "home": "nafisa_office",
-      "desc": "'Pahari Awaaz' ki reporter. Lakkar Bazaar ke upar ek-kamre ka daftar. Saboot maangti hai, kahani nahi.",
-      "color": "#2f7d6b"
-    },
-    {
       "id": "chhotu",
       "name": "Chhotu",
       "role": "ally",
@@ -33,38 +25,6 @@
       "home": "chhotu_perch",
       "desc": "Jakhoo ki chadhai pe rehta hai. Bandaron se baat karta hai, aur poore Mall pe nazar rakhta hai.",
       "color": "#e0a44c"
-    },
-    {
-      "id": "guru",
-      "name": "Guru",
-      "role": "ally",
-      "home": "guru_dhaba",
-      "desc": "HRTC bus driver, 22 saal se. Har mod jaanta hai. Getaway ke liye isse behtar koi nahi.",
-      "color": "#4a6fa5"
-    },
-    {
-      "id": "rana",
-      "name": "Devinder",
-      "role": "antagonist",
-      "home": "rana_hotel",
-      "desc": "Hotel Deodar Palace ka maalik. Mall Road pe darbar lagta hai. Zameen, timber, tender - sab uska.",
-      "color": "#7a2331"
-    },
-    {
-      "id": "bali",
-      "name": "Bali",
-      "role": "antagonist",
-      "home": "bali_yard",
-      "desc": "Devinder ka haath. Dhalli mein yard, cement aur sariya - aur bahut saara bina-kaagaz ka deodar.",
-      "color": "#5c5240"
-    },
-    {
-      "id": "ahluwalia",
-      "name": "Karan",
-      "role": "antagonist",
-      "home": "police_hq",
-      "desc": "Vardi mein Devinder ka aadmi. FIR likhta hai to bhi uske ishaare pe.",
-      "color": "#26374f"
     },
     {
       "id": "rahgeer",
@@ -79,6 +39,51 @@
       "role": "npc",
       "desc": "Bazaar ka dukandaar. Apni dukan ke aage koi panga nahi chalta.",
       "color": "#c9a227"
+    },
+    {
+      "id": "deepika",
+      "name": "Deepika",
+      "role": "friend",
+      "age": 19,
+      "home": "college_gate",
+      "desc": "Vicky ki classmate. Notes bhi deti hai aur seedhi baat bhi.",
+      "color": "#d06a9c"
+    },
+    {
+      "id": "professor",
+      "name": "Thakur Sir",
+      "role": "teacher",
+      "age": 54,
+      "home": "gov_college",
+      "desc": "Political Science ke HOD. Har batch mein ek ladke ko pehchaan lete hain.",
+      "color": "#4f7fa8"
+    },
+    {
+      "id": "sameer",
+      "name": "Sameer",
+      "role": "rival",
+      "age": 22,
+      "home": "college_court",
+      "desc": "Teesre saal ka chhatra neta. Union uske baap ka samajhta hai.",
+      "color": "#8a5a2e"
+    },
+    {
+      "id": "netaji",
+      "name": "Netaji",
+      "role": "patron",
+      "age": 61,
+      "home": "vidhan_sabha",
+      "desc": "Zile ka purana neta. Ladko ko pehchanta hai, istemaal bhi karta hai.",
+      "color": "#c9a227"
+    },
+    {
+      "id": "chudail",
+      "name": "Baudi wali",
+      "role": "legend",
+      "age": 0,
+      "home": "sanjauli_baudi",
+      "desc": "Sanjauli ki sabse purani kahani. Koi maanta nahi, koi raat ko wahan jaata bhi nahi.",
+      "color": "#8fa9b8"
     }
   ]
 }

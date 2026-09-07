@@ -692,6 +692,62 @@
       "accuracy": "approx",
       "sign": "SANJAULI MANDIR",
       "sign_sub": ""
+    },
+    {
+      "id": "college_gate",
+      "name": "College Gate",
+      "lat": 31.10722,
+      "lon": 77.18855,
+      "type": "gate",
+      "district": "sanjauli",
+      "icon": "school",
+      "accuracy": "approx",
+      "desc": "Government College ka mukhya phaatak. Bahar photocopy, chai aur momo."
+    },
+    {
+      "id": "college_court",
+      "name": "College Basketball Court",
+      "lat": 31.106651,
+      "lon": 77.188755,
+      "type": "ground",
+      "district": "sanjauli",
+      "icon": "sport",
+      "accuracy": "approx",
+      "desc": "Campus ka paved court. Union ka faisla yahin hota hai."
+    },
+    {
+      "id": "college_library",
+      "name": "College Library",
+      "lat": 31.107059,
+      "lon": 77.188631,
+      "type": "building",
+      "district": "sanjauli",
+      "icon": "school",
+      "accuracy": "approx",
+      "desc": "Neeche wale terrace par, ARTS aur B.COM block ke saath."
+    },
+    {
+      "id": "college_canteen",
+      "name": "College Canteen",
+      "lat": 31.106946,
+      "lon": 77.188663,
+      "type": "shopfront",
+      "district": "sanjauli",
+      "icon": "food",
+      "accuracy": "approx",
+      "desc": "Chai, samosa, aur din bhar ki siyasat."
+    },
+    {
+      "id": "sanjauli_baudi",
+      "name": "Purani Baudi",
+      "lat": 31.106925,
+      "lon": 77.189527,
+      "type": "water",
+      "district": "sanjauli",
+      "icon": "water",
+      "accuracy": "approx",
+      "landmark": "plaza",
+      "desc": "Angrezon ke zamane ki baudi. Raat ko yahan koi nahi jaata."
     }
   ]
 }
