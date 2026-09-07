@@ -649,18 +649,27 @@
       "oneway": false,
       "points": [
         [
-          31.1082,
-          77.1927
+          31.106943,
+          77.189071
         ],
         [
-          31.1076,
-          77.1908
+          31.107028,
+          77.188938
         ],
         [
-          31.1069,
-          77.1887
+          31.107108,
+          77.188797
+        ],
+        [
+          31.10717,
+          77.188666
+        ],
+        [
+          31.10722,
+          77.18855
         ]
-      ]
+      ],
+      "note": "Chowk_tunnel se nikalta spur, campus ke baayen pehlu se gate tak. Pehle ye Chowk se college tak ki seedhi lakeer thi jo campus ke beecho-beech se guzarti thi."
     },
     {
       "id": "panthaghati_road",

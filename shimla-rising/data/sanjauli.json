@@ -310,6 +310,38 @@
         ]
       ],
       "length_m": 318.4
+    },
+    {
+      "id": "college_road",
+      "name": "Government College Road",
+      "road": "gov_college_road",
+      "type": "street",
+      "width_m": 8.5,
+      "oneway": false,
+      "accuracy": "approx",
+      "points": [
+        [
+          31.106943,
+          77.189071
+        ],
+        [
+          31.107028,
+          77.188938
+        ],
+        [
+          31.107108,
+          77.188797
+        ],
+        [
+          31.10717,
+          77.188666
+        ],
+        [
+          31.10722,
+          77.18855
+        ]
+      ],
+      "length_m": 58.5
     }
   ],
   "junctions": [
@@ -378,6 +410,27 @@
           "segment": "chowk_tunnel",
           "sign": "LAKKAR BAZAAR",
           "km": 2
+        },
+        {
+          "segment": "college_road",
+          "sign": "GOVT COLLEGE",
+          "km": 0
+        }
+      ]
+    },
+    {
+      "id": "college_gate",
+      "name": "Government College Gate",
+      "lat": 31.10722,
+      "lon": 77.18855,
+      "radius_m": 8.0,
+      "accuracy": "approx",
+      "island": false,
+      "arms": [
+        {
+          "segment": "college_road",
+          "sign": "SANJAULI",
+          "km": 1
         }
       ]
     }
@@ -9183,6 +9236,150 @@
       "side": 1,
       "frontage_m": 5.0,
       "dense": false,
+      "shop": null
+    },
+    {
+      "id": "college_road_L_000",
+      "segment": "college_road",
+      "t": 0.04271,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "college_road_R_000",
+      "segment": "college_road",
+      "t": 0.04271,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "college_road_L_001",
+      "segment": "college_road",
+      "t": 0.12812,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "college_road_R_001",
+      "segment": "college_road",
+      "t": 0.12812,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "college_road_L_002",
+      "segment": "college_road",
+      "t": 0.21353,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "college_road_R_002",
+      "segment": "college_road",
+      "t": 0.21353,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "college_road_L_003",
+      "segment": "college_road",
+      "t": 0.29894,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "college_road_R_003",
+      "segment": "college_road",
+      "t": 0.29894,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "college_road_L_004",
+      "segment": "college_road",
+      "t": 0.38435,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "college_road_R_004",
+      "segment": "college_road",
+      "t": 0.38435,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "college_road_L_005",
+      "segment": "college_road",
+      "t": 0.46976,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "college_road_R_005",
+      "segment": "college_road",
+      "t": 0.46976,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "college_road_L_006",
+      "segment": "college_road",
+      "t": 0.55517,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "college_road_R_006",
+      "segment": "college_road",
+      "t": 0.55517,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "college_road_L_007",
+      "segment": "college_road",
+      "t": 0.64058,
+      "side": -1,
+      "frontage_m": 5.0,
+      "dense": true,
+      "shop": null
+    },
+    {
+      "id": "college_road_R_007",
+      "segment": "college_road",
+      "t": 0.64058,
+      "side": 1,
+      "frontage_m": 5.0,
+      "dense": true,
       "shop": null
     }
   ]

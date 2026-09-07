@@ -144,16 +144,30 @@ function college(c, mb) {
   const VOFF = 17;
   const L = (u, v) => c.L(u, v + VOFF);
 
-  /** Kisi hisse ki sabse oonchi zameen -- terrace ka farsh isi par baithta hai. */
-  const padMax = (u0, u1, v0, v1) => {
-    let m = -Infinity;
-    for (let i = 0; i <= 4; i++) {
-      for (let j = 0; j <= 4; j++) {
-        const [px, pz] = L(u0 + ((u1 - u0) * i) / 4, v0 + ((v1 - v0) * j) / 4);
-        m = Math.max(m, terrain.heightAt(px, pz));
+  /**
+   * Terrace ka farsh kis oonchai par baithe -- "cut and fill".
+   *
+   * Pehle yahan sabse *oonchi* zameen li jaati thi. Us hisse mein dhalan 12.5 m
+   * ki hai (2087.4 se 2099.9), isliye poora campus sabse oonche kone ke barabar
+   * uth jaata tha aur sadak se 13 m ooncha ek tairta hua chabutra ban jaata --
+   * gate kahin se bhi sadak se mil hi nahi sakta tha.
+   *
+   * Asli pahadi campus dhalan ko *kaat kar* banta hai: farsh beech mein rehta
+   * hai, upar ki taraf kati hui deewar (retaining wall) aur neeche ki taraf
+   * bharaav. K = 0.56 par yahan farsh 2094.4 par aata hai, jisse neeche wala
+   * terrace 2088 par -- aur college road ke gate ki zameen 2087.8 par hai.
+   * Yaani gate seedha sadak se lag jaata hai.
+   */
+  const padLevel = (u0, u1, v0, v1, k = 0.56) => {
+    let mn = Infinity, mx = -Infinity;
+    for (let i = 0; i <= 6; i++) {
+      for (let j = 0; j <= 6; j++) {
+        const [px, pz] = L(u0 + ((u1 - u0) * i) / 6, v0 + ((v1 - v0) * j) / 6);
+        const h = terrain.heightAt(px, pz);
+        mn = Math.min(mn, h); mx = Math.max(mx, h);
       }
     }
-    return m;
+    return { level: mn + (mx - mn) * k, mn, mx };
   };
 
   // Yahan Y **absolute** hai (relative nahi) -- campus ke teen alag farsh hain.
@@ -163,9 +177,11 @@ function college(c, mb) {
     mb[which].box(px, yy, pz, sx, sy, sz, C, yaw + spin);
   };
 
-  const PLAZA = padMax(-16, 40, -16, 12) + 0.25;   // forecourt + court, ek hi satah
+  const pad = padLevel(-16, 40, -16, 12);
+  const PLAZA = pad.level;                         // forecourt + court, ek hi satah
   const MAIN = PLAZA + 3.2;                        // main building ka plinth
   const LOWER = PLAZA - 6.4;                       // arts / b.com / library
+  const CUT = pad.mx + 1.2;                        // upar ki kati hui dhalan ka sira
 
   const STONE = 0xa89981, STONE_D = 0x8c7d68, TRIM = 0xd0c4ab;
   const WHITE = 0xe6e4dc, BAND = 0xc9c5bb, SLATE = 0x555b63;
@@ -177,6 +193,20 @@ function college(c, mb) {
   // dono terrace ke beech retaining wall
   B("stone", -31, (PLAZA + LOWER) / 2 - 0.2, -12.0, 32, PLAZA - LOWER + 0.5, 1.5, STONE_D);
   B("stone", -31, PLAZA + 0.18, -12.0, 32, 0.36, 1.9, TRIM);     // coping
+
+  /*
+   * Upar ki kati hui dhalan ki deewar.
+   *
+   * Farsh ab pahad ke beech mein hai, sabse oonche kone par nahi -- isliye
+   * peeche ki dhalan farsh se ooncha reh jaata hai. Asli pahadi campus mein
+   * wahan patthar ki oonchi retaining wall hoti hai; uske bina hara pahad
+   * seedha paving se nikalta hua dikhta.
+   */
+  B("stone", 11, (PLAZA + CUT) / 2, 13.6, 54, CUT - PLAZA + 3.0, 1.6, STONE_D);
+  B("stone", 11, CUT + 0.2, 13.6, 54, 0.4, 2.0, TRIM);
+  for (const s of [-1, 1]) {                                     // dono sire par bhi
+    B("stone", 11 + s * 27, (PLAZA + CUT) / 2, 6.5, 1.6, CUT - PLAZA + 3.0, 15, STONE_D);
+  }
 
   // ============================================================ main block
   const MW = 17, MD = 12, MH = 9.4, MV = 10;
@@ -420,6 +450,66 @@ function college(c, mb) {
   lamp(CU + CW / 2 + 1.4, CV + 6, PLAZA);
   lamp(-36, -15.5, LOWER);
   lamp(-21, -17.5, LOWER);
+
+  /*
+   * ============================== gate aur uski seedhiyan ==================
+   *
+   * Nikhil: "college k raste ko left side se Sanjauli s b connect kr dio".
+   * `college_road` (data/sanjauli.json) chowk_tunnel se nikal kar campus ke
+   * baayen pehlu par local(-34,-36) tak aata hai. Gate wahin, sadak ke level
+   * par -- gaadi yahan tak, aage paidal. Wahi jo asli college mein hota hai,
+   * aur wahi jo Nikhil ki tasveer mein hai: neeche-baayen railing wala rasta
+   * aur uske upar chadhti seedhiyan.
+   */
+  const GU = -34, GV = -36;                        // gate ki jagah (road level)
+  const GY = terrain.heightAt(...L(GU, GV));       // sadak wahan jis oonchai par
+
+  // gate ke do patthar ke khambe aur unke beech lohe ka phaatak
+  for (const s of [-1, 1]) {
+    B("stone", GU + s * 3.4, GY + 2.2, GV, 1.5, 4.4, 1.5, STONE_D);
+    B("stone", GU + s * 3.4, GY + 4.6, GV, 1.9, 0.5, 1.9, TRIM);
+  }
+  for (let i = 0; i < 9; i++) {                    // phaatak ki salakhein
+    B("metal", GU - 2.4 + i * 0.6, GY + 1.5, GV, 0.09, 2.8, 0.09, IRON);
+  }
+  B("metal", GU, GY + 2.85, GV, 6.0, 0.14, 0.12, IRON);
+  {
+    const [bx, bz] = L(GU, GV - 0.35);
+    boards.push({ x: bx, z: bz, y: GY + 5.3, yaw, width: 8.2,
+                  text: "GOVT COLLEGE SANJAULI", sub: "", kind: "block" });
+  }
+
+  /*
+   * Gate se neeche wale terrace tak seedhiyan. Do baar mudti hain (switchback)
+   * -- Shimla mein seedhi chadhai wali seedhi banti hi nahi, dhalan itni tez
+   * hai. Har flight ke saath railing.
+   */
+  const flight = (u0, v0, u1, v1, yFrom, yTo, w = 3.4) => {
+    const n = Math.max(3, Math.round(Math.abs(yTo - yFrom) / 0.34));
+    for (let i = 0; i < n; i++) {
+      const t = i / n;
+      B("stone", u0 + (u1 - u0) * t, yFrom + (yTo - yFrom) * t + 0.17,
+        v0 + (v1 - v0) * t, w, 0.34, (Math.hypot(u1 - u0, v1 - v0) / n) + 0.5,
+        i % 2 ? TRIM : STONE);
+    }
+    // dono taraf railing
+    for (const s of [-1, 1]) {
+      for (let i = 0; i <= n; i += 2) {
+        const t = i / n;
+        B("metal", u0 + (u1 - u0) * t + s * w * 0.5, yFrom + (yTo - yFrom) * t + 0.6,
+          v0 + (v1 - v0) * t, 0.08, 1.0, 0.08, IRON);
+      }
+    }
+  };
+  flight(GU, GV + 1.5, GU + 5, GV + 8, GY, (GY + LOWER) / 2);
+  flight(GU + 5, GV + 8, GU + 1, GV + 15, (GY + LOWER) / 2, LOWER);
+
+  // neeche wale terrace se plaza tak -- retaining wall ke kinare se
+  flight(-18, -14.5, -13, -7.5, LOWER, (LOWER + PLAZA) / 2);
+  flight(-13, -7.5, -17, -1.0, (LOWER + PLAZA) / 2, PLAZA);
+
+  lamp(GU + 4.6, GV + 1.0, GY);
+  lamp(GU - 4.6, GV + 1.0, GY);
 
   // ================================================================ collider
   /*
@@ -775,7 +865,19 @@ export function buildLandmarks(terrain, roads, pois, colliders = null) {
     if (!fn) continue;
     const { x, z } = terrain.geo.toWorld(p.lat, p.lon);
     const y = terrain.heightAt(x, z);
-    const yaw = facing(roads, x, z);
+    /*
+     * Rukh: agar POI mein `facing_deg` likha hai to wahi, warna sabse nazdeek
+     * sadak.
+     *
+     * `facing()` har baar sadak dekh kar rukh nikalta hai, isliye ek nayi sadak
+     * paas se guzarte hi poori imaarat ghoom jaati hai. College ke liye ye
+     * chalta nahi -- uska campus haath se rakha gaya hai (bay tower, seedhiyan,
+     * court, teen terrace), aur naya college road banate hi wo sab ghoom kar
+     * pahad mein ghus jaata. Jinka layout tay hai, unka rukh data mein likha
+     * rehta hai.
+     */
+    const yaw = p.facing_deg != null ? (p.facing_deg * Math.PI) / 180
+                                     : facing(roads, x, z);
     const cy = Math.cos(yaw), sy = Math.sin(yaw);
     const ctx = {
       x, z, y, yaw, terrain, roads, poi: p, rng: seeded(p.id), mbRef: mb, boards, fences, colliders,

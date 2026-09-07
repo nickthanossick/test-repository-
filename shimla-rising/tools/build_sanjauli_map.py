@@ -69,6 +69,27 @@ SEGMENTS = [
          type="street", width_m=8.5, oneway=False, accuracy="approx",
          points=[(31.1150, 77.2050), (31.1156, 77.2058), (31.1162, 77.2067),
                  (31.1168, 77.2076)]),
+    # College ka rasta -- Nikhil: "college k raste ko left side se Sanjauli s
+    # b connect kr dio".
+    #
+    # Ye `chowk_tunnel` se nikalta hai (wahi arterial jo Chowk se tunnel aur
+    # Mall ko jaata hai), campus ke saamne se guzarta hai aur uske **baayen
+    # pehlu** par gate par khatam hota hai -- wahi taraf jahan ARTS/B.COM/
+    # LIBRARY wala neeche ka terrace hai.
+    #
+    # Bindu haath se nahi chune: campus ke apne local frame (u = daayen,
+    # v = saamne, rukh `pois.json` ke facing_deg 40.699 se) mein rakhe gaye
+    # aur wahan se lat/lon nikale. Isliye rasta campus ke aakaar ke saath
+    # baithta hai, uske aar-paar nahi jaata:
+    #     local(24,-45) (32,-44) (-8,-42) (-22,-39) (-34,-36 = gate)
+    # Dhalan halki hai -- 65 m mein sirf 3 m, kyunki ye contour ke saath chalta
+    # hai; seedha upar se aane wala rasta 40% ka hota, jo gaadi chadh hi na
+    # paati.
+    dict(id="college_road", name="Government College Road", road="gov_college_road",
+         type="street", width_m=8.5, oneway=False, accuracy="approx",
+         points=[(31.106943, 77.189071), (31.107028, 77.188938),
+                 (31.107108, 77.188797), (31.107170, 77.188666),
+                 (31.107220, 77.188550)]),
 ]
 
 JUNCTIONS = [
@@ -84,7 +105,11 @@ JUNCTIONS = [
                dict(segment="dhalli_bazaar", sign="KUFRI", km=12)]),
     dict(id="tunnel_mouth", name="Sanjauli Tunnel", lat=31.1068, lon=77.1885,
          radius_m=9.0, accuracy="approx", island=False,
-         arms=[dict(segment="chowk_tunnel", sign="LAKKAR BAZAAR", km=2)]),
+         arms=[dict(segment="chowk_tunnel", sign="LAKKAR BAZAAR", km=2),
+               dict(segment="college_road", sign="GOVT COLLEGE", km=0)]),
+    dict(id="college_gate", name="Government College Gate", lat=31.107220,
+         lon=77.188550, radius_m=8.0, accuracy="approx", island=False,
+         arms=[dict(segment="college_road", sign="SANJAULI", km=1)]),
 ]
 
 # Bazaar kis-kis tukde par ghana hai. (segment, kitne metre tak ghana, kul kitna)
@@ -93,6 +118,13 @@ SHOP_STRETCHES = [
     ("bazaar_lane", 260, 400),
     ("chowk_tunnel", 220, 340),
     ("dhalli_bazaar", 300, 420),
+    # College ke gate ke bahar -- har Indian college ke bahar yahi hoti hain:
+    # photocopy, stationery, chai aur momo. Mission 1-3 inhi ke beech chalte hain.
+    #
+    # Slot segment ke shuru se gine jaate hain aur gate uske *aakhir* mein hai
+    # (t=1), isliye 58.8 m mein se sirf pehle 40 m -- warna dukanein theek gate
+    # ke mooh par khadi ho jaati hain aur phaatak dikhta hi nahi.
+    ("college_road", 40, 40),
 ]
 FRONTAGE_M = 5.0
 
