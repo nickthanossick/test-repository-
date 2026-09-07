@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { buildHuman } from "./human.js";
+import { buildHuman, buildHumanFar } from "./human.js";
 import { buildDog, buildCow, buildMonkey, animateQuadruped } from "./animals.js";
 
 /**
@@ -18,6 +18,7 @@ import { buildDog, buildCow, buildMonkey, animateQuadruped } from "./animals.js"
 const KEEPER_RANGE = 95;          // itni doori ke andar hi dukandaar dikhte hain
 const RECYCLE_AT = 118;           // isse door jaate hi slot chhod do
 const WALK_SPEED = 1.25;
+const NEAR_BAND = 42;             // itne andar log ghane, aage chhitre
 /**
  * Itni doori ke andar NPC poore detail wale roop mein aa jaata hai (naak, kaan,
  * bhauh, collar, cuff, angootha, joote ka sole, topi ki phundi). Pehle har NPC
@@ -27,7 +28,8 @@ const WALK_SPEED = 1.25;
  * Dono roop load par ek saath ban jaate hain aur sirf `visible` badalta hai --
  * runtime par kuch banta nahi, isliye chalte-chalte hichki nahi aati.
  */
-const DETAIL_RANGE = 26;
+const DETAIL_RANGE = 26;          // isse paas: poora roop (48 mesh)
+const LITE_RANGE = 48;            // isse paas: lite (23 mesh), aage far (1 mesh)
 const DETAIL_HYSTERESIS = 4;      // baar-baar switch na ho
 
 /** Deterministic RNG -- ek hi jagah ka aadmi har baar wahi dikhna chahiye. */
@@ -77,6 +79,7 @@ function makePerson(i) {
   return {
     lite: buildHuman({ ...opts, lod: "crowd" }),
     full: buildHuman(opts),
+    far: buildHumanFar(opts),
   };
 }
 
@@ -85,18 +88,22 @@ function makePerson(i) {
  * hai, isliye switch dikhta nahi.
  */
 function setDetail(entry, dist) {
-  const wantFull = entry.full
-    ? dist < (entry.detailed ? DETAIL_RANGE + DETAIL_HYSTERESIS : DETAIL_RANGE)
-    : false;
-  if (wantFull === entry.detailed) return;
-  entry.detailed = wantFull;
-  const from = wantFull ? entry.lite : entry.full;
-  const to = wantFull ? entry.full : entry.lite;
+  // Hysteresis dono seemaon par -- warna seema ke aas-paas roop jhilmilaata hai
+  const h = DETAIL_HYSTERESIS;
+  let want;
+  if (dist < (entry.level === "full" ? DETAIL_RANGE + h : DETAIL_RANGE)) want = "full";
+  else if (dist < (entry.level === "far" ? LITE_RANGE : LITE_RANGE + h)) want = "lite";
+  else want = "far";
+  if (want === entry.level) return;
+
+  const from = entry.mesh;
+  const to = entry[want];
   to.position.copy(from.position);
   to.rotation.copy(from.rotation);
   to.visible = from.visible;
   from.visible = false;
   entry.mesh = to;
+  entry.level = want;
 }
 
 export class Crowd {
@@ -104,19 +111,20 @@ export class Crowd {
    * @param stalls bazaar.userData.stalls -- har dukan ka counter aur mooh
    * @param budget {keepers, walkers, dogs, cows}
    */
-  constructor(scene, terrain, roads, stalls, budget) {
+  constructor(scene, terrain, roads, stalls, budget, segs = null) {
     this.terrain = terrain;
     this.roads = roads;
     this.stalls = stalls;
+    // sadak ke segment (buses wale hi) -- paidal log inpar chalte hain
+    this.segs = segs && segs.size ? [...segs.values()] : null;
     this.group = new THREE.Group();
     this.group.name = "crowd";
     scene.add(this.group);
 
     const addPerson = (seed, extra) => {
-      const { lite, full } = makePerson(seed);
-      lite.visible = false; full.visible = false;
-      this.group.add(lite); this.group.add(full);
-      return { lite, full, mesh: lite, detailed: false, ...extra };
+      const { lite, full, far } = makePerson(seed);
+      for (const m of [lite, full, far]) { m.visible = false; this.group.add(m); }
+      return { lite, full, far, mesh: far, level: "far", ...extra };
     };
 
     this.keepers = [];
@@ -155,9 +163,67 @@ export class Crowd {
   }
 
   get count() {
-    const detailed = [...this.keepers, ...this.walkers].filter((e) => e.detailed).length;
+    const all = [...this.keepers, ...this.walkers];
+    const at = (l) => all.filter((e) => e.level === l && e.mesh.visible).length;
     return { keepers: this.keepers.length, walkers: this.walkers.length,
-             animals: this.animals.length, detailed };
+             animals: this.animals.length,
+             full: at("full"), lite: at("lite"), far: at("far") };
+  }
+
+  /**
+   * Paidal aadmi ko sadak ke kinare rakho.
+   *
+   * Pehle walker ek dukan claim karke uske saamne se chalta tha, isliye log
+   * dukanon ke guchhon mein dikhte the aur beech ki sadak suni rehti thi. Ab
+   * naksha ke segment par rakhte hain -- wahi polyline jispar bus chalti hai --
+   * dono taraf footpath par, khiladi ke aas-paas.
+   */
+  _placeWalker(w, pos) {
+    if (!this.segs) {                       // naksha nahi mila to purana tareeka
+      const got = this._claimStall(pos, 12);
+      if (!got) return false;
+      const fx = Math.sin(got.s.yaw), fz = -Math.cos(got.s.yaw);
+      w.x = got.s.x + fx * 5.2; w.z = got.s.z + fz * 5.2;
+      w.dir = Math.random() < 0.5 ? 1 : -1;
+      w.ux = -fz * w.dir; w.uz = fx * w.dir;
+      w.placed = true; w.mesh.visible = true;
+      return true;
+    }
+    for (let tries = 0; tries < 24; tries++) {
+      const seg = this.segs[(Math.random() * this.segs.length) | 0];
+      const d = Math.random() * seg.total;
+      let i = 1;
+      while (i < seg.cum.length - 1 && seg.cum[i] < d) i++;
+      const a = seg.pts[i - 1], b = seg.pts[i];
+      const L = seg.cum[i] - seg.cum[i - 1] || 1;
+      const k = (d - seg.cum[i - 1]) / L;
+      const ux = (b.x - a.x) / L, uz = (b.z - a.z) / L;
+      const nx = -uz, nz = ux;
+      const side = Math.random() < 0.5 ? -1 : 1;
+      // Footpath ki chaudai bhar bikhrao -- sab ek hi lakeer par chalein to
+      // qatar lagti hai, bheed nahi.
+      const off = seg.spec.width_m / 2 + 1.0 + Math.random() * 1.6;
+      const x = a.x + (b.x - a.x) * k + nx * side * off;
+      const z = a.z + (b.z - a.z) * k + nz * side * off;
+      const dist = Math.hypot(x - pos.x, z - pos.z);
+      if (dist > KEEPER_RANGE || dist < 6) continue;
+      /*
+       * Doori ke hisaab se chunav.
+       *
+       * Segment par ek jaisa bikharne se 48 log 95 m ke daayre mein phail
+       * jaate the -- yaani frame mein teen-chaar. Aankh ke saamne wali patti
+       * ko tarjeeh dete hain, par door bhi kuch log rehte hain taaki gali
+       * achanak khatam na lage.
+       */
+      if (dist > NEAR_BAND && Math.random() < 0.7) continue;
+      w.dir = Math.random() < 0.5 ? 1 : -1;
+      w.x = x; w.z = z;
+      w.ux = ux * w.dir; w.uz = uz * w.dir;
+      w.placed = true;
+      w.mesh.visible = true;
+      return true;
+    }
+    return false;
   }
 
   /** Khiladi ke paas ki ek khaali dukan dhoondo. */
@@ -194,7 +260,7 @@ export class Crowd {
       }
       setDetail(k, Math.hypot(k.mesh.position.x - playerPos.x,
                               k.mesh.position.z - playerPos.z));
-      // khade rehte hain, par saans ka halka bob
+      // khade rehte hain, par saans ka halka bob (far roop ka rig nahi hota)
       const rig = k.mesh.userData.rig;
       if (rig) {
         const sway = Math.sin(this._t * 1.3 + k.stall.i) * 0.045;
@@ -205,17 +271,8 @@ export class Crowd {
 
     // ---- paidal log: bazaar ke kinare chalte hue ----
     for (const w of this.walkers) {
-      if (!w.stall) {
-        const got = this._claimStall(playerPos, 12);
-        if (!got) continue;
-        w.stall = got;
-        w.dir = Math.random() < 0.5 ? 1 : -1;
-        // dukan ke saamne, sadak ke kinare pe
-        const fx = Math.sin(got.s.yaw), fz = -Math.cos(got.s.yaw);
-        w.x = got.s.x + fx * 5.2;
-        w.z = got.s.z + fz * 5.2;
-        w.ux = -fz * w.dir; w.uz = fx * w.dir;      // sadak ke saath
-        w.mesh.visible = true;
+      if (!w.placed) {
+        if (!this._placeWalker(w, playerPos)) continue;
       }
       w.x += w.ux * WALK_SPEED * dt;
       w.z += w.uz * WALK_SPEED * dt;
@@ -223,12 +280,9 @@ export class Crowd {
       w.mesh.rotation.y = Math.atan2(w.ux, w.uz);
       const d = Math.hypot(w.x - playerPos.x, w.z - playerPos.z);
       setDetail(w, d);
-      walkGait(w.mesh, this._t + w.phase);
-      if (d > RECYCLE_AT) {
-        this._taken.delete(w.stall.i);
-        w.stall = null;
-        w.mesh.visible = false;
-      }
+      // far roop ka rig nahi hota -- itni door chaal waise bhi dikhti nahi
+      if (w.mesh.userData.rig) walkGait(w.mesh, this._t + w.phase);
+      if (d > RECYCLE_AT) { w.placed = false; w.mesh.visible = false; }
     }
 
     // ---- kutte aur gaay ----

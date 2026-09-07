@@ -32,8 +32,16 @@ function canvas(size) {
  * result `color` buffer attribute mein jaata hai, aur usse three linear hi
  * expect karta hai -- wahan conversion sahi hai.
  */
+/**
+ * Hex se sRGB channels (0..1).
+ *
+ * String bhi chalti hai: `data/*.json` ke rang `"#1e6f4a"` ki tarah aate hain,
+ * aur seedha bitwise karne par `"#1e6f4a" >> 16` = 0 nikalta tha -- yaani
+ * kaala. Isi wajah se **game ki har gaadi aur har bus kaali** thi.
+ */
 function srgb(hex) {
-  return { r: ((hex >> 16) & 255) / 255, g: ((hex >> 8) & 255) / 255, b: (hex & 255) / 255 };
+  const h = typeof hex === "string" ? (parseInt(hex.replace("#", ""), 16) || 0) : hex;
+  return { r: ((h >> 16) & 255) / 255, g: ((h >> 8) & 255) / 255, b: (h & 255) / 255 };
 }
 
 function texture(cv, repeat = 1, isSrgb = false) {
@@ -305,7 +313,7 @@ export function fabric(hex = 0xc8442e, seed = 23, weave = 46) {
 
 /** Gaadi ka paint -- clear-coat jaisa chikna, halki orange-peel. */
 export function carPaint(hex = 0xe8c33a, seed = 61) {
-  return cached(`paint${hex}`, () => {
+  return cached(`paint:${hex}`, () => {
     const S = 128;
     const peel = fbm(S, 14, 3, seed);
     const cv = canvas(S);
@@ -581,10 +589,35 @@ export function signboard(text, sub = "", kind = "shop", seed = 0) {
     cv.height = H;
     const ctx = cv.getContext("2d");
 
+    /*
+     * Har trade ka apna board.
+     *
+     * Pehle har dukan ka board ek hi neela tha -- 46 alag naam, par gali mein
+     * sab ek jaise. Asli bazaar mein chemist ka board safed-hara hota hai,
+     * halwai ka maroon-sunehra, sabziwale ka hara. Ye rang `data/shops.json`
+     * ki `kind` se aate hain, aur texture cache ki key mein kind pehle se hai,
+     * isliye draw call nahi badhta -- har naam ka ek hi texture rehta hai.
+     */
     const PALETTE = {
-      shop:  { bg: "#1d3f5c", fg: "#f4e9cf", accent: "#e8c33a", border: "#e8c33a" },
-      stone: { bg: "#9a938a", fg: "#2c2721", accent: "#4a4239", border: "#7b746b" },
-      road:  { bg: "#14663d", fg: "#ffffff", accent: "#ffffff", border: "#ffffff" },
+      shop:     { bg: "#1d3f5c", fg: "#f4e9cf", accent: "#e8c33a", border: "#e8c33a" },
+      stone:    { bg: "#9a938a", fg: "#2c2721", accent: "#4a4239", border: "#7b746b" },
+      road:     { bg: "#14663d", fg: "#ffffff", accent: "#ffffff", border: "#ffffff" },
+      dhaba:    { bg: "#8f2418", fg: "#ffeccc", accent: "#f0c246", border: "#f0c246" },
+      bakery:   { bg: "#f0e2c4", fg: "#5a3218", accent: "#a8341f", border: "#a8341f" },
+      bank:     { bg: "#123a70", fg: "#ffffff", accent: "#e8c33a", border: "#dfe6f0" },
+      atm:      { bg: "#f2f4f6", fg: "#123a70", accent: "#2f7d63", border: "#123a70" },
+      general:  { bg: "#d99a1e", fg: "#3a2410", accent: "#8f2418", border: "#8f2418" },
+      medical:  { bg: "#f4f7f4", fg: "#14663d", accent: "#c9302c", border: "#14663d" },
+      mobile:   { bg: "#0f2b4a", fg: "#54c8f0", accent: "#ffffff", border: "#54c8f0" },
+      sweets:   { bg: "#6d1330", fg: "#ffd98a", accent: "#f0c246", border: "#f0c246" },
+      cloth:    { bg: "#5c2450", fg: "#ffe8f4", accent: "#e8a8d0", border: "#e8a8d0" },
+      hardware: { bg: "#414851", fg: "#f0f2f4", accent: "#f0a018", border: "#f0a018" },
+      sabzi:    { bg: "#2f6b26", fg: "#f4ffe8", accent: "#f0c246", border: "#c0e08a" },
+      photocopy:{ bg: "#e8eaf0", fg: "#243a6b", accent: "#c9302c", border: "#243a6b" },
+      salon:    { bg: "#1c1a20", fg: "#f4c8d8", accent: "#e8c33a", border: "#c05a80" },
+      books:    { bg: "#1e4636", fg: "#f4e9cf", accent: "#e8c33a", border: "#e8c33a" },
+      meat:     { bg: "#6b1c18", fg: "#ffe4d8", accent: "#ffffff", border: "#e8a08a" },
+      jewel:    { bg: "#4a1030", fg: "#f0d27a", accent: "#f0c246", border: "#c9a84a" },
     };
     const pal = PALETTE[kind] || PALETTE.shop;
 

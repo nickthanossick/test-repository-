@@ -1,85 +1,101 @@
 {
-  "_comment": "Sanjauli Chowk se Dhalli tak ke bazaar ki dukanein. Naam data mein hain, code mein nahi -- bazaar.js corridor ke saath in par cycle karta hai. Chaar naam Nikhil ne diye (Negi Tea Stall, Tripti Bakery, Vivi Bank, ATM); baaki wo kism hain jo Shimla ke kisi bhi bazaar mein milti hain.",
+  "_comment": "Sanjauli Chowk se Dhalli tak ke bazaar ki dukanein. Naam data mein hain, code mein nahi -- bazaar.js corridor ke saath in par cycle karta hai. Chaar naam Nikhil ne diye (Negi Tea Stall, Tripti Bakery, Vivi Bank, ATM); baaki wo kism hain jo Shimla ke kisi bhi bazaar mein milti hain. `goods` batata hai ki dukan ke andar kya rakha dikhega -- isse bakery, medical aur mobile ek jaise nahi lagte.",
   "kinds": {
     "dhaba": {
       "awning": "#8c3b2e",
       "counter": "steel",
-      "glow": "#ffb45c"
+      "glow": "#ffb45c",
+      "goods": "tea"
     },
     "bakery": {
       "awning": "#c98a2e",
       "counter": "glass",
-      "glow": "#ffd08a"
+      "glow": "#ffd08a",
+      "goods": "bakery"
     },
     "bank": {
       "awning": "#1d4f8c",
       "counter": "glass",
-      "glow": "#cfe0ff"
+      "glow": "#cfe0ff",
+      "goods": "bank"
     },
     "atm": {
       "awning": "#2f6b4a",
       "counter": "glass",
-      "glow": "#d8ffe8"
+      "glow": "#d8ffe8",
+      "goods": "atm"
     },
     "general": {
       "awning": "#3f6b47",
       "counter": "crates",
-      "glow": "#ffe0a8"
+      "glow": "#ffe0a8",
+      "goods": "kirana"
     },
     "medical": {
       "awning": "#2f7d63",
       "counter": "glass",
-      "glow": "#dfffe8"
+      "glow": "#dfffe8",
+      "goods": "pharmacy"
     },
     "mobile": {
       "awning": "#2f5d8a",
       "counter": "glass",
-      "glow": "#cfe8ff"
+      "glow": "#cfe8ff",
+      "goods": "mobile"
     },
     "sweets": {
       "awning": "#b8532a",
       "counter": "glass",
-      "glow": "#ffcf8a"
+      "glow": "#ffcf8a",
+      "goods": "sweets"
     },
     "cloth": {
       "awning": "#7a3b6b",
       "counter": "cloth",
-      "glow": "#ffd8f0"
+      "glow": "#ffd8f0",
+      "goods": "tailor"
     },
     "hardware": {
       "awning": "#6b6b70",
       "counter": "crates",
-      "glow": "#e8e0d0"
+      "glow": "#e8e0d0",
+      "goods": "hardware"
     },
     "sabzi": {
       "awning": "#4a7d2f",
       "counter": "crates",
-      "glow": "#e8ffcf"
+      "glow": "#e8ffcf",
+      "goods": "sabzi"
     },
     "photocopy": {
       "awning": "#4a4a8c",
       "counter": "glass",
-      "glow": "#dcdcff"
+      "glow": "#dcdcff",
+      "goods": "copier"
     },
     "salon": {
       "awning": "#a8324f",
       "counter": "glass",
-      "glow": "#ffd0dc"
+      "glow": "#ffd0dc",
+      "goods": "salon"
     },
     "books": {
       "awning": "#8a6a2e",
       "counter": "crates",
-      "glow": "#ffe8bc"
+      "glow": "#ffe8bc",
+      "goods": "books"
     },
     "meat": {
       "awning": "#8c2f2f",
       "counter": "steel",
-      "glow": "#ffc0c0"
+      "glow": "#ffc0c0",
+      "goods": "meat"
     },
     "jewel": {
       "awning": "#8a6a1e",
       "counter": "glass",
-      "glow": "#ffe8a0"
+      "glow": "#ffe8a0",
+      "goods": "jewel"
     }
   },
   "shops": [

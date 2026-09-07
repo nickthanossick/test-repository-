@@ -23,7 +23,7 @@ export class DayNight {
 
     this._lastEnvHour = -99;
     this._nextWeatherHour = this.hour + 2 + Math.random() * 4;
-    this._emissive = { windows: null, signs: [], lamps: null, headlights: [] };
+    this._emissive = { windows: null, signs: [], lamps: null, headlights: [], shops: [] };
 
     this._buildStars();
     this._buildMoon();
@@ -38,7 +38,8 @@ export class DayNight {
   }
 
   /** Jinke emissive raat ko badhne chahiye, unhe yahan de do. */
-  bindEmissive({ windows, signs, lamps }) {
+  bindEmissive({ windows, signs, lamps, shops }) {
+    if (shops) this._emissive.shops = shops;
     if (windows) this._emissive.windows = windows;
     if (signs) this._emissive.signs = signs;
     if (lamps) this._emissive.lamps = lamps;
@@ -111,6 +112,14 @@ export class DayNight {
 
     // --- raat ki roshni --------------------------------------------------
     if (this._emissive.windows) this._emissive.windows.emissiveIntensity = n * 1.7;
+    /*
+     * Dukan ke andar ki roshni. Ye raat par nahi, hamesha jalti hai -- asli
+     * bazaar ki dukanon mein dopahar mein bhi tube light chalti hai, aur uske
+     * bina andar rakha saara saamaan andhere mein doob jaata hai (jo abhi tak
+     * ho raha tha, kyunki ye material kisi list mein tha hi nahi).
+     */
+    // Din mein halki, raat ko poori -- warna emissive trade ka rang dho deta hai
+    for (const m of this._emissive.shops) m.emissiveIntensity = 0.35 + n * 1.05;
     if (this._emissive.lamps) this._emissive.lamps.emissiveIntensity = n * 2.4;
     // Din mein bhi ek base rakhte hain: bazaar ke board awning ki chhaya mein
     // hote hain aur bina iske dopahar mein bhi padhe nahi jaate.

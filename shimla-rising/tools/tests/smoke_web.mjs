@@ -52,6 +52,39 @@ const want = [(SKIN_HEX >> 16) & 255, (SKIN_HEX >> 8) & 255, SKIN_HEX & 255];
 const skinOk = skin !== null && skin.every((v, i) => Math.abs(v - want[i]) <= 22);
 console.log("skin pixel:", JSON.stringify(skin), "chaha:", JSON.stringify(want));
 
+/*
+ * Gaadi ka rang.
+ *
+ * `data/vehicles.json` rang string mein deta hai ("#1e6f4a"), aur `carPaint()`
+ * seedha bitwise karta tha -- `"#1e6f4a" >> 16` = 0. Nateeja: game ki har
+ * gaadi aur har bus kaali. Yahan asli paint texture ka pixel padh kar dekhte
+ * hain ki HRTC bus wakai hari hai.
+ */
+const paint = await page.evaluate(() => {
+  const S = window.__shimla;
+  const spec = S.data.vehicleById.get("hrtc_bus");
+  const bus = S.buses.buses.find((b) => b.spec.id === "hrtc_bus");
+  const src = bus || S.parked.find((v) => v.spec?.id === "hrtc_bus");
+  let img = null;
+  (src?.mesh || S.parked[0]?.mesh)?.traverse((o) => {
+    const m = o.material?.map?.image;
+    if (!img && m && m.width === 128 && m.height === 128) img = m;
+  });
+  if (!img) return null;
+  const cv = document.createElement("canvas");
+  cv.width = img.width; cv.height = img.height;
+  cv.getContext("2d").drawImage(img, 0, 0);
+  const d = cv.getContext("2d").getImageData(40, 40, 1, 1).data;
+  return { px: [d[0], d[1], d[2]], want: spec.color };
+});
+let paintOk = false;
+if (paint) {
+  const h = parseInt(paint.want.replace("#", ""), 16);
+  const w = [(h >> 16) & 255, (h >> 8) & 255, h & 255];
+  paintOk = paint.px.every((v, i) => Math.abs(v - w[i]) <= 22);
+  console.log("paint pixel:", JSON.stringify(paint.px), "chaha:", JSON.stringify(w));
+}
+
 const checks = [
   ["console errors", errors.length === 0, errors.slice(0, 3).join(" | ")],
   ["page errors", pageErrors.length === 0, pageErrors.slice(0, 3).join(" | ")],
@@ -61,6 +94,7 @@ const checks = [
   ["vehicles spawned", s.vehicles >= 10, s.vehicles],
   ["geometry rendered", s.triangles > 100000, s.triangles],
   ["texture colour-space", skinOk, `${JSON.stringify(skin)} != ${JSON.stringify(want)}`],
+  ["gaadi ka rang", paintOk, JSON.stringify(paint)],
 ];
 
 let failed = 0;

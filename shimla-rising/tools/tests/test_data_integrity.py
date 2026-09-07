@@ -170,6 +170,24 @@ def test_shops_have_the_names_nikhil_named():
         assert len(s["name"]) <= 24, f"{s['name']} board pe fit nahi hoga"
 
 
+def test_every_shop_kind_stocks_its_own_goods():
+    """Jaisa naam waisa saamaan -- har kism ka apna fit-out hona chahiye.
+
+    `bazaar.js` ka `fitOut()` `kind.goods` par switch karta hai. Jis kism mein
+    `goods` na ho wo chupchaap default (generic counter) par gir jaati hai, aur
+    bahar se bakery, bank aur chemist phir se ek jaise dikhne lagte hain --
+    theek wahi shikayat jo is round mein theek ki gayi.
+    """
+    kinds = load("shops.json")["kinds"]
+    seen = set()
+    for name, k in kinds.items():
+        assert k.get("goods"), f"{name}: goods defined nahi"
+        assert k.get("glow"), f"{name}: andar ki roshni ka rang nahi"
+        seen.add(k["goods"])
+    # har kism ka apna roop -- do kismon ka ek hi fit-out matlab dono ek jaisi
+    assert len(seen) == len(kinds), f"goods dohre hain: {len(seen)} != {len(kinds)}"
+
+
 def test_sanjauli_map_structure():
     """Naksha aisa hona chahiye ki baad mein asli dukan asli jagah par lage."""
     m = load("sanjauli.json")

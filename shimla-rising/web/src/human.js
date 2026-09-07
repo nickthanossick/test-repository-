@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import * as TEX from "./textures.js";
+import { MeshBuilder } from "./geometry.js";
 
 /**
  * Sab insaani kirdaaron ka saanjha builder -- Vicky aur sadak pe chalne wale
@@ -370,3 +371,68 @@ export function buildHuman(o = {}) {
   if (o.height) g.scale.multiplyScalar(o.height);
   return g;
 }
+
+/**
+ * Door ka kirdaar -- **ek hi merged mesh**.
+ *
+ * Paas wale roop 48 aur 23 alag mesh ke hain. Bheed badhaane par yahi draw call
+ * phaad deta hai (pichhle round mein 348 se 908). 40 m se aage koi ungli,
+ * cuff ya topi ki phundi dikhti hi nahi -- wahan poora kirdaar ek buffer mein
+ * daal dena kaafi hai.
+ *
+ * `MeshBuilder` pehle se merged geometry + vertex colour karta hai, aur city,
+ * bazaar aur landmarks sab isi se bante hain -- wahi yahan bhi.
+ */
+export function buildHumanFar(o = {}) {
+  const build = o.build || "male";
+  const female = build === "female" || build === "girl";
+  const elder = build === "elder";
+  const mb = new MeshBuilder(0.6);
+  const c = new THREE.Color();
+  const put = (hex) => c.setHex(hex);
+
+  const skin = o.skin ?? 0xc08a5e;
+  const top = o.top ?? 0xbb3a2a;
+  const bottom = o.bottom ?? 0x35425e;
+  const hair = o.hair ?? (elder ? 0xb8b2a8 : 0x140f0a);
+
+  // sir -- ek box, chehre ka rang
+  put(skin); mb.box(0, 1.626, 0, 0.19, 0.24, 0.20, c);
+  put(hair); mb.box(0, 1.716, 0.012, 0.20, 0.09, 0.21, c);      // baal
+  put(skin); mb.box(0, 1.494, 0.004, 0.10, 0.10, 0.10, c);      // gardan
+
+  // dhad -- seena chauda, kamar patli (do box se ishaara)
+  put(top);
+  mb.box(0, 1.33, 0, female ? 0.36 : 0.40, 0.26, 0.22, c);
+  mb.box(0, 1.14, 0, female ? 0.31 : 0.34, 0.24, 0.20, c);
+  put(bottom);
+  mb.box(0, 1.00, 0, female ? 0.36 : 0.33, 0.14, 0.21, c);      // kulhe
+
+  // baazu aur taangein -- ek-ek box
+  for (const side of [-1, 1]) {
+    put(top);
+    mb.box(side * (female ? 0.20 : 0.225), 1.26, 0, 0.09, 0.44, 0.10, c);
+    put(skin);
+    mb.box(side * (female ? 0.20 : 0.225), 1.00, 0, 0.075, 0.10, 0.085, c);   // haath
+    put(bottom);
+    mb.box(side * 0.088, 0.72, 0, 0.13, 0.56, 0.14, c);
+    put(0x241d16);
+    mb.box(side * 0.088, 0.40, -0.025, 0.10, 0.07, 0.24, c);                  // joota
+  }
+
+  if (o.topi !== false && !female) {
+    put(0x14543c); mb.box(0, 1.746, 0, 0.25, 0.06, 0.25, c);    // hari topi
+    put(0x8a6a4c); mb.box(0, 1.782, 0, 0.26, 0.03, 0.26, c);    // bhoora band
+  }
+
+  const g = new THREE.Group();
+  const m = mb.build(FAR_MAT);
+  if (m) { m.castShadow = true; m.receiveShadow = false; g.add(m); }
+  if (o.height) g.scale.setScalar(o.height);
+  // rig nahi -- door ke kirdaar ki chaal dikhti hi nahi, isliye animate bhi nahi karte
+  g.userData.far = true;
+  return g;
+}
+
+/** Saanjha material -- sab door ke kirdaar isi par, taaki batching bani rahe. */
+const FAR_MAT = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9 });

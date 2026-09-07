@@ -158,7 +158,7 @@ export function buildBazaar(terrain, roads, shopsJson, mapJson, quality = {}, co
       const oz = -Math.cos(fyaw + turn) * 0.03;
       signs.push({
         x: bx + fx2 * 4.9 + ox, z: bz + fz2 * 4.9 + oz, y: gy + 4.05,
-        yaw: fyaw + turn, text: spec.name, sub: spec.sub, width: 2.9,
+        yaw: fyaw + turn, text: spec.name, sub: spec.sub, width: 2.9, kind: spec.kind,
       });
     }
     /*
@@ -176,7 +176,7 @@ export function buildBazaar(terrain, roads, shopsJson, mapJson, quality = {}, co
      */
     signs.push({
       x: bx + fx2 * 3.28, z: bz + fz2 * 3.28, y: gy + 3.02,
-      yaw: fyaw, text: spec.name, sub: spec.sub, width: 3.9,
+      yaw: fyaw, text: spec.name, sub: spec.sub, width: 3.9, kind: spec.kind,
     });
 
     stalls.push({
@@ -208,8 +208,16 @@ export function buildBazaar(terrain, roads, shopsJson, mapJson, quality = {}, co
     const m = mb[k].build(mats[k]);
     if (m) { m.castShadow = true; m.receiveShadow = true; g.add(m); }
   }
+  /*
+   * Har trade ka apna rang **diffuse** par aata hai, emissive par nahi.
+   * `emissive` MeshStandardMaterial mein ek hi uniform rang hai -- vertex
+   * colour use chhoota hi nahi. Pehle sabka `emissive: #ffb45c` tha, isliye
+   * chemist ho ya bank, andar ki peeth ek jaisi kesari chamakti thi. Ab
+   * vertex colour se din mein trade ka rang dikhta hai, aur emissive sirf
+   * garam roshni ki tarah upar chadhta hai jise daynight raat ko badhata hai.
+   */
   const interiorMat = new THREE.MeshStandardMaterial({
-    color: 0x3a3128, roughness: 0.9,
+    color: 0xffffff, vertexColors: true, roughness: 0.9,
     emissive: 0xffb45c, emissiveIntensity: 0.0,     // raat ko daynight badhata hai
   });
   const im = interior.build(interiorMat);
@@ -261,9 +269,22 @@ function shopUnit(mb, interior, o) {
   }
   mb.plaster.box(x, y + gh - 0.30, z, openW, 0.60, d, C, yaw);            // lintel
   // dukan ka andar ka gehra hissa -- raat ko jalta hai
-  const [ix, iz] = F(0, fz + 1.15);
-  hex(0x2a231c);
-  interior.box(ix, y + (gh - 0.6) / 2, iz, openW, gh - 0.6, 2.0, C, yaw);
+  // Andar ka gehra hissa. Rang har trade ka apna (`kinds[].glow`) -- medical ka
+  // thanda safed, dhaba ka garam peela. Ek hi emissive material par vertex
+  // colour se, isliye draw call nahi badhta.
+  /*
+   * Ye ek **patli peeth** hai, poora dabba nahi.
+   *
+   * Pehle ye 2 m gehra box tha jo mukh se sirf 15 cm andar shuru hota tha --
+   * yaani poori khuli bay ise bhar jaati thi, aur counter, shelf, peti sab
+   * iske *andar* dab jaate the. Bahar se dukan ek chamakta khaali dabba
+   * dikhti thi. Ab ye peechhli deewar par chipki patli patti hai, jiske
+   * saamne saara saamaan khada rehta hai.
+   */
+  const [ix, iz] = F(0, fz + 1.80);
+  const glow = kind.glow ? parseInt(kind.glow.slice(1), 16) : 0xffb45c;
+  C.setHex(glow).multiplyScalar(0.55);
+  interior.box(ix, y + (gh - 0.6) / 2, iz, openW, gh - 0.6, 0.14, C, yaw);
   // peeche ki deewar, taaki dukan ke aar-paar dekha na ja sake
   hex(wallHex);
   mb.plaster.box(x, y + gh / 2, z, openW, gh, d * 0.42, C, yaw);
@@ -273,29 +294,8 @@ function shopUnit(mb, interior, o) {
   hex(SHUTTERS[(rng() * SHUTTERS.length) | 0]);
   mb.metal.box(sx, y + gh - 0.78, sz, openW * 0.98, 0.62, 0.16, C, yaw);
 
-  // counter -- kism ke hisaab se
-  const [cx2, cz2] = F(0, fz + 0.55);
-  if (kind.counter === "glass") {
-    hex(0x9fb4bd); mb.glass.box(cx2, y + 0.72, cz2, openW * 0.94, 1.05, 0.62, C, yaw);
-    hex(0x54493c); mb.wood.box(cx2, y + 0.11, cz2, openW * 0.96, 0.22, 0.68, C, yaw);
-  } else if (kind.counter === "steel") {
-    hex(0x8f979c); mb.metal.box(cx2, y + 0.94, cz2, openW * 0.92, 0.09, 0.70, C, yaw);
-    hex(0x4a4038); mb.wood.box(cx2, y + 0.45, cz2, openW * 0.88, 0.90, 0.62, C, yaw);
-  } else if (kind.counter === "crates") {
-    for (let i = 0; i < 4; i++) {
-      const u = (i / 3 - 0.5) * openW * 0.80;
-      const [qx, qz] = F(u, fz + 0.35 + rng() * 0.5);
-      hex([0x8a6a3c, 0x6f5a2e, 0x9a7a44][(rng() * 3) | 0]);
-      mb.wood.box(qx, y + 0.26 + rng() * 0.12, qz, 0.60, 0.50, 0.52, C, yaw);
-    }
-  } else {
-    for (let i = 0; i < 3; i++) {                  // latke hue than
-      const u = (i / 2 - 0.5) * openW * 0.72;
-      const [qx, qz] = F(u, fz + 0.30);
-      hex([0xa8324f, 0x2f7d63, 0xd8b23f, 0x2f5d8a][(rng() * 4) | 0]);
-      mb.wood.box(qx, y + 1.55, qz, 0.44, 2.0, 0.13, C, yaw);
-    }
-  }
+  // counter aur saamaan -- har trade ka apna
+  fitOut(mb, { F, y, yaw, openW, fz, rng, kind });
 
   // ---- upar ka dhad ----
   hex(wallHex);
@@ -390,10 +390,10 @@ function buildShopSigns(signs) {
   };
 
   for (const s of signs) {
-    const key = s.text + "|" + s.sub;
+    const key = s.text + "|" + s.sub;      // naam se kind pakka hai
     let grp = groups.get(key);
     if (!grp) {
-      grp = { set: TEX.signboard(s.text, s.sub, "shop", 0), pos: [], uv: [], idx: [], n: 0 };
+      grp = { set: TEX.signboard(s.text, s.sub, s.kind || "shop", 0), pos: [], uv: [], idx: [], n: 0 };
       groups.set(key, grp);
     }
     const h = s.width / 4;                          // texture 1024x256 = 4:1
@@ -484,4 +484,204 @@ function buildWires(wires, terrain) {
   const lg = new THREE.BufferGeometry().setFromPoints(linePts);
   g.add(new THREE.LineSegments(lg, wireMat));
   return g;
+}
+
+/**
+ * Dukan ke andar ka saamaan -- trade ke hisaab se.
+ *
+ * Pehle sirf `kind.counter` ke chaar roop the (glass/steel/crates/cloth),
+ * isliye bakery, bank, medical, mobile, salon aur jewel sab bilkul ek jaise
+ * dikhte the: board par naam kuch aur, andar kuch aur. Ab har kism ka apna
+ * fit-out hai -- `data/shops.json` ka `goods` field ise chunta hai.
+ *
+ * Saara saamaan usi MeshBuilder set mein jaata hai jo deewar aur chhat banata
+ * hai, isliye **draw call nahi badhta**, sirf triangle count.
+ */
+function fitOut(mb, o) {
+  const { F, y, yaw, openW, fz, rng, kind } = o;
+  /*
+   * F() sirf *jagah* ko dukan ke rukh mein ghumata hai -- box ka apna rukh
+   * alag se dena padta hai. Pehle yahan yaw 0 tha, aur isliye har counter,
+   * shelf aur peti duniya ke axis par seedhi khadi thi, dukan ke rukh par
+   * nahi. Screenshot mein andar ka saara saamaan tirchha aur tuta hua dikhta
+   * tha -- bahar ki deewar ek taraf aur andar ka case doosri taraf.
+   */
+  const box = (which, u, yy, v, sx, sy, sz, h) => {
+    const [px, pz] = F(u, v);
+    hex(h);
+    mb[which].box(px, y + yy, pz, sx, sy, sz, C, yaw);
+  };
+  const pick = (arr) => arr[(rng() * arr.length) | 0];
+  const TOP = 1.245;              // glassCase ka upri satah -- display isi par
+
+  /** Kaanch ka counter -- kai trade mein ek jaisa dhaancha. */
+  const glassCase = () => {
+    box("glass", 0, 0.72, fz + 0.55, openW * 0.94, 1.05, 0.62, 0x9fb4bd);
+    box("wood", 0, 0.11, fz + 0.55, openW * 0.96, 0.22, 0.68, 0x54493c);
+  };
+  /** Peeche ki deewar par shelf -- kitaab, dawa, dabbe sab isi par. */
+  const shelves = (n, hexes) => {
+    for (let r = 0; r < n; r++) {
+      box("wood", 0, 0.75 + r * 0.62, fz + 1.58, openW * 0.92, 0.06, 0.38, 0x6f5a3c);
+      for (let i = 0; i < 7; i++) {
+        const u = (i / 6 - 0.5) * openW * 0.82;
+        box("plaster", u, 0.90 + r * 0.62, fz + 1.58, openW * 0.09, 0.24, 0.26, pick(hexes));
+      }
+    }
+  };
+
+  switch (kind.goods) {
+    case "tea":
+      box("metal", 0, 0.94, fz + 0.55, openW * 0.92, 0.09, 0.70, 0x8f979c);
+      box("wood", 0, 0.45, fz + 0.55, openW * 0.88, 0.90, 0.62, 0x4a4038);
+      box("metal", -openW * 0.30, 1.16, fz + 0.52, 0.30, 0.36, 0.30, 0xb9bec4);   // samovar
+      box("metal", -openW * 0.06, 1.08, fz + 0.50, 0.16, 0.19, 0.16, 0x8a9096);   // kettle
+      for (let i = 0; i < 6; i++) {                                               // glass ki kataar
+        box("glass", openW * (0.10 + i * 0.05), 1.04, fz + 0.50, 0.05, 0.11, 0.05, 0xd8e4ea);
+      }
+      box("stone", openW * 0.40, 0.55, fz + 1.5, 0.55, 1.10, 0.55, 0x6b5348);     // tandoor
+      break;
+
+    case "bakery":
+      glassCase();
+      for (let r = 0; r < 2; r++) {                                             // counter ke upar tray
+        for (let i = 0; i < 4; i++) {
+          const u = (i / 3 - 0.5) * openW * 0.78;
+          box("wood", u, TOP + 0.06, fz + 0.40 + r * 0.30, openW * 0.16, 0.12, 0.24,
+              [0xc98a4e, 0xd9b070, 0xa9713c][(r + i) % 3]);
+        }
+      }
+      shelves(2, [0xd9b070, 0xc98a4e, 0xe8d0a0]);
+      break;
+
+    case "bank":
+      // Kaanch opaque hai, isliye poori chaudai ka panel dukan ko band dabba bana
+      // deta tha -- ab sirf beech mein, dono taraf se andar dikhta hai
+      box("glass", 0, 1.42, fz + 0.55, openW * 0.52, 1.30, 0.08, 0xb8ccd8);     // teller kaanch
+      box("wood", 0, 0.42, fz + 0.55, openW * 0.96, 0.84, 0.55, 0x5a4a3a);
+      box("wood", 0, 0.90, fz + 0.55, openW * 0.90, 0.08, 0.50, 0x7a6248);
+      box("plaster", -openW * 0.22, 0.98, fz + 0.50, 0.26, 0.05, 0.20, 0xe8e4dc); // register
+      box("wood", openW * 0.18, 0.50, fz + 1.6, 0.34, 0.90, 0.34, 0x3a3f46);      // kursi
+      break;
+
+    case "atm":
+      box("metal", 0, 1.05, fz + 0.75, openW * 0.60, 2.05, 0.55, 0xd8dce0);       // cabin
+      box("glass", 0, 1.42, fz + 0.46, openW * 0.34, 0.34, 0.06, 0x1d3f5c);       // screen
+      box("metal", 0, 1.10, fz + 0.46, openW * 0.30, 0.20, 0.06, 0x5a6068);       // keypad
+      box("metal", 0, 0.86, fz + 0.46, openW * 0.22, 0.05, 0.06, 0x9aa0a6);       // cash slot
+      break;
+
+    case "kirana":
+      for (let i = 0; i < 4; i++) {                                               // boriyan
+        const u = (i / 3 - 0.5) * openW * 0.80;
+        box("wood", u, 0.28, fz + 0.45 + rng() * 0.3, 0.56, 0.56, 0.48,
+            pick([0xbfae8a, 0xa8956e, 0xcdbf9c]));
+      }
+      shelves(3, [0xc94f3a, 0x2f7d63, 0xd8b23f, 0x2f5d8a, 0xe8e0d0]);
+      break;
+
+    case "pharmacy":
+      glassCase();
+      shelves(3, [0xffffff, 0xe8f0f4, 0x4fa08a, 0xd94f4f, 0xf0e4a8]);
+      box("plaster", openW * 0.34, 1.30, fz + 0.52, 0.22, 0.30, 0.10, 0x4fa08a);  // cross
+      break;
+
+    case "mobile":
+      glassCase();
+      for (let i = 0; i < 8; i++) {                                               // counter par phone
+        box("plaster", (i / 7 - 0.5) * openW * 0.82, TOP + 0.02, fz + 0.55, 0.09, 0.03, 0.17, 0x1b1f26);
+      }
+      for (let r = 0; r < 3; r++) {                                               // peeche cover
+        for (let i = 0; i < 9; i++) {
+          box("plaster", (i / 8 - 0.5) * openW * 0.88, 1.05 + r * 0.42, fz + 1.62,
+              0.10, 0.18, 0.03, pick([0xc94f3a, 0x2f5d8a, 0x2f7d63, 0xd8b23f, 0x7a3b6b]));
+        }
+      }
+      break;
+
+    case "sweets":
+      glassCase();
+      for (let i = 0; i < 5; i++) {                                               // counter par thaal
+        const u = (i / 4 - 0.5) * openW * 0.80;
+        box("metal", u, TOP + 0.03, fz + 0.52, openW * 0.14, 0.06, 0.30, 0xc9ced2);
+        box("plaster", u, TOP + 0.11, fz + 0.52, openW * 0.12, 0.10, 0.26,
+            pick([0xe8c05a, 0xd9843c, 0xf0e0b0, 0xc94f3a]));
+      }
+      break;
+
+    case "tailor":
+      for (let i = 0; i < 3; i++) {                                               // latke than
+        box("wood", (i / 2 - 0.5) * openW * 0.72, 1.55, fz + 0.30, 0.44, 2.0, 0.13,
+            pick([0xa8324f, 0x2f7d63, 0xd8b23f, 0x2f5d8a]));
+      }
+      box("wood", -openW * 0.24, 0.42, fz + 1.5, 0.62, 0.84, 0.44, 0x5a4a3a);     // mez
+      box("metal", -openW * 0.24, 0.96, fz + 1.5, 0.44, 0.24, 0.24, 0x2a2e33);    // silai machine
+      break;
+
+    case "hardware":
+      for (let i = 0; i < 5; i++) {                                               // latki balti
+        box("metal", (i / 4 - 0.5) * openW * 0.84, 1.90, fz + 0.35, 0.22, 0.26, 0.22,
+            pick([0xc94f3a, 0x2f5d8a, 0x5a6068]));
+      }
+      for (let i = 0; i < 4; i++) {                                               // paip
+        box("metal", -openW * 0.36 + i * 0.07, 0.90, fz + 1.7, 0.05, 1.70, 0.05, 0x8a9096);
+      }
+      for (let i = 0; i < 3; i++) {
+        box("wood", (i / 2 - 0.5) * openW * 0.66, 0.26, fz + 0.50, 0.58, 0.52, 0.50, 0x8a6a3c);
+      }
+      break;
+
+    case "sabzi":
+      for (let i = 0; i < 4; i++) {                                               // peti + dher
+        const u = (i / 3 - 0.5) * openW * 0.82;
+        box("wood", u, 0.26, fz + 0.42 + rng() * 0.35, 0.60, 0.50, 0.52, 0x8a6a3c);
+        box("plaster", u, 0.58, fz + 0.42, 0.52, 0.20, 0.44,
+            pick([0x4a8c2f, 0xd94f3a, 0xe8a83c, 0x8ac04a, 0xc9d04a]));
+      }
+      box("metal", openW * 0.34, 0.98, fz + 0.50, 0.28, 0.06, 0.28, 0xb9bec4);    // tarazu
+      break;
+
+    case "copier":
+      box("plaster", -openW * 0.24, 0.62, fz + 1.05, 1.05, 1.24, 0.78, 0xd8dce0); // machine
+      box("plaster", -openW * 0.24, 1.28, fz + 1.05, 0.98, 0.10, 0.70, 0x2a2e33); // dhakkan
+      box("glass", -openW * 0.24, 1.34, fz + 0.78, 0.62, 0.03, 0.32, 0x9fb4bd);   // scanner
+      box("wood", openW * 0.30, 0.42, fz + 0.62, openW * 0.34, 0.84, 0.55, 0x5a4a3a);
+      for (let i = 0; i < 4; i++) {                                               // kaagaz ke thak
+        box("plaster", openW * 0.30, 0.88 + i * 0.09, fz + 0.62, 0.32, 0.08, 0.26, 0xf0eee6);
+      }
+      break;
+
+    case "salon":
+      box("glass", 0, 1.35, fz + 1.62, openW * 0.72, 1.20, 0.06, 0xdce8ee);       // aaina
+      box("wood", 0, 0.72, fz + 1.62, openW * 0.86, 0.08, 0.32, 0x6f5a3c);
+      box("metal", 0, 0.45, fz + 1.10, 0.42, 0.90, 0.42, 0x2a2e33);               // kursi
+      box("plaster", 0, 0.92, fz + 1.10, 0.46, 0.10, 0.46, 0x8a323c);
+      break;
+
+    case "books":
+      shelves(4, [0xc94f3a, 0x2f5d8a, 0x2f7d63, 0xd8b23f, 0x7a3b6b, 0x8a5a2e]);
+      box("wood", 0, 0.42, fz + 0.55, openW * 0.90, 0.84, 0.50, 0x5a4a3a);
+      break;
+
+    case "meat":
+      for (let i = 0; i < 5; i++) {                                               // latke hook
+        const u = (i / 4 - 0.5) * openW * 0.80;
+        box("metal", u, 1.95, fz + 0.60, 0.03, 0.34, 0.03, 0xb9bec4);
+        box("plaster", u, 1.55, fz + 0.60, 0.16, 0.46, 0.14, 0x9a3a34);
+      }
+      box("wood", 0, 0.42, fz + 0.60, openW * 0.70, 0.84, 0.60, 0x6f5a3c);        // chopping block
+      break;
+
+    case "jewel":
+      glassCase();
+      for (let i = 0; i < 9; i++) {                                               // counter par ghadi
+        box("metal", (i / 8 - 0.5) * openW * 0.84, TOP + 0.05, fz + 0.52, 0.07, 0.10, 0.05, 0xe8c95a);
+      }
+      shelves(1, [0xe8c95a, 0xd8d8dc]);
+      break;
+
+    default:
+      glassCase();
+      shelves(2, [0xc9bda6, 0xd2c4ad]);
+  }
 }

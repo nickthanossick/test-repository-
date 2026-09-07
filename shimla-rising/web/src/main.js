@@ -200,8 +200,11 @@ async function boot() {
   }
   const buses = new BusSystem(scene, terrain, data.sanjauliMap, data.routes,
                               data.vehicleById, Q.buses ?? 5);
+  // Bus system pehle se saare segment world-space mein resample kar chuka hai --
+  // paidal log usi par chalte hain, taaki dono ek hi naksha follow karein.
   const crowd = new Crowd(scene, terrain, roads, bazaar.userData.stalls,
-                          Q.crowd ?? { keepers: 18, walkers: 10, dogs: 2, cows: 1 });
+                          Q.crowd ?? { keepers: 42, walkers: 28, dogs: 3, cows: 2 },
+                          buses.segs);
 
   const dialogue = new Dialogue(document.getElementById("subtitle"), data);
   const audio = new Audio();
@@ -237,6 +240,7 @@ async function boot() {
   dayNight.bindEmissive({
     windows: city.userData.windowMaterial,
     signs: [...(city.userData.glowingSigns || []), ...(bazaar.userData.glowingSigns || [])],
+    shops: bazaar.userData.interiorMaterial ? [bazaar.userData.interiorMaterial] : [],
     lamps: roadGroup.userData.lampMaterial,
   });
 
@@ -472,6 +476,9 @@ async function boot() {
       tunnels: tunnels.userData.tunnelCount,
       buses: buses.count,
       keepers: crowd.count.keepers,
+      full: crowd.count.full,
+      lite: crowd.count.lite,
+      far: crowd.count.far,
       angry: panga.angryCount,
       walkers: crowd.count.walkers,
       shopSigns: bazaar.userData.signCount,
