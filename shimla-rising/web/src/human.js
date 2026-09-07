@@ -327,13 +327,37 @@ export function buildHuman(o = {}) {
     hip.add(knee);
     const shin = add(new THREE.Mesh(new THREE.CylinderGeometry(0.062, 0.041, 0.335, 12), botMat), knee);
     shin.position.y = -0.163;
-    const shoe = add(new THREE.Mesh(new THREE.BoxGeometry(0.093, 0.058, 0.215), shoeMat), knee);
-    shoe.position.set(0, -0.352, -0.030);
+    // Joota: edi ooncha, panja neecha aur aage patla -- ek hi box dabba lagta tha
+    const shoe = add(new THREE.Mesh(new THREE.BoxGeometry(0.093, 0.058, 0.150), shoeMat), knee);
+    shoe.position.set(0, -0.350, 0.012);
     if (!lite) {
-      const sole = add(new THREE.Mesh(new THREE.BoxGeometry(0.099, 0.024, 0.228), soleMat), knee);
-      sole.position.set(0, -0.389, -0.032);
+      const toe = add(new THREE.Mesh(new THREE.BoxGeometry(0.086, 0.042, 0.098), shoeMat), knee);
+      toe.position.set(0, -0.360, -0.106);
+      toe.rotation.x = -0.16;
+      const sole = add(new THREE.Mesh(new THREE.BoxGeometry(0.099, 0.020, 0.242), soleMat), knee);
+      sole.position.set(0, -0.386, -0.028);
+      sole.rotation.x = -0.05;
+      const heel = add(new THREE.Mesh(new THREE.BoxGeometry(0.088, 0.026, 0.070), soleMat), knee);
+      heel.position.set(0, -0.398, 0.062);
     }
     legs.push({ hip, knee });
+  }
+
+  /*
+   * Zameen ki chhaya. Sooraj se aane wali shadow chhaya wale hisse mein hoti hi
+   * nahi, isliye wahan kirdaar zameen se **kata hua** tairta lagta tha. Ye ek
+   * halka gol dhabba hai jo hamesha uske neeche rehta hai.
+   */
+  if (!lite) {
+    const shade = new THREE.Mesh(
+      new THREE.CircleGeometry(0.30, 16),
+      new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.22,
+                                    depthWrite: false }),
+    );
+    shade.rotation.x = -Math.PI / 2;
+    shade.position.y = 0.02;
+    shade.renderOrder = -1;
+    g.add(shade);
   }
 
   g.userData.rig = { arms, legs, head };

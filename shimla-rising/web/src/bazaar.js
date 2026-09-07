@@ -146,8 +146,18 @@ export function buildBazaar(terrain, roads, shopsJson, mapJson, quality = {}, co
      * iske liye do quad peeth-se-peeth (DoubleSide se ek taraf text palat jaata).
      */
     for (const turn of [Math.PI / 2, -Math.PI / 2]) {
+      /*
+       * Dono quad ko apne-apne mukh ki taraf 3 cm khiskao.
+       *
+       * Bilkul ek hi jagah par rakhne se DoubleSide ke saath depth test mein
+       * kabhi galat wala jeet jaata tha, aur gali ke us paar ka naam **aaine
+       * jaisa ulta** padhta tha. Alag karne se har taraf se sahi mukh saamne
+       * rehta hai.
+       */
+      const ox = Math.sin(fyaw + turn) * 0.03;
+      const oz = -Math.cos(fyaw + turn) * 0.03;
       signs.push({
-        x: bx + fx2 * 4.9, z: bz + fz2 * 4.9, y: gy + 4.05,
+        x: bx + fx2 * 4.9 + ox, z: bz + fz2 * 4.9 + oz, y: gy + 4.05,
         yaw: fyaw + turn, text: spec.name, sub: spec.sub, width: 2.9,
       });
     }
@@ -365,8 +375,6 @@ function buildShopSigns(signs) {
    * Nateeja: ~46 draw call, aur backing ke liye ek.
    */
   const groups = new Map();       // naam -> {set, pos[], uv[], idx[], n}
-  const backPos = [], backIdx = [];
-  let backN = 0;
 
   const pushQuad = (P, I, nRef, cx, cy, cz, yaw, w, h, depth) => {
     const c = Math.cos(yaw), sn = Math.sin(yaw);
@@ -394,9 +402,6 @@ function buildShopSigns(signs) {
     // *baayen* dikhta hai, isliye u ulta dena padta hai -- warna naam aaine
     // jaisa palta hua padhta hai.
     grp.uv.push(1, 0, 0, 0, 0, 1, 1, 1);
-    // peeche ki plate -- sab ek hi material, ek hi mesh
-    pushQuad(backPos, backIdx, { get n() { return backN; }, set n(v) { backN = v; } },
-             s.x, s.y, s.z, s.yaw, s.width * 1.03, h * 1.06, -0.06);
   }
 
   for (const grp of groups.values()) {
@@ -408,9 +413,16 @@ function buildShopSigns(signs) {
     geo.computeBoundingSphere();
     const mat = new THREE.MeshStandardMaterial({
       map: grp.set.map, roughness: grp.set.roughness, metalness: grp.set.metalness,
-      // FrontSide: peeche se board dikhna hi nahi chahiye -- DoubleSide se
-      // gali ke us paar wale board ulte padhte the. Peeche plate hai hi.
-      side: THREE.FrontSide,
+      /*
+       * DoubleSide, aur peeche ki plate hata di.
+       *
+       * FrontSide ke saath board ka mukh us taraf tha jahan se koi dekhta hi
+       * nahi, aur gali se sirf peeche wali gehri plate (0x24282d) dikhti thi --
+       * isliye har board khaali gehre neele aayat jaisa lagta tha, jabki texture
+       * bilkul sahi tha. Naam wale board waise bhi do quad peeth-se-peeth hain,
+       * to har taraf se ek sahi mukh milta hai.
+       */
+      side: THREE.DoubleSide,
     });
     if (grp.set.emissiveMap) {
       mat.emissiveMap = grp.set.emissiveMap;
@@ -424,15 +436,6 @@ function buildShopSigns(signs) {
     const m = new THREE.Mesh(geo, mat);
     m.castShadow = true;
     g.add(m);
-  }
-
-  if (backN) {
-    const bg = new THREE.BufferGeometry();
-    bg.setAttribute("position", new THREE.Float32BufferAttribute(backPos, 3));
-    bg.setIndex(backIdx);
-    bg.computeVertexNormals();
-    bg.computeBoundingSphere();
-    g.add(new THREE.Mesh(bg, new THREE.MeshStandardMaterial({ color: 0x24282d, roughness: 0.8 })));
   }
 
   g.userData.glowingMaterials = glowing;

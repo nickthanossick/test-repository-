@@ -294,8 +294,9 @@ function yard(c, mb) {
 
 const BUILDERS = {
   campus, bazaar, shopfront, colonial, temple, junction, plaza, yard,
-  tunnel_old: (c, mb) => tunnel(c, mb, false),
-  tunnel_new: (c, mb) => tunnel(c, mb, true),
+  // tunnel ab `tunnel.js` banata hai -- poora bore, sirf portal nahi
+  tunnel_old: () => {},
+  tunnel_new: () => {},
   church: (c, mb) => { colonial(c, mb); },
   institution: (c, mb) => { colonial(c, mb); },
   palace: (c, mb) => {

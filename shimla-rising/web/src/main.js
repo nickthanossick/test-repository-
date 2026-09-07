@@ -6,6 +6,7 @@ import { RoadNetwork } from "./roads.js";
 import { buildCity } from "./city.js";
 import { Colliders } from "./grid.js";
 import { buildBazaar } from "./bazaar.js";
+import { buildTunnels } from "./tunnel.js";
 import { BusSystem } from "./buses.js";
 import { Crowd } from "./crowd.js";
 import { Panga } from "./panga.js";
@@ -112,6 +113,9 @@ async function boot() {
   const colliders = new Colliders(24);
   const bazaar = buildBazaar(terrain, roads, data.shops, data.sanjauliMap, Q, colliders);
   scene.add(bazaar);
+
+  const tunnels = buildTunnels(terrain, roads, data.pois, colliders);
+  scene.add(tunnels);
 
   const city = buildCity(terrain, roads, data.districts, data.pois, mulberry32(31104877), Q,
                          { keepClear: bazaar.userData.stalls, colliders });
@@ -465,6 +469,7 @@ async function boot() {
       landmarks: city.userData.landmarkCount,
       signs: city.userData.signCount,
       shops: bazaar.userData.shopCount,
+      tunnels: tunnels.userData.tunnelCount,
       buses: buses.count,
       keepers: crowd.count.keepers,
       angry: panga.angryCount,
@@ -504,33 +509,107 @@ async function boot() {
      * koi dukan hai. Ab colliders maujood hain, to kai koney aazma kar pehla
      * khaali chun lete hain. Screenshot ke liye yahi bharosemand tareeka hai.
      */
+    /**
+     * Kisi bindu ko dekho -- camera na to kisi imaarat ke andar ho, na uske
+     * peeche.
+     *
+     * Pehle wala version sirf khaali kona dhoondta tha. Ghane bazaar mein wo
+     * kaafi nahi: kona khaali ho sakta hai par beech mein poori dukan khadi ho.
+     * Isliye ab **line of sight** bhi jaanchte hain -- camera se target tak
+     * ray-march, wahi tareeka jo chase-camera.js pehle se occlusion ke liye
+     * istemaal karta hai. Agar kisi bhi kone se target nahi dikhta to camera
+     * upar uthaate jaate hain; ooncha uthne par gali ki deewarein hat jaati hain.
+     */
     lookAt(tx, ty, tz, dist = 6, elev = 1.2, preferAz = null) {
       debugCam = true;
-      const tries = 24;
-      // Pasandeeda disha se shuru karo (jaise board ka normal), taaki cheez
-      // saamne se dikhe -- warna pehla khaali kona peeche ka bhi ho sakta hai
+      const AZ = 24;
       const base = preferAz ?? 0;
-      for (let ring = 0; ring < 3; ring++) {
-        const d = dist * (1 + ring * 0.5);
-        for (let i = 0; i < tries; i++) {
-          // pehle pasandeeda disha, phir uske dono taraf badhte hue
-          const off = Math.ceil(i / 2) * (i % 2 ? 1 : -1);
-          const a = base + (off / tries) * Math.PI * 2;
-          const cx = tx + Math.cos(a) * d;
-          const cz = tz + Math.sin(a) * d;
-          const cy = ty + elev;
-          if (colliders.inside(cx, cy, cz, 0.6)) continue;
-          if (cy < terrain.heightAt(cx, cz) + 0.5) continue;
-          camera.position.set(cx, cy, cz);
-          camera.lookAt(tx, ty, tz);
-          return { x: cx, y: cy, z: cz, dist: d, azimuth: a };
+      const why = { inside: 0, under: 0, blocked: 0, tried: 0 };
+      const clear = (cx, cy, cz) => {
+        why.tried++;
+        if (colliders.inside(cx, cy, cz, 0.5)) { why.inside++; return false; }
+        if (cy < terrain.heightAt(cx, cz) + 0.4) { why.under++; return false; }
+        // camera se target tak koi deewar to nahi
+        const dx = tx - cx, dy = ty - cy, dz = tz - cz;
+        const steps = Math.max(6, Math.ceil(Math.hypot(dx, dy, dz) / 1.2));
+        for (let i = 1; i < steps; i++) {
+          const t = i / steps;
+          if (colliders.inside(cx + dx * t, cy + dy * t, cz + dz * t, 0.25)) {
+            why.blocked++; return false;
+          }
+        }
+        return true;
+      };
+      for (let lift = 0; lift < 6; lift++) {
+        const cy = ty + elev + lift * 3.5;
+        for (let ring = 0; ring < 3; ring++) {
+          const d = dist * (1 + ring * 0.45);
+          for (let i = 0; i < AZ; i++) {
+            // pasandeeda disha se shuru, phir dono taraf badhte hue
+            const off = Math.ceil(i / 2) * (i % 2 ? 1 : -1);
+            const a = base + (off / AZ) * Math.PI * 2;
+            const cx = tx + Math.cos(a) * d, cz = tz + Math.sin(a) * d;
+            if (!clear(cx, cy, cz)) continue;
+            camera.position.set(cx, cy, cz);
+            camera.lookAt(tx, ty, tz);
+            return { x: cx, y: cy, z: cz, dist: d, azimuth: a, lift, why };
+          }
         }
       }
-      // kuch nahi mila -- seedha upar se dekho
-      camera.position.set(tx, ty + dist * 1.6, tz + dist * 0.5);
+      // kahin se nahi dikha -- seedha upar se
+      camera.position.set(tx, ty + dist * 2.2, tz + dist * 0.4);
       camera.lookAt(tx, ty, tz);
+      return { overhead: true, why };
+    },
+
+    /**
+     * Naam se seedha sahi shot. Har round ka screenshot script isse chhota aur
+     * bharosemand rehta hai -- jagah aur disha yahi nikaalta hai.
+     */
+    photo(what, o = {}) {
+      const T = (x, y, z, d, e, az) => ({ hit: this.lookAt(x, y, z, d, e, az),
+                                          target: [x, y, z] });
+      const stalls = bazaar.userData.stalls;
+      const idx = o.index ?? 0;
+
+      if (what === "shop" || what === "board") {
+        const st = stalls[idx % stalls.length];
+        const fx = Math.sin(st.yaw), fz = -Math.cos(st.yaw);   // dukan ka mukh
+        // board shutter aur awning ke beech, 3.02 m par
+        const y = what === "board" ? st.y + 3.02 : st.y + 2.2;
+        const bx = st.x + fx * 3.28, bz = st.z + fz * 3.28;
+        return { name: st.name, ...T(bx, y, bz, o.dist ?? 7, o.elev ?? 0.4,
+                                     Math.atan2(fz, fx)) };
+      }
+      if (what === "keeper") {
+        const k = crowd.keepers.find((x) => x.mesh.visible);
+        if (!k) return null;
+        const p = k.mesh.position;
+        const fx = Math.sin(k.stall.s.yaw), fz = -Math.cos(k.stall.s.yaw);
+        return T(p.x, p.y + 1.1, p.z, o.dist ?? 4.5, o.elev ?? 0.5, Math.atan2(fz, fx));
+      }
+      if (what === "bus") {
+        const b = buses.buses[0];
+        if (!b) return null;
+        const p = b.mesh.position;
+        return T(p.x, p.y + 1.4, p.z, o.dist ?? 12, o.elev ?? 3.0);
+      }
+      if (what === "tunnel") {
+        const poi = data.poiById.get(o.id || "dhalli_tunnel");
+        const w = geo.toWorld(poi.lat, poi.lon);
+        const y = terrain.heightAt(w.x, w.z);
+        return T(w.x, y + 3.0, w.z, o.dist ?? 22, o.elev ?? 2.0);
+      }
+      if (what === "poi") {
+        const poi = data.poiById.get(o.id);
+        if (!poi) return null;
+        const w = geo.toWorld(poi.lat, poi.lon);
+        const y = terrain.heightAt(w.x, w.z);
+        return T(w.x, y + (o.up ?? 4), w.z, o.dist ?? 30, o.elev ?? 8);
+      }
       return null;
     },
+
     /** Ek dukan ke theek saamne khade ho jao -- bazaar ki jaanch ke liye. */
     viewShop(i = 0, dist = 9, height = 3.2, skew = 0) {
       const st = bazaar.userData.stalls[i % bazaar.userData.stalls.length];

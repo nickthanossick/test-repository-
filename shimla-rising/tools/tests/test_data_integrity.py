@@ -255,3 +255,17 @@ def test_ambulance_and_bus_fleet():
     v = {x["id"]: x for x in load("vehicles.json")["vehicles"]}
     assert "ambulance" in v, "IGMC ambulance nahi mili"
     assert v["ambulance"]["siren"] is True
+
+
+def test_both_tunnels_exist_with_their_kind():
+    """Dono tunnel alag hone chahiye -- purana single-lane, naya double-lane."""
+    pois = {p["id"]: p for p in load("pois.json")["pois"]}
+    assert pois["sanjauli_tunnel"]["landmark"] == "tunnel_old"
+    assert pois["dhalli_tunnel"]["landmark"] == "tunnel_new"
+    # dono kisi sadak ke paas hone chahiye, warna bore ki disha nahi milegi
+    segs = load("sanjauli.json")["segments"]
+    pts = [tuple(p) for s in segs for p in s["points"]]
+    for tid in ("sanjauli_tunnel", "dhalli_tunnel"):
+        t = pois[tid]
+        near = min(abs(t["lat"] - a) + abs(t["lon"] - b) for a, b in pts)
+        assert near < 0.004, f"{tid} kisi segment ke paas nahi ({near:.4f})"

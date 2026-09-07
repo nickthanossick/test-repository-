@@ -254,10 +254,12 @@ export function skin(hex = 0xb07d55, seed = 7) {
     const img = ctx.createImageData(S, S);
     for (let i = 0; i < S * S; i++) {
       const k = 0.92 + pores[i] * 0.14;
-      const warm = (blotch[i] - 0.5) * 0.07;
+      // Halka gulaabi/garam bhed -- asli twacha kaan, naak aur gaal par thodi
+      // laal hoti hai. Ek hi flat tone se chehra plastic lagta tha.
+      const warm = (blotch[i] - 0.5) * 0.13;
       img.data[i * 4] = Math.min(255, (base.r + warm) * 255 * k);
-      img.data[i * 4 + 1] = Math.min(255, (base.g + warm * 0.4) * 255 * k);
-      img.data[i * 4 + 2] = Math.min(255, (base.b + warm * 0.2) * 255 * k);
+      img.data[i * 4 + 1] = Math.min(255, (base.g + warm * 0.30) * 255 * k);
+      img.data[i * 4 + 2] = Math.min(255, (base.b + warm * 0.12) * 255 * k);
       img.data[i * 4 + 3] = 255;
     }
     ctx.putImageData(img, 0, 0);
