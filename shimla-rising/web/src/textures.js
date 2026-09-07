@@ -250,6 +250,80 @@ export function terrainDetail(seed = 91) {
   });
 }
 
+/**
+ * Pahadi chattan -- slate/quartzite ki tarah parat-daar.
+ *
+ * Himachal ki dhalan par nangi chattan mahin parton mein tooti hoti hai, gol
+ * patthar ki tarah nahi. Isliye ek disha mein khinchi hui fbm (`stretch`) --
+ * usi se wo parat wala look aata hai.
+ */
+export function groundRock(seed = 17) {
+  return cached("groundRock", () => {
+    const S = 256;
+    const layers = fbm(S, 26, 5, seed);
+    const grain = fbm(S, 64, 3, seed + 7);
+    const h = new Float32Array(S * S);
+    for (let y = 0; y < S; y++) {
+      for (let x = 0; x < S; x++) {
+        // parat: y ke saath sankri, x ke saath chaudi
+        const sx = (x * 0.35) | 0, sy = y;
+        const stretch = layers[(sy * S + (sx % S)) | 0];
+        h[y * S + x] = stretch * 0.72 + grain[y * S + x] * 0.28;
+      }
+    }
+    const cv = canvas(S);
+    const ctx = cv.getContext("2d");
+    const img = ctx.createImageData(S, S);
+    for (let i = 0; i < S * S; i++) {
+      const k = 0.62 + h[i] * 0.5;
+      img.data[i * 4] = k * 255 * 1.00;
+      img.data[i * 4 + 1] = k * 255 * 0.95;
+      img.data[i * 4 + 2] = k * 255 * 0.88;
+      img.data[i * 4 + 3] = 255;
+    }
+    ctx.putImageData(img, 0, 0);
+    return {
+      map: texture(cv, 1, true),
+      normalMap: texture(normalMapFrom(h, S, 3.4)),
+      roughnessMap: texture(grey(h, S, 0.72, 0.98)),
+    };
+  });
+}
+
+/**
+ * Sookhi ghaas aur mitti -- ridge ke upar aur raaston ke kinare.
+ *
+ * Isme `terrainDetail` se motha daana hai aur kahin-kahin nangi mitti ke
+ * dhabbe, taaki dhalan ek hi hare rang ki chaadar na lage.
+ */
+export function groundSoil(seed = 53) {
+  return cached("groundSoil", () => {
+    const S = 256;
+    const tuft = fbm(S, 30, 4, seed);
+    const patch = fbm(S, 6, 3, seed + 19);
+    const h = new Float32Array(S * S);
+    for (let i = 0; i < S * S; i++) h[i] = tuft[i] * 0.6 + patch[i] * 0.4;
+    const cv = canvas(S);
+    const ctx = cv.getContext("2d");
+    const img = ctx.createImageData(S, S);
+    for (let i = 0; i < S * S; i++) {
+      // patch kam ho to nangi mitti jhaankti hai
+      const bare = Math.max(0, 0.42 - patch[i]) * 2.2;
+      const k = 0.78 + h[i] * 0.34;
+      img.data[i * 4] = k * 255 * (1.0 + bare * 0.30);
+      img.data[i * 4 + 1] = k * 255 * (0.96 - bare * 0.10);
+      img.data[i * 4 + 2] = k * 255 * (0.74 - bare * 0.18);
+      img.data[i * 4 + 3] = 255;
+    }
+    ctx.putImageData(img, 0, 0);
+    return {
+      map: texture(cv, 1, true),
+      normalMap: texture(normalMapFrom(h, S, 2.2)),
+      roughnessMap: texture(grey(h, S, 0.82, 1.0)),
+    };
+  });
+}
+
 /** Insaani twacha -- halka subsurface-jaisa gulaabi, mahin roomiyan. */
 export function skin(hex = 0xb07d55, seed = 7) {
   return cached(`skin${hex}`, () => {

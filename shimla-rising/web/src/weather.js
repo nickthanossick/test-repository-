@@ -8,7 +8,18 @@ import * as THREE from "three";
  * - `fog`    Subah-shaam. Sirf visibility.
  */
 const PRESETS = {
-  clear:   { grip: 1.00, fogNear: 900, fogFar: 5200, particles: 0,     tint: null },
+  /*
+   * `clear` ka fog itna door tha ki wo lagta hi nahi tha.
+   *
+   * 900..5200 ke saath 2 km door ka pahad sirf 26% dhundhla hota tha -- yaani
+   * saamne ki dhalan aur peeche ki ridge dono ek hi hare rang ke. Screenshot
+   * mein yahi sabse zyada "flat" lag raha tha.
+   *
+   * Asli pahadi hawa mein 2 km ka pahad aadha ghul chuka hota hai. 260..3800
+   * se wahi milta hai, aur paas ki gali (300 m ke andar) bilkul saaf rehti hai
+   * -- yahi "atmospheric perspective" hai, aur ye poori tarah muft hai.
+   */
+  clear:   { grip: 1.00, fogNear: 260, fogFar: 3800, particles: 0,     tint: null },
   fog:     { grip: 0.94, fogNear: 90,  fogFar: 1100, particles: 0,     tint: 0xc9d3dc },
   monsoon: { grip: 0.80, fogNear: 220, fogFar: 2300, particles: 5500,  tint: 0x8d9aa6, rain: true },
   snow:    { grip: 0.55, fogNear: 140, fogFar: 1500, particles: 4200,  tint: 0xdfe7ee },

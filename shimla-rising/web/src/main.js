@@ -108,6 +108,7 @@ async function boot() {
    * rehta tha (sadak ka mesh terrain se 0.5 m upar hai).
    */
   const groundAt = (x, z) => roads.groundAt(x, z);
+  let forest = null;
 
   setProgress(0.80, "Shimla bas raha hai…");
   // Sanjauli ka bazaar: Chowk se Dhalli tak dono taraf lagatar dukanein.
@@ -130,6 +131,7 @@ async function boot() {
   const city = buildCity(terrain, roads, data.districts, data.pois, mulberry32(31104877), Q,
                          { keepClear: bazaar.userData.stalls, colliders });
   scene.add(city);
+  forest = city.getObjectByName("forest");
 
   setProgress(0.90, "aasman aur mausam…");
   const sky = new Sky(scene, terrain, renderer);
@@ -718,6 +720,9 @@ async function boot() {
 
     wanted.update(dt, pos, state.mode === "vehicle", weather.grip, district, onRoad);
     missions.update(dt, { playerPos: pos, inVehicle: state.mode === "vehicle", stars: wanted.stars });
+    // Jungle ka LOD -- 240 m ke andar poora ped, aage ek cone.
+    // Sirf 64 doori ka hisaab, aur badlav par hi visible toggle hota hai.
+    forest?.userData.update?.(camera.position);
     buses.update(dt);
     traffic.update(dt, pos, camera.position,
                    { night: dayNight.hour >= 18.4 || dayNight.hour <= 6.2 });

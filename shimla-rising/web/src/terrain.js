@@ -78,8 +78,7 @@ export class Terrain {
     const group = new THREE.Group();
     group.name = "terrain";
     const chunkSize = this.worldSize / chunks;
-    const det = TEX.setRepeat(TEX.terrainDetail(), 1);
-    const mat = TEX.standard(det, { vertexColors: true, roughness: 1.0 });
+    const mat = this._groundMaterial();
 
     for (let cz = 0; cz < chunks; cz++) {
       for (let cx = 0; cx < chunks; cx++) {
@@ -91,11 +90,121 @@ export class Terrain {
     return group;
   }
 
+  /**
+   * Zameen ka material -- teen satah, dhalan aur oonchai se ghuli hui.
+   *
+   * Pehle yahan **ek** texture thi aur rang sirf vertex colour se aata tha.
+   * Nateeja screenshot mein saaf tha: poora pahad ek chapta hara rang, na
+   * ghaas ka daana, na chattan, na mitti -- golf course jaisa, Himalaya jaisa
+   * nahi.
+   *
+   * Ab teen satah hain -- ghaas, chattan, sookhi mitti -- aur unka anupaat
+   * **per-vertex** aata hai (`aSplat`), dhalan aur oonchai se: khadi dhalan
+   * par chattan (wahan ghaas ugti hi nahi), ridge ke upar sookhi ghaas,
+   * baaki jagah hari.
+   *
+   * Do paimane par UV bhi hai: ek motha (~11 m) jo door se dhabbe deta hai,
+   * ek mahin (~2.2 m) jo paas aane par daana deta hai. Sirf ek scale rakhne
+   * par ya to door se dohraav dikhta hai ya paas se plastic.
+   *
+   * Ye sab `MeshStandardMaterial` ke andar `onBeforeCompile` se hota hai --
+   * yaani shadow, fog, tone mapping aur image-based lighting sab pehle jaise
+   * chalte rehte hain, aur **draw call ek bhi nahi badhta**.
+   */
+  _groundMaterial() {
+    const grass = TEX.setRepeat(TEX.terrainDetail(), 1);
+    const rock = TEX.setRepeat(TEX.groundRock(), 1);
+    const soil = TEX.setRepeat(TEX.groundSoil(), 1);
+
+    const mat = TEX.standard(grass, { vertexColors: true, roughness: 1.0 });
+    mat.defines = { ...(mat.defines || {}), SHIMLA_SPLAT: "" };
+    mat.userData.rockMap = { value: rock.map };
+    mat.userData.soilMap = { value: soil.map };
+    mat.userData.rockNormal = { value: rock.normalMap };
+    mat.userData.soilNormal = { value: soil.normalMap };
+
+    mat.onBeforeCompile = (shader) => {
+      shader.uniforms.rockMap = mat.userData.rockMap;
+      shader.uniforms.soilMap = mat.userData.soilMap;
+      shader.uniforms.rockNormal = mat.userData.rockNormal;
+      shader.uniforms.soilNormal = mat.userData.soilNormal;
+
+      shader.vertexShader = shader.vertexShader
+        .replace("#include <common>", `#include <common>
+          attribute vec2 aSplat;      // x = chattan, y = sookhi mitti
+          varying vec2 vSplat;
+          varying vec2 vFineUv;`)
+        .replace("#include <begin_vertex>", `#include <begin_vertex>
+          vSplat = aSplat;
+          // mahin paimana -- world XZ se, taaki chunk ke jod par seam na ho
+          vFineUv = vec2(position.x, position.z) * 0.45;`);
+
+      shader.fragmentShader = shader.fragmentShader
+        .replace("#include <common>", `#include <common>
+          uniform sampler2D rockMap;
+          uniform sampler2D soilMap;
+          uniform sampler2D rockNormal;
+          uniform sampler2D soilNormal;
+          varying vec2 vSplat;
+          varying vec2 vFineUv;`)
+        // albedo: teen satah ka mishran, motha + mahin dono paimane par
+        .replace("#include <map_fragment>", `
+          vec4 gMacro = texture2D(map, vMapUv);
+          vec4 rMacro = texture2D(rockMap, vMapUv);
+          vec4 sMacro = texture2D(soilMap, vMapUv);
+          vec4 gFine  = texture2D(map, vFineUv);
+          vec4 rFine  = texture2D(rockMap, vFineUv);
+          vec4 sFine  = texture2D(soilMap, vFineUv);
+          float wRock = clamp(vSplat.x, 0.0, 1.0);
+          float wSoil = clamp(vSplat.y, 0.0, 1.0) * (1.0 - wRock);
+          float wGrass = max(0.0, 1.0 - wRock - wSoil);
+          vec4 macro = gMacro * wGrass + rMacro * wRock + sMacro * wSoil;
+          vec4 fine  = gFine  * wGrass + rFine  * wRock + sFine  * wSoil;
+          /*
+           * Mahin parat ka contrast.
+           *
+           * Generator ka output 0.86..1.0 ke sankre daayre mein hai (wo
+           * jaan-boojh kar neutral hai, taaki vertex colour rang de). Use
+           * seedha guna karne se paas ki zameen ab bhi chapti dikhti thi.
+           * Isliye pehle usko 0..1 par phailate hain, phir tone todte hain --
+           * rang nahi, warna dohraav saaf dikhne lagta hai.
+           */
+          float f = clamp((fine.r - 0.80) * 4.2, 0.0, 1.0);
+          /*
+           * Bada paimana: ~110 m ke dhabbe.
+           *
+           * Bina iske poori dhalan ek hi rang ki chaadar lagti hai, chahe
+           * mahin daana kitna bhi ho -- kyunki aankh door se sirf bade dhabbe
+           * padhti hai. Ye soil map ko bahut dheere tile karke aata hai,
+           * yaani koi nayi texture nahi.
+           */
+          float blotch = texture2D(soilMap, vMapUv * 0.085).r;
+          vec3 tone = vec3(0.74 + 0.46 * f) * (0.90 + 0.20 * blotch);
+          vec4 sampledDiffuseColor = vec4(macro.rgb * tone, macro.a);
+          diffuseColor *= sampledDiffuseColor;`)
+        // normal: chattan par ubhaar zyada, ghaas par kam
+        .replace("#include <normal_fragment_maps>", `
+          vec3 nG = texture2D(normalMap, vNormalMapUv).xyz * 2.0 - 1.0;
+          vec3 nR = texture2D(rockNormal, vNormalMapUv).xyz * 2.0 - 1.0;
+          vec3 nS = texture2D(soilNormal, vNormalMapUv).xyz * 2.0 - 1.0;
+          float bRock = clamp(vSplat.x, 0.0, 1.0);
+          float bSoil = clamp(vSplat.y, 0.0, 1.0) * (1.0 - bRock);
+          float bGrass = max(0.0, 1.0 - bRock - bSoil);
+          vec3 mapN = normalize(nG * bGrass + nR * bRock + nS * bSoil);
+          mapN.xy *= normalScale * (1.0 + bRock * 0.9);
+          normal = normalize(tbn * mapN);`);
+    };
+    // shader alag hai to three.js ko program dobara compile karna padta hai
+    mat.customProgramCacheKey = () => "shimla-ground";
+    return mat;
+  }
+
   _chunk(x0, z0, size, quads, mat) {
     const vn = quads + 1;
     const pos = new Float32Array(vn * vn * 3);
     const col = new Float32Array(vn * vn * 3);
     const uvs = new Float32Array(vn * vn * 2);
+    const splat = new Float32Array(vn * vn * 2);      // x = chattan, y = sookhi mitti
     const idx = new Uint32Array(quads * quads * 6);
     const step = size / quads;
     const c = new THREE.Color();
@@ -111,6 +220,21 @@ export class Terrain {
         col[p] = c.r; col[p + 1] = c.g; col[p + 2] = c.b;
         // world-space UV -- chunk seams pe texture continue rehta hai
         uvs[t] = x * UV_SCALE; uvs[t + 1] = z * UV_SCALE;
+        /*
+         * Splat: kaunsi satah kitni.
+         *
+         * Chattan dhalan se aati hai -- 0.45 se shuru, 0.85 par poori. Yahi
+         * asli niyam hai: itni khadi dhalan par mitti tikti hi nahi, isliye
+         * wahan ghaas ugti nahi.
+         *
+         * Sookhi mitti/ghaas oonchai se -- ridge ke upar ped ki rekha khatm
+         * ho jaati hai. Neeche ki ghaati hari rehti hai.
+         */
+        const sl = this.slopeAt(x, z);
+        const rockW = THREE.MathUtils.smoothstep(sl, 0.45, 0.85);
+        const dry = THREE.MathUtils.smoothstep(y, 2180, 2400);
+        splat[t] = rockW;
+        splat[t + 1] = dry * (1 - rockW);
         p += 3; t += 2;
       }
     }
@@ -127,6 +251,7 @@ export class Terrain {
     g.setAttribute("position", new THREE.BufferAttribute(pos, 3));
     g.setAttribute("color", new THREE.BufferAttribute(col, 3));
     g.setAttribute("uv", new THREE.BufferAttribute(uvs, 2));
+    g.setAttribute("aSplat", new THREE.BufferAttribute(splat, 2));
     g.setIndex(new THREE.BufferAttribute(idx, 1));
     g.computeVertexNormals();
     g.computeBoundingSphere();

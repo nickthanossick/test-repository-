@@ -6,11 +6,20 @@
  * andaza lagata hai. `Q` se badla ja sakta hai, aur save mein yaad rehta hai.
  */
 
+/*
+ * `treeCount` round 16 mein teen guna hua.
+ *
+ * Pehle har ped har doori par poora 72-triangle ka tha, isliye ginti hi
+ * budget thi. Ab 240 m ke aage wo ek 12-triangle ka cone ban jaata hai
+ * (`city.js` ka forest LOD), yaani door ke hazaron ped utne hi mehnge hain
+ * jitne pehle saikdon. Shimla ki dhalan ghane deodar se dhaki hai -- 3,500
+ * ped us 8 km ke naksha par gine-chune dikhte the.
+ */
 export const PRESETS = {
   low: {
     name: "Low",
     terrainQuads: 64,      // chunk mein quads (8x8 chunks)
-    treeCount: 3500,
+    treeCount: 9000,
     windowFacades: 1,      // har ghar ki kitni deewaron pe khidkiyan
     shadowMap: 1024,
     shadowRadius: 120,
@@ -24,7 +33,7 @@ export const PRESETS = {
   medium: {
     name: "Medium",
     terrainQuads: 96,
-    treeCount: 9000,
+    treeCount: 20000,
     windowFacades: 2,
     shadowMap: 2048,
     shadowRadius: 190,
@@ -38,7 +47,7 @@ export const PRESETS = {
   high: {
     name: "High",
     terrainQuads: 128,
-    treeCount: 16000,
+    treeCount: 34000,
     windowFacades: 4,
     shadowMap: 4096,
     shadowRadius: 240,

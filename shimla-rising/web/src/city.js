@@ -17,6 +17,9 @@ import { buildSigns } from "./signs.js";
  */
 
 const ROOFS = [0x8c3b2e, 0x2f5d8a, 0x3f6b47, 0x6b6b70, 0x9c5a2b];
+/** Itni door tak poora ped; uske aage ek hi cone. */
+const NEAR_FOREST_M = 240;
+
 const WALLS = [0xb8ad98, 0xa99d86, 0x9f8e75, 0xb2a48d, 0x8a7b6c, 0xc0b6a4];
 
 export function buildCity(terrain, roads, districts, pois, rng, quality = {}, opts = {}) {
@@ -246,35 +249,82 @@ function house(mb, terrain, x, z, d, rng, col, colliders, facadeCount = 2, roadC
  * shadow frustum ke andar wale tiles hi draw hote hain.
  */
 function buildForest(terrain, roads, buildings, rng, TARGET = 9000) {
-  const TILES = 6;
+  const TILES = 8;
   const g = new THREE.Group();
   g.name = "forest";
 
   const trunkGeo = new THREE.CylinderGeometry(0.30, 0.46, 3.4, 6, 1);
   trunkGeo.translate(0, 1.7, 0);
-  // deodar: teen layer ke cone, upar jaate hue chhote -- asli silhouette
-  const canopyGeo = mergeCones([
+  /*
+   * Do prajaati -- Shimla ki dhalan par dono hain aur silhouette alag hai.
+   *
+   * **Deodar** chaudi, teen layer ka cone, gehra hara. **Chir pine** patli
+   * aur oonchi, upar hi taaj. Ek hi shakl ke 9,000 ped turant "copy-paste"
+   * lagte hain; do shakl aur alag-alag tint se jungle asli lagta hai.
+   */
+  const deodarGeo = mergeCones([
     { r: 3.0, h: 4.4, y: 2.6 }, { r: 2.4, h: 4.2, y: 5.6 }, { r: 1.6, h: 4.4, y: 8.6 },
   ]);
+  const chirGeo = mergeCones([
+    { r: 1.5, h: 3.6, y: 6.4 }, { r: 2.0, h: 3.4, y: 8.2 }, { r: 1.1, h: 3.0, y: 10.6 },
+  ]);
+  /*
+   * Door ka roop: ek hi cone, bina trunk, 6 phalak. 72 triangle se 12.
+   *
+   * 200 m se aage aankh sirf silhouette padhti hai -- na chhaal dikhti hai, na
+   * teen layer ka farak. Isi wajah se ped ki ginti teen guna ho sakti hai bina
+   * budget phate: door ke hazaron ped ab utne hi mehnge hain jitne pehle
+   * saikdon.
+   */
+  const farGeo = mergeCones([{ r: 2.6, h: 9.6, y: 2.4 }]);
 
   const barkMat = TEX.standard(TEX.bark(), { roughness: 1.0 });
   const needleMat = TEX.standard(TEX.needles(), { vertexColors: true, roughness: 0.95 });
 
   // pehle saari positions chuno, phir tiles mein baanto
+  /*
+   * Ped **jhund** mein ugte hain, bikhre hue nahi.
+   *
+   * Pehle poore 64 km² par eksaman random scatter tha. 9,000 ped bahut lagte
+   * hain, par us phailav par wo prati km² sirf 140 hote hain -- yaani dhalan
+   * par gine-chune ped, jungle nahi. Asli deodar stand mein ugta hai: ghane
+   * jhund, beech mein khaali maidan.
+   *
+   * Isliye pehle kuch **kendra** chunte hain aur unke aas-paas ped daalte
+   * hain. Ginti wahi rehti hai, par dikhta ghana jungle hai -- aur khaali
+   * maidan bhi asli lagte hain.
+   */
   const spots = [];
   const half = terrain.half - 30;
+  const CLUMP_R = 120;
+  let clumpX = 0, clumpZ = 0, clumpLeft = 0;
   let tries = 0;
   while (spots.length < TARGET && tries < TARGET * 14) {
     tries++;
-    const x = (rng() * 2 - 1) * half, z = (rng() * 2 - 1) * half;
+    if (clumpLeft <= 0) {
+      clumpX = (rng() * 2 - 1) * half;
+      clumpZ = (rng() * 2 - 1) * half;
+      clumpLeft = 18 + ((rng() * 46) | 0);
+    }
+    clumpLeft--;
+    // jhund ke andar bhi kinare patle -- sqrt se beech ghana hota hai
+    const a = rng() * Math.PI * 2, rr = Math.sqrt(rng()) * CLUMP_R;
+    const x = THREE.MathUtils.clamp(clumpX + Math.cos(a) * rr, -half, half);
+    const z = THREE.MathUtils.clamp(clumpZ + Math.sin(a) * rr, -half, half);
     const y = terrain.heightAt(x, z);
     if (y > 2380) continue;                        // treeline ke upar barf
-    if (terrain.slopeAt(x, z) > 0.86) continue;    // nangi chattan
+    const slope = terrain.slopeAt(x, z);
+    if (slope > 0.86) continue;                    // nangi chattan
+    // Khadi dhalan par jungle patla hota hai -- jad tikti nahi. Yahi
+    // terrain ke splat se bhi mel khata hai (wahan chattan dikhti hai).
+    if (slope > 0.55 && rng() < (slope - 0.55) * 2.2) continue;
     const nr = roads.nearestNode(x, z);
     if (nr && nr.dist < 11) continue;              // sadak khaali rakho
     if (buildings.occupied(x, z, 7)) continue;
     if (y < 1800 && rng() > 0.42) continue;        // deodar belt 1800 m se upar
-    spots.push([x, y, z, 0.62 + rng() * 0.85, rng() * Math.PI * 2, 0.42 + rng() * 0.20]);
+    // chir neeche zyada, deodar upar zyada
+    const chir = rng() < THREE.MathUtils.clamp((2200 - y) / 500, 0.12, 0.78);
+    spots.push([x, y, z, 0.62 + rng() * 0.85, rng() * Math.PI * 2, 0.42 + rng() * 0.20, chir]);
   }
 
   const size = terrain.worldSize / TILES;
@@ -288,30 +338,74 @@ function buildForest(terrain, roads, buildings, rng, TARGET = 9000) {
   const m = new THREE.Matrix4(), q = new THREE.Quaternion();
   const pos = new THREE.Vector3(), scl = new THREE.Vector3();
   const c = new THREE.Color();
+  const tiles = [];
 
-  for (const bucket of buckets) {
-    if (!bucket.length) continue;
-    const tm = new THREE.InstancedMesh(trunkGeo, barkMat, bucket.length);
-    const cm = new THREE.InstancedMesh(canopyGeo, needleMat, bucket.length);
-    cm.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(bucket.length * 3), 3);
-    bucket.forEach(([x, y, z, s, rot, tint], i) => {
+  buckets.forEach((bucket, bi) => {
+    if (!bucket.length) return;
+    const n = bucket.length;
+    const tm = new THREE.InstancedMesh(trunkGeo, barkMat, n);
+    const deo = bucket.filter((s) => !s[6]).length;
+    const cmD = new THREE.InstancedMesh(deodarGeo, needleMat, Math.max(1, deo));
+    const cmC = new THREE.InstancedMesh(chirGeo, needleMat, Math.max(1, n - deo));
+    const far = new THREE.InstancedMesh(farGeo, needleMat, n);
+    for (const im of [cmD, cmC, far]) {
+      im.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(im.count * 3), 3);
+    }
+
+    let iD = 0, iC = 0;
+    bucket.forEach(([x, y, z, s, rot, tint, chir], i) => {
       pos.set(x, y, z);
       scl.set(s, s * (0.85 + (tint - 0.42) * 2.4), s);
       q.setFromAxisAngle(_cityUp, rot);
       m.compose(pos, q, scl);
       tm.setMatrixAt(i, m);
-      cm.setMatrixAt(i, m);
-      c.setRGB(tint * 0.52, tint * 1.06, tint * 0.58);
-      cm.setColorAt(i, c);
+      far.setMatrixAt(i, m);
+      // chir thoda halka aur peela-hara, deodar gehra neela-hara
+      if (chir) c.setRGB(tint * 0.62, tint * 1.02, tint * 0.46);
+      else c.setRGB(tint * 0.46, tint * 1.02, tint * 0.62);
+      far.setColorAt(i, c);
+      const im = chir ? cmC : cmD;
+      const k = chir ? iC++ : iD++;
+      im.setMatrixAt(k, m);
+      im.setColorAt(k, c);
     });
-    tm.instanceMatrix.needsUpdate = cm.instanceMatrix.needsUpdate = true;
-    if (cm.instanceColor) cm.instanceColor.needsUpdate = true;
-    tm.castShadow = cm.castShadow = true;
-    tm.receiveShadow = cm.receiveShadow = true;
-    tm.computeBoundingSphere?.();
-    cm.computeBoundingSphere?.();
-    g.add(tm, cm);
-  }
+    for (const im of [tm, cmD, cmC, far]) {
+      im.instanceMatrix.needsUpdate = true;
+      if (im.instanceColor) im.instanceColor.needsUpdate = true;
+      im.receiveShadow = true;
+      im.computeBoundingSphere?.();
+    }
+    tm.castShadow = cmD.castShadow = cmC.castShadow = true;
+    far.castShadow = false;         // door ke ped ki chhaya kaun dekhta hai
+
+    const tx = bi % TILES, tz = (bi / TILES) | 0;
+    tiles.push({
+      near: [tm, cmD, cmC], far,
+      cx: -terrain.half + (tx + 0.5) * size,
+      cz: -terrain.half + (tz + 0.5) * size,
+      isNear: null,
+    });
+    g.add(tm, cmD, cmC, far);
+  });
+
+  /*
+   * Har frame: kaun sa tile paas hai.
+   *
+   * Sirf 64 doori ka hisaab -- kuch bhi nahi. Tile ka aadha vikarn jodte hain
+   * taaki jis tile mein khiladi khada hai wo hamesha "paas" gine.
+   */
+  const halfDiag = size * 0.71;
+  g.userData.update = (camPos) => {
+    for (const t of tiles) {
+      const d = Math.hypot(t.cx - camPos.x, t.cz - camPos.z) - halfDiag;
+      const near = d < NEAR_FOREST_M;
+      if (near === t.isNear) continue;
+      t.isNear = near;
+      for (const im of t.near) im.visible = near;
+      t.far.visible = !near;
+    }
+  };
+  g.userData.update({ x: 0, z: 0 });
   g.userData.treeCount = spots.length;
   return g;
 }
