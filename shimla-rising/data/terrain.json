@@ -1,20 +1,25 @@
 {
-  "$comment": "tools/terrain/build_heightmap.py se generate hua. Haath se edit mat karo.",
-  "size_px": 1024,
+  "$comment": "shimla_pipeline/build_real_terrain.py se generate hua (asli DEM). Haath se edit mat karo.",
+  "size_px": 2048,
   "world_size_m": 8192.0,
-  "metres_per_pixel": 8.0078,
-  "elevation_min_m": 1300.0,
+  "metres_per_pixel": 4.002,
+  "elevation_min_m": 1350.0,
   "elevation_max_m": 2500.0,
-  "source": "terrain_control.json (landmark IDW interpolation + ridged multifractal detail)",
+  "source": "AWS Terrain Tiles (terrarium) z15",
+  "attribution": "AWS Terrain Tiles (terrarium) -- SRTM/NED/GMTED se bana, AWS Open Data Registry par khula. Koi API key nahi.",
   "files": {
     "heightmap.png": "RGB8. elevation = min + ((R*256 + G) / 65535) * (max - min). Web game.",
-    "heightmap_16.png": "16-bit grayscale, same normalisation. Godot / Blender / GIS.",
-    "heightmap_preview.png": "Hillshaded colour preview. Sirf dekhne ke liye."
+    "heightmap_16.png": "16-bit grayscale, same normalisation. Godot / Blender / GIS."
   },
   "orientation": "row 0 = north edge (z = -half), col 0 = west edge (x = -half)",
   "godot_import": {
-    "$comment": "Godot HeightMapShape3D / ArrayMesh ke liye seedhe metre values.",
-    "height_scale_m": 1200.0,
-    "height_offset_m": 1300.0
+    "height_scale_m": 1150.0,
+    "height_offset_m": 1350.0
+  },
+  "road_carving": {
+    "corridor_m": 26.0,
+    "feather_m": 46.0,
+    "max_grade": 0.11,
+    "$comment": "Sadak ke corridor mein terrain uske mulayam profile ki taraf kheencha gaya hai -- asli cut-and-fill ka sasta roop. Bina iske 30 m ka DEM sadak ko pahad ke upar oopar-neeche daudata hai."
   }
 }

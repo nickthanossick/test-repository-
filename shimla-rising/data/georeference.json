@@ -25,7 +25,10 @@
     },
     "$comment_bounds": "8.192 km x 8.192 km. Isme poora Shimla sheher aa jata hai: Summer Hill se Sanjauli/Dhalli tak, Annandale se New Shimla tak, aur Jakhoo (2455 m) beech mein. Mashobra, Kufri, Naldehra aur Tara Devi is box ke bahar hain - wo 'shimla_extended' preset mein hain (docs/ROADMAP.md dekho)."
   },
-  "elevation_range_m": { "min": 1300, "max": 2500 },
+  "elevation_range_m": {
+    "min": 1350.0,
+    "max": 2500.0
+  },
   "conversion": {
     "lat_lon_to_world": "x = (lon - origin.lon) * meters_per_degree_lon;  z = -(lat - origin.lat) * meters_per_degree_lat",
     "world_to_lat_lon": "lon = origin.lon + x / meters_per_degree_lon;  lat = origin.lat - z / meters_per_degree_lat"

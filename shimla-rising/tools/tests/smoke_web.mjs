@@ -267,11 +267,22 @@ const nose = await page.evaluate(() => {
     return f.dot(d);
   };
   for (let i = 0; i < 40; i++) S.traffic.update(0.05, S.player.pos, S.camera.position);
-  let worstCar = 1, nCar = 0;
+  let worstCar = 1, nCar = 0, skipped = 0;
   for (const c of S.traffic.cars) {
     if (!c.lane) continue;
     const b = c.mesh.position.clone();
+    const dir0 = c.dir, lane0 = c.lane;
     S.traffic.update(0.1, S.player.pos, S.camera.position);
+    /*
+     * Jis gaadi ne is kadam mein palti maari ya lane badla, uska naap bekaar
+     * hai: wo do jagah ke beech ki seedhi rekha hai, chalne ki disha nahi.
+     * Sadak ke sire par palatna aur door nikal kar recycle hona -- dono
+     * bilkul theek bartav hain.
+     */
+    if (c.dir !== dir0 || c.lane !== lane0 || c.mesh.position.distanceTo(b) > 12) {
+      skipped++;
+      continue;
+    }
     const dot = noseDot(c.mesh, b);
     if (dot !== null) { worstCar = Math.min(worstCar, dot); nCar++; }
   }
@@ -282,7 +293,7 @@ const nose = await page.evaluate(() => {
     const dot = noseDot(bus.mesh, b);
     if (dot !== null) { worstBus = Math.min(worstBus, dot); nBus++; }
   }
-  return { worstCar, nCar, worstBus, nBus };
+  return { worstCar, nCar, worstBus, nBus, skipped };
 });
 const noseOk = nose.nCar > 0 && nose.worstCar > 0.9 && (nose.nBus === 0 || nose.worstBus > 0.9);
 console.log("naak:", JSON.stringify({ car: +nose.worstCar.toFixed(2), bus: +nose.worstBus.toFixed(2) }));
