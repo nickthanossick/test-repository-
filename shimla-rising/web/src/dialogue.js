@@ -7,6 +7,8 @@ export class Dialogue {
     this.characters = data.characterById;
     this.queue = [];
     this.timer = 0;
+    /** Har line par bulaaya jaata hai -- main.js isse bolwaata hai. */
+    this.onLine = () => {};
   }
 
   play(key) {
@@ -29,6 +31,7 @@ export class Dialogue {
     const name = c ? c.name.replace(/\s*'.*'\s*/, " ").trim() : line.speaker;
     const colour = c?.color || "#e8c33a";
     this.el.innerHTML = `<b style="color:${colour}">${escapeHtml(name)}:</b> ${escapeHtml(line.text)}`;
+    this.onLine(line);
     this.el.style.display = "block";
     // padhne ka time: lambai ke hisaab se, kam se kam 2.2s
     this.timer = line.seconds || Math.max(2.2, Math.min(6.5, line.text.length * 0.055));

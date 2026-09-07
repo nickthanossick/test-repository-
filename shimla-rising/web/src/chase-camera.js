@@ -8,8 +8,11 @@ export class ChaseCamera {
     this.colliders = colliders;
     this.yaw = 0;
     this.pitch = 0.22;
-    this.dist = 7.5;
-    this.targetDist = 7.5;
+    this.dist = 9.5;
+    this.targetDist = 9.5;
+    // Nikhil: "camera bahut zoom in ho raha, chalne mein aur overall dekhne
+    // mein dikkat". Ab wheel se khud tay kar sakta hai.
+    this.zoom = 1.0;
     this.pos = new THREE.Vector3();
     this.look = new THREE.Vector3();
     this._init = false;
@@ -20,14 +23,20 @@ export class ChaseCamera {
     this.pitch = THREE.MathUtils.clamp(this.pitch + dy * sens, -0.42, 1.15);
   }
 
+  /** Mouse wheel se zoom -- 0.65x (paas) se 1.7x (door) tak. */
+  handleWheel(dy) {
+    if (!dy) return;
+    this.zoom = THREE.MathUtils.clamp(this.zoom + Math.sign(dy) * 0.12, 0.65, 1.7);
+  }
+
   /** @param mode "foot" | "vehicle" */
   update(dt, target, mode, headingYaw = null) {
-    this.targetDist = mode === "vehicle" ? 10.5 : 6.2;
-    const height = mode === "vehicle" ? 3.4 : 2.4;
+    this.targetDist = (mode === "vehicle" ? 13.5 : 9.5) * this.zoom;
+    const height = (mode === "vehicle" ? 4.2 : 3.1) * (0.6 + this.zoom * 0.4);
     this.dist += (this.targetDist - this.dist) * Math.min(1, dt * 4);
 
     // gaadi mein camera dheere-dheere gaadi ke peeche aa jaata hai
-    if (mode === "vehicle" && headingYaw !== null) {
+    if (headingYaw !== null) {
       let d = headingYaw - this.yaw;
       while (d > Math.PI) d -= Math.PI * 2;
       while (d < -Math.PI) d += Math.PI * 2;

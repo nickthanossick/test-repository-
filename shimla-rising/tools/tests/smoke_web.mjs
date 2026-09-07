@@ -85,6 +85,48 @@ if (paint) {
   console.log("paint pixel:", JSON.stringify(paint.px), "chaha:", JSON.stringify(w));
 }
 
+/*
+ * Control ki disha.
+ *
+ * `player.js` mein camera-relative movement ka z (aur strafe ka x) ka chinh
+ * ulta laga hua tha: W dabane par banda camera ke aage nahi, kahin aur chal
+ * padta tha, aur camera ghumate hi disha badal jaati thi. Ye kabhi test nahi
+ * hua tha kyunki control ko sirf khel kar hi dekha jaata tha.
+ *
+ * Headless mein frame rate ~1 fps hai, isliye `player.update()` haath se
+ * chalate hain -- yahan hum simulation ki ganit jaanch rahe hain, rendering
+ * nahi.
+ */
+const ctl = await page.evaluate(() => {
+  const S = window.__shimla;
+  const base = { forward: 0, strafe: 0, walk: 0, turn: 0, run: false, jump: false };
+  const run = (c, n = 30) => { for (let i = 0; i < n; i++) S.player.update(0.05, c, S.chase.yaw); };
+
+  S.chase.yaw = 0;                      // camera-aage = (0, -1)
+  const p0 = S.player.pos.clone();
+  run({ ...base, forward: 1 });
+  const d = S.player.pos.clone().sub(p0);
+  const dl = Math.hypot(d.x, d.z) || 1;
+
+  const y0 = S.player.yaw;
+  run({ ...base, turn: -1 }, 10);
+  const turned = Math.abs(S.player.yaw - y0);
+
+  S.player.yaw = 0;                     // apna rukh +Z
+  const q0 = S.player.pos.clone();
+  run({ ...base, walk: 1 });
+  const e = S.player.pos.clone().sub(q0);
+  const el = Math.hypot(e.x, e.z) || 1;
+
+  return { wDot: (d.z / dl) * -1, wMoved: dl, turned, upDz: e.z / el, upMoved: el };
+});
+// W camera ke aage jaaye (dot ~1), arrows se ghoome, aur up apne rukh mein jaaye
+const ctlOk = ctl.wMoved > 1 && ctl.wDot > 0.9
+  && ctl.turned > 0.5 && ctl.upMoved > 1 && ctl.upDz > 0.9;
+console.log("control:", JSON.stringify({
+  wDot: +ctl.wDot.toFixed(2), turned: +ctl.turned.toFixed(2), upDz: +ctl.upDz.toFixed(2),
+}));
+
 const checks = [
   ["console errors", errors.length === 0, errors.slice(0, 3).join(" | ")],
   ["page errors", pageErrors.length === 0, pageErrors.slice(0, 3).join(" | ")],
@@ -95,6 +137,7 @@ const checks = [
   ["geometry rendered", s.triangles > 100000, s.triangles],
   ["texture colour-space", skinOk, `${JSON.stringify(skin)} != ${JSON.stringify(want)}`],
   ["gaadi ka rang", paintOk, JSON.stringify(paint)],
+  ["control ki disha", ctlOk, JSON.stringify(ctl)],
 ];
 
 let failed = 0;

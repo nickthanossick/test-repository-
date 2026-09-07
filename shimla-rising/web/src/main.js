@@ -311,6 +311,33 @@ async function boot() {
   hud.setMoney(state.money);
   if (weather.mode === "snow") dialogue.play("generic:snow");
 
+  /*
+   * Awaaz browser ki autoplay policy ke chalte pehle user gesture par hi shuru
+   * ho sakti hai -- isliye har jagah `audio.start()` ki jagah yeh, jo music bhi
+   * chalu kar deta hai.
+   */
+  function startAudio() {
+    audio.start();
+    audio.startMusic();
+  }
+  addEventListener("keydown", startAudio, { once: true });
+  addEventListener("pointerdown", startAudio, { once: true });
+
+  /*
+   * Jo line subtitle mein dikhti hai wahi boli bhi jaati hai.
+   *
+   * Nikhil ne gaaliyan sunai dene ko kaha tha. Sound file download nahi ho
+   * sakti (saare free-sound host block hain), par browser ki apni Web Speech
+   * API kaafi hai -- koi download nahi. Gaali thodi tez aur neeche ki awaaz
+   * mein, taaki wo gaali lage.
+   */
+  dialogue.onLine = (line) => {
+    const angry = /panga|gali|betiyachu|bedafu|bendaga|bedelo/i.test(line.text)
+      || line.speaker === "rahgeer";
+    audio.say(line.text, angry ? { rate: 1.18, pitch: 0.82, volume: 1.0 }
+                               : { rate: 0.98, pitch: 1.0, volume: 0.85 });
+  };
+
   missions.onEvent = (type, payload) => {
     switch (type) {
       case "mission_start":
@@ -362,7 +389,7 @@ async function boot() {
   }
 
   function toggleVehicle() {
-    audio.start();
+    startAudio();
     if (state.mode === "vehicle") {
       const v = state.vehicle;
       const f = v.forward(new THREE.Vector3());
@@ -371,6 +398,7 @@ async function boot() {
       player.mesh.visible = true;
       state.mode = "foot"; state.vehicle = null;
       audio.setEngine(0, 1, false);
+      audio.setInCar(false);
       hud.toast("Gaadi se utar gaye");
     } else {
       const v = nearestParked(player.pos);
@@ -411,6 +439,7 @@ async function boot() {
   let acc = 0, frames = 0, fps = 0;
   let helpOn = true;
   let debugCam = false;    // sirf testing ke liye -- viewPOI() isse on karta hai
+  let ambientTimer = 1.0;  // aas-paas ki awaaz ki ghadi
   // Ctrl se bhaagna: **toggle**, hold nahi. Browser mein Ctrl+W tab band kar
   // deta hai aur JavaScript use rok nahi sakta (preventDefault ka koi asar
   // nahi). Ctrl dabaye rakh kar W se aage chalte to game beech mein band ho
@@ -441,7 +470,13 @@ async function boot() {
 
     // ------------------------------------------------------------ input
     chase.handleMouse(input.mouseDX, input.mouseDY);
+    chase.handleWheel(input.wheelDY);
     if (input.pressed("KeyF")) toggleVehicle();
+    // H -- phone jeb se nikalo / wapas rakho
+    if (input.pressed("KeyH") && state.mode === "foot") {
+      startAudio();
+      hud.toast(player.togglePhone() ? "Phone pe baat" : "Phone jeb mein", 1.6);
+    }
     if (input.pressed("KeyE") || input.pressed("Enter")) tryStartMission();
     if (input.pressed("KeyM")) hud.mapScale = hud.mapScale > 0.08 ? 0.055 : 0.13;
     if (input.pressed("ControlLeft") || input.pressed("ControlRight")) {
@@ -493,15 +528,28 @@ async function boot() {
         v.lastImpact = 0;
       }
       audio.setEngine(v.kmh, v.spec.top_speed_kmh, true);
+      audio.setInCar(true);
       hud.setSpeed(v.kmh, v.spec.name);
     } else {
+      /*
+       * WASD camera ke hisaab se, arrows bande ke apne rukh mein.
+       *
+       * Pehle dono ek hi axis par the, isliye arrows se ghoomne wali scheme
+       * (jo Nikhil ne chuni thi) thi hi nahi -- aur camera-relative wala axis
+       * bhi ulta laga tha.
+       */
       player.update(dt, {
-        forward: input.axis("KeyS", "KeyW") || input.axis("ArrowDown", "ArrowUp"),
-        strafe: input.axis("KeyA", "KeyD") || input.axis("ArrowLeft", "ArrowRight"),
+        forward: input.axis("KeyS", "KeyW"),
+        strafe: input.axis("KeyA", "KeyD"),
+        walk: input.axis("ArrowDown", "ArrowUp"),
+        turn: input.axis("ArrowLeft", "ArrowRight"),
         run: runToggle || input.anyDown("ShiftLeft", "ShiftRight"),
         jump: input.down("Space"),
       }, chase.yaw);
-      if (!debugCam) chase.update(dt, player.pos, "foot");
+      // Arrows se ghoome to camera peeche aa jaata hai (mouse se ghumaya ho to
+      // wo hukum bhaari -- warna free-look har frame wapas khinch jaata)
+      const turning = input.axis("ArrowLeft", "ArrowRight") !== 0;
+      if (!debugCam) chase.update(dt, player.pos, "foot", turning ? player.yaw : null);
       hud.setSpeed(0, player.running ? "daud rahe ho" : "paidal");
     }
 
@@ -517,6 +565,28 @@ async function boot() {
       hit: state.mode === "foot" && input.pressed("KeyG"),
       throw: state.mode === "foot" && input.pressed("KeyR"),
     });
+    /*
+     * Aas-paas ki awaaz.
+     *
+     * Har frame ek naya WebAudio node banana mehnga hai, isliye ye ghadi se
+     * chalta hai: jitne log paas utni ghani bud-bud, aur bazaar mein kabhi-kabhi
+     * ek horn. Dono chhote, apne aap khatam hone wale node hain.
+     */
+    ambientTimer -= dt;
+    if (ambientTimer <= 0) {
+      let near = 0;
+      for (const w of crowd.walkers) {
+        if (w.mesh.visible && w.mesh.position.distanceTo(pos) < 22) near++;
+      }
+      for (const k of crowd.keepers) {
+        if (k.mesh.visible && k.mesh.position.distanceTo(pos) < 22) near++;
+      }
+      if (near > 0) audio.murmur(near);
+      // horn tabhi jab sadak paas ho -- pahad ke beech horn ajeeb lagta hai
+      if (onRoad && Math.random() < 0.22) audio.horn(0.3 + Math.random() * 0.3, 0.10);
+      ambientTimer = 0.7 + Math.random() * 1.4;
+    }
+
     dayNight.update(dt, camera);   // waqt, sooraj, taare, raat ki roshni, mausam
     sky.update(camera);
     sky.fitShadow(pos);            // shadow camera khiladi ke saath chalta hai

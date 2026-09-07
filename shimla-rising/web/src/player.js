@@ -22,6 +22,18 @@ export class Player {
     this.running = false;
     this.height = 1.75;
     this.mesh = buildAvatar();
+
+    /*
+     * Chhota state machine: idle / walk / run / smoke / phone.
+     *
+     * Pehle sirf `_animate(moving)` tha, isliye beedi ka kash aur phone ki
+     * baat gait ke upar likh jaate the -- baazu ek hi frame mein do jagah
+     * jaana chahte the. Ab ye states baazu par *baad mein* likhti hain.
+     */
+    this.smokeT = 0;              // kash ka waqt, 0 = nahi
+    this.smokeWait = 8 + Math.random() * 12;
+    this.onPhone = false;
+    this.phoneT = 0;
   }
 
   placeAt(x, z, yaw = 0) {
@@ -35,16 +47,48 @@ export class Player {
     /** Khiladi ka collision radius -- kandhe se thoda kam. */
 const PLAYER_RADIUS = 0.42;
 const WALK = 3.1, RUN = 6.4;
+const TURN_RATE = 2.6;      // radian/second, arrows se ghoomne ki raftaar
+
+    /*
+     * Do tarah ke control, dono ek saath:
+     *
+     *   W/A/S/D  camera ke hisaab se -- jidhar camera dekh raha hai udhar
+     *   arrows   up/down bande ke apne rukh mein, left/right se banda ghoomta
+     *            hai aur camera peeche aata hai
+     *
+     * Camera target se `(sin yaw, cos yaw) * dist` par baithta hai, yaani
+     * **aage ki disha `(-sin, -cos)` hai**. Pehle yahan
+     *     dx = mx*cos - mz*sin;  dz = mx*sin + mz*cos;
+     * tha -- W dabane par `(-sin, +cos)` nikalta tha, yaani z ka chinh ulta
+     * (aur strafe mein x ka). Isi se banda camera ghumate hi kabhi aage,
+     * kabhi bagal, kabhi ulta chal padta tha.
+     */
+    if (ctl.turn) {
+      this.yaw -= ctl.turn * TURN_RATE * dt;
+      // yaw ko -PI..PI mein rakho, warna camera ka lerp lamba chakkar kaat leta hai
+      if (this.yaw > Math.PI) this.yaw -= Math.PI * 2;
+      if (this.yaw < -Math.PI) this.yaw += Math.PI * 2;
+    }
 
     let mx = ctl.strafe, mz = ctl.forward;
     const len = Math.hypot(mx, mz);
     if (len > 1) { mx /= len; mz /= len; }
-    const moving = len > 0.01;
 
-    // camera-relative movement
+    // arrows wala aage/peeche -- bande ke apne rukh mein
+    const fwd = ctl.walk || 0;
+    const moving = len > 0.01 || Math.abs(fwd) > 0.01;
+
     const sin = Math.sin(camYaw), cos = Math.cos(camYaw);
-    const dx = mx * cos - mz * sin;
-    const dz = mx * sin + mz * cos;
+    let dx = -mx * cos - mz * sin;      // camera-right = (-cos, +sin)
+    let dz = mx * sin - mz * cos;       // camera-aage  = (-sin, -cos)
+    if (fwd) {
+      dx += Math.sin(this.yaw) * fwd;
+      dz += Math.cos(this.yaw) * fwd;
+    }
+    {
+      const dl = Math.hypot(dx, dz);
+      if (dl > 1) { dx /= dl; dz /= dl; }
+    }
 
     // --- dhalan aur stamina ----------------------------------------------
     const h0 = this.terrain.heightAt(this.pos.x, this.pos.z);
@@ -75,7 +119,10 @@ const WALK = 3.1, RUN = 6.4;
       } else {
         this.pos.x += mx; this.pos.z += mz;
       }
-      this.yaw = Math.atan2(dx, dz);
+      // Rukh sirf tab badlo jab WASD se chal rahe ho. Arrows wale mode mein
+      // rukh khiladi khud `ctl.turn` se tay karta hai -- yahan overwrite karne
+      // se wo turant wapas ghis jaata tha aur ghoomna kaam hi nahi karta tha.
+      if (len > 0.01) this.yaw = Math.atan2(dx, dz);
     }
 
     const lim = this.terrain.half - 8;
@@ -95,7 +142,74 @@ const WALK = 3.1, RUN = 6.4;
     this.mesh.position.copy(this.pos);
     this.mesh.rotation.y = this.yaw;
 
+    this._updateStates(dt, moving);
     this._animate(moving);
+    this._applyStates();
+  }
+
+  /** `H` se phone on/off. */
+  togglePhone() {
+    this.onPhone = !this.onPhone;
+    const ph = this.mesh.userData.props?.phone;
+    if (ph) ph.visible = this.onPhone;
+    return this.onPhone;
+  }
+
+  /**
+   * Beedi aur phone ki ghadi.
+   *
+   * Kash apne aap aata hai -- Nikhil ne kaha tha "beech beech m smoke krra".
+   * Chalte-chalte kash nahi lagta, isliye sirf khade hone par.
+   */
+  _updateStates(dt, moving) {
+    if (this.smokeT > 0) {
+      this.smokeT = Math.max(0, this.smokeT - dt);
+      if (this.smokeT === 0) this.smokeWait = 10 + Math.random() * 14;
+    } else if (!moving && !this.onPhone) {
+      this.smokeWait -= dt;
+      if (this.smokeWait <= 0) this.smokeT = 2.4;
+    }
+    if (this.onPhone) this.phoneT += dt;
+  }
+
+  /**
+   * States gait ke **upar** lagti hain.
+   *
+   * Isi kram se dono ek saath chal sakte hain: taangein chalti rehti hain aur
+   * baayan haath phone/beedi ke liye upar uth jaata hai.
+   */
+  _applyStates() {
+    const rig = this.mesh.userData.rig;
+    const props = this.mesh.userData.props;
+    if (!rig) return;
+    const L = rig.arms[0];        // baayan haath -- beedi aur phone dono yahin
+
+    if (this.onPhone) {
+      // haath kaan tak
+      L.shoulder.rotation.x = -1.05;
+      L.shoulder.rotation.z = 0.42;
+      L.elbow.rotation.x = -2.15;
+      // baat karte waqt halka sar hilana
+      if (rig.head) rig.head.rotation.z = Math.sin(this.phoneT * 2.2) * 0.05;
+    } else if (this.smokeT > 0) {
+      /*
+       * Kash: haath mooh tak jaata hai, ek pal rukta hai, phir wapas.
+       * 2.4 s ka arc -- 0..0.35 upar, 0.35..0.65 mooh par, 0.65..1 wapas.
+       */
+      const t = 1 - this.smokeT / 2.4;
+      const up = t < 0.35 ? t / 0.35
+        : t < 0.65 ? 1
+        : 1 - (t - 0.65) / 0.35;
+      L.shoulder.rotation.x = -1.25 * up;
+      L.shoulder.rotation.z = 0.30 * up;
+      L.elbow.rotation.x = -1.95 * up;
+      // ember tez jab beedi mooh par ho
+      if (props?.ember) {
+        props.ember.material.emissiveIntensity = 1.4 + (t > 0.35 && t < 0.65 ? 2.6 : 0);
+      }
+    } else if (props?.ember) {
+      props.ember.material.emissiveIntensity = 1.4;
+    }
   }
 
   /** Chalne/daudne ka simple procedural gait -- kandha aur ghutna asli joints par. */
@@ -133,6 +247,15 @@ const WALK = 3.1, RUN = 6.4;
  * Poora humanoid `human.js` mein hai taaki sadak pe chalne wale NPC bhi wahi
  * dhaancha istemaal karein -- ek hi jagah se sudhaar sab pe lagta hai.
  */
+/**
+ * Vicky -- pahadi bawa.
+ *
+ * NPC se alag treatment jaan-boojh kar: bheed mein 34-120 log hote hain aur
+ * lag wahin se aata hai, jabki Vicky **ek hi model** hai. Isliye uspar detail
+ * kharch karna lagbhag muft hai aur NPC ko haath nahi lagate -- Nikhil ne khud
+ * kaha tha "baki npc chahe normal lge par charcater pura pahadi bawa lagna
+ * chahie".
+ */
 function buildAvatar() {
   return buildHuman({
     build: "male",
@@ -141,5 +264,8 @@ function buildAvatar() {
     bottom: 0x35425e,     // neeli jeans
     topi: true,
     danda: true,          // daayein haath mein -- `combat.js` isse ghumata hai
+    sneakers: true,
+    beedi: true,          // baayen haath mein
+    phone: true,          // jeb mein, `H` par bahar
   });
 }

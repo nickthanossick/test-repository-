@@ -93,6 +93,7 @@ export function buildHuman(o = {}) {
   const HEAD_Y = 1.626;
 
   const g = new THREE.Group();
+  const props = {};        // beedi, phone -- player.js inhe chalata hai
   const skinMat = TEX.standard(TEX.skin(SKIN), { roughness: 0.62 });
   const faceMat = TEX.standard(TEX.face(SKIN, elder ? 61 : 19, { elder, female }), { roughness: 0.56 });
   const topMat = TEX.standard(TEX.setRepeat(TEX.fabric(o.top ?? 0xbb3a2a, 23), 2), { roughness: 0.88 });
@@ -331,6 +332,44 @@ export function buildHuman(o = {}) {
       }
     }
 
+    /*
+     * Beedi -- baayen haath mein (daayan danda pakadta hai).
+     *
+     * `props` mein reference rakhte hain taaki `player.js` ka state machine
+     * ise dikha/chhupa sake aur kash ke waqt ember tez kar sake.
+     */
+    if (o.beedi && side === -1) {
+      const beediMat = new THREE.MeshStandardMaterial({ color: 0x6b5a3f, roughness: 0.95 });
+      const b = add(new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.009, 0.075, 6), beediMat), elbow);
+      b.position.set(-0.016, -0.300, -0.030);
+      b.rotation.set(1.35, 0, 0.25);
+      const ember = add(new THREE.Mesh(new THREE.SphereGeometry(0.0075, 6, 5),
+        new THREE.MeshStandardMaterial({ color: 0xff7a2a, emissive: 0xff5a10,
+                                         emissiveIntensity: 1.4, roughness: 0.7 })), elbow);
+      ember.position.set(-0.016, -0.300, -0.066);
+      props.beedi = b;
+      props.ember = ember;
+    }
+
+    /*
+     * Phone -- baayen haath mein, shuru mein chhupa hua. `H` par jeb se
+     * nikalta hai aur kaan tak jaata hai.
+     */
+    if (o.phone && side === -1) {
+      const ph = new THREE.Group();
+      const body = add(new THREE.Mesh(new THREE.BoxGeometry(0.068, 0.135, 0.011),
+        new THREE.MeshStandardMaterial({ color: 0x1b1f26, roughness: 0.35, metalness: 0.4 })), ph);
+      const scr = add(new THREE.Mesh(new THREE.BoxGeometry(0.058, 0.112, 0.004),
+        new THREE.MeshStandardMaterial({ color: 0x2a4a68, emissive: 0x2f5f8a,
+                                         emissiveIntensity: 0.5, roughness: 0.2 })), ph);
+      scr.position.z = 0.008;
+      ph.position.set(-0.030, -0.300, -0.020);
+      ph.rotation.set(0.2, 0, 0.15);
+      ph.visible = false;
+      elbow.add(ph);
+      props.phone = ph;
+    }
+
     arms.push({ shoulder, elbow });
   }
 
@@ -371,6 +410,35 @@ export function buildHuman(o = {}) {
     // Joota: edi ooncha, panja neecha aur aage patla -- ek hi box dabba lagta tha
     const shoe = add(new THREE.Mesh(new THREE.BoxGeometry(0.093, 0.058, 0.150), shoeMat), knee);
     shoe.position.set(0, -0.350, 0.012);
+    /*
+     * Sneaker -- sirf khiladi ke liye (`o.sneakers`).
+     *
+     * Nikhil: "pura pahadi bawa lagna chahie thik sneaker". Motha safed sole,
+     * upar ki patti, aur laces. NPC par ye nahi lagta -- wo 30+ hote hain aur
+     * unke liye ye sirf tri count hai; khiladi ek hi hai, isliye yahan detail
+     * lagbhag muft hai.
+     */
+    if (o.sneakers && !lite) {
+      const midMat = new THREE.MeshStandardMaterial({ color: 0xf0efe9, roughness: 0.72 });
+      const mid = add(new THREE.Mesh(new THREE.BoxGeometry(0.101, 0.036, 0.252), midMat), knee);
+      mid.position.set(0, -0.383, -0.024);
+      mid.rotation.x = -0.05;
+      const toecap = add(new THREE.Mesh(new THREE.SphereGeometry(0.050, 12, 10), midMat), knee);
+      toecap.position.set(0, -0.372, -0.118);
+      toecap.scale.set(0.92, 0.52, 0.72);
+      // panel aur laces
+      const panel = add(new THREE.Mesh(new THREE.BoxGeometry(0.096, 0.046, 0.088),
+        new THREE.MeshStandardMaterial({ color: 0xc9342c, roughness: 0.62 })), knee);
+      panel.position.set(0, -0.334, -0.052);
+      for (let i = 0; i < 3; i++) {
+        const lace = add(new THREE.Mesh(new THREE.BoxGeometry(0.070, 0.007, 0.007),
+          new THREE.MeshStandardMaterial({ color: 0xf4f2ec, roughness: 0.85 })), knee);
+        lace.position.set(0, -0.318 + i * 0.014, -0.030 - i * 0.022);
+      }
+      const cuff = add(new THREE.Mesh(new THREE.CylinderGeometry(0.049, 0.049, 0.030, 12),
+        new THREE.MeshStandardMaterial({ color: 0x2a2f38, roughness: 0.9 })), knee);
+      cuff.position.set(0, -0.300, 0.010);
+    }
     if (!lite) {
       const toe = add(new THREE.Mesh(new THREE.BoxGeometry(0.086, 0.042, 0.098), shoeMat), knee);
       toe.position.set(0, -0.360, -0.106);
@@ -402,6 +470,7 @@ export function buildHuman(o = {}) {
   }
 
   g.userData.rig = { arms, legs, head };
+  g.userData.props = props;
 
   if (elder) {
     // buzurg thode jhuke hue aur chhote hote hain

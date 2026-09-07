@@ -3,6 +3,7 @@ export class Input {
   constructor(dom) {
     this.keys = new Set();
     this.mouseDX = 0; this.mouseDY = 0;
+    this.wheelDY = 0;
     this.locked = false;
     this._pressedOnce = new Set();
 
@@ -18,6 +19,11 @@ export class Input {
 
     dom.addEventListener("click", () => { if (!this.locked) dom.requestPointerLock?.(); });
     document.addEventListener("pointerlockchange", () => { this.locked = document.pointerLockElement === dom; });
+    dom.addEventListener("wheel", (e) => {
+      // Camera zoom. passive:false taaki page scroll na ho.
+      e.preventDefault();
+      this.wheelDY += e.deltaY;
+    }, { passive: false });
     addEventListener("mousemove", (e) => {
       if (this.locked || e.buttons & 1) { this.mouseDX += e.movementX || 0; this.mouseDY += e.movementY || 0; }
     });
@@ -37,5 +43,5 @@ export class Input {
   axis(neg, pos) { return (this.down(pos) ? 1 : 0) - (this.down(neg) ? 1 : 0); }
 
   /** Har frame ke aakhir mein call karo. */
-  endFrame() { this.mouseDX = 0; this.mouseDY = 0; this._pressedOnce.clear(); }
+  endFrame() { this.mouseDX = 0; this.mouseDY = 0; this.wheelDY = 0; this._pressedOnce.clear(); }
 }
