@@ -72,6 +72,60 @@ export class Colliders {
     return null;
   }
 
+  /**
+   * `pos` ko har overlapping cylinder ke bahar dhakel do.
+   *
+   * Ye sirf dhakka nahi, **pakki rok** hai: lautne ke baad pos kisi bhi cylinder
+   * ke andar nahi hota. Do baar chalate hain kyunki do imaaraton ke kone mein ek
+   * se bahar nikaalte hi doosre mein ghus jaate hain.
+   *
+   * Push horizontal hi hai -- oopar se nahi nikaalte, warna khiladi deewar par
+   * chadh jaata. Aur `hitX/hitZ` (unit normal) wapas milta hai taaki gaadi apni
+   * raftaar ka utna hissa kaat sake jitna deewar ki taraf tha.
+   *
+   * @returns {hit: boolean, nx: number, nz: number, depth: number}
+   */
+  resolve(pos, radius, y, iterations = 3) {
+    let hit = false, nx = 0, nz = 0, depth = 0;
+    for (let it = 0; it < iterations; it++) {
+      const c = this.inside(pos.x, y, pos.z, radius);
+      if (!c) break;
+      hit = true;
+      let dx = pos.x - c.x, dz = pos.z - c.z;
+      let d = Math.hypot(dx, dz);
+      if (d < 1e-4) { dx = 1; dz = 0; d = 1; }     // theek kendra par -- kisi bhi disha mein
+      const push = c.r + radius - d;
+      if (push <= 0) break;
+      dx /= d; dz /= d;
+      pos.x += dx * (push + 1e-3);
+      pos.z += dz * (push + 1e-3);
+      if (push > depth) { depth = push; nx = dx; nz = dz; }
+    }
+    return { hit, nx, nz, depth };
+  }
+
+  /**
+   * Ek jagah se doosri jagah tak sarko, par kisi cylinder ke *paar* mat jao.
+   *
+   * Tez raftaar par ye zaroori hai: 100 km/h ki gaadi ek frame mein ~1.4 m
+   * chalti hai, par 20 fps par 5.5 m -- aur 6 m ki dukan ke aar-paar nikal
+   * jaati hai. Isliye raaste ko chhote kadmon mein toda jaata hai.
+   *
+   * @param pos badla jaata hai (in place)
+   */
+  sweep(pos, dx, dz, radius, y, maxStep = 1.0) {
+    const dist = Math.hypot(dx, dz);
+    const steps = Math.max(1, Math.ceil(dist / maxStep));
+    let out = { hit: false, nx: 0, nz: 0, depth: 0 };
+    for (let i = 0; i < steps; i++) {
+      pos.x += dx / steps;
+      pos.z += dz / steps;
+      const r = this.resolve(pos, radius, y);
+      if (r.hit) out = r;
+    }
+    return out;
+  }
+
   /** Sabse nazdeek khaali jagah dhoondo -- spawn/teleport ke liye. */
   freeSpotNear(x, z, y, pad = 1.5, step = 4, rings = 8) {
     if (!this.inside(x, y, z, pad)) return { x, z };

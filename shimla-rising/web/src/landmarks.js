@@ -351,7 +351,32 @@ const BUILDERS = {
 
 // ------------------------------------------------------------------- build
 
-export function buildLandmarks(terrain, roads, pois) {
+/**
+ * Har landmark kism ka mota footprint -- collider ke liye.
+ *
+ * `r: 0` ka matlab **collider bilkul nahi**, aur ye jaan-boojh kar hai:
+ * tunnel, chowk, maidan, gate, parking aur bazaar-row ke aar-paar se guzarna
+ * hota hai. Wahan cylinder rakhne se sadak hi band ho jaati.
+ */
+const FOOTPRINT = {
+  campus: { r: 18, h: 14 },
+  shopfront: { r: 5.0, h: 8 },
+  colonial: { r: 14, h: 17 },
+  temple: { r: 10, h: 15 },
+  church: { r: 12, h: 19 },
+  institution: { r: 14, h: 15 },
+  palace: { r: 20, h: 18 },
+  hotel: { r: 12, h: 16 },
+  station: { r: 14, h: 10 },
+  busstand: { r: 10, h: 8 },
+  garage: { r: 7.0, h: 6 },
+  house: { r: 6.0, h: 11 },
+  // guzarne wali jagahein -- yahan collider nahi
+  bazaar: { r: 0 }, junction: { r: 0 }, plaza: { r: 0 }, yard: { r: 0 },
+  tunnel_old: { r: 0 }, tunnel_new: { r: 0 }, ground: { r: 0 }, gate: { r: 0 },
+};
+
+export function buildLandmarks(terrain, roads, pois, colliders = null) {
   const mb = {
     stone: new MeshBuilder(0.32), plaster: new MeshBuilder(0.42),
     tin: new MeshBuilder(0.5), wood: new MeshBuilder(0.6),
@@ -371,6 +396,11 @@ export function buildLandmarks(terrain, roads, pois) {
       L: (u, v) => [x + u * cy - v * sy, z + u * sy + v * cy],
     };
     fn(ctx, mb);
+
+    // Pehle 51 named landmark mein se ek bhi collider list mein nahi tha --
+    // gaadi St. Bede's aur hospital dono ke aar-paar nikal jaati thi.
+    const fp = FOOTPRINT[p.landmark];
+    if (colliders && fp && fp.r > 0) colliders.add(x, z, fp.r, y - 3, y + fp.h);
 
     if (p.sign) {
       signs.push({ x, z, y, yaw, text: p.sign, sub: p.sign_sub || "",

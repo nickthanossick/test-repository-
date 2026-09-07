@@ -4,9 +4,11 @@ import { GeoReference } from "./geo.js";
 import { Terrain } from "./terrain.js";
 import { RoadNetwork } from "./roads.js";
 import { buildCity } from "./city.js";
+import { Colliders } from "./grid.js";
 import { buildBazaar } from "./bazaar.js";
 import { BusSystem } from "./buses.js";
 import { Crowd } from "./crowd.js";
+import { Panga } from "./panga.js";
 import { Sky } from "./sky.js";
 import { Weather } from "./weather.js";
 import { DayNight } from "./daynight.js";
@@ -104,11 +106,15 @@ async function boot() {
   // Dukanein ab `data/sanjauli.json` ke **slots** par lagti hain -- har jagah ka
   // apna naam hai (chowk_dhalli_L_012), taaki baad mein asli dukan asli jagah
   // par lagayi ja sake.
-  const bazaar = buildBazaar(terrain, roads, data.shops, data.sanjauliMap, Q);
+  // Ek hi Colliders sab ke liye. Pehle ye city.js ke andar banta tha, isliye
+  // bazaar -- jo city se pehle banta hai -- usme kuch daal hi nahi sakta tha,
+  // aur uski 672 dukanein poori duniya ke liye ghost thi.
+  const colliders = new Colliders(24);
+  const bazaar = buildBazaar(terrain, roads, data.shops, data.sanjauliMap, Q, colliders);
   scene.add(bazaar);
 
   const city = buildCity(terrain, roads, data.districts, data.pois, mulberry32(31104877), Q,
-                         { keepClear: bazaar.userData.stalls });
+                         { keepClear: bazaar.userData.stalls, colliders });
   scene.add(city);
 
   setProgress(0.90, "aasman aur mausam…");
@@ -122,7 +128,7 @@ async function boot() {
 
   // ------------------------------------------------------------------ actors
   setProgress(0.95, "Vicky taiyaar ho raha hai…");
-  const player = new Player(terrain);
+  const player = new Player(terrain, colliders);
   scene.add(player.mesh);
 
   // aas-paas kuch gaadiyan khadi kar do
@@ -140,7 +146,7 @@ async function boot() {
     if (!n) continue;
     const kind = id === "isbt" ? "hrtc_bus" : id === "timber_depot" ? "timber_truck"
       : kinds[(rng() * kinds.length) | 0];
-    const v = new Vehicle(data.vehicleById.get(kind), terrain);
+    const v = new Vehicle(data.vehicleById.get(kind), terrain, { colliders });
     v.placeAt(n.node.pos.x + (rng() - 0.5) * 6, n.node.pos.z + (rng() - 0.5) * 6, rng() * Math.PI * 2);
     scene.add(v.mesh);
     parked.push(v);
@@ -148,7 +154,6 @@ async function boot() {
 
   // ----------------------------------------------------------------- systems
   const input = new Input(renderer.domElement);
-  const colliders = city.userData.colliders;
   const chase = new ChaseCamera(camera, terrain, colliders);
   const hud = new HUD(data, terrain);
 
@@ -180,7 +185,7 @@ async function boot() {
   }
   {
     // Vicky ki apni taxi, garage ke bahar. Khiladi ko dhoondhna na pade.
-    const home = new Vehicle(data.vehicleById.get("taxi"), terrain);
+    const home = new Vehicle(data.vehicleById.get("taxi"), terrain, { colliders });
     // sadak pe khadi karo, ghaas pe nahi
     const rn = roads.nearestNode(player.pos.x, player.pos.z, (r) => r.type !== "pedestrian" && r.type !== "rail");
     const base = rn ? rn.node.pos : { x: player.pos.x + 4, z: player.pos.z + 3 };
@@ -208,10 +213,17 @@ async function boot() {
     state.hour = saved.hour ?? state.hour;
     if (saved.completed) missions.completed = new Set(saved.completed);
     if (saved.available) missions.available = new Set(saved.available);
-    if (saved.pos) player.placeAt(saved.pos.x, saved.pos.z);
+    if (saved.pos) {
+      const sp = colliders.freeSpotNear(saved.pos.x, saved.pos.z,
+                                        terrain.heightAt(saved.pos.x, saved.pos.z) + 1, 1.2);
+      player.placeAt(sp.x, sp.z);
+    }
     if (saved.weather) weather.set(saved.weather);
     missions._refreshStartMarkers();
   }
+
+  // NPC se takrane par jhagda. Ye missions se bilkul alag hai.
+  const panga = new Panga(crowd, { dialogue, hud, audio, wanted, player });
 
   wanted.onStarsChanged = (n) => {
     hud.setStars(n);
@@ -382,6 +394,12 @@ async function boot() {
       }, weather.grip);
       player.pos.copy(v.pos);
       if (!debugCam) chase.update(dt, v.pos, "vehicle", v.yaw);
+      if (v.lastImpact) {
+        // Deewar se takkar -- zor ke hisaab se awaaz aur nuksan
+        audio.blip(90 + Math.min(120, v.lastImpact * 8), 0.18, 0.3);
+        if (v.lastImpact > 7) player.health = Math.max(0, player.health - v.lastImpact * 0.8);
+        v.lastImpact = 0;
+      }
       audio.setEngine(v.kmh, v.spec.top_speed_kmh, true);
       hud.setSpeed(v.kmh, v.spec.name);
     } else {
@@ -399,6 +417,9 @@ async function boot() {
     missions.update(dt, { playerPos: pos, inVehicle: state.mode === "vehicle", stars: wanted.stars });
     buses.update(dt);
     crowd.update(dt, pos);
+    panga.update(dt, state.mode === "vehicle"
+      ? { pos: state.vehicle.pos, radius: 1.5, inVehicle: true }
+      : { pos: player.pos, radius: 0.42, inVehicle: false });
     dayNight.update(dt, camera);   // waqt, sooraj, taare, raat ki roshni, mausam
     sky.update(camera);
     sky.fitShadow(pos);            // shadow camera khiladi ke saath chalta hai
@@ -430,7 +451,7 @@ async function boot() {
   // debugging ke liye -- Playwright test yahi padhta hai
   window.__shimla = {
     ready: true, scene, camera, renderer, terrain, roads, city, player, missions, wanted, chase, sky, dayNight,
-    bazaar, buses, crowd,
+    bazaar, buses, crowd, panga, colliders, parked,
     weather, state, data, get fps() { return fps; },
     get stats() { return {
       triangles: renderer.info.render.triangles,
@@ -446,6 +467,7 @@ async function boot() {
       shops: bazaar.userData.shopCount,
       buses: buses.count,
       keepers: crowd.count.keepers,
+      angry: panga.angryCount,
       walkers: crowd.count.walkers,
       shopSigns: bazaar.userData.signCount,
     }; },

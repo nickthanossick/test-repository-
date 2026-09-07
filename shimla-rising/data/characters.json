@@ -65,6 +65,20 @@
       "home": "police_hq",
       "desc": "Vardi mein Devinder ka aadmi. FIR likhta hai to bhi uske ishaare pe.",
       "color": "#26374f"
+    },
+    {
+      "id": "rahgeer",
+      "name": "Rahgeer",
+      "role": "npc",
+      "desc": "Sadak par chalta koi aam aadmi. Naam nahi, par zubaan teekhi.",
+      "color": "#c9a227"
+    },
+    {
+      "id": "dukandaar",
+      "name": "Dukandaar",
+      "role": "npc",
+      "desc": "Bazaar ka dukandaar. Apni dukan ke aage koi panga nahi chalta.",
+      "color": "#c9a227"
     }
   ]
 }

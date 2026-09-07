@@ -10,7 +10,8 @@ import { buildHuman } from "./human.js";
  * daudne ka kharch dhalan ke saath teen guna tak badh jaata hai.
  */
 export class Player {
-  constructor(terrain) {
+  constructor(terrain, colliders = null) {
+    this.colliders = colliders;
     this.terrain = terrain;
     this.pos = new THREE.Vector3();
     this.yaw = 0;
@@ -31,7 +32,9 @@ export class Player {
   }
 
   update(dt, ctl, camYaw) {
-    const WALK = 3.1, RUN = 6.4;
+    /** Khiladi ka collision radius -- kandhe se thoda kam. */
+const PLAYER_RADIUS = 0.42;
+const WALK = 3.1, RUN = 6.4;
 
     let mx = ctl.strafe, mz = ctl.forward;
     const len = Math.hypot(mx, mz);
@@ -62,8 +65,16 @@ export class Player {
     this.stamina = THREE.MathUtils.clamp(this.stamina, 0, 100);
 
     if (moving) {
-      this.pos.x += dx * speed * dt;
-      this.pos.z += dz * speed * dt;
+      // Deewar ke aar-paar nahi -- sweep chhote kadmon mein chalta hai aur har
+      // kadam ke baad bahar dhakel deta hai, isliye tez chaal pe bhi paar nahi
+      // hota. Slide apne aap hoti hai: push sirf normal ki disha mein lagta hai.
+      const mx = dx * speed * dt, mz = dz * speed * dt;
+      if (this.colliders) {
+        this.colliders.sweep(this.pos, mx, mz, PLAYER_RADIUS,
+                             this.pos.y + 0.9, 0.35);
+      } else {
+        this.pos.x += mx; this.pos.z += mz;
+      }
       this.yaw = Math.atan2(dx, dz);
     }
 

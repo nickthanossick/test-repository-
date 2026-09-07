@@ -91,9 +91,10 @@ export function buildHuman(o = {}) {
   const HEAD_Y = 1.626;
 
   const g = new THREE.Group();
-  const skinMat = TEX.standard(TEX.skin(SKIN), { roughness: 0.68 });
-  const faceMat = TEX.standard(TEX.face(SKIN, elder ? 61 : 19, { elder, female }), { roughness: 0.60 });
+  const skinMat = TEX.standard(TEX.skin(SKIN), { roughness: 0.62 });
+  const faceMat = TEX.standard(TEX.face(SKIN, elder ? 61 : 19, { elder, female }), { roughness: 0.56 });
   const topMat = TEX.standard(TEX.setRepeat(TEX.fabric(o.top ?? 0xbb3a2a, 23), 2), { roughness: 0.88 });
+  if (topMat.normalMap) topMat.normalScale.set(1.5, 1.5);   // silvatein saaf dikhein
   const botMat = TEX.standard(TEX.setRepeat(TEX.fabric(o.bottom ?? 0x35425e, 51, 60), 2), { roughness: 0.94 });
   const hairMat = new THREE.MeshStandardMaterial({ color: HAIR, roughness: elder ? 0.86 : 0.66 });
   const shoeMat = new THREE.MeshStandardMaterial({ color: 0x241d16, roughness: 0.5 });
@@ -279,9 +280,20 @@ export function buildHuman(o = {}) {
         new THREE.MeshStandardMaterial({ color: female ? (o.top ?? 0xa8324f) : 0x8f2b1e, roughness: 0.9 })), elbow);
       cuff.position.y = female ? 0.004 : -0.206;
     }
+    // Haath: hatheli + angootha. Pehle sirf ek chapta gola tha, jo paas se
+    // dastane jaisa lagta tha.
     const hand = add(new THREE.Mesh(new THREE.SphereGeometry(0.040, 10, 8), skinMat), elbow);
     hand.scale.set(0.82, 1.55, 0.52);
     hand.position.y = -0.256;
+    if (!lite) {
+      const thumb = add(new THREE.Mesh(new THREE.CapsuleGeometry(0.011, 0.030, 3, 6), skinMat), elbow);
+      thumb.position.set(side * -0.026, -0.246, -0.012);
+      thumb.rotation.set(0.35, 0, side * 0.62);
+      // ungliyon ka ishaara -- ek hi mesh, kinare par khaanche
+      const fingers = add(new THREE.Mesh(new THREE.BoxGeometry(0.046, 0.052, 0.020), skinMat), elbow);
+      fingers.position.set(0, -0.298, -0.004);
+      fingers.rotation.x = 0.22;
+    }
     arms.push({ shoulder, elbow });
   }
 

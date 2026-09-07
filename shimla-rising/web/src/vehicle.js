@@ -13,6 +13,7 @@ import * as TEX from "./textures.js";
  */
 export class Vehicle {
   constructor(spec, terrain, opts = {}) {
+    this.colliders = opts.colliders || null;
     this.spec = spec;
     this.terrain = terrain;
     this.pos = new THREE.Vector3();
@@ -84,8 +85,30 @@ export class Vehicle {
     // --- integrate --------------------------------------------------------
     this.forward(_f);
     _r.set(-_f.z, 0, _f.x);
-    this.pos.addScaledVector(_f, this.speed * dt);
-    this.pos.addScaledVector(_r, this.slip * dt);
+    const mx = _f.x * this.speed * dt + _r.x * this.slip * dt;
+    const mz = _f.z * this.speed * dt + _r.z * this.slip * dt;
+
+    /*
+     * Deewar ke aar-paar nahi. 100 km/h par gaadi ek frame mein 1.4 m chalti hai,
+     * par 20 fps par 5.5 m -- aur 6 m ki dukan ke paar nikal jaati hai. Isliye
+     * sweep chhote kadmon mein chalta hai. Takkar par raftaar ka utna hi hissa
+     * jaata hai jitna deewar ki taraf tha, isliye kinare se ragadte hue nikalna
+     * mumkin rehta hai par seedhi takkar rok deti hai.
+     */
+    if (this.colliders) {
+      const hit = this.colliders.sweep(this.pos, mx, mz, VEHICLE_RADIUS,
+                                       this.pos.y + 1.0, 0.6);
+      if (hit.hit) {
+        const into = -(_f.x * hit.nx + _f.z * hit.nz) * this.speed;   // deewar ki taraf
+        if (into > 0) {
+          this.speed -= into * 0.92;
+          this.slip *= 0.3;
+          this.lastImpact = into;                  // main.js awaaz/nuksan ke liye padhta hai
+        }
+      }
+    } else {
+      this.pos.x += mx; this.pos.z += mz;
+    }
 
     // world bounds
     const lim = this.terrain.half - 12;
@@ -312,6 +335,8 @@ function chamferBox(w, h, d, c) {
   return g;
 }
 
+/** Gaadi ka collision radius -- lambai/chaudai ke beech ka. */
+const VEHICLE_RADIUS = 1.5;
 const _f = new THREE.Vector3(), _r = new THREE.Vector3(), _n = new THREE.Vector3();
 const _up = new THREE.Vector3(0, 1, 0);
 const _q = new THREE.Quaternion(), _align = new THREE.Quaternion();

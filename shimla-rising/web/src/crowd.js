@@ -18,6 +18,17 @@ import { buildDog, buildCow, animateQuadruped } from "./animals.js";
 const KEEPER_RANGE = 95;          // itni doori ke andar hi dukandaar dikhte hain
 const RECYCLE_AT = 118;           // isse door jaate hi slot chhod do
 const WALK_SPEED = 1.25;
+/**
+ * Itni doori ke andar NPC poore detail wale roop mein aa jaata hai (naak, kaan,
+ * bhauh, collar, cuff, angootha, joote ka sole, topi ki phundi). Pehle har NPC
+ * hamesha lite roop mein rehta tha, isliye Vicky ke bagal mein khada dukandaar
+ * saaf taur par usse ghatiya dikhta tha.
+ *
+ * Dono roop load par ek saath ban jaate hain aur sirf `visible` badalta hai --
+ * runtime par kuch banta nahi, isliye chalte-chalte hichki nahi aati.
+ */
+const DETAIL_RANGE = 26;
+const DETAIL_HYSTERESIS = 4;      // baar-baar switch na ho
 
 /** Deterministic RNG -- ek hi jagah ka aadmi har baar wahi dikhna chahiye. */
 function seeded(n) {
@@ -37,13 +48,16 @@ const FEMALE_TOP = [0xa8324f, 0x2f7d63, 0x7a3b6b, 0x2f5d8a, 0xb8532a];
 const DUPATTA = [0xd8b23f, 0xe08a3c, 0xd0d8e8, 0xc93f5f];
 const BOTTOM = [0x35425e, 0x2f3b52, 0x453a52, 0x3b3b42];
 
-/** Ek variant banata hai -- seed se, taaki har baar wahi mile. */
+/**
+ * Ek kirdaar ke dono roop -- seed se, taaki dono bilkul ek jaise dikhein aur
+ * har load par wahi mile.
+ */
 function makePerson(i) {
   const r = seeded(i * 7919 + 13);
   const roll = r();
   const build = roll < 0.46 ? "male" : roll < 0.84 ? "female" : "elder";
   const pick = (arr) => arr[(r() * arr.length) | 0];
-  return buildHuman({
+  const opts = {
     build,
     skin: pick(SKIN),
     top: build === "female" ? pick(FEMALE_TOP) : pick(MALE_TOP),
@@ -52,8 +66,30 @@ function makePerson(i) {
     // Pahadi topi zyadatar aadmiyon aur buzurgon ke sar pe
     topi: build !== "female" && r() < 0.72,
     height: 0.95 + r() * 0.1,
-    lod: "crowd",     // chhoti detail chhod do -- 50 kirdaar ke draw call bachate hain
-  });
+  };
+  return {
+    lite: buildHuman({ ...opts, lod: "crowd" }),
+    full: buildHuman(opts),
+  };
+}
+
+/**
+ * Doori ke hisaab se roop badlo. Dono mesh ki transform ek jaisi rakhi jaati
+ * hai, isliye switch dikhta nahi.
+ */
+function setDetail(entry, dist) {
+  const wantFull = entry.full
+    ? dist < (entry.detailed ? DETAIL_RANGE + DETAIL_HYSTERESIS : DETAIL_RANGE)
+    : false;
+  if (wantFull === entry.detailed) return;
+  entry.detailed = wantFull;
+  const from = wantFull ? entry.lite : entry.full;
+  const to = wantFull ? entry.full : entry.lite;
+  to.position.copy(from.position);
+  to.rotation.copy(from.rotation);
+  to.visible = from.visible;
+  from.visible = false;
+  entry.mesh = to;
 }
 
 export class Crowd {
@@ -69,20 +105,22 @@ export class Crowd {
     this.group.name = "crowd";
     scene.add(this.group);
 
+    const addPerson = (seed, extra) => {
+      const { lite, full } = makePerson(seed);
+      lite.visible = false; full.visible = false;
+      this.group.add(lite); this.group.add(full);
+      return { lite, full, mesh: lite, detailed: false, ...extra };
+    };
+
     this.keepers = [];
     for (let i = 0; i < budget.keepers; i++) {
-      const mesh = makePerson(i);
-      mesh.visible = false;
-      this.group.add(mesh);
-      this.keepers.push({ mesh, stall: null });
+      this.keepers.push(addPerson(i, { stall: null }));
     }
 
     this.walkers = [];
     for (let i = 0; i < budget.walkers; i++) {
-      const mesh = makePerson(1000 + i);
-      mesh.visible = false;
-      this.group.add(mesh);
-      this.walkers.push({ mesh, seg: null, d: 0, dir: 1, side: 1, phase: Math.random() * 10 });
+      this.walkers.push(addPerson(1000 + i,
+        { seg: null, d: 0, dir: 1, side: 1, phase: Math.random() * 10 }));
     }
 
     this.animals = [];
@@ -104,8 +142,9 @@ export class Crowd {
   }
 
   get count() {
+    const detailed = [...this.keepers, ...this.walkers].filter((e) => e.detailed).length;
     return { keepers: this.keepers.length, walkers: this.walkers.length,
-             animals: this.animals.length };
+             animals: this.animals.length, detailed };
   }
 
   /** Khiladi ke paas ki ek khaali dukan dhoondo. */
@@ -140,6 +179,8 @@ export class Crowd {
         k.mesh.rotation.y = s.yaw;          // dukan ka mooh sadak ki taraf, wahi keeper ka
         k.mesh.visible = true;
       }
+      setDetail(k, Math.hypot(k.mesh.position.x - playerPos.x,
+                              k.mesh.position.z - playerPos.z));
       // khade rehte hain, par saans ka halka bob
       const rig = k.mesh.userData.rig;
       if (rig) {
@@ -167,9 +208,9 @@ export class Crowd {
       w.z += w.uz * WALK_SPEED * dt;
       w.mesh.position.set(w.x, this.terrain.heightAt(w.x, w.z), w.z);
       w.mesh.rotation.y = Math.atan2(w.ux, w.uz);
-      walkGait(w.mesh, this._t + w.phase);
-
       const d = Math.hypot(w.x - playerPos.x, w.z - playerPos.z);
+      setDetail(w, d);
+      walkGait(w.mesh, this._t + w.phase);
       if (d > RECYCLE_AT) {
         this._taken.delete(w.stall.i);
         w.stall = null;

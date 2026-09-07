@@ -35,7 +35,8 @@ export function buildCity(terrain, roads, districts, pois, rng, quality = {}, op
   // usi grid mein daal do taaki generic ghar unke andar na ghusein -- `occupied()`
   // ka check pehle se hai, bas isse feed karna tha.
   for (const st of opts.keepClear || []) placed.add(st.x, st.z);
-  const colliders = new Colliders(24);
+  // Colliders ab main.js banata hai aur bazaar ke saath saanjha hai
+  const colliders = opts.colliders || new Colliders(24);
   let placedCount = 0;
 
   for (const d of districts.districts) {
@@ -90,7 +91,7 @@ export function buildCity(terrain, roads, districts, pois, rng, quality = {}, op
   group.add(buildForest(terrain, roads, placed, rng, quality.treeCount ?? 9000));
 
   // Asli jagahein: har named POI ki apni imaarat, aur uske naam ka board.
-  const lm = buildLandmarks(terrain, roads, pois);
+  const lm = buildLandmarks(terrain, roads, pois, colliders);
   group.add(lm);
   const signs = buildSigns(lm.userData.signs, terrain);
   group.add(signs);

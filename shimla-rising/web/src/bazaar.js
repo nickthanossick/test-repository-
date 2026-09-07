@@ -46,7 +46,7 @@ const SHUTTERS = [0x3a4149, 0x4a4038, 0x2f3b46, 0x45403a];
  * Jab tak slot khaali hain, unme cycle karke naam bhar diye jaate hain -- kaam
  * rukta nahi.
  */
-export function buildBazaar(terrain, roads, shopsJson, mapJson, quality = {}) {
+export function buildBazaar(terrain, roads, shopsJson, mapJson, quality = {}, colliders = null) {
   const g = new THREE.Group();
   g.name = "bazaar";
 
@@ -123,10 +123,19 @@ export function buildBazaar(terrain, roads, shopsJson, mapJson, quality = {}) {
     // mein local -Z hi aage hai, isliye yaw = atan2(dx, -dz).
     const fyaw = Math.atan2(-p.nx * slot.side, p.nz * slot.side);
 
+    const W = 4.6, D = 6.4;
     shopUnit(mb, interior, {
       x: bx, y: gy, z: bz, yaw: fyaw, drop,
-      width: 4.6, depth: 6.4, rng, spec, kind,
+      width: W, depth: D, rng, spec, kind,
     });
+    /*
+     * Dukan ka collider. Pehle bazaar ki 672 dukanein collider list mein thi hi
+     * nahi -- isliye gaadi unme se guzar jaati thi, aur chase camera ka
+     * building-avoidance bhi unhe dekh nahi paata tha (screenshot bar-bar dukan
+     * ke andar aa jaata tha). Radius aadha diagonal se thoda kam, taaki paas se
+     * guzarte waqt gaadi khaamakha na atke.
+     */
+    colliders?.add(bx, bz, Math.hypot(W, D) * 0.42, gy - drop - 1, gy + 14);
 
     const fx2 = Math.sin(fyaw), fz2 = -Math.cos(fyaw);   // local -Z = sadak ki taraf
     /*

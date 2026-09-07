@@ -72,8 +72,11 @@ def test_dialogue_speakers_and_keys(bundle):
     chars = {c["id"] for c in bundle["characters"]["characters"]}
     missions = {m["id"] for m in bundle["missions"]["missions"]}
     problems = []
+    # "generic:" aur "panga:" mission se bandhe nahi hain -- pehla sheher ke aam
+    # halaat ke liye, doosra NPC se takrane wale jhagde ke liye.
+    free = ("generic:", "panga:")
     for key, lines in bundle["dialogue"]["lines"].items():
-        if not key.startswith("generic:") and key.split(":")[0] not in missions:
+        if not key.startswith(free) and key.split(":")[0] not in missions:
             problems.append(f"key {key}")
         for ln in lines:
             if ln["speaker"] not in chars:
@@ -219,3 +222,16 @@ def test_four_bus_operators_nikhil_named():
     names = " ".join(v["name"] for v in buses)
     for need in ("HRTC", "Lalit", "Krishna", "Rajdhani"):
         assert need in names, f"{need} bus nahi mili"
+
+
+def test_panga_dialogue_exists_at_every_level():
+    """NPC se takrane par jo bola jaata hai -- har level par lines honi chahiye."""
+    lines = load("dialogue.json")["lines"]
+    speakers = {c["id"] for c in load("characters.json")["characters"]}
+    for key in ("panga:l1", "panga:l2", "panga:l3", "panga:car"):
+        assert key in lines, f"{key} nahi mila"
+        assert len(lines[key]) >= 3, f"{key}: kam se kam teen line chahiye"
+        for beat in lines[key]:
+            assert beat["text"].strip(), f"{key}: khaali line"
+            assert beat["speaker"] in speakers, \
+                f"{key}: speaker {beat['speaker']} characters.json mein nahi"
