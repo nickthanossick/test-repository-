@@ -101,7 +101,8 @@ export class DayNight {
     if (camera) this.stars.position.copy(camera.position);
     this.moon.intensity = n * 0.42;
     const mt = ((this.hour + 12 - 6) / 12) * Math.PI;      // sooraj se ulta
-    const mdir = new THREE.Vector3(Math.cos(mt), Math.max(0.1, Math.sin(mt)) * 0.9, -0.3).normalize();
+    // ek hi vector dobara -- pehle har frame naya banta tha
+    const mdir = _mdir.set(Math.cos(mt), Math.max(0.1, Math.sin(mt)) * 0.9, -0.3).normalize();
     if (camera) {
       this.moon.target.position.copy(camera.position);
       this.moon.target.updateMatrixWorld();
@@ -110,7 +111,31 @@ export class DayNight {
     }
     this.moonDisc.visible = n > 0.15;
 
-    // --- raat ki roshni --------------------------------------------------
+    /*
+     * --- raat ki roshni ---------------------------------------------------
+     *
+     * Neeche ki list mein ~81 material hain (35 POI board + ~46 bazaar ke
+     * board group). Inka `emissiveIntensity` har frame likhna bekaar hai:
+     * `nightness` ek game-minute prati second ke hisaab se badalta hai, yaani
+     * 60 fps par har frame ka farak 0.0003 se bhi kam. 0.004 par likhte hain
+     * -- aankh ko farak nahi, aur 81 property write har frame se bach jaate
+     * hain.
+     */
+    if (this._litAt === undefined || Math.abs(n - this._litAt) > 0.004) {
+      this._litAt = n;
+      this._applyLights(n);
+    }
+
+    // --- mausam apne aap badalta hai --------------------------------------
+    if (this.hour > this._nextWeatherHour
+        || (this._nextWeatherHour > 24 && this.hour < 2)) {
+      this._rollWeather();
+    }
+    this.weather.update(dt, camera);
+  }
+
+  /** Raat ki saari roshni ek jagah. Sirf tab chalti hai jab nightness badle. */
+  _applyLights(n) {
     if (this._emissive.windows) this._emissive.windows.emissiveIntensity = n * 1.7;
     /*
      * Dukan ke andar ki roshni. Ye raat par nahi, hamesha jalti hai -- asli
@@ -124,13 +149,6 @@ export class DayNight {
     // Din mein bhi ek base rakhte hain: bazaar ke board awning ki chhaya mein
     // hote hain aur bina iske dopahar mein bhi padhe nahi jaate.
     for (const m of this._emissive.signs) m.emissiveIntensity = 0.28 + n * 0.85;
-
-    // --- mausam apne aap badalta hai --------------------------------------
-    if (this.hour > this._nextWeatherHour
-        || (this._nextWeatherHour > 24 && this.hour < 2)) {
-      this._rollWeather();
-    }
-    this.weather.update(dt, camera);
   }
 
   /**
@@ -165,3 +183,6 @@ export class DayNight {
 
   static monthPreset(m) { return Weather.forMonth(m); }
 }
+
+/** Chaand ki disha -- ek hi vector, har frame naya nahi. */
+const _mdir = new THREE.Vector3();

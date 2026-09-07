@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { MeshBuilder } from "./geometry.js";
+import { MeshBuilder, ChunkedBuilder } from "./geometry.js";
 import * as TEX from "./textures.js";
 
 /**
@@ -10,6 +10,9 @@ import * as TEX from "./textures.js";
  * aur wanted.js police navigation ke liye use karta hai -- Shimla mein imaarat
  * hamesha sadak ke kinare hi hoti hai, isliye placement roads pe hi tikta hai.
  */
+/** Ring search itni door tak. 40 m ke cell par ye ~1.2 km hai. */
+const MAX_SPAN = 30;
+
 export class RoadNetwork {
   constructor(geo, terrain, roadsJson) {
     this.geo = geo;
@@ -36,10 +39,83 @@ export class RoadNetwork {
         this.nodes.push({ pos: dense[i], road, nx: -dz / L, nz: dx / L });
       }
     }
+
+    this._buildIndex();
   }
 
-  /** Sabse nazdeek sadak ka point. Police AI aur spawn ke liye. */
+  /**
+   * Nodes ka uniform grid.
+   *
+   * Sadak har 10 m par resample hoti hai, isliye 35 km ke network mein **3,603
+   * nodes** hain. `nearestNode()` inpar seedha loop chalata tha -- aur wo ek
+   * frame mein 30-50 baar bulaya jaata hai (khiladi, bheed, traffic, bus,
+   * police, sab `groundAt()` se), yaani **har frame ~1.5 lakh doori ka
+   * hisaab**. Ye `renderer.info` mein dikhta hi nahi, isliye draw call theek
+   * lagne par bhi khel atakta tha. Nikhil: *"abhi it lags"*.
+   *
+   * Cell 40 m ka hai: 10 m ke nodes ke saath ek cell mein mutthi bhar nodes
+   * aate hain, aur pehla ring aksar hi jawab de deta hai.
+   */
+  _buildIndex() {
+    this._cell = 40;
+    this._grid = new Map();
+    for (let i = 0; i < this.nodes.length; i++) {
+      const p = this.nodes[i].pos;
+      const k = this._key(p.x, p.z);
+      let a = this._grid.get(k);
+      if (!a) this._grid.set(k, (a = []));
+      a.push(i);
+    }
+  }
+
+  _key(x, z) { return ((x / this._cell) | 0) * 100003 + ((z / this._cell) | 0); }
+
+  /**
+   * Sabse nazdeek sadak ka point. Police AI, spawn aur zameen ki oonchai ke liye.
+   *
+   * Beech se bahar ki taraf ring-by-ring dekhte hain. Ek ring mein kuch mila
+   * to bhi ruk nahi sakte -- agle ring ka koi node aur paas ho sakta hai --
+   * isliye ek ring aur dekh kar hi rukte hain (`ringMin` se jaanch).
+   *
+   * `filter` ke saath jawab bahut door ho sakta hai (jaise Mall par khade
+   * hokar "koi non-pedestrian sadak" poochhna), isliye ring khatm hone par
+   * seedha loop fallback hai -- wo kabhi-kabhaar hi chalta hai.
+   */
   nearestNode(x, z, filter = null) {
+    const cell = this._cell;
+    const cx = (x / cell) | 0, cz = (z / cell) | 0;
+    let best = null, bd = Infinity;
+
+    for (let span = 0; span <= MAX_SPAN; span++) {
+      // Is ring ka koi bhi node itne se paas nahi ho sakta -- pichhla jawab
+      // pakka hai to yahin ruk jao.
+      const ringMin = (span - 1) * cell;
+      if (best && ringMin > 0 && ringMin * ringMin > bd) break;
+
+      for (let iz = cz - span; iz <= cz + span; iz++) {
+        const edgeZ = iz === cz - span || iz === cz + span;
+        for (let ix = cx - span; ix <= cx + span; ix++) {
+          // sirf ring ka kinara -- andar ke cell pichhle span mein dekh liye
+          if (!edgeZ && ix !== cx - span && ix !== cx + span) continue;
+          const a = this._grid.get(ix * 100003 + iz);
+          if (!a) continue;
+          for (const i of a) {
+            const n = this.nodes[i];
+            if (filter && !filter(n.road)) continue;
+            const dx = n.pos.x - x, dz = n.pos.z - z;
+            const d = dx * dx + dz * dz;
+            if (d < bd) { bd = d; best = n; }
+          }
+        }
+      }
+    }
+
+    if (!best) return this._nearestLinear(x, z, filter);
+    return { node: best, dist: Math.sqrt(bd) };
+  }
+
+  /** Ring khatm, kuch nahi mila -- poora scan. Filter wale sawaal par hi lagta hai. */
+  _nearestLinear(x, z, filter) {
     let best = null, bd = Infinity;
     for (const n of this.nodes) {
       if (filter && !filter(n.road)) continue;
@@ -84,10 +160,16 @@ export class RoadNetwork {
    * naapa jaata hai, isliye ye apne aap sahi taraf lagte hain.
    */
   buildMesh() {
-    const road = new MeshBuilder(0.16);
-    const stone = new MeshBuilder(0.55);
-    const metal = new MeshBuilder(0.8);
-    const lamps = new MeshBuilder(0.9);   // sirf lamp ke sir -- raat ko jalte hain
+    /*
+     * Khaane-wale builder. Sadak 35 km lambi hai, isliye ek merged mesh ka
+     * bounding sphere poore world jitna (4,054 m) ban jaata tha -- aur
+     * `road-railings` akele 208k triangle hai, har frame dono pass mein.
+     * Ab har 1 km ka apna mesh.
+     */
+    const road = new ChunkedBuilder(0.16);
+    const stone = new ChunkedBuilder(0.55);
+    const metal = new ChunkedBuilder(0.8);
+    const lamps = new ChunkedBuilder(0.9);   // sirf lamp ke sir -- raat ko jalte hain
     const col = new THREE.Color();
     const edge = new THREE.Color();
     const stoneCol = new THREE.Color(0x8d857a);
@@ -201,31 +283,32 @@ export class RoadNetwork {
 
     const g = new THREE.Group();
     g.name = "roads";
-    const roadMesh = road.build(TEX.standard(TEX.asphalt(), { vertexColors: true, roughness: 0.92 }));
-    roadMesh.name = "road-surface";
-    roadMesh.castShadow = false;
-    g.add(roadMesh);
-    if (stone.count) {
-      const m = stone.build(TEX.standard(TEX.plaster(0xffffff, 91), { vertexColors: true, roughness: 1.0 }));
-      m.name = "road-walls";
-      g.add(m);
-    }
-    if (metal.count) {
-      const m = metal.build(new THREE.MeshStandardMaterial({
-        vertexColors: true, roughness: 0.42, metalness: 0.75 }));
-      m.name = "road-railings";
-      g.add(m);
-    }
+    /*
+     * `ChunkedBuilder.build()` ek Group deta hai (har khaane ka apna mesh), aur
+     * three.js mein `castShadow` Group se bachchon par nahi jaata -- isliye
+     * yahan traverse karke lagana padta hai.
+     */
+    const emit = (builder, mat, name, cast = true) => {
+      if (!builder.count) return null;
+      const grp = builder.build(mat);
+      grp.name = name;
+      if (!cast) grp.traverse((o) => { o.castShadow = false; });
+      g.add(grp);
+      return grp;
+    };
+    emit(road, TEX.standard(TEX.asphalt(), { vertexColors: true, roughness: 0.92 }),
+         "road-surface", false);
+    emit(stone, TEX.standard(TEX.plaster(0xffffff, 91), { vertexColors: true, roughness: 1.0 }),
+         "road-walls");
+    emit(metal, TEX.mat("road:rail", () => new THREE.MeshStandardMaterial({
+      vertexColors: true, roughness: 0.42, metalness: 0.75 })), "road-railings");
     if (lamps.count) {
       // Apna material, taaki daynight.js raat ko sirf lamp ke sir jaga sake
       const lampMat = new THREE.MeshStandardMaterial({
         vertexColors: true, roughness: 0.3,
         emissive: 0xffd98a, emissiveIntensity: 0,
       });
-      const m = lamps.build(lampMat);
-      m.name = "road-lamps";
-      m.castShadow = false;
-      g.add(m);
+      emit(lamps, lampMat, "road-lamps", false);
       g.userData.lampMaterial = lampMat;
     }
     return g;

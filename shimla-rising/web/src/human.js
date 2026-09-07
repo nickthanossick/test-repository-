@@ -106,14 +106,30 @@ export function buildHuman(o = {}) {
 
   const g = new THREE.Group();
   const props = {};        // beedi, phone -- player.js inhe chalata hai
-  const skinMat = TEX.standard(TEX.skin(SKIN), { roughness: 0.62 });
-  const faceMat = TEX.standard(TEX.face(SKIN, elder ? 61 : 19, { elder, female }), { roughness: 0.56 });
-  const topMat = TEX.standard(TEX.setRepeat(TEX.fabric(o.top ?? 0xbb3a2a, 23), 2), { roughness: 0.88 });
-  if (topMat.normalMap) topMat.normalScale.set(1.5, 1.5);   // silvatein saaf dikhein
-  const botMat = TEX.standard(TEX.setRepeat(TEX.fabric(o.bottom ?? 0x35425e, 51, 60), 2), { roughness: 0.94 });
-  const hairMat = new THREE.MeshStandardMaterial({ color: HAIR, roughness: elder ? 0.86 : 0.66 });
-  const shoeMat = new THREE.MeshStandardMaterial({ color: 0x241d16, roughness: 0.5 });
-  const soleMat = new THREE.MeshStandardMaterial({ color: 0x4a423c, roughness: 0.9 });
+  /*
+   * Material cache se.
+   *
+   * Texture pehle se sanjhe the, par material har kirdaar ke liye naye bante
+   * the -- aur `crowd.js` har vyakti ke **teen** LOD roop banata hai, yaani
+   * teen guna. Naapa gaya: duniya banne par 1,197 material. Ab ek hi rang/
+   * texture ka material sab jagah ek hi hai. Koi bhi material jo runtime par
+   * badalta ho (beedi ka angaara) neeche `new` se hi banta hai.
+   */
+  const TOP = o.top ?? 0xbb3a2a, BOT = o.bottom ?? 0x35425e;
+  const skinMat = TEX.standardCached(`h:skin:${SKIN}`, TEX.skin(SKIN), { roughness: 0.62 });
+  const faceMat = TEX.standardCached(
+    `h:face:${SKIN}:${elder ? 1 : 0}:${female ? 1 : 0}`,
+    TEX.face(SKIN, elder ? 61 : 19, { elder, female }), { roughness: 0.56 });
+  const topMat = TEX.mat(`h:top:${TOP}`, () => {
+    const m = TEX.standard(TEX.setRepeat(TEX.fabric(TOP, 23), 2), { roughness: 0.88 });
+    if (m.normalMap) m.normalScale.set(1.5, 1.5);           // silvatein saaf dikhein
+    return m;
+  });
+  const botMat = TEX.standardCached(`h:bot:${BOT}`,
+    TEX.setRepeat(TEX.fabric(BOT, 51, 60), 2), { roughness: 0.94 });
+  const hairMat = TEX.plain(HAIR, elder ? 0.86 : 0.66);
+  const shoeMat = TEX.plain(0x241d16, 0.5);
+  const soleMat = TEX.plain(0x4a423c, 0.9);
 
   const add = (mesh, parent = g) => {
     mesh.castShadow = true;
@@ -268,7 +284,7 @@ export function buildHuman(o = {}) {
   } else {
     if (!lite) {
       const zip = add(new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.30, 0.010),
-        new THREE.MeshStandardMaterial({ color: 0x6d1f16, roughness: 0.6 })));
+        TEX.plain(0x6d1f16, 0.6)));
       zip.position.set(0, 1.265, -0.104);
       const hem = add(new THREE.Mesh(new THREE.CylinderGeometry(0.152, 0.148, 0.036, 18), topMat));
       hem.position.y = 1.083;
@@ -308,7 +324,7 @@ export function buildHuman(o = {}) {
     fore.position.y = -0.104;
     if (!lite) {
       const cuff = add(new THREE.Mesh(new THREE.CylinderGeometry(0.037, 0.035, 0.028, 12),
-        new THREE.MeshStandardMaterial({ color: female ? (o.top ?? 0xa8324f) : 0x8f2b1e, roughness: 0.9 })), elbow);
+        TEX.plain(female ? (o.top ?? 0xa8324f) : 0x8f2b1e, 0.9)), elbow);
       cuff.position.y = female ? 0.004 : -0.206;
     }
     // Haath: hatheli + angootha. Pehle sirf ek chapta gola tha, jo paas se
@@ -331,12 +347,12 @@ export function buildHuman(o = {}) {
      * Sirf daayein haath mein.
      */
     if (o.danda && side === 1) {
-      const dandaMat = new THREE.MeshStandardMaterial({ color: 0x6b4a2a, roughness: 0.86 });
+      const dandaMat = TEX.plain(0x6b4a2a, 0.86);
       const stick = add(new THREE.Mesh(new THREE.CylinderGeometry(0.019, 0.023, 0.95, 8), dandaMat), elbow);
       stick.position.set(0, -0.30, -0.10);
       stick.rotation.x = Math.PI / 2 - 0.25;         // haath mein aage ki taraf
       // dono sire par lohe ki patti -- asli lathi par yahi hoti hai
-      const ring = new THREE.MeshStandardMaterial({ color: 0x4a4f55, roughness: 0.5, metalness: 0.6 });
+      const ring = TEX.plain(0x4a4f55, 0.5, { metalness: 0.6 });
       for (const t of [-0.42, 0.42]) {
         const r = add(new THREE.Mesh(new THREE.CylinderGeometry(0.024, 0.024, 0.04, 8), ring), elbow);
         r.position.set(0, -0.30 - Math.sin(0.25) * t, -0.10 + Math.cos(0.25) * t);
@@ -351,7 +367,7 @@ export function buildHuman(o = {}) {
      * ise dikha/chhupa sake aur kash ke waqt ember tez kar sake.
      */
     if (o.beedi && side === -1) {
-      const beediMat = new THREE.MeshStandardMaterial({ color: 0x6b5a3f, roughness: 0.95 });
+      const beediMat = TEX.plain(0x6b5a3f, 0.95);
       const b = add(new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.009, 0.075, 6), beediMat), elbow);
       b.position.set(-0.016, -0.300, -0.030);
       b.rotation.set(1.35, 0, 0.25);
@@ -370,7 +386,7 @@ export function buildHuman(o = {}) {
     if (o.phone && side === -1) {
       const ph = new THREE.Group();
       const body = add(new THREE.Mesh(new THREE.BoxGeometry(0.068, 0.135, 0.011),
-        new THREE.MeshStandardMaterial({ color: 0x1b1f26, roughness: 0.35, metalness: 0.4 })), ph);
+        TEX.plain(0x1b1f26, 0.35, { metalness: 0.4 })), ph);
       const scr = add(new THREE.Mesh(new THREE.BoxGeometry(0.058, 0.112, 0.004),
         new THREE.MeshStandardMaterial({ color: 0x2a4a68, emissive: 0x2f5f8a,
                                          emissiveIntensity: 0.5, roughness: 0.2 })), ph);
@@ -431,7 +447,7 @@ export function buildHuman(o = {}) {
      * lagbhag muft hai.
      */
     if (o.sneakers && !lite) {
-      const midMat = new THREE.MeshStandardMaterial({ color: 0xf0efe9, roughness: 0.72 });
+      const midMat = TEX.plain(0xf0efe9, 0.72);
       const mid = add(new THREE.Mesh(new THREE.BoxGeometry(0.101, 0.036, 0.252), midMat), knee);
       mid.position.set(0, -0.383, -0.024);
       mid.rotation.x = -0.05;
@@ -440,15 +456,15 @@ export function buildHuman(o = {}) {
       toecap.scale.set(0.92, 0.52, 0.72);
       // panel aur laces
       const panel = add(new THREE.Mesh(new THREE.BoxGeometry(0.096, 0.046, 0.088),
-        new THREE.MeshStandardMaterial({ color: 0xc9342c, roughness: 0.62 })), knee);
+        TEX.plain(0xc9342c, 0.62)), knee);
       panel.position.set(0, -0.334, -0.052);
       for (let i = 0; i < 3; i++) {
         const lace = add(new THREE.Mesh(new THREE.BoxGeometry(0.070, 0.007, 0.007),
-          new THREE.MeshStandardMaterial({ color: 0xf4f2ec, roughness: 0.85 })), knee);
+          TEX.plain(0xf4f2ec, 0.85)), knee);
         lace.position.set(0, -0.318 + i * 0.014, -0.030 - i * 0.022);
       }
       const cuff = add(new THREE.Mesh(new THREE.CylinderGeometry(0.049, 0.049, 0.030, 12),
-        new THREE.MeshStandardMaterial({ color: 0x2a2f38, roughness: 0.9 })), knee);
+        TEX.plain(0x2a2f38, 0.9)), knee);
       cuff.position.set(0, -0.300, 0.010);
     }
     if (!lite) {

@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { MeshBuilder } from "./geometry.js";
+import { ChunkedBuilder } from "./geometry.js";
 import { SpatialGrid, Colliders } from "./grid.js";
 import * as TEX from "./textures.js";
 import { buildLandmarks, landmarkClearance } from "./landmarks.js";
@@ -23,12 +23,22 @@ export function buildCity(terrain, roads, districts, pois, rng, quality = {}, op
   const group = new THREE.Group();
   group.name = "city";
 
-  const walls = new MeshBuilder(0.42);
-  const roofs = new MeshBuilder(0.5);
-  const plinths = new MeshBuilder(0.35);
-  const windows = new MeshBuilder(0.9);      // apna material -- raat ko jagmagati hain
+  /*
+   * Khaane-wale builder -- ek hi mesh nahi, 1 km ke tukde.
+   *
+   * Pehle poora sheher paanch mesh mein merge hota tha. Draw call to bach
+   * jaate the, par har mesh ka bounding sphere 3,930 m ka ban jaata tha --
+   * yaani wo kabhi frustum-cull nahi hoti thi aur **saare 3,594 ghar har
+   * frame, dono pass mein** draw hote the. Naapa gaya: sirf `trim` 394k
+   * triangle. `ChunkedBuilder` wahi merging karta hai, par jagah ke hisaab se
+   * baant kar, taaki three.js door ke khaane chhod sake.
+   */
+  const walls = new ChunkedBuilder(0.42);
+  const roofs = new ChunkedBuilder(0.5);
+  const plinths = new ChunkedBuilder(0.35);
+  const windows = new ChunkedBuilder(0.9);   // apna material -- raat ko jagmagati hain
   const facades = quality.windowFacades ?? 2;
-  const trim = new MeshBuilder(0.7);         // balcony, railing, chimney, floor bands
+  const trim = new ChunkedBuilder(0.7);      // balcony, railing, chimney, floor bands
   const col = new THREE.Color();
   const placed = new SpatialGrid(16);
   // Bazaar corridor ki dukanein pehle ban chuki hain (bazaar.js). Unki jagahein

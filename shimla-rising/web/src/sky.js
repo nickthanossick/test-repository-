@@ -70,7 +70,8 @@ export class Sky {
 
     // Sooraj ki *disha* rakho, position nahi -- update() har frame use camera ke
     // aas-paas dobara rakhta hai, warna 8 km ke world mein light angle bigad jaata hai.
-    this.sunDir = new THREE.Vector3(Math.cos(t), Math.max(0.06, el) * 0.8, -0.35).normalize();
+    this.sunDir = (this.sunDir || new THREE.Vector3())
+      .set(Math.cos(t), Math.max(0.06, el) * 0.8, -0.35).normalize();
     this.sunDist = this.terrain.worldSize * 0.6;
     this.sun.position.copy(this.sunDir).multiplyScalar(this.sunDist);
     this.sun.intensity = 0.30 + day * 1.85;
@@ -91,20 +92,42 @@ export class Sky {
     const DAY_TOP = [0.16, 0.30, 0.52];
     const DAY_HZ = [0.52, 0.60, 0.68];
     const mix = (a, b, k) => a + (b - a) * k;
-    this.top = new THREE.Color().setRGB(
+    // Rang objects dobara istemaal hote hain -- pehle har frame do naye
+    // `THREE.Color` bante the (aur teesra fog ke liye).
+    this.top = (this.top || new THREE.Color()).setRGB(
       mix(NIGHT_TOP[0], DAY_TOP[0] + day * 0.20, day),
       mix(NIGHT_TOP[1], DAY_TOP[1] + day * 0.34, day),
       mix(NIGHT_TOP[2], DAY_TOP[2] + day * 0.40, day));
-    this.horizon = new THREE.Color().setRGB(
+    this.horizon = (this.horizon || new THREE.Color()).setRGB(
       mix(NIGHT_HZ[0], DAY_HZ[0] + day * 0.36 + dusk * 0.30, day),
       mix(NIGHT_HZ[1], DAY_HZ[1] + day * 0.32 + dusk * 0.06, day),
       mix(NIGHT_HZ[2], DAY_HZ[2] + day * 0.28 - dusk * 0.12, day));
-    this._paint();
+
+    /*
+     * Dome ka repaint mehnga hai -- roshni ka update nahi.
+     *
+     * `daynight.js` ise har frame bulata hai. Sooraj ki disha, uski chamak aur
+     * fog ka rang har frame chalna chahiye (warna suraj astt hote waqt roshni
+     * jhatke mein badalti hai). Par `_paint()` 425 vertex ke rang likh kar
+     * **poora colour buffer GPU par dobara bhejta hai** -- aur wo gradient ek
+     * game-minute prati second ke hisaab se khiskta hai, yaani frame-dar-frame
+     * ka farak aankh pakad hi nahi sakti.
+     *
+     * Naapa gaya: `dayNight.update()` 530 us prati frame tha -- poore
+     * simulation ka sabse bada hissa. Ab dome 0.02 ghante (72 game-second) par
+     * hi dobara rangta hai.
+     */
+    if (regenerateEnv || this._paintedAt === undefined
+        || Math.abs(hour - this._paintedAt) > 0.02
+        || Math.abs(hour - this._paintedAt) > 12) {     // aadhi raat ka wrap
+      this._paintedAt = hour;
+      this._paint();
+    }
     // Raat mein sky khud gehra hai, to env se aane wali roshni bhi kam ho jaati
     // hai -- par bilkul kaala nahi chahiye, warna kuch dikhta hi nahi.
     this.scene.environmentIntensity = 0.42 + day * 0.62;
-    this.scene.fog.color.copy(this.horizon).lerp(new THREE.Color(0.72, 0.79, 0.86), 0.35 * (0.3 + day * 0.7));
-    this.fogBase = this.scene.fog.color.clone();
+    this.scene.fog.color.copy(this.horizon).lerp(HAZE, 0.35 * (0.3 + day * 0.7));
+    (this.fogBase || (this.fogBase = new THREE.Color())).copy(this.scene.fog.color);
     if (regenerateEnv) this._updateEnvironment();
   }
 
@@ -112,7 +135,7 @@ export class Sky {
     const pos = this.skyGeo.attributes.position;
     const col = this.skyGeo.attributes.color;
     const R = this.skyGeo.parameters.radius;
-    const c = new THREE.Color();
+    const c = _paintCol;
     for (let i = 0; i < pos.count; i++) {
       const t = THREE.MathUtils.clamp(pos.getY(i) / R, -1, 1) * 0.5 + 0.5;
       c.copy(this.horizon).lerp(this.top, Math.pow(t, 0.65));
@@ -170,3 +193,7 @@ export class Sky {
     this.dome.position.copy(camera.position);
   }
 }
+
+/** Dobara istemaal hone wale objects -- har frame naya banana mehnga tha. */
+const HAZE = new THREE.Color(0.72, 0.79, 0.86);
+const _paintCol = new THREE.Color();

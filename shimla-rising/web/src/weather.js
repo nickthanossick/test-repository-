@@ -100,15 +100,29 @@ export class Weather {
     const fall = this.mode === "snow" ? 4.5 : 26;
     const drift = this.mode === "snow" ? 2.2 : 0.5;
     const t = performance.now() / 1000;
+    /*
+     * Zameen ki oonchai har particle par nahi.
+     *
+     * Pehle har frame har particle ke liye `terrain.heightAt()` chalta tha --
+     * monsoon mein **5,500 bilinear terrain samples prati frame**, aur naapa
+     * gaya to `weather.update()` 423 us le raha tha (CPU ka doosra sabse bada
+     * hissa). Barish ka daana zameen chhoo kar gayab hota hai; uske liye
+     * camera ke neeche ki ek oonchai kaafi hai. Wo bhi har frame nahi --
+     * khiladi 16 m khiske tabhi dobara.
+     */
+    if (this._groundAtX === undefined
+        || Math.abs(cx - this._groundAtX) > 16 || Math.abs(cz - this._groundAtZ) > 16) {
+      this._groundAtX = cx; this._groundAtZ = cz;
+      this._groundY = this.terrain.heightAt(cx, cz);
+    }
+    // particle ki jagah camera ke sapeksh hai, isliye seema bhi wahi
+    const floor = this._groundY - cy;
     for (let i = 0; i < this.active; i++) {
       const j = i * 3;
       this.pos[j + 1] -= fall * this.vel[i] * dt;
       this.pos[j] += Math.sin(t + i) * drift * dt;
       // camera ke aas-paas wrap karo -- particles hamesha khiladi ke paas rahein
-      if (this.pos[j + 1] + cy < this.terrain.heightAt(this.pos[j] + cx, this.pos[j + 2] + cz) - cy) {
-        this._respawn(i);
-      }
-      if (this.pos[j + 1] < -40) this._respawn(i);
+      if (this.pos[j + 1] < floor || this.pos[j + 1] < -40) this._respawn(i);
     }
     this.points.geometry.attributes.position.needsUpdate = true;
     this.points.position.set(cx, cy, cz);

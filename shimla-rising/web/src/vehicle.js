@@ -170,15 +170,25 @@ export function buildBody(spec) {
   const g = new THREE.Group();
   const [w, h, l] = spec.body;
 
-  const paintMat = TEX.standard(TEX.carPaint(spec.color), { roughness: 0.3, metalness: 0.55 });
-  const glassMat = new THREE.MeshStandardMaterial({
+  /*
+   * Material sanjhe hain, sirf paint ka rang alag.
+   *
+   * Pehle har gaadi apne ~11 naye material banati thi -- 15 khadi + 3 bus +
+   * 8 traffic = ~290 material, sab ek jaise. Ab cache se aate hain (texture to
+   * pehle se hi sanjhe the). Sirf headlight/taillight neeche `new` se bante
+   * hain, kyunki `traffic.js` raat ko aur brake par unka `emissiveIntensity`
+   * badalta hai -- sanjha kar dein to ek gaadi ki batti sab par jal jaayegi.
+   */
+  const paintMat = TEX.standardCached(`v:paint:${spec.color}`,
+    TEX.carPaint(spec.color), { roughness: 0.3, metalness: 0.55 });
+  const glassMat = TEX.mat("v:glass", () => new THREE.MeshStandardMaterial({
     color: 0x18242e, roughness: 0.06, metalness: 0.1,
     transparent: true, opacity: 0.72,
-  });
-  const trimMat = new THREE.MeshStandardMaterial({ color: 0x1b1e22, roughness: 0.55, metalness: 0.35 });
-  const chromeMat = new THREE.MeshStandardMaterial({ color: 0xb9bec4, roughness: 0.22, metalness: 0.9 });
-  const rubberMat = new THREE.MeshStandardMaterial({ color: 0x14161a, roughness: 0.95 });
-  const rimMat = new THREE.MeshStandardMaterial({ color: 0x9aa0a6, roughness: 0.3, metalness: 0.85 });
+  }));
+  const trimMat = TEX.plain(0x1b1e22, 0.55, { metalness: 0.35 });
+  const chromeMat = TEX.plain(0xb9bec4, 0.22, { metalness: 0.9 });
+  const rubberMat = TEX.plain(0x14161a, 0.95);
+  const rimMat = TEX.plain(0x9aa0a6, 0.3, { metalness: 0.85 });
 
   const add = (mesh, parent = g) => {
     mesh.castShadow = true;
@@ -271,7 +281,7 @@ export function buildBody(spec) {
     }
     // HP number plate
     const plate = add(new THREE.Mesh(new THREE.BoxGeometry(w * 0.34, 0.1, 0.02),
-      new THREE.MeshStandardMaterial({ color: 0xe9e6dd, roughness: 0.7 })));
+      TEX.plain(0xe9e6dd, 0.7)));
     plate.position.set(0, bodyH * 0.34, l / 2 + 0.05);
     // Battiyon ka material bahar dikha do -- traffic raat ko headlight jalata
     // hai aur brake par taillight tez karta hai. Har gaadi ka apna material
@@ -281,8 +291,8 @@ export function buildBody(spec) {
 
   if (spec.roof_sign) {
     const sign = add(new THREE.Mesh(new THREE.BoxGeometry(w * 0.4, 0.2, 0.42),
-      new THREE.MeshStandardMaterial({ color: 0xf2e6c8, emissive: 0x554626,
-        emissiveIntensity: 0.4, roughness: 0.6 })));
+      TEX.mat("v:roofsign", () => new THREE.MeshStandardMaterial({
+        color: 0xf2e6c8, emissive: 0x554626, emissiveIntensity: 0.4, roughness: 0.6 }))));
     sign.position.y = bodyH + cabH + 0.09;
   }
   if (spec.siren) {

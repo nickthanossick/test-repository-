@@ -174,3 +174,90 @@ export class MeshBuilder {
     return m;
   }
 }
+
+/**
+ * Wahi `MeshBuilder`, par **jagah ke hisaab se tukdon mein**.
+ *
+ * Merging ne draw call to bacha liye the -- poora sheher paanch mesh mein --
+ * par ek nayi museebat khadi kar di: us ek mesh ka bounding sphere **poori
+ * duniya jitna bada** ho jaata hai (naapa gaya: 3,930 m). Uska matlab:
+ *
+ *   - wo kabhi frustum-cull nahi hoti; khiladi jidhar bhi dekhe, saare 3,594
+ *     ghar draw hote hain
+ *   - aur wahi geometry **shadow pass mein dobara** jaati hai, chahe shadow
+ *     camera sirf 120-240 m ka box ho
+ *
+ * Naapa gaya nateeja: `city/trim` 394k triangle, `city/windows` 264k,
+ * `roads/road-railings` 208k -- sab har frame, dono pass mein, hamesha.
+ *
+ * Iska hal ye hai: geometry usi tarah merged rahe, par ek nahi **kai** mesh
+ * banein -- har ek apne 1 km ke khaane ka. Tab three.js ka apna frustum cull
+ * kaam karne lagta hai aur shadow map sirf paas ke khaane deta hai. Draw call
+ * thode badhte hain, triangle bahut kam ho jaate hain -- aur integrated GPU
+ * par yahi sauda faayde ka hai.
+ *
+ * API bilkul `MeshBuilder` jaisi hai, isliye call site badalne ki zaroorat
+ * nahi -- sirf `new MeshBuilder(u)` ki jagah `new ChunkedBuilder(u)`.
+ */
+export class ChunkedBuilder {
+  constructor(uvScale = 0.25, cell = 1024) {
+    this.uvScale = uvScale;
+    this.cell = cell;
+    this.chunks = new Map();
+    this._count = 0;
+  }
+
+  /** Us jagah ka builder -- na ho to bana do. */
+  _at(x, z) {
+    const k = ((x / this.cell) | 0) * 100003 + ((z / this.cell) | 0);
+    let b = this.chunks.get(k);
+    if (!b) this.chunks.set(k, (b = new MeshBuilder(this.uvScale)));
+    return b;
+  }
+
+  box(cx, cy, cz, sx, sy, sz, color, yaw = 0) {
+    this._count++;
+    this._at(cx, cz).box(cx, cy, cz, sx, sy, sz, color, yaw);
+    return this;
+  }
+
+  pyramid(cx, cy, cz, base, height, color, yaw = 0) {
+    this._count++;
+    this._at(cx, cz).pyramid(cx, cy, cz, base, height, color, yaw);
+    return this;
+  }
+
+  gableRoof(cx, cy, cz, sx, sz, rise, eave, color, yaw = 0, ridgeAlongX = true) {
+    this._count++;
+    this._at(cx, cz).gableRoof(cx, cy, cz, sx, sz, rise, eave, color, yaw, ridgeAlongX);
+    return this;
+  }
+
+  quad(a, b, c, d, color, uw = null, uh = null) {
+    this._count++;
+    this._at(a.x, a.z).quad(a, b, c, d, color, uw, uh);
+    return this;
+  }
+
+  quadUp(a, b, c, d, color, uw = null, uh = null) {
+    this._count++;
+    this._at(a.x, a.z).quadUp(a, b, c, d, color, uw, uh);
+    return this;
+  }
+
+  get count() {
+    let n = 0;
+    for (const b of this.chunks.values()) n += b.count;
+    return n;
+  }
+
+  /** Ek Group -- har khaane ka apna mesh, sab ek hi material par. */
+  build(material) {
+    const g = new THREE.Group();
+    for (const b of this.chunks.values()) {
+      if (!b.count) continue;
+      g.add(b.build(material));
+    }
+    return g;
+  }
+}

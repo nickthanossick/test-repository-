@@ -937,6 +937,45 @@ export function standard(set, extra = {}) {
   return m;
 }
 
+/*
+ * =========================== material cache ===============================
+ *
+ * Texture pehle se cached the (`cached()` upar), par **material nahi** --
+ * `standard()` har call par ek naya `MeshStandardMaterial` banata tha. Nateeja
+ * naapa gaya: duniya banne par **1,197 material**, jabki alag texture sirf ~300
+ * hain. Sabse bade doshi `human.js` (har kirdaar par 7-19) aur `vehicle.js`
+ * (har gaadi par ~11) the -- aur crowd to har vyakti ke teen LOD roop banata
+ * hai, yaani teen guna.
+ *
+ * Har material apna shader program permutation, apna uniform block aur apna
+ * render-list bucket hai. Kam material = kam state change = kam CPU.
+ *
+ * **Chetavni:** wahi material sanjha hota hai, isliye jise runtime par badla
+ * jaata hai use cache se NAHI lena. Abhi teen aise hain: gaadi ki headlight/
+ * taillight (`traffic.js` raat ko emissive badalta hai), beedi ka angaara
+ * (`player.js`), aur weather/stars ke apne. Wo jaan-boojh kar `new` se hi
+ * bante hain.
+ */
+const matCache = new Map();
+
+/** Cached `MeshStandardMaterial`. `key` mein har wo cheez ho jo material badalti ho. */
+export function mat(key, make) {
+  let m = matCache.get(key);
+  if (!m) matCache.set(key, (m = make()));
+  return m;
+}
+
+/** `standard()` ka cached roop. */
+export function standardCached(key, set, extra = {}) {
+  return mat(key, () => standard(set, extra));
+}
+
+/** Saada rangeen material, bina texture ke -- sabse aam cheez. */
+export function plain(color, roughness = 0.8, extra = null) {
+  const k = `plain:${color}:${roughness}:${extra ? JSON.stringify(extra) : ""}`;
+  return mat(k, () => new THREE.MeshStandardMaterial({ color, roughness, ...(extra || {}) }));
+}
+
 export function setRepeat(set, r) {
   for (const k of ["map", "normalMap", "roughnessMap"]) {
     if (set[k]) set[k].repeat.set(r, r);

@@ -26,6 +26,7 @@ export class HUD {
     this.mapScale = 0.055;          // px per metre
     this._toastTimer = 0;
     this._volTimer = 0;
+    this._last = {};          // DOM ke liye chhota memo -- neeche `_once()`
     this._prepMinimap();
   }
 
@@ -48,26 +49,55 @@ export class HUD {
     this.el.stars.innerHTML = s;
   }
 
-  setMoney(v) { this.el.money.innerHTML = "&#8377;" + Math.round(v).toLocaleString("en-IN"); }
-  setDistrict(name) { this.el.district.textContent = name || "—"; }
+  /*
+   * DOM tabhi likho jab value sach mein badli ho.
+   *
+   * Ye sab `main.js` ke loop se **har frame** bulaye jaate the, aur har baar
+   * `innerHTML` likhna matlab string banana + HTML parse + layout invalidate --
+   * us aankde ke liye jo secondon mein ek baar badalta hai (paisa, district,
+   * mission ki list). `_last` ek chhota memo hai; sirf farak par likhte hain.
+   */
+  _once(key, value, write) {
+    if (this._last[key] === value) return;
+    this._last[key] = value;
+    write();
+  }
+
+  setMoney(v) {
+    const s = "&#8377;" + Math.round(v).toLocaleString("en-IN");
+    this._once("money", s, () => { this.el.money.innerHTML = s; });
+  }
+  setDistrict(name) {
+    const s = name || "—";
+    this._once("district", s, () => { this.el.district.textContent = s; });
+  }
   setBars(hp, st) {
-    this.el.hp.style.width = Math.max(0, hp) + "%";
-    this.el.st.style.width = Math.max(0, st) + "%";
+    // 0.5% se kam ka farak ek pixel bhi nahi hilata
+    const a = Math.round(Math.max(0, hp) * 2) / 2, b = Math.round(Math.max(0, st) * 2) / 2;
+    this._once("hp", a, () => { this.el.hp.style.width = a + "%"; });
+    this._once("st", b, () => { this.el.st.style.width = b + "%"; });
   }
   setSpeed(kmh, label) {
-    this.el.kmh.innerHTML = Math.round(kmh) + "<small> km/h</small>";
-    this.el.vehname.textContent = label;
+    const k = Math.round(kmh);
+    this._once("kmh", k, () => { this.el.kmh.innerHTML = k + "<small> km/h</small>"; });
+    this._once("vehname", label, () => { this.el.vehname.textContent = label; });
   }
 
   setMission(mission, objIndex, extra = "") {
-    if (!mission) { this.el.mission.hidden = true; return; }
-    this.el.mission.hidden = false;
-    this.el.mtitle.textContent = mission.title;
-    this.el.objlist.innerHTML = mission.objectives.map((o, i) => {
-      const cls = i < objIndex ? "done" : i === objIndex ? "active" : "";
-      const suffix = i === objIndex && extra ? ` <span style="opacity:.75">${extra}</span>` : "";
-      return `<li class="${cls}">${escapeHtml(o.text)}${suffix}</li>`;
-    }).join("");
+    if (!mission) {
+      this._once("mission", null, () => { this.el.mission.hidden = true; });
+      return;
+    }
+    const key = `${mission.id}|${objIndex}|${extra}`;
+    this._once("mission", key, () => {
+      this.el.mission.hidden = false;
+      this.el.mtitle.textContent = mission.title;
+      this.el.objlist.innerHTML = mission.objectives.map((o, i) => {
+        const cls = i < objIndex ? "done" : i === objIndex ? "active" : "";
+        const suffix = i === objIndex && extra ? ` <span style="opacity:.75">${extra}</span>` : "";
+        return `<li class="${cls}">${escapeHtml(o.text)}${suffix}</li>`;
+      }).join("");
+    });
   }
 
   toast(msg, seconds = 2.6) {
@@ -100,7 +130,19 @@ export class HUD {
       this._volTimer -= dt;
       if (this._volTimer <= 0) this.el.vol?.classList.remove("show");
     }
-    this._drawMinimap(playerPos, playerYaw, markers);
+    /*
+     * Minimap 15 Hz par, har frame nahi.
+     *
+     * Ek poora 2D canvas redraw hai: 24 sadak ki polyline, 58 POI, aur mission
+     * marker -- har frame. Naksha 190 px ka hai aur khiladi 6 m/s chalta hai,
+     * yaani ek frame mein wo aadha pixel bhi nahi khiskta. 15 Hz par aankh ko
+     * farak nahi padta aur CPU ka chautha hissa bach jaata hai.
+     */
+    this._mapTimer = (this._mapTimer || 0) - dt;
+    if (this._mapTimer <= 0) {
+      this._mapTimer = 1 / 15;
+      this._drawMinimap(playerPos, playerYaw, markers);
+    }
   }
 
   _drawMinimap(p, yaw, markers) {

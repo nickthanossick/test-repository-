@@ -803,7 +803,7 @@ async function boot() {
   // debugging ke liye -- Playwright test yahi padhta hai
   window.__shimla = {
     ready: true, THREE, scene, camera, renderer, terrain, roads, city, player, missions, wanted, chase, sky, dayNight,
-    bazaar, buses, traffic, crowd, panga, combat, colliders, parked, flashcards, audio,
+    bazaar, buses, traffic, crowd, panga, combat, colliders, parked, flashcards, audio, hud,
     weather, state, data, get fps() { return fps; },
     get stats() { return {
       triangles: renderer.info.render.triangles,
