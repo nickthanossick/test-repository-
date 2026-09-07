@@ -42,9 +42,10 @@ handbrake · `F` gaadi mein baitho/utro · `E` mission · `G` danda · `R` patha
 | **Kahani** | 3 act, 14 story missions + 10 side missions, Hinglish dialogue |
 | **Gaadiyan** | Alto (taxi bhi), Maruti 800, Baleno, Thar, scooter, HRTC bus, timber truck, HP Police Gypsy — har ek ka apna aakar |
 | **Systems** | Wanted level (0–5), slope stamina, save/load, **quality tiers** (device dekh kar auto, `Q` se badlo) |
-| **Traffic** | Sadak par chalti gaadiyan — aage wali se doori rakhti hain, raat ko headlight jalti hai, brake par taillight. Paas ki gaadi poori detail mein, door wali ek merged mesh (draw call bachane ke liye) |
+| **Traffic** | Sadak par chalti gaadiyan — aage wali se doori rakhti hain, raat ko headlight jalti hai, brake par taillight. Paas ki gaadi poori detail mein, door wali ek merged mesh (draw call bachane ke liye). **Chalti gaadi rok kar driver ko bahar nikala ja sakta hai** (`F`) — wo bhaag jaata hai, aur police ki heat lag jaati hai |
 | **Awaaz** | Sab WebAudio se banti hai, koi file download nahi — pahadi nati, engine, horn, bheed ki bud-bud, aur Shimla ka mahaul (deodar mein hawa, chidiya, door mandir ki ghanti, raat ko kutte). Volume `,`/`.` se, mute `N` |
-| **Bolna** | Browser ki apni Web Speech se. Line pehle **Devanagari** mein badalti hai (`web/src/translit.js`), warna Hindi voice roman Hinglish ko angrezi ki tarah padhti hai. Voice `V` se chuni ja sakti hai |
+| **Bolna** | Browser ki apni Web Speech se. Line pehle **Devanagari** mein badalti hai (`web/src/translit.js`), warna Hindi voice roman Hinglish ko angrezi ki tarah padhti hai. Har kirdaar ka apna pitch/rate/gender `data/characters.json` mein — Vicky 19 saal ka ladka hai. Voice `V` se chuni ja sakti hai |
+| **Bolchaal** | Vicky Sanjauli ki apni zubaan bolta hai — *bawa*, *macho*, *bedafu*, *benduga*, *bendiyaba*, *pataka* — aur beech mein aam mazak (RKMV wali, attendance, udhaar) |
 | **Engines** | Three.js (browser) + Godot 4.7 (desktop/web export) — ek hi data layer |
 
 ### Shimla-specific gameplay
@@ -138,6 +139,10 @@ hai, kyunki headless mein frame rate ~1 fps hai aur aankh se kuch dikhta nahi:
 | `rukh saamne` | mesh ka apna `-Z` chalne ki disha se dot ≈ +1 (chehra aage, pair peeche) |
 | `zameen par khada` | khiladi/gaadi/bus sadak ki **satah** par — terrain par nahi (sadak 0.5 m upar bichti hai) |
 | `sadak par traffic` | khiladi ke 120 m ke andar chalti gaadiyan > 0 |
+| `camera peeche` | camera chalne ki disha ke **ulti** taraf, aur chehra camera se door — yahi wo check hai jiski kami se "body ulti" bug do round chala |
+| `gaadi naak ke bal` | gaadi/bus ka mooh chalne ki disha mein (dot > 0.9), bagal ko sarakti hui nahi |
+| `hawa mein koi nahi` | koi bhi paidal na zameen se upar ho na kisi slab ke bina latka ho |
+| `chalti gaadi kheenchna` | gaadi `parked` mein aayi, driver bhaag raha hai, heat lagi |
 | `gaadi ka rang` | paint texture ka asli pixel |
 | `texture colour-space` | sRGB double-conversion |
 
@@ -151,7 +156,7 @@ Sach saaf rakhna behtar hai:
 |---|---|
 | ✅ **Web game** | Headless Chromium mein chala kar verify kiya — 0 console errors, 0 page errors, 2600+ imaaratein, 45 landmark, 43 naam ke board, 27 km sadkein. Screenshots liye gaye. |
 | ✅ **Heightmap generator** | Chala kar output dekha gaya. Landmark elevation error: mean 0.7 m. |
-| ✅ **Tests + lint** | 89 pytest pass, ruff clean, 13 smoke checks pass, transliteration test pass. |
+| ✅ **Tests + lint** | 89 pytest pass, ruff clean, 17 smoke checks pass, transliteration test pass. |
 | ⚠️ **Pahadi lehja** | **Nahi mil sakta.** Kisi bhi TTS engine mein Himachali accent hota hi nahi — Hindi voice mil jaati hai, lehja nahi. Jo ho sakta tha wo kiya hai: line Devanagari mein jaati hai (uchcharan theek), `hi-IN` voice pehle chunti hai, pitch thoda neeche, aur lehja *likhawat* mein hai (`bawa`, `bedafu`, `bendaga`). Isse zyada ka vaada nahi. |
 | ⚠️ **Downloaded awaaz** | Is environment se har free-sound host (freesound, opengameart, pixabay) aur har TTS API `000` deta hai — proxy block. Isliye har awaaz WebAudio se **bani** hai, kahin se laayi nahi gayi. |
 | ⚠️ **Godot project** | **Kabhi chalaya nahi gaya.** Godot editor is environment mein download nahi ho saka. Scripts Godot 4.7 API ke against dhyan se likhe hain, aur structural checks (res:// paths, scene bookkeeping, indentation) automated hain — par pehla asli run aapke PC pe hoga. |

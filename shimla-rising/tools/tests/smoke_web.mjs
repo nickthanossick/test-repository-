@@ -115,13 +115,14 @@ const ctl = await page.evaluate(() => {
   run({ ...base, turn: -1 }, 10);
   const turned = Math.abs(S.player.yaw - y0);
 
-  S.player.yaw = 0;                     // apna rukh +Z
+  // yaw ka matlab: aage = (-sin yaw, -cos yaw). yaw 0 -> aage -Z
+  S.player.yaw = 0;
   const q0 = S.player.pos.clone();
   run({ ...base, walk: 1 });
   const e = S.player.pos.clone().sub(q0);
   const el = Math.hypot(e.x, e.z) || 1;
 
-  return { wDot: (d.z / dl) * -1, wMoved: dl, turned, upDz: e.z / el, upMoved: el };
+  return { wDot: (d.z / dl) * -1, wMoved: dl, turned, upDz: (e.z / el) * -1, upMoved: el };
 });
 // W camera ke aage jaaye (dot ~1), arrows se ghoome, aur up apne rukh mein jaaye
 const ctlOk = ctl.wMoved > 1 && ctl.wDot > 0.9
@@ -209,6 +210,137 @@ console.log("zameen:", JSON.stringify({
   car: +grounded.car.toFixed(3), bus: +grounded.bus.toFixed(2),
 }));
 
+/*
+ * Camera bande ke PEECHE hai ya SAAMNE?
+ *
+ * Yahi wo bug tha jise pichhla round pakad nahi paya. Model ka rukh sahi tha
+ * (uska test tha aur pass ho raha tha), par `player.yaw` ka matlab gaadi ke
+ * `yaw` se **ulta** tha: khiladi ka "aage" `(sin, cos)` tha, gaadi ka
+ * `(-sin, -cos)`. Chase camera gaadi wale usool par bana hai -- `target +
+ * (sin yaw, cos yaw) * dist` -- isliye arrows se ghoomte hi camera bande ke
+ * **saamne** aa jaata tha. Nateeja: aage badho to Vicky camera ki taraf, mooh
+ * saamne karke aata dikhta tha. Nikhil ki "body ulti chal rahi hai" -- do
+ * round tak.
+ *
+ * Isliye ab rukh nahi, **rishta** naapte hain: camera chalne ki disha ke ulti
+ * taraf hona chahiye, aur chehra camera se door.
+ */
+const cam = await page.evaluate(() => {
+  const S = window.__shimla, T = S.THREE;
+  const base = { forward: 0, strafe: 0, walk: 0, turn: 0, run: false, jump: false };
+  S.player.yaw = 0; S.chase.yaw = 0; S.chase._init = false;
+  const p0 = S.player.pos.clone();
+  for (let i = 0; i < 30; i++) {
+    S.player.update(0.05, { ...base, walk: 1 }, S.chase.yaw);
+    S.chase.update(0.05, S.player.pos, "foot", S.player.yaw);
+  }
+  const mv = S.player.pos.clone().sub(p0); mv.y = 0;
+  if (mv.length() < 0.5) return { moved: mv.length(), behind: 0, faceCam: 0 };
+  mv.normalize();
+  const toCam = S.camera.position.clone().sub(S.player.pos); toCam.y = 0; toCam.normalize();
+  S.player.mesh.updateMatrixWorld(true);
+  const face = new T.Vector3(0, 0, -1)
+    .applyQuaternion(S.player.mesh.getWorldQuaternion(new T.Quaternion()));
+  face.y = 0; face.normalize();
+  return { moved: mv.length(), behind: toCam.dot(mv), faceCam: face.dot(toCam) };
+});
+// dono ~ -1 hone chahiye: camera peeche, chehra camera se door
+const camOk = cam.behind < -0.8 && cam.faceCam < -0.8;
+console.log("camera:", JSON.stringify({ behind: +cam.behind.toFixed(2), faceCam: +cam.faceCam.toFixed(2) }));
+
+/*
+ * Gaadi naak ke bal chal rahi hai ya bagal ko sarak rahi?
+ *
+ * `atan2(ux*dir, -(uz*dir))` mein `sin` ka chinh ulta tha, isliye gaadi ka
+ * mooh sadak ke aar-paar mirror ho jaata tha -- chalti seedhi, dikhti tirchhi.
+ * Nikhil: "gadiyan float hori rather than going in straight line".
+ */
+const nose = await page.evaluate(() => {
+  const S = window.__shimla, T = S.THREE;
+  const noseDot = (mesh, before) => {
+    const d = mesh.position.clone().sub(before); d.y = 0;
+    if (d.length() < 0.02) return null;
+    d.normalize();
+    mesh.updateMatrixWorld(true);
+    const f = new T.Vector3(0, 0, -1).applyQuaternion(mesh.getWorldQuaternion(new T.Quaternion()));
+    f.y = 0; f.normalize();
+    return f.dot(d);
+  };
+  for (let i = 0; i < 40; i++) S.traffic.update(0.05, S.player.pos, S.camera.position);
+  let worstCar = 1, nCar = 0;
+  for (const c of S.traffic.cars) {
+    if (!c.lane) continue;
+    const b = c.mesh.position.clone();
+    S.traffic.update(0.1, S.player.pos, S.camera.position);
+    const dot = noseDot(c.mesh, b);
+    if (dot !== null) { worstCar = Math.min(worstCar, dot); nCar++; }
+  }
+  let worstBus = 1, nBus = 0;
+  for (const bus of S.buses.buses) {
+    const b = bus.mesh.position.clone();
+    S.buses.update(0.2);
+    const dot = noseDot(bus.mesh, b);
+    if (dot !== null) { worstBus = Math.min(worstBus, dot); nBus++; }
+  }
+  return { worstCar, nCar, worstBus, nBus };
+});
+const noseOk = nose.nCar > 0 && nose.worstCar > 0.9 && (nose.nBus === 0 || nose.worstBus > 0.9);
+console.log("naak:", JSON.stringify({ car: +nose.worstCar.toFixed(2), bus: +nose.worstBus.toFixed(2) }));
+
+/*
+ * Koi hawa mein to nahi chal raha?
+ *
+ * Campus ke student `fixedY` par pin the (slab ki oonchai) par chaal chalti
+ * rehti thi -- kuch second mein wo slab se bahar nikal kar 5 m hawa mein
+ * chalte rehte the. Nikhil: "hwa me mat chla cheeje".
+ *
+ * `roads.groundAt()` landmark ke slab ko nahi jaanta, isliye sirf oonchai se
+ * faisla nahi ho sakta. Pair ke thoda neeche collider hai ya nahi -- yahi
+ * asli sawal hai, aur `colliders` mein har slab maujood hai.
+ */
+const air = await page.evaluate(() => {
+  const S = window.__shimla;
+  const bad = [];
+  for (const w of [...S.crowd.walkers, ...S.crowd.keepers]) {
+    if (!w.mesh.visible) continue;
+    const P = w.mesh.position;
+    const dy = P.y - S.roads.groundAt(P.x, P.z);
+    if (Math.abs(dy) < 0.4) continue;                    // zameen par hai
+    if (S.colliders.inside(P.x, P.y - 0.25, P.z, 0.3)) continue;  // slab par khada hai
+    bad.push(+dy.toFixed(1));
+  }
+  return { bad, checked: S.crowd.walkers.length + S.crowd.keepers.length };
+});
+const airOk = air.bad.length === 0;
+console.log("hawa:", JSON.stringify(air.bad));
+
+/*
+ * Chalti gaadi rok kar usme baithna.
+ *
+ * Nikhil: *"gadi rok k andr bethne ka option rkh, gadi wale ko bhar nikal k"*.
+ * Jaanchne layak teen cheezein hain: gaadi asli `Vehicle` ban kar `parked`
+ * mein aayi, driver bahar nikal kar bhaag raha hai, aur police ki heat lagi.
+ */
+const jack = await page.evaluate(() => {
+  const S = window.__shimla;
+  S.wanted.clear();
+  // kisi chalti gaadi ke paas pahuncho
+  for (let i = 0; i < 60; i++) S.traffic.update(0.05, S.player.pos, S.camera.position);
+  const car = S.traffic.cars.find((c) => c.lane);
+  if (!car) return { ok: false, why: "koi chalti gaadi nahi" };
+  const p = car.mesh.position;
+  S.player.placeAt(p.x + 1.5, p.z + 1.5);
+  const before = { parked: S.parked.length, heat: S.wanted.heat, fleeing: S.traffic.fleeing.length };
+  const mode = S.enterVehicle();
+  return {
+    ok: mode === "vehicle" && S.parked.length === before.parked + 1
+        && S.traffic.fleeing.length === before.fleeing + 1 && S.wanted.heat > before.heat,
+    mode, added: S.parked.length - before.parked,
+    fleeing: S.traffic.fleeing.length, heat: Math.round(S.wanted.heat),
+  };
+});
+console.log("gaadi kheenchi:", JSON.stringify(jack));
+
 const checks = [
   ["console errors", errors.length === 0, errors.slice(0, 3).join(" | ")],
   ["page errors", pageErrors.length === 0, pageErrors.slice(0, 3).join(" | ")],
@@ -223,6 +355,10 @@ const checks = [
   ["rukh saamne", facingOk, JSON.stringify(facing)],
   ["zameen par khada", groundOk, JSON.stringify(grounded)],
   ["sadak par traffic", s.trafficNear > 0, `${s.trafficNear} / ${s.traffic}`],
+  ["camera peeche", camOk, JSON.stringify(cam)],
+  ["gaadi naak ke bal", noseOk, JSON.stringify(nose)],
+  ["hawa mein koi nahi", airOk, JSON.stringify(air.bad)],
+  ["chalti gaadi kheenchna", jack.ok, JSON.stringify(jack)],
 ];
 
 let failed = 0;

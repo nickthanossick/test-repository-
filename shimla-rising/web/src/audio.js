@@ -5,8 +5,11 @@ import { toDevanagari } from "./translit.js";
  * Engine ki awaaz do oscillator (saw + square) se, RPM ke saath pitch/gain badalta hai.
  */
 
-/** Nikhil: *"game ki sound b thodi jyda rkhni h"* -- 0.16 se yahan tak. */
-export const DEFAULT_VOLUME = 0.34;
+/**
+ * Nikhil: *"game ki sound b thodi jyda rkhni h"* -- 0.16 se shuru hua tha,
+ * ek round 0.34 par, aur *"music thoda increase kr"* ke baad yahan.
+ */
+export const DEFAULT_VOLUME = 0.46;
 
 export class Audio {
   constructor(opts = {}) {
@@ -125,7 +128,7 @@ export class Audio {
 
     // --- drone: do sur, halka beating ---
     const drone = ctx.createGain();
-    drone.gain.value = 0.16;
+    drone.gain.value = 0.22;
     drone.connect(bus);
     const dOsc = [];
     for (const f of [98.0, 147.0]) {          // Sa aur Pa
@@ -169,7 +172,7 @@ export class Audio {
       lOsc.frequency.setTargetAtTime(f, t, 0.05);
       lead.gain.cancelScheduledValues(t);
       lead.gain.setValueAtTime(lead.gain.value, t);
-      lead.gain.linearRampToValueAtTime(inCar ? 0.05 : 0.10, t + 0.06);
+      lead.gain.linearRampToValueAtTime(inCar ? 0.08 : 0.15, t + 0.06);
       lead.gain.linearRampToValueAtTime(0.012, t + STEP * 0.9);
       // theka -- pehli aur teesri maatra par bhaari
       const strong = beat % 4 === 0;
@@ -180,8 +183,9 @@ export class Audio {
     this._music = { bus, drone, lead, lOsc, vib, dOsc };
     this._inCar = false;
     tick();
-    // dheere se aao, warna shuruaat mein jhatka lagta hai
-    bus.gain.setTargetAtTime(0.55, ctx.currentTime, 2.5);
+    // dheere se aao, warna shuruaat mein jhatka lagta hai.
+    // Nikhil: "music thoda increase kr" -- 0.55 se 0.85.
+    bus.gain.setTargetAtTime(0.85, ctx.currentTime, 2.5);
   }
 
   /** Dholak ki ek thaap. */
@@ -205,8 +209,8 @@ export class Audio {
   setInCar(on) {
     this._inCar = !!on;
     if (this._music) {
-      this._music.bus.gain.setTargetAtTime(on ? 0.30 : 0.55, this.ctx.currentTime, 0.6);
-      this._music.drone.gain.setTargetAtTime(on ? 0.09 : 0.16, this.ctx.currentTime, 0.6);
+      this._music.bus.gain.setTargetAtTime(on ? 0.48 : 0.85, this.ctx.currentTime, 0.6);
+      this._music.drone.gain.setTargetAtTime(on ? 0.13 : 0.22, this.ctx.currentTime, 0.6);
     }
   }
 
@@ -415,19 +419,17 @@ export class Audio {
    * **Pahadi lehja kisi TTS engine mein nahi hota** -- Hindi mil jaati hai,
    * lehja nahi. Ye saaf keh dena zaroori hai.
    */
-  say(text, { rate = 1.0, pitch = 1.0, volume = 0.9 } = {}) {
+  say(text, { rate = 1.0, pitch = 1.0, volume = 0.9, gender = "male" } = {}) {
     const synth = window.speechSynthesis;
     if (!synth || !text || this.muted) return false;
     try {
       if (synth.speaking) synth.cancel();
       const u = new SpeechSynthesisUtterance(toDevanagari(text));
-      const v = this.pickVoice();
+      const v = this.pickVoice(gender);
       if (v) { u.voice = v; u.lang = v.lang; }
       else u.lang = "hi-IN";
       u.rate = rate;
-      // Pahadi lehja to nahi mil sakta, par pitch thoda neeche rakhne se
-      // awaaz "news reader" jaisi nahi lagti.
-      u.pitch = pitch * 0.94;
+      u.pitch = Math.max(0.1, Math.min(2, pitch));
       u.volume = Math.min(1, volume * (0.55 + this.volume));
       synth.speak(u);
       return true;
@@ -436,23 +438,38 @@ export class Audio {
     }
   }
 
-  /** Sab maujood awaazein -- Hindi/Indian pehle. */
+  /** Sab maujood awaazein -- Hindi/Indian pehle, mard ki awaaz upar. */
   voices() {
     const all = window.speechSynthesis?.getVoices?.() || [];
-    const rank = (v) => (/^hi/i.test(v.lang) ? 0 : /^(en-IN|bn|mr|ta|te|gu|pa)/i.test(v.lang) ? 1 : 2);
-    return [...all].sort((a, b) => rank(a) - rank(b));
+    return [...all].sort((a, b) => score(b, "male") - score(a, "male"));
   }
 
-  pickVoice() {
+  /**
+   * Kaunsi awaaz bole.
+   *
+   * Nikhil: *"ladke ki awaj ho vicky ki"*. Pehle sirf `lang` dekha jaata tha,
+   * isliye jis machine par pehli Hindi voice aurat ki thi -- aur wahi aam
+   * baat hai -- Vicky bhi usi mein bolta tha.
+   *
+   * Web Speech API `gender` batati hi nahi. Jo mil sakta hai wo hai **naam**:
+   * har platform ki Hindi/Indian awaazon ke naam gine-chune hain (Madhur,
+   * Hemant, Ravi, Prabhat mard; Swara, Kalpana, Heera, Neerja aurat). Isliye
+   * naam se score lagta hai. Khiladi `V` se apni pasand chun le to wahi
+   * sabse upar rehti hai -- ye sirf uski gair-maujoodgi mein chalta hai.
+   */
+  pickVoice(gender = "male") {
     const all = window.speechSynthesis?.getVoices?.() || [];
     if (!all.length) return null;
     if (this.voiceName) {
       const chosen = all.find((v) => v.name === this.voiceName);
       if (chosen) return chosen;
     }
-    return all.find((v) => /^hi/i.test(v.lang))
-        || all.find((v) => /^en-IN/i.test(v.lang))
-        || null;
+    let best = null, bs = -Infinity;
+    for (const v of all) {
+      const sc = score(v, gender);
+      if (sc > bs) { bs = sc; best = v; }
+    }
+    return best;
   }
 
   /** `V` -- agli awaaz. Naam lautata hai taaki HUD dikha sake. */
@@ -485,6 +502,31 @@ export class Audio {
       this._siren = null;
     }
   }
+}
+
+/** Jaane-pehchane Indian TTS naam -- yahi ek ishaara hai jo API deti hi nahi. */
+const MALE_NAMES = /(madhur|hemant|ravi|prabhat|kunal|arjun|pankaj|rishi|gagan|niranjan|\bmale\b)/i;
+const FEMALE_NAMES = /(swara|kalpana|heera|neerja|aditi|lekha|priya|isha|veena|sangeeta|shruti|\bfemale\b)/i;
+
+/**
+ * Awaaz kitni theek baithti hai -- pehle zubaan, phir naam se lingg ka andaza.
+ *
+ * `SpeechSynthesisVoice` mein gender ka koi field hai hi nahi; jo mil sakta
+ * hai wo sirf naam hai, aur har platform ki Indian awaazon ke naam gine-chune
+ * hain. Isliye ye ek andaza hai, guarantee nahi -- aur isiliye `V` se khiladi
+ * khud chun sakta hai.
+ */
+function score(v, gender = "male") {
+  let s = 0;
+  if (/^hi/i.test(v.lang)) s += 100;
+  else if (/^en-IN/i.test(v.lang)) s += 60;
+  else if (/^(bn|mr|ta|te|gu|pa|ur)/i.test(v.lang)) s += 25;
+  else if (/^en/i.test(v.lang)) s += 8;
+  const male = MALE_NAMES.test(v.name), female = FEMALE_NAMES.test(v.name);
+  if (gender === "female") { if (female) s += 40; if (male) s -= 40; }
+  else { if (male) s += 40; if (female) s -= 40; }
+  if (v.localService) s += 4;   // local awaaz turant bolti hai, network wali ruk-ruk kar
+  return s;
 }
 
 const clamp01 = (v) => Math.max(0, Math.min(1, v));

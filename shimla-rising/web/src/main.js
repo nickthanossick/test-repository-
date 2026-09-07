@@ -393,10 +393,28 @@ async function boot() {
    * mein, taaki wo gaali lage.
    */
   dialogue.onLine = (line) => {
-    const angry = /panga|gali|betiyachu|bedafu|bendaga|bedelo/i.test(line.text)
+    /*
+     * Har kirdaar ki apni awaaz.
+     *
+     * Nikhil: *"ladke ki awaj ho vicky ki"*. Pehle sab ek hi pitch/rate par
+     * bolte the aur voice bhi bina lingg dekhe chuni jaati thi -- jis machine
+     * par pehli Hindi voice aurat ki thi (aam baat hai) wahan Vicky bhi usi
+     * mein bolta tha.
+     *
+     * Profile ab `data/characters.json` mein hai (`voice: {gender, pitch,
+     * rate}`) taaki Godot bhi wahi padh sake. Vicky 19 saal ka hai -- pitch
+     * 0.78, thodi tez chaal.
+     */
+    const ch = data.characterById.get(line.speaker);
+    const vp = ch?.voice || {};
+    const angry = /panga|gali|betiyachu|bedafu|bendaga|bedelo|benduga|bendiyaba/i.test(line.text)
       || line.speaker === "rahgeer";
-    audio.say(line.text, angry ? { rate: 1.18, pitch: 0.82, volume: 1.0 }
-                               : { rate: 0.98, pitch: 1.0, volume: 0.85 });
+    audio.say(line.text, {
+      gender: vp.gender || "male",
+      pitch: (vp.pitch ?? 0.9) * (angry ? 0.94 : 1),
+      rate: (vp.rate ?? 1.0) * (angry ? 1.14 : 1),
+      volume: angry ? 1.0 : 0.9,
+    });
   };
 
   missions.onEvent = (type, payload) => {
@@ -462,7 +480,32 @@ async function boot() {
       audio.setInCar(false);
       hud.toast("Gaadi se utar gaye");
     } else {
-      const v = nearestParked(player.pos);
+      let v = nearestParked(player.pos);
+      /*
+       * Khadi gaadi na mile to **chalti gaadi roko**.
+       *
+       * Nikhil: *"gadi rok k andr bethne ka option rkh, gadi wale ko bhar
+       * nikal k"*. Traffic ki gaadi apne aap chalti hai, uske paas `Vehicle`
+       * ki physics nahi hoti -- isliye yahan use traffic se nikaal kar ek
+       * asli `Vehicle` bana dete hain, aur wo aage se `parked` wali hi ho
+       * jaati hai. Driver bahar aakar bhaagta hai.
+       *
+       * Ye chori hai, aur Sanjauli bhari sadak hai -- isliye heat lagti hai.
+       */
+      if (!v) {
+        const t = traffic.carjack(player.pos, 7);
+        if (t) {
+          v = new Vehicle(data.vehicleById.get(t.spec.id) || t.spec, terrain,
+                          { colliders, ground: groundAt });
+          v.placeAt(t.x, t.z, t.yaw);
+          scene.add(v.mesh);
+          parked.push(v);
+          wanted.add(16);
+          audio.horn(0.5, 0.14);
+          dialogue.playOne("vicky:chori");
+          hud.toast(`${t.spec.name} kheench li — bhaag ab!`, 3);
+        }
+      }
       if (!v) { hud.toast("Aas-paas koi gaadi nahi"); return; }
       state.mode = "vehicle"; state.vehicle = v;
       player.mesh.visible = false;
@@ -664,7 +707,13 @@ async function boot() {
       // wo hukum bhaari -- warna free-look har frame wapas khinch jaata)
       const turning = input.axis("ArrowLeft", "ArrowRight") !== 0;
       if (!debugCam) chase.update(dt, player.pos, "foot", turning ? player.yaw : null);
-      hud.setSpeed(0, player.running ? "daud rahe ho" : "paidal");
+      /*
+       * Paas se chalti gaadi guzre to speedo wali patti hi prompt ban jaati
+       * hai -- ek aur toast HUD par chipkane se behtar.
+       */
+      const jackable = traffic.nearest(player.pos, 7);
+      hud.setSpeed(0, jackable ? `F — ${jackable.spec.name} rok lo`
+                               : player.running ? "daud rahe ho" : "paidal");
     }
 
     wanted.update(dt, pos, state.mode === "vehicle", weather.grip, district, onRoad);

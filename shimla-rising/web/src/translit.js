@@ -139,6 +139,22 @@ const DICT = {
   adhoora: "अधूरा", baahar: "बाहर", bura: "बुरा", jeb: "जेब",
   kutte: "कुत्ते", aadha: "आधा", hamesha: "हमेशा",
 
+  // ---- Sanjauli ki apni bolchaal (Nikhil ki di hui) ----
+  macho: "माचो", benduga: "बेंदुगा", bendaga: "बेंदगा", bendiyaba: "बेंदियाबा",
+  bedufu: "बेदफ़ू", pataka: "पटाका", rkmv: "आर के एम वी", shilpa: "शिल्पा",
+  kat: "कट", kata: "काटा", katni: "काटनी", ganda: "गंदा",
+  vishwas: "विश्वास", wishwas: "विश्वास", yaar: "यार", wala: "वाला", wali: "वाली",
+
+  // ---- baaki jo niyam se theek nahi bante ----
+  aaye: "आए", andhere: "अँधेरे", badha: "बढ़ा", baith: "बैठ", baithe: "बैठे",
+  battery: "बैटरी", board: "बोर्ड", bolun: "बोलूँ", chabhi: "चाबी",
+  chehra: "चेहरा", chhed: "छेड़", kahin: "कहीं", khadi: "खड़ी",
+  kirane: "किराने", kismat: "किस्मत", layak: "लायक", maangne: "माँगने",
+  mann: "मन", notes: "नोट्स", padenge: "पड़ेंगे", phone: "फ़ोन",
+  planning: "प्लानिंग", shayad: "शायद", sorry: "सॉरी", sunn: "सुन्न",
+  sweater: "स्वेटर", wapas: "वापस", zaroori: "ज़रूरी", li: "ली",
+  hisaab: "हिसाब", udhaar: "उधार", chakkar: "चक्कर", politics: "पॉलिटिक्स",
+
 };
 
 /** Vyanjan -- lambe pehle, taaki "chh" ko "ch"+"h" na padha jaaye. */

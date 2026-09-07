@@ -143,7 +143,18 @@ export class BusSystem {
       // origin pahiye ke neeche hai -- koi offset nahi, warna bus tairti hai
       bus.mesh.position.set(x, y, z);
 
-      const heading = Math.atan2(p.ux * bus.dir, -(p.uz * bus.dir));
+      /*
+       * Gaadi ka rukh.
+       *
+       * Model ka aage `-Z` hai, aur `rotation.y = h` use `(-sin h, -cos h)`
+       * par le jaata hai. Chalne ki disha `(ux, uz) * dir` hai, isliye
+       * `h = atan2(-ux*dir, -uz*dir)`. Pehle yahan `atan2(ux*dir, -(uz*dir))`
+       * tha -- `sin` ka chinh ulta, yaani gaadi ka mooh sadak ke aar-paar
+       * mirror ho jaata tha. Chalti wo seedhi thi par dikhti tirchhi/bagal ko
+       * sarakti hui -- Nikhil ki "gaadiyan float ho rahi, straight line mein
+       * nahi jaa rahi".
+       */
+      const heading = Math.atan2(-p.ux * bus.dir, -(p.uz * bus.dir));
       const n = this.terrain.normalAt(x, z, _n);
       _q.setFromAxisAngle(_up, heading);
       _align.setFromUnitVectors(_up, n);

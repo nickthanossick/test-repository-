@@ -7,7 +7,12 @@
       "age": 19,
       "home": "vicky_home",
       "desc": "Sanjauli ka ladka, Government College mein pehla saal. Baap ki garage abhi bhi chalti hai, par Vicky ka raasta ab college ke gate se hokar jaata hai.",
-      "color": "#c8442e"
+      "color": "#c8442e",
+      "voice": {
+        "gender": "male",
+        "pitch": 0.78,
+        "rate": 1.04
+      }
     },
     {
       "id": "amma",
@@ -15,7 +20,12 @@
       "role": "family",
       "home": "vicky_home",
       "desc": "Vicky ki maa. Sanjauli ki teen-manzila ke upar wale kamre mein. Sach sabse pehle wahi bolti hai.",
-      "color": "#d8b26a"
+      "color": "#d8b26a",
+      "voice": {
+        "gender": "female",
+        "pitch": 1.02,
+        "rate": 0.92
+      }
     },
     {
       "id": "chhotu",
@@ -24,21 +34,36 @@
       "age": 15,
       "home": "chhotu_perch",
       "desc": "Jakhoo ki chadhai pe rehta hai. Bandaron se baat karta hai, aur poore Mall pe nazar rakhta hai.",
-      "color": "#e0a44c"
+      "color": "#e0a44c",
+      "voice": {
+        "gender": "male",
+        "pitch": 1.18,
+        "rate": 1.12
+      }
     },
     {
       "id": "rahgeer",
       "name": "Rahgeer",
       "role": "npc",
       "desc": "Sadak par chalta koi aam aadmi. Naam nahi, par zubaan teekhi.",
-      "color": "#c9a227"
+      "color": "#c9a227",
+      "voice": {
+        "gender": "male",
+        "pitch": 0.86,
+        "rate": 1.1
+      }
     },
     {
       "id": "dukandaar",
       "name": "Dukandaar",
       "role": "npc",
       "desc": "Bazaar ka dukandaar. Apni dukan ke aage koi panga nahi chalta.",
-      "color": "#c9a227"
+      "color": "#c9a227",
+      "voice": {
+        "gender": "male",
+        "pitch": 0.84,
+        "rate": 1.0
+      }
     },
     {
       "id": "deepika",
@@ -47,7 +72,12 @@
       "age": 19,
       "home": "college_gate",
       "desc": "Vicky ki classmate. Notes bhi deti hai aur seedhi baat bhi.",
-      "color": "#d06a9c"
+      "color": "#d06a9c",
+      "voice": {
+        "gender": "female",
+        "pitch": 1.06,
+        "rate": 1.02
+      }
     },
     {
       "id": "professor",
@@ -56,7 +86,12 @@
       "age": 54,
       "home": "gov_college",
       "desc": "Political Science ke HOD. Har batch mein ek ladke ko pehchaan lete hain.",
-      "color": "#4f7fa8"
+      "color": "#4f7fa8",
+      "voice": {
+        "gender": "male",
+        "pitch": 0.7,
+        "rate": 0.88
+      }
     },
     {
       "id": "sameer",
@@ -65,7 +100,12 @@
       "age": 22,
       "home": "college_court",
       "desc": "Teesre saal ka chhatra neta. Union uske baap ka samajhta hai.",
-      "color": "#8a5a2e"
+      "color": "#8a5a2e",
+      "voice": {
+        "gender": "male",
+        "pitch": 0.72,
+        "rate": 1.06
+      }
     },
     {
       "id": "netaji",
@@ -74,7 +114,12 @@
       "age": 61,
       "home": "vidhan_sabha",
       "desc": "Zile ka purana neta. Ladko ko pehchanta hai, istemaal bhi karta hai.",
-      "color": "#c9a227"
+      "color": "#c9a227",
+      "voice": {
+        "gender": "male",
+        "pitch": 0.66,
+        "rate": 0.86
+      }
     },
     {
       "id": "chudail",
@@ -83,7 +128,13 @@
       "age": 0,
       "home": "sanjauli_baudi",
       "desc": "Sanjauli ki sabse purani kahani. Koi maanta nahi, koi raat ko wahan jaata bhi nahi.",
-      "color": "#8fa9b8"
+      "color": "#8fa9b8",
+      "voice": {
+        "gender": "female",
+        "pitch": 0.52,
+        "rate": 0.8
+      }
     }
-  ]
+  ],
+  "$comment": ""
 }

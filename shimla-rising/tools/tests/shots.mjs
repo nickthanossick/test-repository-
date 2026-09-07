@@ -2,8 +2,12 @@
  * Round ke screenshots.
  *
  * Headless mein SwiftShader ~1 fps deta hai, isliye har cheez haath se chalayi
- * jaati hai: simulation ko step karo, camera khud rakho, phir do-teen frame
- * ruk kar tasveer lo. Loop ka intezaar karne se sab jama hua dikhta hai.
+ * jaati hai: simulation ko step karo, camera ko settle hone do, phir tasveer
+ * lo. Loop ka intezaar karne se sab jama hua dikhta hai.
+ *
+ * **Chalne wala shot asli chase camera se hi liya jaata hai** -- haath se
+ * camera rakh kar nahi. Pichhle round ki galti yahi thi: camera khud rakha
+ * tha, isliye tasveer sahi lagi jabki khel mein camera bande ke saamne tha.
  *
  *   node web/serve.mjs &   node tools/tests/shots.mjs
  */
@@ -19,54 +23,48 @@ const browser = await chromium.launch({
 });
 const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
 page.on("pageerror", (e) => console.log("pageerror:", e.message));
-// SwiftShader par ek raat ka frame 30 s se zyada le sakta hai
-page.setDefaultTimeout(150000);
+page.setDefaultTimeout(150000);   // SwiftShader par ek frame 30 s se zyada le sakta hai
 await page.goto(URL, { waitUntil: "domcontentloaded", timeout: 60000 });
 await page.waitForFunction(() => window.__shimla?.ready === true, null, { timeout: 300000 });
 
-const shot = async (name, waitMs = 2600) => {
+const shot = async (name, waitMs = 3000) => {
   await page.waitForTimeout(waitMs);
   await page.screenshot({ path: `${OUT}/${name}.png` });
   console.log("  ", name);
 };
 
-// ---- 1. pehla frame: college + intro card (khel jaisa shuru hota hai) ----
-await shot("r14-shuruaat");
-
-// baaki shots ke liye card hata do -- warna duniya ruki rehti hai
+// ---- 1. pehla frame: intro card ----
+await shot("r15-shuruaat");
 await page.evaluate(() => window.__shimla.skipCards());
 await page.waitForTimeout(1500);
 
-// ---- 2. college gate: khel yahin se shuru hota hai ----
-await page.evaluate(() => {
-  const S = window.__shimla;
-  S.teleport("college_gate");
-  S.viewPOI("college_gate", 46, 20, 1.1);
-});
-await shot("r14-college");
-
-// ---- 3. peeche se chalta Vicky -- chehra aage hona chahiye ----
-const facing = await page.evaluate(() => {
-  const S = window.__shimla;
+/*
+ * ---- 2. chalta hua Vicky, ASLI chase camera se ----
+ * Agar rukh ya camera ulta hoga to yahan chehra dikhega, peeth nahi.
+ */
+const walk = await page.evaluate(() => {
+  const S = window.__shimla, T = S.THREE;
+  S.teleport("sanjauli_chowk");
   const base = { forward: 0, strafe: 0, walk: 0, turn: 0, run: false, jump: false };
-  S.player.yaw = 0;
-  for (let i = 0; i < 40; i++) S.player.update(0.05, { ...base, walk: 1 }, S.chase.yaw);
-  const p = S.player.pos;
+  S.chase._init = false;
+  for (let i = 0; i < 60; i++) {
+    S.player.update(0.05, { ...base, walk: 1 }, S.chase.yaw);
+    S.chase.update(0.05, S.player.pos, "foot", S.player.yaw);
+  }
+  const toCam = S.camera.position.clone().sub(S.player.pos); toCam.y = 0; toCam.normalize();
   S.player.mesh.updateMatrixWorld(true);
-  const f = new S.THREE.Vector3(0, 0, -1)
-    .applyQuaternion(S.player.mesh.getWorldQuaternion(new S.THREE.Quaternion()));
-  // camera peeche: chalne ki disha ke ulat
-  S.lookAt(p.x, p.y + 1.05, p.z, 4.2, 0.35, Math.atan2(-f.x, -f.z));
-  return { fx: +f.x.toFixed(2), fz: +f.z.toFixed(2) };
+  const face = new T.Vector3(0, 0, -1)
+    .applyQuaternion(S.player.mesh.getWorldQuaternion(new T.Quaternion()));
+  face.y = 0; face.normalize();
+  return { faceDotCam: +face.dot(toCam).toFixed(2) };   // -1 = peeth camera ki taraf (sahi)
 });
-console.log("   forward:", JSON.stringify(facing));
-await shot("r14-vicky-peeche");
+console.log("   chehra-camera dot:", walk.faceDotCam, "(-1 = peeth dikhni chahiye)");
+await shot("r15-chalte-hue");
 
-// ---- 4. sadak par gaadiyan ----
-const near = await page.evaluate(() => {
+// ---- 3. sadak par traffic -- naak ke bal, seedhi ----
+const tr = await page.evaluate(() => {
   const S = window.__shimla;
-  // pehle traffic ko thoda chalao, phir sabse paas ki gaadi par camera
-  for (let i = 0; i < 60; i++) S.traffic.update(0.05, S.player.pos);
+  for (let i = 0; i < 80; i++) S.traffic.update(0.05, S.player.pos, S.camera.position);
   let best = null, bd = Infinity;
   for (const c of S.traffic.cars) {
     if (!c.lane) continue;
@@ -75,77 +73,54 @@ const near = await page.evaluate(() => {
   }
   if (!best) return null;
   const p = best.mesh.position;
-  S.lookAt(p.x, p.y + 1.2, p.z, 16, 0.35);
-  return { spec: best.spec.id, dist: +bd.toFixed(1), speed: +best.speed.toFixed(1) };
+  S.lookAt(p.x, p.y + 1.3, p.z, 13, 0.3);
+  for (let i = 0; i < 4; i++) S.traffic.update(0.05, S.player.pos, S.camera.position);
+  return { spec: best.spec.id, dist: +bd.toFixed(1), full: best.full.visible };
 });
-console.log("   traffic:", JSON.stringify(near));
-await shot("r14-traffic");
+console.log("   traffic:", JSON.stringify(tr));
+await shot("r15-traffic");
 
-// ---- 5. zameen: pair sadak ki satah par, gaadi ke pahiye bhi ----
-const gnd = await page.evaluate(() => {
+/*
+ * ---- 4. gaadi kheencho: driver bahar, bhaagta hua ----
+ * Camera gaadi aur bhaagte driver dono ko pakadta hai.
+ */
+const jack = await page.evaluate(() => {
   const S = window.__shimla;
-  /*
-   * Aisi sadak chuno jiske dono taraf khula ho -- warna camera kisi deewar ke
-   * andar chala jaata hai aur tasveer se kuch pata hi nahi chalta.
-   */
-  let best = null, bestScore = -1;
-  for (const r of S.roads.roads) {
-    if (r.type === "rail" || r.type === "pedestrian") continue;
-    for (let i = 4; i < r.points.length - 4; i += 3) {
-      const q = r.points[i];
-      let open = 0;
-      for (let a = 0; a < 8; a++) {
-        const th = (a / 8) * Math.PI * 2;
-        const cx = q.x + Math.cos(th) * 9, cz = q.z + Math.sin(th) * 9;
-        if (!S.colliders.inside(cx, S.roads.groundAt(cx, cz) + 2, cz, 0.5)) open++;
-      }
-      if (open > bestScore) { bestScore = open; best = q; }
-    }
-  }
-  const q = best;
-  const bus = S.buses.buses[0];
-  S.player.placeAt(q.x, q.z);
-  const v = S.parked[0];
-  const off = S.colliders.freeSpotNear(q.x + 5, q.z, S.roads.groundAt(q.x + 5, q.z) + 1, 2.5);
-  v.placeAt(off.x, off.z, 1.2); v.syncMesh();
-  S.lookAt(q.x + 2.4, S.roads.groundAt(q.x, q.z) + 0.75, q.z, 9, 0.05);
-  return {
-    surface: +S.roads.groundAt(q.x, q.z).toFixed(2),
-    pair: +S.player.pos.y.toFixed(2),
-    pahiya: +v.mesh.position.y.toFixed(2),
-    bus: bus ? +(bus.mesh.position.y - S.roads.groundAt(bus.mesh.position.x, bus.mesh.position.z)).toFixed(2) : null,
-  };
+  S.freeCamOff();
+  for (let i = 0; i < 40; i++) S.traffic.update(0.05, S.player.pos, S.camera.position);
+  const car = S.traffic.cars.find((c) => c.lane);
+  const p = car.mesh.position.clone();
+  S.player.placeAt(p.x + 1.6, p.z + 1.6);
+  const mode = S.enterVehicle();
+  // driver ko do second bhaagne do
+  for (let i = 0; i < 40; i++) S.traffic.update(0.05, S.player.pos, S.camera.position);
+  const f = S.traffic.fleeing[S.traffic.fleeing.length - 1];
+  const look = f ? f.mesh.position : p;
+  S.lookAt((look.x + p.x) / 2, p.y + 1.4, (look.z + p.z) / 2, 11, 0.45);
+  return { mode, fleeing: S.traffic.fleeing.length, stars: S.wanted.stars,
+           heat: Math.round(S.wanted.heat) };
 });
-console.log("   zameen:", JSON.stringify(gnd));
-await shot("r14-zameen");
+console.log("   gaadi kheenchi:", JSON.stringify(jack));
+await shot("r15-gaadi-cheen");
 
-// ---- 6. Sanjauli bazaar -- bheed, dukanein, traffic sab ek frame mein ----
-await page.evaluate(() => {
+// ---- 5. campus: student slab par, hawa mein nahi ----
+const campus = await page.evaluate(() => {
   const S = window.__shimla;
-  S.teleport("sanjauli_chowk");
-  for (let i = 0; i < 40; i++) S.traffic.update(0.05, S.player.pos);
-  S.viewPOI("sanjauli_chowk", 52, 24, 2.2);
-});
-await shot("r14-sanjauli");
-
-// ---- 7. raat: traffic ki headlight ----
-await page.evaluate(() => {
-  const S = window.__shimla;
-  S.dayNight.hour = 20.6;
-  S.sky.setTime(20.6, true);
-  S.teleport("sanjauli_chowk");
-  for (let i = 0; i < 80; i++) {
-    S.traffic.update(0.05, S.player.pos, S.camera.position, { night: true });
+  S.freeCamOff();
+  S.teleport("college_gate");
+  for (let i = 0; i < 200; i++) S.crowd.update(0.05, S.player.pos);
+  let air = 0, on = 0;
+  for (const w of S.crowd.walkers) {
+    if (!w.mesh.visible || !w.home) continue;
+    on++;
+    const P = w.mesh.position;
+    if (Math.abs(P.y - S.roads.groundAt(P.x, P.z)) > 0.4
+        && !S.colliders.inside(P.x, P.y - 0.25, P.z, 0.3)) air++;
   }
-  let best = null, bd = Infinity;
-  for (const c of S.traffic.cars) {
-    if (!c.lane) continue;
-    const d = c.mesh.position.distanceTo(S.player.pos);
-    if (d < bd) { bd = d; best = c; }
-  }
-  const p = best ? best.mesh.position : S.player.pos;
-  S.lookAt(p.x, p.y + 1.1, p.z, 13, 0.3);
+  S.viewPOI("college_gate", 44, 17, 1.15);
+  return { campusWalkers: on, air };
 });
-await shot("r14-raat");
+console.log("   campus:", JSON.stringify(campus));
+await shot("r15-campus");
 
 await browser.close();

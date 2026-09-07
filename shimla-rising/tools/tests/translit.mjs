@@ -54,6 +54,26 @@ for (const k of ["aam", "bazaar", "college", "raat", "thanda", "police", "thaka"
   const key = `vicky:idle:${k}`;
   if (!dlg.lines[key] || dlg.lines[key].length < 3) fails.push(`kam lines: ${key}`);
 }
+if (!dlg.lines["vicky:chori"]) fails.push("vicky:chori nahi hai");
+
+/*
+ * Sanjauli ki bolchaal.
+ *
+ * Nikhil ne apne shabd diye the -- "bawa", "macho", "bedafu", "benduga",
+ * "bendiyaba", "pataka". Ye lines ki jaan hain: bina inke Vicky ek aam Hindi
+ * game ka kirdaar lagta hai, Sanjauli ka ladka nahi. Isliye inka hona test
+ * karte hain, aur ye bhi ki Devanagari mein theek utarte hain.
+ */
+const SLANG = { bawa: "बावा", macho: "माचो", bedafu: "बेदफ़ू",
+                benduga: "बेंदुगा", bendiyaba: "बेंदियाबा", pataka: "पटाका" };
+for (const [w, want] of Object.entries(SLANG)) {
+  eq(`slang ${w}`, toDevanagari(w), want);
+}
+const allIdle = Object.keys(dlg.lines).filter((k) => k.startsWith("vicky:"))
+  .flatMap((k) => dlg.lines[k]).map((b) => b.text.toLowerCase()).join(" ");
+for (const w of Object.keys(SLANG)) {
+  if (!allIdle.includes(w)) fails.push(`Vicky "${w}" kabhi nahi bolta`);
+}
 
 console.log(`kosh: ${dictSize} shabd · dialogue: ${lines} lines`);
 for (const f of fails) console.log("  FAIL", f);

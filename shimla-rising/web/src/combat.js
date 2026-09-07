@@ -104,7 +104,8 @@ export class Combat {
   /** Saamne ke arc mein jo NPC aaye use chot. */
   _land() {
     const P = this.d.player;
-    const fx = Math.sin(P.yaw), fz = Math.cos(P.yaw);
+    // khiladi ka aage = (-sin yaw, -cos yaw) -- wahi usool jo gaadi ka hai
+    const fx = -Math.sin(P.yaw), fz = -Math.cos(P.yaw);
     let any = false;
     for (const npc of this._targets()) {
       const m = npc.mesh;
@@ -126,7 +127,7 @@ export class Combat {
     const P = this.d.player;
     this.stoneCool = STONE_COOLDOWN;
     const mesh = new THREE.Mesh(this.stoneGeo, this.stoneMat);
-    const fx = Math.sin(P.yaw), fz = Math.cos(P.yaw);
+    const fx = -Math.sin(P.yaw), fz = -Math.cos(P.yaw);
     mesh.position.set(P.pos.x + fx * 0.5, P.pos.y + 1.5, P.pos.z + fz * 0.5);
     this.d.scene.add(mesh);
     this.stones.push({

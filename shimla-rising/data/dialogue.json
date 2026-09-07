@@ -360,85 +360,109 @@
     "vicky:idle:aam": [
       {
         "speaker": "vicky",
-        "text": "Chal bawa, kuch to karna padega aaj."
+        "text": "Macho, aaj to kuch karna hi padega bawa."
       },
       {
         "speaker": "vicky",
-        "text": "Jeb khaali, aur mahina abhi aadha hai."
+        "text": "Bawa yaar, pataka hua pada hoon subah se."
       },
       {
         "speaker": "vicky",
-        "text": "Amma ne phir poochha hoga — kahan gaya tha."
+        "text": "Jeb khaali, mahina aadha. Bendiyaba hisaab hai ye."
       },
       {
         "speaker": "vicky",
-        "text": "Ye sheher chhota hai, par chadhai lambi hai."
+        "text": "Macho, Sameer ne phir wahi purani baat chhed di."
       },
       {
         "speaker": "vicky",
-        "text": "Kaam ka koi ant nahi, bas raasta badalta hai."
+        "text": "Bedafu, kal wale paise abhi tak nahi aaye."
       },
       {
         "speaker": "vicky",
-        "text": "Sanjauli mein sab ek doosre ko jaante hain. Achha bhi, bura bhi."
+        "text": "Chal bawa, Sanjauli mein baithe rehne se kuch nahi hota."
       },
       {
         "speaker": "vicky",
-        "text": "Baap ki garage abhi bhi khuli hai. Main hi band ho gaya."
+        "text": "Amma ne poochha hoga — kahan mara gaya tha. Aur main kya bolun."
       },
       {
         "speaker": "vicky",
-        "text": "Ek din is sheher mein naam hoga mera."
+        "text": "Ek din is sheher mein naam hoga, bawa. Bas ek din."
+      },
+      {
+        "speaker": "vicky",
+        "text": "Baap ki garage khuli hai abhi bhi. Main hi band ho gaya."
+      },
+      {
+        "speaker": "vicky",
+        "text": "Macho, chai peene ka mann hai. Paise dekhne ka nahi."
       }
     ],
     "vicky:idle:bazaar": [
       {
         "speaker": "vicky",
-        "text": "Bazaar mein aaj bheed zyada hai."
+        "text": "Macho, aaj bazaar mein bheed benduga hai."
       },
       {
         "speaker": "vicky",
-        "text": "Dukan waale ko paisa dena hai. Kal dunga."
+        "text": "Bedafu dukaan wale ne rate phir badha diya."
       },
       {
         "speaker": "vicky",
-        "text": "Yahan har dukan mein wahi saamaan, bas rate alag."
+        "text": "Bawa, udhaar pe kitna chalega. Ek din kat jaayega."
       },
       {
         "speaker": "vicky",
-        "text": "Chai peeni chahiye. Par paise?"
+        "text": "Chai pe do minute — phir chalte hain."
       },
       {
         "speaker": "vicky",
-        "text": "Bhaiya rate kam karo — hamesha yahi sunta hoon."
+        "text": "Yahan har dukaan mein wahi saamaan, bas board alag."
+      },
+      {
+        "speaker": "vicky",
+        "text": "Macho, wo kirane wala mujhe dekh ke andar ghus gaya. Samajh gaya kya chakkar hai."
       }
     ],
     "vicky:idle:college": [
       {
         "speaker": "vicky",
-        "text": "Class chal rahi hogi. Main yahan khada hoon."
+        "text": "Macho, Shilpa ne ganda hi kata mera. RKMV wali, bendiyaba."
       },
       {
         "speaker": "vicky",
-        "text": "Attendance kam hai. Thakur Sir dekhenge to gaya."
+        "text": "Bawa, us RKMV wali pe vishwas karne layak nahi tha."
       },
       {
         "speaker": "vicky",
-        "text": "College ka gate — yahi se sab shuru hua tha."
+        "text": "Attendance kam hai. Thakur Sir ne dekh liya to kat gaya samajh."
       },
       {
         "speaker": "vicky",
-        "text": "Deepika ne kaha tha library mein milna."
+        "text": "Class chal rahi hai andar, aur main gate pe khada hoon. Macho."
       },
       {
         "speaker": "vicky",
-        "text": "Padhai ya politics — dono ek saath nahi chalte."
+        "text": "Deepika ne bola tha library mein milna. Bhool gaya bedafu."
+      },
+      {
+        "speaker": "vicky",
+        "text": "Bawa, padhai aur politics — dono ek saath nahi chalti yaar."
+      },
+      {
+        "speaker": "vicky",
+        "text": "Photocopy wale ke saamne teesre saal wale phir khade hain."
+      },
+      {
+        "speaker": "vicky",
+        "text": "Macho, notes kisi se maangne padenge. Apne to hain hi nahi."
       }
     ],
     "vicky:idle:raat": [
       {
         "speaker": "vicky",
-        "text": "Raat mein Sanjauli aur bhi chhoti lagti hai."
+        "text": "Bawa, raat ko Sanjauli aur chhoti lagti hai."
       },
       {
         "speaker": "vicky",
@@ -446,97 +470,139 @@
       },
       {
         "speaker": "vicky",
-        "text": "Itni thand mein bhi log baahar hain."
+        "text": "Macho, itni raat ko bhi log baahar hain. Benduga sheher hai."
       },
       {
         "speaker": "vicky",
-        "text": "Ghar jaana chahiye. Par abhi nahi."
+        "text": "Ghar jaana chahiye. Par abhi nahi bawa."
       },
       {
         "speaker": "vicky",
-        "text": "Andhera mein raasta yaad se chalta hai, aankhon se nahi."
+        "text": "Andhere mein raasta yaad se chalta hai, aankhon se nahi."
+      },
+      {
+        "speaker": "vicky",
+        "text": "Bedafu, phone ki battery bhi ab hi khatam honi thi."
       }
     ],
     "vicky:idle:thanda": [
       {
         "speaker": "vicky",
-        "text": "Barf pad rahi hai. Sadak band ho jaayegi."
+        "text": "Bedafu, kat gaya. Mausam itna benduga aaj."
       },
       {
         "speaker": "vicky",
-        "text": "Haath sun ho gaye. Beedi jalani padegi."
+        "text": "Bawa, barf pad rahi hai. Sadak band ho jaayegi."
       },
       {
         "speaker": "vicky",
-        "text": "Is mausam mein gaadi chalana bewakoofi hai."
+        "text": "Haath sunn ho gaye. Beedi jalani padegi ab."
       },
       {
         "speaker": "vicky",
-        "text": "Shimla ki sardi haddi tak jaati hai, bawa."
+        "text": "Macho, is mausam mein gaadi chalana bewakoofi hai."
+      },
+      {
+        "speaker": "vicky",
+        "text": "Shimla ki sardi haddi tak jaati hai bawa. Sach mein."
+      },
+      {
+        "speaker": "vicky",
+        "text": "Sweater andar hai, main baahar. Bendiyaba planning meri."
       }
     ],
     "vicky:idle:police": [
       {
         "speaker": "vicky",
-        "text": "Police peeche hai. Ab bhaagna hi padega."
+        "text": "Bedafu, police peeche lag gayi. Bhaag ab."
       },
       {
         "speaker": "vicky",
-        "text": "Ek galti aur — seedha chowki."
+        "text": "Macho, ek galti aur — seedha chowki."
       },
       {
         "speaker": "vicky",
-        "text": "Chowki mein baithna nahi hai aaj."
+        "text": "Bawa, aaj chowki mein raat nahi katni."
       },
       {
         "speaker": "vicky",
-        "text": "Bhaag Vicky, sochna baad mein."
+        "text": "Bhaag Vicky, sochna baad mein bendiyaba."
+      },
+      {
+        "speaker": "vicky",
+        "text": "Inko abhi hi mera chehra yaad aana tha. Benduga kismat."
       }
     ],
     "vicky:idle:thaka": [
       {
         "speaker": "vicky",
-        "text": "Saans phool gayi. Ye chadhai jaan le legi."
+        "text": "Saans phool gayi bawa. Ye chadhai jaan le legi."
       },
       {
         "speaker": "vicky",
-        "text": "Thoda ruk. Pahad bhaagta nahi hai."
+        "text": "Macho, do minute. Pahad kahin bhaag nahi raha."
       },
       {
         "speaker": "vicky",
-        "text": "Ab aur nahi. Do minute."
+        "text": "Bedafu, ab aur nahi. Baith jaata hoon."
+      },
+      {
+        "speaker": "vicky",
+        "text": "Pataka hua pada hoon. Thoda ruk yaar."
       }
     ],
     "vicky:idle:gaadi": [
       {
         "speaker": "vicky",
-        "text": "Gaadi purani hai, par chalti hai."
+        "text": "Gaadi purani hai bawa, par chalti hai."
       },
       {
         "speaker": "vicky",
-        "text": "Mall pe gaadi le gaya to police pakka aayegi."
+        "text": "Macho, Mall pe gaadi le gaya to police pakka aayegi."
       },
       {
         "speaker": "vicky",
-        "text": "Horn maaro, warna koi hatega nahi."
+        "text": "Horn maaro, warna yahan koi hatega nahi."
       },
       {
         "speaker": "vicky",
-        "text": "Mod tez hai — dhyan se."
+        "text": "Mod tez hai — dhyan se bawa."
+      },
+      {
+        "speaker": "vicky",
+        "text": "Bedafu ne beech sadak pe gaadi khadi kar di."
       }
     ],
     "vicky:idle:kaam": [
       {
         "speaker": "vicky",
-        "text": "Kaam adhoora hai. Chal ab."
+        "text": "Kaam adhoora hai bawa. Chal ab."
       },
       {
         "speaker": "vicky",
-        "text": "Marker udhar hai. Pahunchna hai."
+        "text": "Marker udhar hai. Pahunchna hai macho."
       },
       {
         "speaker": "vicky",
-        "text": "Der ho rahi hai. Log intezaar nahi karte."
+        "text": "Der ho rahi hai. Log intezaar nahi karte bawa."
+      }
+    ],
+    "vicky:chori": [
+      {
+        "speaker": "vicky",
+        "text": "Macho, gaadi to le li. Ab bhaag bawa."
+      },
+      {
+        "speaker": "vicky",
+        "text": "Bedafu, chabhi andar hi chhod gaya tha!"
+      },
+      {
+        "speaker": "vicky",
+        "text": "Sorry bawa, kaam zaroori hai. Wapas kar dunga… shayad."
+      },
+      {
+        "speaker": "vicky",
+        "text": "Benduga, ab poora Sanjauli dekh raha hai."
       }
     ]
   }

@@ -549,7 +549,10 @@ function college(c, mb) {
     [-30, -16, LOWER], [-24, -18, LOWER],                 // neeche ka terrace
   ]) {
     const [px, pz] = L(u, v);
-    crowdSpots.push({ x: px, z: pz, y: base, kind: "campus" });
+    // `r` = kitne ghere mein tehal sakte hain. Ye bindu slab ke kinare,
+    // seedhiyon aur court ke paas hain, isliye ghera chhota rakhna zaroori
+    // hai -- warna student slab se utar kar hawa mein chalta rehta hai.
+    crowdSpots.push({ x: px, z: pz, y: base, r: 2.5, kind: "campus" });
   }
 
   /*

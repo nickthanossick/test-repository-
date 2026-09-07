@@ -213,8 +213,9 @@ export class Crowd {
       });
       if (near.length) {
         const sp = near[(Math.random() * near.length) | 0];
-        w.x = sp.x + (Math.random() - 0.5) * 5;
-        w.z = sp.z + (Math.random() - 0.5) * 5;
+        const rr = (sp.r ?? 2.5) * 0.7;
+        w.x = sp.x + (Math.random() - 0.5) * 2 * rr;
+        w.z = sp.z + (Math.random() - 0.5) * 2 * rr;
         /*
          * Campus ka farsh **zameen se ooncha** hai (college ka terrace cut-and-
          * fill se banta hai, kahin 5-6 m upar). Isliye yahan terrain ki oonchai
@@ -222,10 +223,24 @@ export class Crowd {
          * aur ek bhi nazar nahi aata. Spot apni oonchai khud bata deta hai.
          */
         w.fixedY = sp.y;
+        /*
+         * Student campus se bahar nahi jaayega.
+         *
+         * `fixedY` slab ki oonchai par pin kar deta hai, par chaal har frame
+         * chalti rehti thi -- kuch second mein student campus ke kinare se
+         * bahar nikal jaata tha aur wahin pin hone ki wajah se **hawa mein**
+         * chalta rehta tha (naapa hua: 5.6 m upar). Nikhil: *"hwa me mat chla
+         * cheeje"*.
+         *
+         * Ab har student ka apna ghera hai. Kinare par pahunchte hi wo palat
+         * jaata hai -- waise bhi college ka ladka Dhalli tak nahi tehalta.
+         */
+        w.home = { x: sp.x, z: sp.z, r: sp.r ?? 2.5 };
         const a = Math.random() * Math.PI * 2;
         w.dir = 1;
-        // campus mein log tehelte hain, kisi lakeer par nahi chalte
-        w.ux = Math.cos(a) * 0.35; w.uz = Math.sin(a) * 0.35;
+        // campus mein log tehelte hain, kisi lakeer par nahi chalte --
+        // aur dheere, kyunki ghera chhota hai
+        w.ux = Math.cos(a) * 0.22; w.uz = Math.sin(a) * 0.22;
         w.placed = true;
         w.mesh.visible = true;
         return true;
@@ -262,6 +277,7 @@ export class Crowd {
       w.dir = Math.random() < 0.5 ? 1 : -1;
       w.x = x; w.z = z;
       w.fixedY = null;              // sadak par terrain hi sahi hai
+      w.home = null;
       w.ux = ux * w.dir; w.uz = uz * w.dir;
       w.placed = true;
       w.mesh.visible = true;
@@ -320,6 +336,18 @@ export class Crowd {
       }
       w.x += w.ux * WALK_SPEED * dt;
       w.z += w.uz * WALK_SPEED * dt;
+      // Campus wale apne ghere ke andar hi -- bahar nikalte hi wapas mud jao
+      if (w.home) {
+        const hx = w.x - w.home.x, hz = w.z - w.home.z;
+        if (Math.hypot(hx, hz) > w.home.r) {
+          const L = Math.hypot(hx, hz) || 1;
+          w.x = w.home.x + (hx / L) * w.home.r;
+          w.z = w.home.z + (hz / L) * w.home.r;
+          // andar ki taraf, thoda tedha -- warna sab ek hi lakeer par lautte hain
+          const a = Math.atan2(-hz, -hx) + (Math.random() - 0.5) * 1.2;
+          w.ux = Math.cos(a) * 0.22; w.uz = Math.sin(a) * 0.22;
+        }
+      }
       w.mesh.position.set(w.x, w.fixedY ?? this.ground(w.x, w.z), w.z);
       w.mesh.rotation.y = faceYaw(w.ux, w.uz);
       const d = Math.hypot(w.x - playerPos.x, w.z - playerPos.z);

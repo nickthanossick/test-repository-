@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { buildHuman, faceYaw } from "./human.js";
+import { buildHuman } from "./human.js";
 
 /**
  * Paidal Vicky.
@@ -68,6 +68,21 @@ const TURN_RATE = 2.6;      // radian/second, arrows se ghoomne ki raftaar
      * tha -- W dabane par `(-sin, +cos)` nikalta tha, yaani z ka chinh ulta
      * (aur strafe mein x ka). Isi se banda camera ghumate hi kabhi aage,
      * kabhi bagal, kabhi ulta chal padta tha.
+     *
+     * ## `this.yaw` ka matlab -- yahi asli gadbad thi
+     *
+     * Pehle `yaw` ka matlab tha "chalne ki disha `(sin yaw, cos yaw)`", jabki
+     * gaadi ka `yaw` matlab "aage `(-sin yaw, -cos yaw)`" -- do ulte usool ek
+     * hi khel mein. Chase camera gaadi wale usool par bana hai (wo `target +
+     * (sin, cos)*dist` par baithta hai), isliye jab arrows se ghoomne par
+     * `chase.yaw` ko `player.yaw` diya jaata tha, **camera bande ke saamne
+     * pahunch jaata tha**. Nateeja: aage badhte hi Vicky camera ki taraf, mooh
+     * saamne karke chalta dikhta tha -- Nikhil ki "body ulti chal rahi hai".
+     *
+     * Ab dono ek hi usool par hain: **aage `(-sin yaw, -cos yaw)`**. Isse
+     * camera apne aap peeche aa jaata hai, aur model ka apna aage bhi `-Z` hai
+     * to `mesh.rotation.y = yaw` seedha kaam kar jaata hai -- koi ulat-pher
+     * nahi.
      */
     if (ctl.turn) {
       this.yaw -= ctl.turn * TURN_RATE * dt;
@@ -88,8 +103,8 @@ const TURN_RATE = 2.6;      // radian/second, arrows se ghoomne ki raftaar
     let dx = -mx * cos - mz * sin;      // camera-right = (-cos, +sin)
     let dz = mx * sin - mz * cos;       // camera-aage  = (-sin, -cos)
     if (fwd) {
-      dx += Math.sin(this.yaw) * fwd;
-      dz += Math.cos(this.yaw) * fwd;
+      dx += -Math.sin(this.yaw) * fwd;      // aage = (-sin, -cos)
+      dz += -Math.cos(this.yaw) * fwd;
     }
     {
       const dl = Math.hypot(dx, dz);
@@ -128,7 +143,7 @@ const TURN_RATE = 2.6;      // radian/second, arrows se ghoomne ki raftaar
       // Rukh sirf tab badlo jab WASD se chal rahe ho. Arrows wale mode mein
       // rukh khiladi khud `ctl.turn` se tay karta hai -- yahan overwrite karne
       // se wo turant wapas ghis jaata tha aur ghoomna kaam hi nahi karta tha.
-      if (len > 0.01) this.yaw = Math.atan2(dx, dz);
+      if (len > 0.01) this.yaw = Math.atan2(-dx, -dz);
     }
 
     const lim = this.terrain.half - 8;
@@ -146,9 +161,15 @@ const TURN_RATE = 2.6;      // radian/second, arrows se ghoomne ki raftaar
     }
 
     this.mesh.position.copy(this.pos);
-    // `yaw` heading hai (combat aur arrows isi par chalte hain); model ka
-    // apna rukh alag nikalta hai kyunki uska aage -Z hai
-    this.mesh.rotation.y = faceYaw(Math.sin(this.yaw), Math.cos(this.yaw));
+    /*
+     * Seedha `yaw`.
+     *
+     * `rotation.y = yaw` model ka `-Z` `(-sin yaw, -cos yaw)` par le jaata
+     * hai -- aur ab `yaw` ka matlab bhi wahi hai. Pehle yahan `faceYaw()` se
+     * ulta karna padta tha kyunki `yaw` ka matlab ulta tha; wo ab theek ho
+     * gaya, isliye ye ulat-pher hat gayi.
+     */
+    this.mesh.rotation.y = this.yaw;
 
     this._updateStates(dt, moving);
     this._animate(moving);

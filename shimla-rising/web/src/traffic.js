@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { MeshBuilder } from "./geometry.js";
 import { buildBody } from "./vehicle.js";
+import { buildHuman } from "./human.js";
 
 /**
  * Sadak par chalti gaadiyan.
@@ -54,6 +55,7 @@ export class Traffic {
     this.group.name = "traffic";
     scene.add(this.group);
     this.cars = [];
+    this.fleeing = [];          // gaadi se nikale hue driver, bhaagte hue
 
     // ---- lanes: har chalne layak sadak ki polyline + cumulative lambai ----
     this.lanes = [];
@@ -83,12 +85,25 @@ export class Traffic {
     const full = buildBody(spec);
     full.traverse((o) => { o.castShadow = true; o.receiveShadow = true; });
     const lite = buildLite(spec);
+    /*
+     * Gaadi mein driver.
+     *
+     * Nikhil: *"gadi rok k andr bethne ka option rkh, gadi wale ko bhar nikal
+     * k"*. Bina driver ke gaadi se kisi ko bahar nikalne ka matlab hi nahi
+     * banta. Poora kirdaar mehnga padta (23 mesh), isliye sirf sar aur kandha
+     * -- ek merged mesh, sheeshe ke peeche itna hi dikhta hai.
+     *
+     * India mein steering daayein hoti hai. Model ka aage `-Z` hai, upar `+Y`
+     * hai, isliye daayan haath `+X` par padta hai.
+     */
+    const driver = buildDriverBust(spec, i);
+    full.add(driver);
     // shuru mein sasta wala -- pehla `_sync` bataayega ki paas hai ya door
     full.visible = false;
     mesh.add(full, lite);
     this.group.add(mesh);
     const car = {
-      mesh, full, lite, spec,
+      mesh, full, lite, spec, driver,
       lane: null, d: 0, dir: 1, speed: 0, horn: 2 + this.rng() * 20,
       top: (spec.top_speed_kmh || 90) / 3.6,
     };
@@ -158,7 +173,18 @@ export class Traffic {
     const x = p.x + nx * off, z = p.z + nz * off;
     car.mesh.position.set(x, this.ground(x, z), z);
 
-    const heading = Math.atan2(p.ux * car.dir, -(p.uz * car.dir));
+    /*
+     * Gaadi ka rukh.
+     *
+     * Model ka aage `-Z` hai, aur `rotation.y = h` use `(-sin h, -cos h)`
+     * par le jaata hai. Chalne ki disha `(ux, uz) * dir` hai, isliye
+     * `h = atan2(-ux*dir, -uz*dir)`. Pehle yahan `atan2(ux*dir, -(uz*dir))`
+     * tha -- `sin` ka chinh ulta, yaani gaadi ka mooh sadak ke aar-paar
+     * mirror ho jaata tha. Chalti wo seedhi thi par dikhti tirchhi/bagal ko
+     * sarakti hui -- Nikhil ki "gaadiyan float ho rahi, straight line mein
+     * nahi jaa rahi".
+     */
+    const heading = Math.atan2(-p.ux * car.dir, -(p.uz * car.dir));
     const n = this.terrain.normalAt(x, z, _n);
     _q.setFromAxisAngle(_up, heading);
     _align.setFromUnitVectors(_up, n);
@@ -195,6 +221,7 @@ export class Traffic {
     if (!this.lanes.length) return;
     this.eye = camPos || playerPos;
     this.night = night;
+    this._updateFleeing(dt);
     for (const car of this.cars) {
       if (!car.lane) { this._place(car, playerPos); continue; }
       const lane = car.lane;
@@ -239,6 +266,99 @@ export class Traffic {
     }
   }
 
+  /**
+   * Khiladi ke paas ki chalti gaadi -- jise roka ja sakta hai.
+   *
+   * `null` agar itne paas koi nahi. HUD isse prompt dikhata hai.
+   */
+  nearest(pos, max = 7) {
+    let best = null, bd = max;
+    for (const c of this.cars) {
+      if (!c.lane) continue;
+      const d = c.mesh.position.distanceTo(pos);
+      if (d < bd) { bd = d; best = c; }
+    }
+    return best;
+  }
+
+  /**
+   * Gaadi roko, driver ko bahar nikalo.
+   *
+   * Nikhil: *"gadi rok k andr bethne ka option rkh gadi wale ko bhar nikal
+   * k"*. Gaadi traffic ke hisaab se hat jaati hai (`main.js` use ek asli
+   * `Vehicle` bana kar `parked` mein daal deta hai), driver bahar aakar bhaag
+   * jaata hai, aur uski jagah kahin aur ek nayi gaadi aa jaati hai taaki
+   * sadak khaali na ho.
+   *
+   * @returns {{spec, x, z, yaw}|null}
+   */
+  carjack(pos, max = 7) {
+    const car = this.nearest(pos, max);
+    if (!car) return null;
+
+    const p = car.mesh.position;
+    const yaw = car.mesh.rotation.y;
+    const out = { spec: car.spec, x: p.x, z: p.z, yaw: yawOf(car.mesh) };
+
+    // driver bahar -- bhaagta hua
+    this._eject(p, pos, car.spec, this.cars.indexOf(car));
+
+    // gaadi ab traffic ki nahi rahi; uski jagah nayi kahin aur
+    car.driver.visible = false;
+    car.mesh.visible = false;
+    car.lane = null;
+    car.taken = true;
+    this._place(car, pos);
+    car.mesh.visible = true;
+    car.driver.visible = true;
+    car.taken = false;
+    return out;
+  }
+
+  /** Bahar nikala hua driver -- kuch second bhaagta hai, phir gayab. */
+  _eject(carPos, playerPos, spec, seed) {
+    const mesh = buildHuman({
+      build: seed % 4 === 0 ? "female" : "male", lod: "crowd",
+      skin: [0xb07c4f, 0xc08a5e, 0x9a6a41][Math.abs(seed) % 3],
+      top: [0x3d4a63, 0x6d3630, 0x2f5545][Math.abs(seed + 1) % 3],
+      bottom: 0x35425e,
+    });
+    mesh.castShadow = true;
+    // gaadi se door, khiladi ke ulti taraf
+    let ax = carPos.x - playerPos.x, az = carPos.z - playerPos.z;
+    const L = Math.hypot(ax, az) || 1;
+    ax /= L; az /= L;
+    mesh.position.set(carPos.x + ax * 1.6, this.ground(carPos.x, carPos.z), carPos.z + az * 1.6);
+    this.group.add(mesh);
+    this.fleeing.push({ mesh, ux: ax, uz: az, life: 14, phase: Math.random() * 6 });
+  }
+
+  _updateFleeing(dt) {
+    for (let i = this.fleeing.length - 1; i >= 0; i--) {
+      const f = this.fleeing[i];
+      f.life -= dt;
+      const sp = 4.2;
+      f.mesh.position.x += f.ux * sp * dt;
+      f.mesh.position.z += f.uz * sp * dt;
+      f.mesh.position.y = this.ground(f.mesh.position.x, f.mesh.position.z);
+      f.mesh.rotation.y = Math.atan2(-f.ux, -f.uz);      // aage = (-sin, -cos)
+      f.phase += dt * 11;
+      const rig = f.mesh.userData.rig;
+      if (rig) {
+        const g = Math.sin(f.phase) * 0.62;
+        rig.legs[0].hip.rotation.x = g;
+        rig.legs[1].hip.rotation.x = -g;
+        rig.arms[0].shoulder.rotation.x = -g * 0.7;
+        rig.arms[1].shoulder.rotation.x = g * 0.7;
+      }
+      if (f.life <= 0) {
+        this.group.remove(f.mesh);
+        f.mesh.traverse((o) => o.geometry?.dispose?.());
+        this.fleeing.splice(i, 1);
+      }
+    }
+  }
+
   /** Test/HUD ke liye -- khiladi ke itne paas kitni gaadiyan chal rahi hain. */
   movingNear(playerPos, radius = 120) {
     let n = 0;
@@ -248,6 +368,20 @@ export class Traffic {
     }
     return n;
   }
+}
+
+/**
+ * Mesh ka apna yaw, terrain ke jhukav ko hata kar.
+ *
+ * Traffic ki gaadi ka quaternion `align * yaw` hai (pehle dhalan ke saath
+ * jhukav, phir rukh), isliye `rotation.y` seedha padhna galat nikalta hai.
+ * Model ka aage `-Z` hai -- use world mein le jaakar wahi yaw wapas nikaalte
+ * hain jo `Vehicle` samajhta hai.
+ */
+function yawOf(mesh) {
+  mesh.updateMatrixWorld(true);
+  const f = _fwd.set(0, 0, -1).applyQuaternion(mesh.getWorldQuaternion(_qw));
+  return Math.atan2(-f.x, -f.z);
 }
 
 /** Polyline par doori `d` ki jagah aur disha. */
@@ -316,11 +450,45 @@ function buildLite(spec) {
   return m;
 }
 
+/**
+ * Driver ka sirf sar aur kandha -- ek merged mesh.
+ *
+ * Sheeshe ke peeche se itna hi dikhta hai, aur ye sirf paas wali (full LOD)
+ * gaadi par lagta hai. Rang seed se aate hain taaki har gaadi mein alag banda
+ * baithe.
+ */
+function buildDriverBust(spec, seed) {
+  const [w, h, l] = spec.body;
+  const mb = new MeshBuilder(0.6);
+  const c = new THREE.Color();
+  const SKIN = [0xb07c4f, 0xc08a5e, 0x9a6a41, 0xd0a071];
+  const SHIRT = [0x3d4a63, 0x6d3630, 0x2f5545, 0x7a6a3c, 0x45414a];
+  c.setHex(SHIRT[seed % SHIRT.length]);
+  mb.box(0, 0.10, 0.02, 0.40, 0.30, 0.20, c);              // kandhe
+  c.setHex(SKIN[seed % SKIN.length]);
+  mb.box(0, 0.28, 0.00, 0.10, 0.09, 0.10, c);              // gardan
+  mb.box(0, 0.40, 0.00, 0.185, 0.22, 0.19, c);             // sar
+  c.setHex(0x140f0a);
+  mb.box(0, 0.485, 0.012, 0.195, 0.075, 0.20, c);          // baal
+  if (seed % 3 === 0) {                                     // kabhi topi
+    c.setHex(0x14543c); mb.box(0, 0.525, 0, 0.24, 0.055, 0.24, c);
+  }
+  const m = mb.build(LITE_MAT);
+  m.castShadow = false;
+  m.receiveShadow = false;
+  // daayein seat par, cabin ke aage wale hisse mein
+  const bodyH = h * 0.48, cabH = h * 0.36;
+  m.position.set(w * 0.22, bodyH + cabH * 0.10, -l * 0.06 - l * 0.06);
+  return m;
+}
+
 /** Saanjha material -- saari door ki gaadiyan isi par, taaki batching bani rahe. */
 const LITE_MAT = new THREE.MeshStandardMaterial({
   vertexColors: true, roughness: 0.42, metalness: 0.25 });
 
 const _n = new THREE.Vector3();
+const _fwd = new THREE.Vector3();
+const _qw = new THREE.Quaternion();
 const _up = new THREE.Vector3(0, 1, 0);
 const _q = new THREE.Quaternion();
 const _align = new THREE.Quaternion();
