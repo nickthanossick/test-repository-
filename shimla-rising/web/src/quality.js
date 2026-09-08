@@ -26,6 +26,7 @@ export const PRESETS = {
     pixelRatio: 1.0,
     detailScatter: 0,      // ghaas/chattan ka daayra, metres
     shadows: true,
+    post: null,            // koi post-processing nahi -- sabse halka
     crowd: { keepers: 20, walkers: 14, dogs: 2, cows: 1, monkeys: 1 },
     buses: 3,
     traffic: 8,            // sadak par chalti gaadiyan
@@ -37,9 +38,17 @@ export const PRESETS = {
     windowFacades: 2,
     shadowMap: 2048,
     shadowRadius: 190,
-    pixelRatio: 1.5,
+    /*
+     * pixelRatio 1.5 se 1.25.
+     *
+     * Ye seedha fill-rate hai: 1.5 matlab 2.25 guna pixel, 2.0 matlab chaar
+     * guna. Integrated GPU par yahi sabse pehle ghutta hai, aur 1.25 aur 1.5
+     * ka farak aankh ko mushkil se dikhta hai -- FPS ko saaf dikhta hai.
+     */
+    pixelRatio: 1.25,
     detailScatter: 120,
     shadows: true,
+    post: { ao: true, aoScale: 0.5, bloom: false, samples: 4 },
     crowd: { keepers: 42, walkers: 28, dogs: 3, cows: 2, monkeys: 2 },
     buses: 5,
     traffic: 12,
@@ -51,9 +60,10 @@ export const PRESETS = {
     windowFacades: 4,
     shadowMap: 4096,
     shadowRadius: 240,
-    pixelRatio: 2.0,
+    pixelRatio: 1.5,
     detailScatter: 200,
     shadows: true,
+    post: { ao: true, aoScale: 0.5, bloom: true, samples: 4 },
     crowd: { keepers: 72, walkers: 48, dogs: 4, cows: 3, monkeys: 4 },
     buses: 8,
     traffic: 16,
@@ -86,9 +96,36 @@ export function detect(renderer) {
   if (mobile) return cores >= 8 && mem >= 6 ? "medium" : "low";
   if (cores <= 4 || mem <= 4) return "low";
 
-  const strong = /RTX|GTX (1[06-9]|[2-9])|Radeon RX|Apple M[1-9]|Arc A/i.test(gpu);
-  if (strong && cores >= 8) return "high";
-  return cores >= 8 ? "high" : "medium";
+  /*
+   * GPU dekho -- core count nahi.
+   *
+   * Yahan pehle bas `cores >= 8 ? "high" : "medium"` tha, yaani **GPU ka naam
+   * padha hi nahi jaata tha**. Aaj ke aam i5/i7 laptop mein 8-12 logical core
+   * hote hain aur GPU Intel Iris Xe. Nateeja: aise har laptop ko `high` mil
+   * raha tha -- pixelRatio 2.0 (HiDPI screen par chaar guna pixel), 4096 ka
+   * shadow map, 34,000 ped, aur terrain akela 2.1 M triangle. Integrated
+   * graphics par ye bahut zyada hai.
+   *
+   * Nikhil isi par khelta hai, aur "abhi it lags" ki shikayat ki asli wajah
+   * shayad yahi thi. (Mera apna naap `low` par hota hai, kyunki headless
+   * SwiftShader upar wali line se hamesha `low` deta hai -- isliye ye load
+   * maine kabhi dekha hi nahi tha.)
+   */
+  const integrated = /Intel|UHD|HD Graphics|Iris|Radeon(?!.*\bRX\b).*Graphics|Vega|Adreno|Mali|PowerVR|llvmpipe/i
+    .test(gpu);
+  const discrete = /RTX|GTX (1[06-9]|[2-9])|Radeon RX|Apple M[1-9]|Arc A|Quadro|Titan/i.test(gpu);
+
+  if (discrete && cores >= 8) return "high";
+  if (integrated) return "medium";        // chahe 16 core hon -- GPU hi seema hai
+  /*
+   * GPU ka naam mila hi nahi (browser privacy ke chalte aksar nahi milta).
+   *
+   * Aise mein `high` maan lena khatarnaak hai: galat hue to khel atakta hai
+   * aur khiladi ko pata bhi nahi chalta ki kyun. `medium` galat hua to sirf
+   * thoda kam sundar dikhta hai, aur `Q` se badla ja sakta hai. Isliye shak
+   * ka faayda hamesha halke tier ko.
+   */
+  return "medium";
 }
 
 export function next(tier) {

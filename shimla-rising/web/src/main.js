@@ -68,8 +68,19 @@ async function boot() {
   // Device dekh kar quality tier chuno. Wahi scene jo laptop pe 60 fps deta hai
   // phone pe 8 fps dega, isliye terrain density, ped, shadow map aur pixel ratio
   // sab tier se aate hain. `Q` se badla ja sakta hai.
+  /*
+   * Tier: URL se, phir save se, phir auto-detect.
+   *
+   * `?tier=high` isliye zaroori hai ki headless test hamesha SwiftShader par
+   * chalta hai aur `detect()` use hamesha `low` deta hai -- yaani `medium`
+   * aur `high` ka load naapa hi nahi ja sakta tha. Pichhle round ka poora
+   * naap `low` ka tha, jabki khiladi `high` par tha. Ab `perf.mjs` teenon
+   * tier maap sakta hai.
+   */
+  const urlTier = new URLSearchParams(location.search).get("tier");
   const savedTier = (loadGame() || {}).quality;
-  let tier = Quality.TIERS.includes(savedTier) ? savedTier : Quality.detect(renderer);
+  let tier = Quality.TIERS.includes(urlTier) ? urlTier
+    : Quality.TIERS.includes(savedTier) ? savedTier : Quality.detect(renderer);
   let Q = Quality.PRESETS[tier];
   renderer.setPixelRatio(Math.min(devicePixelRatio, Q.pixelRatio));
   renderer.setSize(innerWidth, innerHeight);
@@ -723,6 +734,8 @@ async function boot() {
     // Jungle ka LOD -- 240 m ke andar poora ped, aage ek cone.
     // Sirf 64 doori ka hisaab, aur badlav par hi visible toggle hota hai.
     forest?.userData.update?.(camera.position);
+    // Khadi gaadiyan bhi -- 70 m ke aage ek merged mesh. 15 doori ka hisaab.
+    for (const v of parked) v.setLod(camera.position);
     buses.update(dt);
     traffic.update(dt, pos, camera.position,
                    { night: dayNight.hour >= 18.4 || dayNight.hour <= 6.2 });

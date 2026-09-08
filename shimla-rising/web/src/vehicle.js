@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import * as TEX from "./textures.js";
+import { MeshBuilder } from "./geometry.js";
 
 /**
  * Arcade gaadi.
@@ -26,8 +27,39 @@ export class Vehicle {
     this.steer = 0;
     this.isPolice = !!opts.police;
     this.topSpeed = (spec.top_speed_kmh / 3.6);
-    this.mesh = buildBody(spec);
+
+    /*
+     * Do roop -- wahi jo `traffic.js` ki chalti gaadiyon par pehle se hai.
+     *
+     * Poora `buildBody()` ~24 mesh ka hai. Khel mein 15 khadi gaadiyan hain,
+     * aur unpar koi LOD tha hi nahi -- naapa gaya to Sanjauli Chowk par akeli
+     * khadi gaadiyan ~250 draw call kha rahi thi, jo bheed ke baad sabse bada
+     * hissa tha. `buildLiteBody()` ek merged mesh hai (1 call) aur 70 m ke
+     * aage usme aur poore roop mein farak dikhta hi nahi.
+     *
+     * `mesh` ab ek container hai; `body` poora roop. `userData` dono par ek hi
+     * object hai, isliye `mesh.userData.wheels` / `.beacons` jaise purane
+     * raaste waise ke waise chalte hain.
+     */
+    this.mesh = new THREE.Group();
+    this.body = buildBody(spec);
+    this.lite = buildLiteBody(spec);
+    this.lite.visible = false;
+    this.mesh.add(this.body, this.lite);
+    this.mesh.userData = this.body.userData;
     this.mesh.userData.vehicle = this;
+  }
+
+  /**
+   * Doori ke hisaab se roop. `main.js` har frame bulata hai (15 gaadiyan --
+   * kuch bhi nahi). Camera se naapta hai, khiladi se nahi: flashcard aur
+   * screenshot ke waqt camera kahin aur hota hai.
+   */
+  setLod(camPos, nearM = 70) {
+    const near = this.pos.distanceTo(camPos) < nearM;
+    if (near === this.body.visible) return;
+    this.body.visible = near;
+    this.lite.visible = !near;
   }
 
   get kmh() { return Math.abs(this.speed) * 3.6; }
@@ -366,3 +398,55 @@ const VEHICLE_RADIUS = 1.5;
 const _f = new THREE.Vector3(), _r = new THREE.Vector3(), _n = new THREE.Vector3();
 const _up = new THREE.Vector3(0, 1, 0);
 const _q = new THREE.Quaternion(), _align = new THREE.Quaternion();
+
+/**
+ * Saanjha material -- saari door/khadi gaadiyan isi par, taaki batching bani rahe.
+ * Rang vertex se aata hai, isliye ek hi material har gaadi ke liye kaafi hai.
+ */
+export const LITE_MAT = new THREE.MeshStandardMaterial({
+  vertexColors: true, roughness: 0.42, metalness: 0.25 });
+
+export function buildLiteBody(spec) {
+  const [w, h, l] = spec.body;
+  const mb = new MeshBuilder(0.5);
+  const c = new THREE.Color();
+  const bodyH = h * 0.48;
+  const cabH = h * 0.36;
+  const paint = new THREE.Color(spec.color);
+
+  // dhad -- do parat, taaki kinara ekdum seedha na lage
+  c.copy(paint);
+  mb.box(0, bodyH * 0.55, 0, w, bodyH * 0.9, l, c);
+  c.copy(paint).multiplyScalar(0.94);
+  mb.box(0, bodyH * 0.12, 0, w * 0.96, bodyH * 0.3, l * 0.99, c);
+
+  // greenhouse -- chhat neeche wale hisse se sankri
+  c.copy(paint).multiplyScalar(0.9);
+  mb.box(0, bodyH + cabH * 0.5, -l * 0.06, w * 0.86, cabH, l * 0.5, c);
+  c.copy(paint).multiplyScalar(1.06);
+  mb.box(0, bodyH + cabH - 0.02, -l * 0.06, w * 0.74, 0.05, l * 0.44, c);   // chhat
+
+  c.setHex(0x141a20);                                  // sheeshe: aage, peeche, bagal
+  mb.box(0, bodyH + cabH * 0.52, -l * 0.31, w * 0.80, cabH * 0.72, 0.05, c);
+  mb.box(0, bodyH + cabH * 0.52, l * 0.19, w * 0.78, cabH * 0.66, 0.05, c);
+  for (const dx of [-1, 1]) {
+    mb.box(dx * w * 0.43, bodyH + cabH * 0.52, -l * 0.06, 0.04, cabH * 0.62, l * 0.42, c);
+  }
+
+  c.setHex(0x1b1e22);                                  // bumper
+  for (const dz of [-1, 1]) mb.box(0, bodyH * 0.34, dz * l * 0.5, w * 0.97, bodyH * 0.26, 0.12, c);
+  c.setHex(0xfff0cc); mb.box(0, bodyH * 0.66, -l / 2 - 0.03, w * 0.68, bodyH * 0.2, 0.05, c);
+  c.setHex(0xc4301f); mb.box(0, bodyH * 0.7, l / 2 + 0.03, w * 0.68, bodyH * 0.16, 0.05, c);
+
+  c.setHex(0x14161a);
+  const rad = Math.min(0.42, h * 0.32);
+  for (const dx of [-1, 1]) {
+    for (const dz of [0.32, -0.32]) {
+      mb.box(dx * w * 0.47, rad, dz * l, 0.2, rad * 2, rad * 1.9, c);
+    }
+  }
+  const m = mb.build(LITE_MAT);
+  m.castShadow = true;
+  m.receiveShadow = false;
+  return m;
+}

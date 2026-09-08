@@ -82,6 +82,14 @@ export const faceYaw = (dx, dz) => Math.atan2(-dx, -dz);
 const HEAD_R = 0.098;
 
 /**
+ * Saanjha material -- lite aur far dono roop isi par.
+ *
+ * Rang vertex se aata hai, isliye har kirdaar ka apna material nahi chahiye.
+ * Yahi batching bhi bachata hai aur material ki ginti bhi.
+ */
+const FAR_MAT = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9 });
+
+/**
  * @param o.build   "male" | "female" | "elder"
  * @param o.skin    twacha ka hex
  * @param o.top     upar ke kapde ka hex
@@ -520,6 +528,111 @@ export function buildHuman(o = {}) {
  * `MeshBuilder` pehle se merged geometry + vertex colour karta hai, aur city,
  * bazaar aur landmarks sab isi se bante hain -- wahi yahan bhi.
  */
+/**
+ * Beech ka roop -- **paanch mesh**, par chaal ab bhi chalti hai.
+ *
+ * Ye round 17 ka sabse bada perf sudhaar hai. `buildHuman({lod:"crowd"})` ka
+ * "lite" roop **23 alag mesh** ka tha, aur `medium` tier par Sanjauli Chowk
+ * par naapa gaya to akeli bheed **506 draw call** kha rahi thi -- poore
+ * drishya ka sabse bada hissa, sheher se bhi zyada.
+ *
+ * Jo hissa hilta nahi (sir, baal, topi, dhad, kulhe) wo ek merged mesh mein
+ * ja sakta hai. Sirf wahi alag rehna chahiye jo mudta hai: do baazu, do
+ * taangein. Isliye:
+ *
+ *     1 dhad + 2 baazu + 2 taang = 5 draw call   (23 ki jagah)
+ *
+ * Rig ka dhaancha bilkul wahi rehta hai (`{arms:[{shoulder,elbow}], legs:
+ * [{hip,knee}]}`), isliye `walkGait()` aur `panga.js` bina badle chalte hain.
+ * Kohni aur ghutna ab mudte nahi -- 15 m se aage wo dikhta hi nahi.
+ *
+ * Sab kuch ek hi `FAR_MAT` par hai (vertex colour se rang), isliye material
+ * bhi nahi badhte.
+ */
+export function buildHumanLite(o = {}) {
+  const build = o.build || "male";
+  const female = build === "female" || build === "girl";
+  const elder = build === "elder";
+  const skin = o.skin ?? 0xc08a5e;
+  const top = o.top ?? 0xbb3a2a;
+  const bottom = o.bottom ?? 0x35425e;
+  const hair = o.hair ?? (elder ? 0xb8b2a8 : 0x140f0a);
+
+  const g = new THREE.Group();
+  const c = new THREE.Color();
+
+  // ---- dhad: sir se kulhe tak, ek hi mesh ----
+  const body = new MeshBuilder(0.6);
+  c.setHex(skin);
+  body.box(0, 1.626, 0, 0.185, 0.235, 0.195, c);              // sir
+  body.box(0, 1.494, 0.004, 0.098, 0.10, 0.098, c);           // gardan
+  c.setHex(hair);
+  body.box(0, 1.716, 0.012, 0.196, 0.086, 0.202, c);          // baal
+  c.setHex(top);
+  body.box(0, 1.33, 0, female ? 0.355 : 0.395, 0.27, 0.215, c);   // seena
+  body.box(0, 1.14, 0, female ? 0.305 : 0.335, 0.24, 0.195, c);   // kamar
+  c.setHex(bottom);
+  body.box(0, 1.012, 0, female ? 0.35 : 0.325, 0.15, 0.205, c);   // kulhe
+  if (o.topi !== false && !female) {
+    c.setHex(0x14543c); body.box(0, 1.748, 0, 0.248, 0.058, 0.248, c);
+    c.setHex(0x8a6a4c); body.box(0, 1.784, 0, 0.258, 0.030, 0.258, c);
+  }
+  const torso = body.build(FAR_MAT);
+  torso.castShadow = true;
+  torso.receiveShadow = true;
+  g.add(torso);
+
+  // ---- baazu: har taraf ek merged mesh, shoulder ke local space mein ----
+  const arms = [];
+  for (const side of [-1, 1]) {
+    const shoulder = new THREE.Group();
+    shoulder.position.set(side * (female ? 0.201 : 0.228), 1.386, 0);
+    g.add(shoulder);
+    const mb = new MeshBuilder(0.6);
+    c.setHex(top);
+    mb.box(0, -0.128, 0, 0.098, 0.30, 0.098, c);              // upar ka baazu
+    // aurton ka kurta kohni tak -- aage nangi baazu
+    c.setHex(female ? skin : top);
+    mb.box(0, -0.356, 0, 0.082, 0.225, 0.082, c);             // kohni se aage
+    c.setHex(skin);
+    mb.box(0, -0.508, 0, 0.072, 0.09, 0.05, c);               // haath
+    const m = mb.build(FAR_MAT);
+    m.castShadow = true;
+    shoulder.add(m);
+    // `elbow` sirf isliye ki purana code use dhoondh sake -- ismein kuch nahi
+    const elbow = new THREE.Group();
+    elbow.position.y = -0.252;
+    shoulder.add(elbow);
+    arms.push({ shoulder, elbow });
+  }
+
+  // ---- taangein: har taraf ek merged mesh, hip ke local space mein ----
+  const legs = [];
+  for (const side of [-1, 1]) {
+    const hip = new THREE.Group();
+    hip.position.set(side * 0.088, 0.955, 0);
+    g.add(hip);
+    const mb = new MeshBuilder(0.6);
+    c.setHex(bottom);
+    mb.box(0, -0.168, 0, 0.145, 0.34, 0.145, c);              // jangh
+    mb.box(0, -0.508, 0, 0.115, 0.34, 0.115, c);              // pindli
+    c.setHex(0x241d16);
+    mb.box(0, -0.695, 0.012, 0.093, 0.058, 0.150, c);         // joota
+    const m = mb.build(FAR_MAT);
+    m.castShadow = true;
+    hip.add(m);
+    const knee = new THREE.Group();
+    knee.position.y = -0.345;
+    hip.add(knee);
+    legs.push({ hip, knee });
+  }
+
+  if (o.height) g.scale.setScalar(o.height);
+  g.userData.rig = { arms, legs, head: torso };
+  g.userData.lite = true;
+  return g;
+}
+
 export function buildHumanFar(o = {}) {
   const build = o.build || "male";
   const female = build === "female" || build === "girl";
@@ -571,5 +684,3 @@ export function buildHumanFar(o = {}) {
   return g;
 }
 
-/** Saanjha material -- sab door ke kirdaar isi par, taaki batching bani rahe. */
-const FAR_MAT = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9 });

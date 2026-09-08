@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { buildHuman, buildHumanFar, faceYaw } from "./human.js";
+import { buildHuman, buildHumanLite, buildHumanFar, faceYaw } from "./human.js";
 import { buildDog, buildCow, buildMonkey, animateQuadruped } from "./animals.js";
 
 /**
@@ -28,9 +28,22 @@ const NEAR_BAND = 42;             // itne andar log ghane, aage chhitre
  * Dono roop load par ek saath ban jaate hain aur sirf `visible` badalta hai --
  * runtime par kuch banta nahi, isliye chalte-chalte hichki nahi aati.
  */
-const DETAIL_RANGE = 26;          // isse paas: poora roop (48 mesh)
-const LITE_RANGE = 48;            // isse paas: lite (23 mesh), aage far (1 mesh)
-const DETAIL_HYSTERESIS = 4;      // baar-baar switch na ho
+/*
+ * LOD ka daayra -- naap kar chhota kiya gaya.
+ *
+ * Poore roop ka ek NPC **48 draw call** ka hai. 26 m ka daayra rakhne par
+ * `medium` tier par ek waqt mein 8-10 log poore roop mein aa jaate the, yaani
+ * akele bheed 400+ draw call -- naapa gaya: medium ka main pass 762 call par
+ * tha, aur uska sabse bada hissa yahi tha.
+ *
+ * 15 m par bhi chehra, topi aur kapde saaf dikhte hain (Vicky khud hamesha
+ * poore roop mein rehta hai, wo alag hai). Nikhil ne bhi kaha tha ki mehnat
+ * sirf Vicky par lage -- NPC "chahe normal lge".
+ */
+const DETAIL_RANGE = 15;          // isse paas: poora roop (48 mesh)
+const LITE_RANGE = 34;            // isse paas: lite (23 mesh), aage far (1 mesh)
+const DETAIL_HYSTERESIS = 3;      // baar-baar switch na ho
+const MAX_FULL = 4;               // ek waqt mein itne hi NPC poore roop mein
 
 /** Deterministic RNG -- ek hi jagah ka aadmi har baar wahi dikhna chahiye. */
 function seeded(n) {
@@ -83,7 +96,8 @@ function makePerson(i) {
     height: 0.95 + r() * 0.1,
   };
   return {
-    lite: buildHuman({ ...opts, lod: "crowd" }),
+    // 23 mesh ka purana lite roop hata -- ab 5 mesh, par chaal wahi
+    lite: buildHumanLite(opts),
     full: buildHuman(opts),
     far: buildHumanFar(opts),
   };
@@ -93,13 +107,28 @@ function makePerson(i) {
  * Doori ke hisaab se roop badlo. Dono mesh ki transform ek jaisi rakhi jaati
  * hai, isliye switch dikhta nahi.
  */
-function setDetail(entry, dist) {
+function setDetail(entry, dist, budget = null) {
   // Hysteresis dono seemaon par -- warna seema ke aas-paas roop jhilmilaata hai
   const h = DETAIL_HYSTERESIS;
   let want;
   if (dist < (entry.level === "full" ? DETAIL_RANGE + h : DETAIL_RANGE)) want = "full";
   else if (dist < (entry.level === "far" ? LITE_RANGE : LITE_RANGE + h)) want = "lite";
   else want = "far";
+  /*
+   * Poore roop walon ki ginti par **hard cap**.
+   *
+   * Ek poora NPC 48 draw call ka hai. Sirf doori se tay karne par ghane
+   * bazaar mein 8-10 log ek saath daayre mein aa jaate the -- akele bheed
+   * 400+ call. Aur wo sabse bura tab hota hai jab drishya waise hi sabse
+   * bhara ho (Sanjauli Chowk).
+   *
+   * Doori se chunav hota hai, par ginti bandhi hui hai: budget khatm to agla
+   * banda `lite` par. Isse worst case ka pata rehta hai.
+   */
+  if (want === "full" && budget) {
+    if (budget.left <= 0) want = "lite";
+    else budget.left--;
+  }
   if (want === entry.level) return;
 
   const from = entry.mesh;
@@ -302,6 +331,8 @@ export class Crowd {
 
   update(dt, playerPos) {
     this._t += dt;
+    // Is frame mein kitne log poore roop mein ho sakte hain (upar `setDetail`)
+    const fullBudget = { left: MAX_FULL };
 
     // ---- dukandaar: counter ke peeche khade, sadak ki taraf mooh ----
     for (const k of this.keepers) {
@@ -319,7 +350,7 @@ export class Crowd {
         k.mesh.visible = true;
       }
       setDetail(k, Math.hypot(k.mesh.position.x - playerPos.x,
-                              k.mesh.position.z - playerPos.z));
+                              k.mesh.position.z - playerPos.z), fullBudget);
       // khade rehte hain, par saans ka halka bob (far roop ka rig nahi hota)
       const rig = k.mesh.userData.rig;
       if (rig) {
@@ -351,7 +382,7 @@ export class Crowd {
       w.mesh.position.set(w.x, w.fixedY ?? this.ground(w.x, w.z), w.z);
       w.mesh.rotation.y = faceYaw(w.ux, w.uz);
       const d = Math.hypot(w.x - playerPos.x, w.z - playerPos.z);
-      setDetail(w, d);
+      setDetail(w, d, fullBudget);
       // far roop ka rig nahi hota -- itni door chaal waise bhi dikhti nahi
       if (w.mesh.userData.rig) walkGait(w.mesh, this._t + w.phase);
       if (d > RECYCLE_AT) { w.placed = false; w.mesh.visible = false; }

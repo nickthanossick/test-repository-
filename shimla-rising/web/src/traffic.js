@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { MeshBuilder } from "./geometry.js";
-import { buildBody } from "./vehicle.js";
+import { buildBody, buildLiteBody, LITE_MAT } from "./vehicle.js";
 import { buildHuman } from "./human.js";
 
 /**
@@ -84,7 +84,7 @@ export class Traffic {
     const mesh = new THREE.Group();
     const full = buildBody(spec);
     full.traverse((o) => { o.castShadow = true; o.receiveShadow = true; });
-    const lite = buildLite(spec);
+    const lite = buildLiteBody(spec);
     /*
      * Gaadi mein driver.
      *
@@ -405,51 +405,6 @@ function at(lane, d) {
  * chamfer aur alag material chale jaate hain. 60 m se aage ye farak dikhta hi
  * nahi.
  */
-function buildLite(spec) {
-  const [w, h, l] = spec.body;
-  const mb = new MeshBuilder(0.5);
-  const c = new THREE.Color();
-  const bodyH = h * 0.48;
-  const cabH = h * 0.36;
-  const paint = new THREE.Color(spec.color);
-
-  // dhad -- do parat, taaki kinara ekdum seedha na lage
-  c.copy(paint);
-  mb.box(0, bodyH * 0.55, 0, w, bodyH * 0.9, l, c);
-  c.copy(paint).multiplyScalar(0.94);
-  mb.box(0, bodyH * 0.12, 0, w * 0.96, bodyH * 0.3, l * 0.99, c);
-
-  // greenhouse -- chhat neeche wale hisse se sankri
-  c.copy(paint).multiplyScalar(0.9);
-  mb.box(0, bodyH + cabH * 0.5, -l * 0.06, w * 0.86, cabH, l * 0.5, c);
-  c.copy(paint).multiplyScalar(1.06);
-  mb.box(0, bodyH + cabH - 0.02, -l * 0.06, w * 0.74, 0.05, l * 0.44, c);   // chhat
-
-  c.setHex(0x141a20);                                  // sheeshe: aage, peeche, bagal
-  mb.box(0, bodyH + cabH * 0.52, -l * 0.31, w * 0.80, cabH * 0.72, 0.05, c);
-  mb.box(0, bodyH + cabH * 0.52, l * 0.19, w * 0.78, cabH * 0.66, 0.05, c);
-  for (const dx of [-1, 1]) {
-    mb.box(dx * w * 0.43, bodyH + cabH * 0.52, -l * 0.06, 0.04, cabH * 0.62, l * 0.42, c);
-  }
-
-  c.setHex(0x1b1e22);                                  // bumper
-  for (const dz of [-1, 1]) mb.box(0, bodyH * 0.34, dz * l * 0.5, w * 0.97, bodyH * 0.26, 0.12, c);
-  c.setHex(0xfff0cc); mb.box(0, bodyH * 0.66, -l / 2 - 0.03, w * 0.68, bodyH * 0.2, 0.05, c);
-  c.setHex(0xc4301f); mb.box(0, bodyH * 0.7, l / 2 + 0.03, w * 0.68, bodyH * 0.16, 0.05, c);
-
-  c.setHex(0x14161a);
-  const rad = Math.min(0.42, h * 0.32);
-  for (const dx of [-1, 1]) {
-    for (const dz of [0.32, -0.32]) {
-      mb.box(dx * w * 0.47, rad, dz * l, 0.2, rad * 2, rad * 1.9, c);
-    }
-  }
-  const m = mb.build(LITE_MAT);
-  m.castShadow = true;
-  m.receiveShadow = false;
-  return m;
-}
-
 /**
  * Driver ka sirf sar aur kandha -- ek merged mesh.
  *
@@ -482,9 +437,6 @@ function buildDriverBust(spec, seed) {
   return m;
 }
 
-/** Saanjha material -- saari door ki gaadiyan isi par, taaki batching bani rahe. */
-const LITE_MAT = new THREE.MeshStandardMaterial({
-  vertexColors: true, roughness: 0.42, metalness: 0.25 });
 
 const _n = new THREE.Vector3();
 const _fwd = new THREE.Vector3();

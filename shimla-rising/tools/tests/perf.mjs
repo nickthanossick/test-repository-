@@ -17,7 +17,17 @@
  */
 import { chromium } from "playwright";
 
-const URL = process.env.GAME_URL || "http://localhost:8080/web/";
+/*
+ * `--tier=medium` se us tier ka naap.
+ *
+ * Headless hamesha SwiftShader par chalta hai aur `Quality.detect()` use
+ * hamesha `low` deta hai -- yaani ab tak sirf sabse halke load ka naap hota
+ * tha, jabki asli khiladi `medium`/`high` par hota hai. Ab teenon naape ja
+ * sakte hain.
+ */
+const TIER = (process.argv.find((a) => a.startsWith("--tier=")) || "").split("=")[1] || "";
+const BASE = process.env.GAME_URL || "http://localhost:8080/web/";
+const URL = TIER ? `${BASE}?tier=${TIER}` : BASE;
 
 const browser = await chromium.launch({
   args: ["--use-gl=swiftshader", "--enable-unsafe-swiftshader", "--no-sandbox"],
@@ -29,6 +39,24 @@ await page.goto(URL, { waitUntil: "domcontentloaded", timeout: 60000 });
 await page.waitForFunction(() => window.__shimla?.ready === true, null, { timeout: 300000 });
 await page.evaluate(() => window.__shimla.skipCards());
 await page.waitForTimeout(1500);
+
+/*
+ * Naapne se pehle ek **nishchit jagah aur camera**.
+ *
+ * Bina iske draw call har run par badalta hai: khiladi jahan spawn hua, jidhar
+ * camera ka rukh tha, traffic kahan pahunchi -- sab frustum badal dete hain.
+ * Ek baar `low` ka aankda 493 se 632 par chala gaya tha sirf isi wajah se, aur
+ * main lagbhag ise regression samajh baitha. Ab har naap Sanjauli Chowk se,
+ * ek hi kone se.
+ */
+await page.evaluate(() => {
+  const S = window.__shimla;
+  S.teleport("sanjauli_chowk");
+  S.viewPOI("sanjauli_chowk", 70, 26, 2.2);
+  for (let i = 0; i < 40; i++) S.traffic.update(0.05, S.player.pos, S.camera.position);
+  S.crowd.update(0.05, S.player.pos);
+});
+await page.waitForTimeout(800);
 
 const r = await page.evaluate(() => {
   const S = window.__shimla;
@@ -166,7 +194,23 @@ console.log("gpu memory:  %d geometries, %d textures", r.gpu.geometries, r.gpu.t
  * spec ka baseline hai. CPU ka budget sabse ahem hai: 16 ms ke frame mein
  * simulation 4 ms se zyada le to renderer ke liye kuch bachta hi nahi.
  */
-const BUDGET = { cpuUs: 4000, mainCalls: 700, mainTris: 2_600_000, materials: 500 };
+/*
+ * Budget har tier ka apna.
+ *
+ * Pehle ek hi budget tha jo `low` ke hisaab se bana tha -- aur headless
+ * hamesha `low` par chalta hai, isliye `medium`/`high` kabhi jaanche hi nahi
+ * gaye. Naapne par pata chala ki `high` 3.49 M triangle aur 872 draw call ka
+ * hai; khiladi wahi chala raha tha.
+ *
+ * Ye aankde Intel integrated (Iris Xe) ko dhyan mein rakh kar hain -- wahi
+ * Nikhil ki machine hai.
+ */
+const BUDGETS = {
+  low:    { cpuUs: 4000, mainCalls: 550, mainTris: 1_700_000, materials: 550 },
+  medium: { cpuUs: 4500, mainCalls: 700, mainTris: 2_500_000, materials: 800 },
+  high:   { cpuUs: 5500, mainCalls: 900, mainTris: 3_800_000, materials: 1200 },
+};
+const BUDGET = BUDGETS[r.tier] || BUDGETS.low;
 const checks = [
   ["nearestNode sahi jawab", N.mismatch === 0, `${N.mismatch} mismatch`],
   /*
