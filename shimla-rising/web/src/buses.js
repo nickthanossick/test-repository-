@@ -166,7 +166,17 @@ export class BusSystem {
        * nahi jaa rahi".
        */
       const heading = Math.atan2(-p.ux * bus.dir, -(p.uz * bus.dir));
-      const n = this.terrain.normalAt(x, z, _n);
+      // Bus bhi sadak ke saath -- wahi wajah jo `traffic.js` mein likhi hai.
+      // Bus lambi hoti hai, isliye dhalan 4 m par naapte hain.
+      let n;
+      if (this.ground) {
+        const d = 4;
+        const fx = -Math.sin(heading), fz = -Math.cos(heading);
+        const grade = (this.ground(x + fx * d, z + fz * d) - this.ground(x - fx * d, z - fz * d)) / (2 * d);
+        n = _n.set(-fx * grade, 1, -fz * grade).normalize();
+      } else {
+        n = this.terrain.normalAt(x, z, _n);
+      }
       _q.setFromAxisAngle(_up, heading);
       _align.setFromUnitVectors(_up, n);
       bus.mesh.quaternion.copy(_align).multiply(_q);

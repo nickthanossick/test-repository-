@@ -247,7 +247,7 @@ async function boot() {
     if (!n) continue;
     const kind = id === "isbt" ? "hrtc_bus" : id === "timber_depot" ? "timber_truck"
       : kinds[(rng() * kinds.length) | 0];
-    const v = new Vehicle(data.vehicleById.get(kind), terrain, { colliders, ground: groundAt });
+    const v = new Vehicle(data.vehicleById.get(kind), terrain, { colliders, ground: groundAt, roads });
     v.placeAt(n.node.pos.x + (rng() - 0.5) * 6, n.node.pos.z + (rng() - 0.5) * 6, rng() * Math.PI * 2);
     scene.add(v.mesh);
     parked.push(v);
@@ -338,7 +338,7 @@ async function boot() {
   }
   {
     // Vicky ki apni taxi, garage ke bahar. Khiladi ko dhoondhna na pade.
-    const home = new Vehicle(data.vehicleById.get("taxi"), terrain, { colliders, ground: groundAt });
+    const home = new Vehicle(data.vehicleById.get("taxi"), terrain, { colliders, ground: groundAt, roads });
     // sadak pe khadi karo, ghaas pe nahi
     const rn = roads.nearestNode(player.pos.x, player.pos.z, (r) => r.type !== "pedestrian" && r.type !== "rail");
     const base = rn ? rn.node.pos : { x: player.pos.x + 4, z: player.pos.z + 3 };
@@ -414,8 +414,11 @@ async function boot() {
     if (saved.completed) missions.completed = new Set(saved.completed);
     if (saved.available) missions.available = new Set(saved.available);
     if (saved.pos) {
+      // `playerGround` se, `terrain.heightAt` se nahi -- warna sadak par save
+      // karke load karne par khiladi uski satah se aadha metre neeche aata hai
+      // (aur campus ke farsh par to poore teen metre).
       const sp = colliders.freeSpotNear(saved.pos.x, saved.pos.z,
-                                        terrain.heightAt(saved.pos.x, saved.pos.z) + 1, 1.2);
+                                        playerGround(saved.pos.x, saved.pos.z) + 1, 1.2);
       player.placeAt(sp.x, sp.z);
     }
     if (saved.weather) weather.set(saved.weather);
@@ -638,7 +641,7 @@ async function boot() {
         const t = traffic.carjack(player.pos, 7);
         if (t) {
           v = new Vehicle(data.vehicleById.get(t.spec.id) || t.spec, terrain,
-                          { colliders, ground: groundAt });
+                          { colliders, ground: groundAt, roads });
           v.placeAt(t.x, t.z, t.yaw);
           scene.add(v.mesh);
           parked.push(v);
@@ -937,7 +940,37 @@ async function boot() {
     if (o?.type === "survive") extra = `(${Math.ceil(missions.timer)}s)`;
     else if (o?.type === "race") extra = `(${Math.ceil(missions.timer)}s · ${o.checkpoints.length - missions.raceIndex} baaki)`;
     else if (o?.type === "collect") extra = `(${missions.pickups.filter((p) => !p.taken).length} baaki)`;
-    hud.setMission(missions.active, missions.objIndex, extra);
+    /*
+     * Mission ka display -- **hamesha**, chahe koi mission chal raha ho ya nahi.
+     *
+     * Nikhil: *"no mission k lie display, map m kitni dur h"*. Pehle mission
+     * na hone par HUD ka poora panel chhup jaata tha, isliye save load karne
+     * par khiladi ko kuch pata hi nahi chalta tha ki ab kya karna hai aur
+     * kahan jaana hai.
+     *
+     * Ab teen haalat: chal raha mission (uske kaam ke aage doori), koi mission
+     * shuru karne layak (uska naam + doori), ya sab poore.
+     */
+    if (missions.active) {
+      const target = missions.markers.children.find(
+        (mk) => mk.userData?.markerKind === "active" || mk.userData?.markerKind === "objective");
+      if (target) {
+        const d = Math.hypot(target.position.x - pos.x, target.position.z - pos.z);
+        extra = `${extra} ${d >= 1000 ? (d / 1000).toFixed(1) + " km" : Math.round(d) + " m"}`.trim();
+      }
+      hud.setMission(missions.active, missions.objIndex, extra);
+    } else {
+      let best = null, bd = Infinity;
+      for (const id of missions.available) {
+        const m = missions.byId.get(id);
+        if (!m || (missions.completed.has(id) && !m.repeatable)) continue;
+        const p = missions.poiPos(m.start_poi);
+        if (!p) continue;
+        const d = Math.hypot(p.x - pos.x, p.z - pos.z);
+        if (d < bd) { bd = d; best = m; }
+      }
+      hud.setNextMission(best, bd);
+    }
     hud.setDistrict(district ? district.name : "Shimla ke bahar");
     hud.setBars(player.health, player.stamina);
     hud.update(dt, pos, state.mode === "vehicle" ? state.vehicle.yaw : player.yaw, missions.markers.children);

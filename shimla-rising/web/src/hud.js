@@ -100,6 +100,34 @@ export class HUD {
     });
   }
 
+  /**
+   * Koi mission chal nahi raha -- to bhi kuch dikhna chahiye.
+   *
+   * Pehle `setMission(null)` poora panel chhupa deta tha, aur khiladi ke
+   * saamne ek khaali screen reh jaati thi: na ye pata ki ab kya karna hai, na
+   * ye ki kahan jaana hai. Nikhil: *"no mission k lie display, map m kitni
+   * dur h"*.
+   *
+   * @param m  sabse paas wala shuru hone layak mission (ya null)
+   * @param d  us tak ki doori, metre
+   */
+  setNextMission(m, d) {
+    const key = m ? `next|${m.id}|${Math.round(d / 25)}` : "next|none";
+    this._once("mission", key, () => {
+      this.el.mission.hidden = false;
+      if (!m) {
+        this.el.mtitle.textContent = "Sab mission poore";
+        this.el.objlist.innerHTML = "<li>Shimla ghoomo — naye mission baad mein khulenge</li>";
+        return;
+      }
+      const far = d >= 1000 ? `${(d / 1000).toFixed(1)} km` : `${Math.round(d)} m`;
+      this.el.mtitle.textContent = "Agla mission";
+      this.el.objlist.innerHTML =
+        `<li class="active">${escapeHtml(m.title)} <span style="opacity:.75">${far}</span></li>`
+        + `<li>Wahan pahunch kar <b>E</b> dabao</li>`;
+    });
+  }
+
   toast(msg, seconds = 2.6) {
     this.el.toast.textContent = msg;
     this.el.toast.classList.add("show");

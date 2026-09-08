@@ -164,7 +164,7 @@ export class WantedSystem {
     const n = this.roads.nearestNode(tx, tz, (rd) => rd.type !== "pedestrian" && rd.type !== "rail");
     const p = n ? n.node.pos : { x: tx, z: tz };
     const v = new Vehicle(this.spec, this.terrain,
-                          { police: true, ground: this.ground });
+                          { police: true, ground: this.ground, roads: this.roads });
     v.placeAt(p.x, p.z, Math.random() * Math.PI * 2);
     this.scene.add(v.mesh);
     this.chasers.push(v);

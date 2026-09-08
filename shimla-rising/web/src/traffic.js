@@ -193,7 +193,23 @@ export class Traffic {
      * nahi jaa rahi".
      */
     const heading = Math.atan2(-p.ux * car.dir, -(p.uz * car.dir));
-    const n = this.terrain.normalAt(x, z, _n);
+    /*
+     * Chalti gaadi bhi **sadak** ke saath jhukti hai, pahad ke saath nahi.
+     *
+     * `terrain.normalAt()` se ye samtal sadak par bhi pahad jitni tedhi ho
+     * jaati thi aur har bump par jhukav badalta tha -- Nikhil: *"gadiyan b"*.
+     * Lane ki apni disha (`ux, uz`) aur uske saath ki dhalan hi sahi normal
+     * deti hai; chaudai mein sadak samtal hai.
+     */
+    let n;
+    if (this.ground) {
+      const d = 2.5;
+      const fx = -Math.sin(heading), fz = -Math.cos(heading);
+      const grade = (this.ground(x + fx * d, z + fz * d) - this.ground(x - fx * d, z - fz * d)) / (2 * d);
+      n = _n.set(-fx * grade, 1, -fz * grade).normalize();
+    } else {
+      n = this.terrain.normalAt(x, z, _n);
+    }
     _q.setFromAxisAngle(_up, heading);
     _align.setFromUnitVectors(_up, n);
     car.mesh.quaternion.copy(_align).multiply(_q);

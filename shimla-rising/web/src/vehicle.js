@@ -18,6 +18,9 @@ export class Vehicle {
     // aadhi ghusi rehti thi (aur bus tairti dikhti thi)
     this.ground = opts.ground || ((x, z) => terrain.heightAt(x, z));
     this.colliders = opts.colliders || null;
+    // sadak ka network -- `syncMesh()` isse poochhta hai ki gaadi sadak par
+    // hai ya nahi, taaki jhukav sadak ka ho, pahad ka nahi
+    this.roads = opts.roads || null;
     this.spec = spec;
     this.terrain = terrain;
     this.pos = new THREE.Vector3();
@@ -156,14 +159,48 @@ export class Vehicle {
     // bahut khadi dhalan pe gaadi nahi chadhti
     if (grade > 0.62 && this.speed > 0) this.speed *= 0.90;
 
-    this.pos.y = this.ground(this.pos.x, this.pos.z);
+    /*
+     * Oonchai **narm** aati hai, snap nahi -- suspension jaisa.
+     *
+     * Pehle har frame `pos.y = ground(...)` seedha set hota tha, isliye zameen
+     * ka har chhota utaar-chadhaav gaadi ko jhatka deta tha. Ab wo lagbhag
+     * 0.1 s mein pahunchti hai. Bada farak (gaddha, chhalaang) par turant
+     * baithti hai, warna gaadi hawa mein tairti rehti.
+     */
+    const gy = this.ground(this.pos.x, this.pos.z);
+    const dy = gy - this.pos.y;
+    this.pos.y = Math.abs(dy) > 1.2 ? gy : this.pos.y + dy * Math.min(1, dt * 10);
     this.syncMesh();
   }
 
   /** Gaadi ko terrain ke normal ke saath jhukao -- pahad pe ye zaroori dikhta hai. */
   syncMesh() {
     const t = this.terrain;
-    const n = t.normalAt(this.pos.x, this.pos.z, _n);
+    /*
+     * Gaadi **sadak** ke saath jhukti hai, pahad ke saath nahi.
+     *
+     * Nikhil: *"cars are bouncing"*. Yahan hamesha `terrain.normalAt()` lagta
+     * tha -- yaani samtal sadak par khadi gaadi bhi pahad ke saath 30 degree
+     * tedhi ho jaati thi, aur har chhoti bump par jhukav badalta tha, isliye
+     * wo uchhalti hui dikhti thi.
+     *
+     * Sadak par ab uska apna normal banta hai: chaudai mein bilkul samtal
+     * (sadak khud samtal hai), lambai mein utni hi dhalan jitni sadak ki hai.
+     * Sadak se bahar (kachcha/ghaas) pahad ka normal hi sahi hai.
+     */
+    const onRoad = this.roads?.roadAt?.(this.pos.x, this.pos.z, 0.5);
+    let n;
+    if (onRoad && this.ground) {
+      const f = this.forward(_f);
+      const d = 2.5;
+      const h0 = this.ground(this.pos.x - f.x * d, this.pos.z - f.z * d);
+      const h1 = this.ground(this.pos.x + f.x * d, this.pos.z + f.z * d);
+      const grade = (h1 - h0) / (2 * d);
+      // saamne ki dhalan ka normal: (-f * grade) + up, phir normalize
+      n = _n.set(-f.x * grade, 1, -f.z * grade).normalize();
+    } else {
+      n = t.normalAt(this.pos.x, this.pos.z, _n);
+    }
     /*
      * Koi offset nahi.
      *

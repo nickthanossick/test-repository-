@@ -478,36 +478,46 @@ const gaitOk = gait.convention < -0.05          // +kon = aage, jaisa maana tha
  */
 const surface = await page.evaluate(() => {
   const S = window.__shimla, R = S.roads, T = S.terrain;
-  const drawn = (x, z) => {
-    const n = R.nearestNode(x, z);
-    if (!n) return null;
-    const w = n.node.road.spec.width_m / 2;
-    const u = (x - n.node.pos.x) * n.node.nx + (z - n.node.pos.z) * n.node.nz;
-    if (Math.abs(u) > w) return null;
-    const cx = x - n.node.nx * u, cz = z - n.node.nz * u;
-    const hm = T.heightAt(cx - n.node.nx * w, cz - n.node.nz * w);
-    const hp = T.heightAt(cx + n.node.nx * w, cz + n.node.nz * w);
-    const lift = n.node.road.type === "rail" ? 0.35 : 0.5;
-    return hm + (hp - hm) * ((u + w) / (2 * w)) + lift;
-  };
-  let n = 0, worst = 0, bad = 0;
+  /*
+   * Reference **`groundAt` ki nakal nahi** hai -- wo hoti to jaanch apne aap
+   * ko hi sach thehra leti (aur pehle wo bilkul yahi kar rahi thi: dono taraf
+   * ek hi hisaab likha tha, isliye jawab hamesha 0 aata tha jabki sadak
+   * hairpin par 5 m tuti hui thi).
+   *
+   * Ab reference wahi hai jo `buildMesh()` **khinchta** hai, seedhe uske quad
+   * se: segment (a, b) ke quad ke saare kone `lerp(h(a), h(b), t) + lift` par
+   * hote hain, chaudai se koi farak nahi padta. Bindu bhi usi quad ke andar
+   * se uthaya jaata hai, isliye kis segment ka hai ye poochhna hi nahi padta.
+   */
+  let n = 0, worst = 0, bad = 0, overlap = 0;
   for (const r of R.roads) {
     if (r.type === "rail") continue;
-    const w = r.spec.width_m / 2;
-    for (let i = 2; i < r.points.length - 2; i += 7) {
-      const pt = r.points[i];
-      const nd = R.nearestNode(pt.x, pt.z);
-      for (const fr of [-0.8, -0.4, 0, 0.4, 0.8]) {
-        const x = pt.x + nd.node.nx * w * fr, z = pt.z + nd.node.nz * w * fr;
-        const d = drawn(x, z);
-        if (d === null) continue;
-        const e = Math.abs(d - R.groundAt(x, z));
-        n++; if (e > worst) worst = e;
-        if (e > 0.15) bad++;
+    const w = r.spec.width_m / 2, lift = 0.5;
+    for (let j = 1; j < r.points.length - 2; j += 5) {
+      const a = r.points[j], b = r.points[j + 1];
+      const dx = b.x - a.x, dz = b.z - a.z, L = Math.hypot(dx, dz) || 1;
+      const nx = -dz / L, nz = dx / L;
+      const ha = T.heightAt(a.x, a.z), hb = T.heightAt(b.x, b.z);
+      for (const t of [0.25, 0.5, 0.75]) {
+        const cx = a.x + dx * t, cz = a.z + dz * t;
+        const want = ha + (hb - ha) * t + lift;          // quad jo khinchta hai
+        for (const fr of [-0.8, -0.4, 0, 0.4, 0.8]) {
+          const x = cx + nx * w * fr, z = cz + nz * w * fr;
+          /*
+           * Hairpin par do limb sach mein ek doosre ke upar aati hain, aur
+           * wahan "sadak ki satah" ka ek hi jawab hota hi nahi. Aise bindu
+           * ginte hain, par naapte nahi.
+           */
+          const sg = R.nearestSegment(x, z);
+          if (!sg || sg.road !== r || sg.a !== a || sg.b !== b) { overlap++; continue; }
+          const e = Math.abs(want - R.groundAt(x, z));
+          n++; if (e > worst) worst = e;
+          if (e > 0.15) bad++;
+        }
       }
     }
   }
-  return { n, worst: +worst.toFixed(2), bad };
+  return { n, worst: +worst.toFixed(2), bad, overlap };
 });
 console.log("sadak ki satah:", JSON.stringify(surface));
 const surfaceOk = surface.n > 500 && surface.bad === 0 && surface.worst < 0.15;
@@ -550,6 +560,100 @@ const shopsClear = await page.evaluate(() => {
 console.log("dukaanein:", JSON.stringify(shopsClear));
 const shopsOk = shopsClear.mismN === 0 && shopsClear.n > 100 && shopsClear.inside === 0;
 
+/*
+ * Sadak apni chaudai bhar **samtal** hai, aur gaadi uske saath jhukti hai.
+ *
+ * Nikhil ka screenshot: sadak ek bada tirchha kaala plane, sab usme dhanse
+ * hue, gaadiyan uchhalti hui. Do alag wajah thi, aur dono kisi purani jaanch
+ * mein aati hi nahi thi:
+ *
+ *   1. mesh har kone ko alag se terrain par rakhta tha -- heightmap par naapa
+ *      gaya to **9% segment 3 m se zyada tirchhe**, sabse bure par 12.7 m.
+ *   2. gaadi `terrain.normalAt()` se jhukti thi, yaani samtal sadak par bhi
+ *      pahad jitni tedhi.
+ */
+const roadFlat = await page.evaluate(() => {
+  const S = window.__shimla, R = S.roads;
+  let n = 0, worst = 0, overlap = 0;
+  for (const r of R.roads) {
+    if (r.type === "rail") continue;
+    const w = r.spec.width_m / 2;
+    for (let j = 1; j < r.points.length - 2; j += 5) {
+      const a = r.points[j], b = r.points[j + 1];
+      const dx = b.x - a.x, dz = b.z - a.z, L = Math.hypot(dx, dz) || 1;
+      const nx = -dz / L, nz = dx / L;
+      const cx = (a.x + b.x) / 2, cz = (a.z + b.z) / 2;
+      const px = cx + nx * w * 0.9, pz = cz + nz * w * 0.9;
+      const mx = cx - nx * w * 0.9, mz = cz - nz * w * 0.9;
+      /*
+       * Dono kinare **isi** segment ke hone chahiye.
+       *
+       * Do baar ye filter galat likha tha. Pehle `roadAt(..., 0)` -- par wo
+       * **node** se doori naapta tha, aur segment ke beech ka bindu apne hi
+       * node se 5 m door hota hai, isliye 4,000 mein se sirf 12 bindu bache.
+       * Phir node par naapa -- tab hairpin ki doosri limb ghus aayi aur 5.85 m
+       * ka farak dikha, jo sadak ke tirchhepan ka nahi, do alag limb ka naap
+       * tha. Ab dono kinare usi segment par girne chahiye, warna bindu chhod
+       * dete hain (aur ginte hain).
+       */
+      const sP = R.nearestSegment(px, pz), sM = R.nearestSegment(mx, mz);
+      if (!sP || !sM || sP.a !== a || sM.a !== a || sP.b !== b || sM.b !== b) {
+        overlap++; continue;
+      }
+      const e = Math.abs(R.groundAt(px, pz) - R.groundAt(mx, mz));
+      n++; if (e > worst) worst = e;
+    }
+  }
+  return { n, worst: +worst.toFixed(2), overlap };
+});
+console.log("sadak samtal:", JSON.stringify(roadFlat));
+
+/*
+ * Sadak ke kinare ka chehra **pahad jaisa** ho, kaali deewar jaisa nahi.
+ *
+ * Round 20 mein sadak ko chaudai bhar samtal karne se ek naya keeda paida hua:
+ * ab kinare ke neeche/upar jo khaali jagah bachti hai use bharna padta hai, aur
+ * pehli koshish mein wo chehra lagbhag khada tha -- naapa gaya, bhraav
+ * **17.6 m nichle 0.9 m mein** (87 degree) aur pathar ki wall **24.8 m** oonchi.
+ * Screenshot mein wahi "bada kaala plane" dikhta tha jiski Nikhil ne shikayat
+ * ki thi.
+ *
+ * Ye naap `buildMesh()` khud rakhta hai (`roads.faceStats`) -- yahan formula
+ * dobara likhna galat hota, kyunki tab jaanch aur code ek saath galat ho sakte
+ * hain (is round mein do baar hua).
+ */
+const face = await page.evaluate(() => window.__shimla.roads.faceStats);
+console.log("kinare ka chehra:", JSON.stringify(face));
+const faceOk = face && face.wallMax <= 8.0        // pathar ki seedhi wall
+  && face.fillMaxDeg <= 50                        // bhraav: 16 m cap ke saath itna hi
+  && face.cutMaxDeg <= 62;                        // chattan ka kata hua chehra
+const flatOk = roadFlat.n > 300 && roadFlat.worst < 0.05;
+
+const carTilt = await page.evaluate(() => {
+  const S = window.__shimla, T = S.THREE, R = S.roads;
+  const road = S.roads.roads.find((r) => r.type === "arterial") || S.roads.roads[0];
+  let worst = 0, n = 0;
+  for (let i = 4; i < road.points.length - 4; i += 9) {
+    const p = road.points[i];
+    const nd0 = R.nearestNode(p.x, p.z);
+    // Gaadi ka rukh **sadak ke saath** -- warna uska pitch axis sadak ke
+    // aar-paar padta hai aur ye jaanch apni hi galti naapti hai (pehli baar
+    // yahi hua: 43.6 degree, jabki gaadi theek thi).
+    const tx = -nd0.node.nz, tz = nd0.node.nx;
+    const car = S.parked[0];
+    car.placeAt(p.x, p.z, Math.atan2(-tx, -tz));
+    car.syncMesh();
+    const up = new T.Vector3(0, 1, 0).applyQuaternion(car.mesh.quaternion);
+    // sadak ke aar-paar jhukav: up-vector ka lateral hissa
+    const lat = Math.abs(up.x * nd0.node.nx + up.z * nd0.node.nz);
+    const deg = Math.asin(Math.min(1, lat)) * 180 / Math.PI;
+    n++; if (deg > worst) worst = deg;
+  }
+  return { n, worstDeg: +worst.toFixed(1) };
+});
+console.log("gaadi ka jhukav:", JSON.stringify(carTilt));
+const tiltOk = carTilt.n > 3 && carTilt.worstDeg < 5;
+
 const checks = [
   ["console errors", errors.length === 0, errors.slice(0, 3).join(" | ")],
   ["page errors", pageErrors.length === 0, pageErrors.slice(0, 3).join(" | ")],
@@ -569,6 +673,9 @@ const checks = [
   ["college ke andar shuru", campusOk, JSON.stringify(campus)],
   ["sadak ki satah = groundAt", surfaceOk, JSON.stringify(surface)],
   ["dukaanein sadak ke bahar", shopsOk, JSON.stringify(shopsClear)],
+  ["sadak samtal hai", flatOk, JSON.stringify(roadFlat)],
+  ["kinare ka chehra dhalwan", faceOk, JSON.stringify(face)],
+  ["gaadi sadak ke saath", tiltOk, JSON.stringify(carTilt)],
   ["sadak par traffic", s.trafficNear > 0, `${s.trafficNear} / ${s.traffic}`],
   ["camera peeche", camOk, JSON.stringify(cam)],
   ["gaadi naak ke bal", noseOk, JSON.stringify(nose)],
