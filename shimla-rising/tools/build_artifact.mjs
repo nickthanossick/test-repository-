@@ -90,6 +90,29 @@ function bundleThree() {
 
 // ------------------------------------------------------------ game modules
 // Dependency order. Har module ek IIFE ban jaata hai jo apne exports lautaata hai.
+/*
+ * three.js ke post-processing addons.
+ *
+ * Ye `web/vendor/addons/` mein vendored hain (r185, wahi version jo core ka
+ * hai). Bundle mein inka key `addons/...` hai, aur inke aapasi import
+ * (`./Pass.js`, `../shaders/CopyShader.js`) neeche usi key par map hote hain.
+ *
+ * Kram maayne rakhta hai -- jo pehle chahiye wo pehle.
+ */
+const ADDONS = [
+  "postprocessing/Pass.js",
+  "shaders/CopyShader.js",
+  "shaders/OutputShader.js",
+  "shaders/LuminosityHighPassShader.js",
+  "shaders/FXAAShader.js",
+  "postprocessing/ShaderPass.js",
+  "postprocessing/MaskPass.js",
+  "postprocessing/EffectComposer.js",
+  "postprocessing/RenderPass.js",
+  "postprocessing/OutputPass.js",
+  "postprocessing/UnrealBloomPass.js",
+];
+
 const MODULES = [
   "util.js", "textures.js", "geo.js", "grid.js", "geometry.js", "terrain.js", "roads.js",
   "landmarks.js", "signs.js", "bazaar.js", "tunnel.js", "quality.js", "city.js", "sky.js", "weather.js",
@@ -98,7 +121,9 @@ const MODULES = [
   "panga.js", "combat.js",
   "player.js",
   "chase-camera.js", "wanted.js", "missions.js", "flashcards.js", "dialogue.js", "hud.js",
-  "translit.js", "audio.js", "save.js", "main.js",
+  "translit.js", "audio.js", "save.js",
+  "postfx.js",                    // addons ke baad, main.js se pehle
+  "main.js",
 ];
 
 function bundleModule(name, source) {
@@ -107,6 +132,44 @@ function bundleModule(name, source) {
 
   // `import * as THREE from "three"` -- THREE bundle mein pehle se global hai
   s = s.replace(/import\s+\*\s+as\s+THREE\s+from\s+["']three["'];?/g, "");
+  /*
+   * three ke addons `import { X } from 'three'` likhte hain (multi-line bhi).
+   * THREE global hai, isliye use destructure kar lete hain.
+   */
+  s = s.replace(/import\s*\{([^}]*)\}\s*from\s*["']three["'];?/g,
+    (_, names) => `const {${names.replace(/\s+/g, " ").trim()}} = THREE;`);
+  /*
+   * `web/src/*` se addons: `from "../vendor/addons/postprocessing/X.js"`
+   * Bundle mein unka key `addons/postprocessing/X.js` hai.
+   */
+  s = s.replace(/import\s*\{([^}]*)\}\s*from\s*["']\.\.\/vendor\/addons\/([^"']+)["'];?/g,
+    (_, names, file) => `const {${names.trim()}} = __m[${JSON.stringify("addons/" + file)}];`);
+  /*
+   * Addon ke aapasi import. `dir` us addon ka apna folder hai, taaki
+   * `./Pass.js` aur `../shaders/CopyShader.js` dono theek se hal hon.
+   *
+   * Ye neeche wale saade `./x.js` niyam se **pehle** chalna chahiye. Pehle ye
+   * baad mein tha, aur saada niyam `./Pass.js` ko `__m["Pass.js"]` bana deta
+   * tha -- jabki bundle mein uski key `addons/postprocessing/Pass.js` hai.
+   * Artifact chup-chaap `Cannot destructure property 'Pass' of '__m.Pass.js'`
+   * par mar jaata tha.
+   */
+  if (name.startsWith("addons/")) {
+    const dir = name.slice(0, name.lastIndexOf("/"));      // e.g. addons/postprocessing
+    const resolve = (rel) => {
+      const parts = (dir + "/" + rel).split("/");
+      const out = [];
+      for (const seg of parts) {
+        if (seg === "." || seg === "") continue;
+        if (seg === "..") out.pop();
+        else out.push(seg);
+      }
+      return out.join("/");
+    };
+    s = s.replace(/import\s*\{([^}]*)\}\s*from\s*["'](\.[^"']+)["'];?/g,
+      (_, names, rel) => `const {${names.replace(/\s+/g, " ").trim()}} = __m[${JSON.stringify(resolve(rel))}];`);
+  }
+
   // `import { a, b } from "./x.js"`
   s = s.replace(/import\s*\{([^}]*)\}\s*from\s*["']\.\/([^"']+)["'];?/g,
     (_, names, file) => `const {${names.trim()}} = __m[${JSON.stringify(file)}];`);
@@ -117,6 +180,17 @@ function bundleModule(name, source) {
   // exports collect karke keyword hatao
   s = s.replace(/^export\s+(async\s+)?(class|function|const|let|var)\s+(\w+)/gm,
     (_, asy, kind, id) => { exported.push(id); return `${asy || ""}${kind} ${id}`; });
+  /*
+   * `export { A, B };` -- three ke addons yahi shakl istemaal karte hain
+   * (class pehle declare hoti hai, export aakhir mein).
+   */
+  s = s.replace(/^export\s*\{([^}]*)\}\s*;?\s*$/gm, (_, body) => {
+    for (const item of body.split(",")) {
+      const id = item.trim().split(/\s+as\s+/).pop().trim();
+      if (id) exported.push(id);
+    }
+    return "";
+  });
 
   return `__m[${JSON.stringify(name)}] = (function(){\n${s}\nreturn {${exported.join(",")}};\n})();`;
 }
@@ -179,11 +253,13 @@ function buildProfileSvg() {
 function build(outPath, profileSvg) {
   const { blob, png } = inlineData();
 
-  const bodies = MODULES.map((n) => {
-    let src = read(join(SRC, n));
+  const addonBodies = ADDONS.map((n) =>
+    bundleModule("addons/" + n, read(join(VENDOR, "addons", n))));
+  const bodies = [...addonBodies, ...MODULES.map((n) => {
+    const src = read(join(SRC, n));
     if (n === "data.js") throw new Error("data.js bundle mein include nahi hota");
     return bundleModule(n, src);
-  });
+  })];
 
   // data.js ki jagah inlined loader
   const dataModule = `__m["data.js"] = (function(){
@@ -213,7 +289,21 @@ function build(outPath, profileSvg) {
   return { loadAll };
 })();`;
 
-  const idx = MODULES.indexOf("main.js");
+  /*
+   * `data.js` ko theek `main.js` se pehle daalna hai.
+   *
+   * Dhyan: `bodies` ke aage ab **addons** bhi hain, isliye MODULES ka index
+   * seedha yahan nahi chalta. Pehle chalta tha, aur addons jodne ke baad
+   * chupke se galat ho gaya: `bodies.slice(0, 34)` beech mein kat jaata tha
+   * aur `main.js` samet aakhri barah module bundle se **gayab** ho jaate the.
+   * Koi error nahi aata tha -- entry point hi na ho to page bas apne pehle
+   * loading message par baitha rehta tha ("shuru ho raha hai…"), aur test
+   * 300 second baad timeout deta tha.
+   */
+  const idx = addonBodies.length + MODULES.indexOf("main.js");
+  if (bodies.length !== idx + 1) {
+    throw new Error(`main.js bundle ka aakhri module hona chahiye (idx ${idx}, kul ${bodies.length})`);
+  }
   const ordered = [...bodies.slice(0, idx), dataModule, bodies[idx]];
 
   const js = [

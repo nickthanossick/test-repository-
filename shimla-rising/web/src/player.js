@@ -288,6 +288,7 @@ const TURN_RATE = 2.6;      // radian/second, arrows se ghoomne ki raftaar
 function buildAvatar() {
   return buildHuman({
     build: "male",
+    hero: true,           // lagataar dhad, joint ke gole, asli ungliyan, 512px kapda
     skin: 0xc08a5e,
     top: 0xbb3a2a,        // laal jacket
     bottom: 0x35425e,     // neeli jeans

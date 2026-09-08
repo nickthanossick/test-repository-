@@ -324,11 +324,19 @@ export function groundSoil(seed = 53) {
   });
 }
 
-/** Insaani twacha -- halka subsurface-jaisa gulaabi, mahin roomiyan. */
-export function skin(hex = 0xb07d55, seed = 7) {
-  return cached(`skin${hex}`, () => {
-    const S = 128;
-    const pores = fbm(S, 34, 3, seed);
+/**
+ * Insaani twacha -- halka subsurface-jaisa gulaabi, mahin roomiyan.
+ *
+ * `o.size` sirf khiladi ke liye badhta hai. NPC 30-120 hote hain aur unki
+ * twacha 128 px par hi theek hai; Vicky ek hi hai aur camera uske kandhe ke
+ * peeche rehta hai, isliye uspar 512 px lagbhag muft padta hai.
+ */
+export function skin(hex = 0xb07d55, seed = 7, o = {}) {
+  const S = o.size || 128;
+  return cached(`skin${hex}:${S}`, () => {
+    // Cells texel ke saath badhte hain taaki roomiya ka naap wahi rahe, aur
+    // ek extra octave se ab wo asli mein resolve bhi hota hai.
+    const pores = fbm(S, (S / 128) * 34, S >= 256 ? 4 : 3, seed);
     const blotch = fbm(S, 6, 3, seed + 13);
     const cv = canvas(S);
     const ctx = cv.getContext("2d");
@@ -353,16 +361,32 @@ export function skin(hex = 0xb07d55, seed = 7) {
   });
 }
 
-/** Kapda -- twill weave (jacket, jeans). */
-export function fabric(hex = 0xc8442e, seed = 23, weave = 46) {
-  return cached(`fabric${hex}${seed}`, () => {
-    const S = 128;
-    const fuzz = fbm(S, 26, 3, seed);
+/**
+ * Kapda -- twill weave (jacket, jeans).
+ *
+ * `o.size` aur `o.folds` sirf khiladi ke liye. Weave akela paas se **chapta**
+ * lagta hai: asli kapde par jo cheez sabse pehle aankh pakadti hai wo dhaage
+ * nahi, **silvatein** hain -- kohni ke andar, kamar par, ghutne ke peeche.
+ * `folds` ek kam-frequency ridge field jodta hai jo normal map mein wahi
+ * karta hai.
+ */
+export function fabric(hex = 0xc8442e, seed = 23, weave = 46, o = {}) {
+  const S = o.size || 128;
+  const folds = o.folds ?? 0;
+  return cached(`fabric${hex}${seed}:${S}:${folds}`, () => {
+    const fuzz = fbm(S, (S / 128) * 26, 3, seed);
+    // Silvat: fbm ko ridge banaya (1 - |2n-1|) taaki crease teekhi rahe aur
+    // beech ka kapda samtal -- yahi asli fold ka profile hai.
+    const crease = folds > 0 ? fbm(S, 5, 3, seed + 401) : null;
     const h = new Float32Array(S * S);
+    const wf = weave * (S / 128);              // dhaage ka naap texel ke saath
     for (let y = 0; y < S; y++) {
       for (let x = 0; x < S; x++) {
-        const t = Math.sin((x / S) * Math.PI * weave) * Math.sin((y / S) * Math.PI * weave);
-        h[y * S + x] = 0.5 + t * 0.32 + (fuzz[y * S + x] - 0.5) * 0.36;
+        const i = y * S + x;
+        const t = Math.sin((x / S) * Math.PI * wf) * Math.sin((y / S) * Math.PI * wf);
+        let v = 0.5 + t * 0.32 + (fuzz[i] - 0.5) * 0.36;
+        if (crease) v += (1 - Math.abs(crease[i] * 2 - 1) - 0.45) * folds;
+        h[i] = v;
       }
     }
     const cv = canvas(S);
@@ -474,29 +498,42 @@ export function needles(seed = 83) {
  * theek -Z disha par aata hai, aur -Z hi character ka forward hai -- isliye
  * bina kisi rotation ke chehra saamne aa jaata hai.
  */
+/**
+ * @param o.ss  supersample -- 1 (NPC, 512x256) ya 2 (khiladi, 1024x512).
+ *
+ * Chehra haath se canvas par bana hai aur uske andar kai **absolute pixel**
+ * naap hain (clip rect, lineWidth). Isliye W/H badalne ke bajaye canvas ko
+ * `ss` guna bada banate hain aur context ko utna hi scale kar dete hain --
+ * saara drawing code 512x256 ke hisaab se hi likha rehta hai aur bina kisi
+ * badlaav ke do guna resolution par nikalta hai.
+ */
 export function face(hex = 0xc08a5e, seed = 19, o = {}) {
   const elder = !!o.elder, female = !!o.female;
-  return cached(`face${hex}${seed}${elder ? "E" : ""}${female ? "F" : ""}`, () => {
+  const ss = o.ss || 1;
+  return cached(`face${hex}${seed}${elder ? "E" : ""}${female ? "F" : ""}:${ss}`, () => {
     const W = 512, H = 256;
-    const cv = canvas(W);
-    cv.height = H;
+    const cv = canvas(W * ss);
+    cv.height = H * ss;
     const ctx = cv.getContext("2d");
     const base = srgb(hex);
     const rgb = (k = 1, a = 1) =>
       `rgba(${Math.min(255, base.r * 255 * k) | 0},${Math.min(255, base.g * 255 * k) | 0},${Math.min(255, base.b * 255 * k) | 0},${a})`;
 
-    // twacha ka base + roomiyan
-    ctx.fillStyle = rgb(1); ctx.fillRect(0, 0, W, H);
-    const pores = fbm(128, 40, 3, seed);
-    const img = ctx.getImageData(0, 0, W, H);
-    for (let y = 0; y < H; y++) {
-      for (let x = 0; x < W; x++) {
-        const k = 0.95 + pores[(y % 128) * 128 + (x % 128)] * 0.10;
-        const i = (y * W + x) * 4;
+    // twacha ka base + roomiyan -- ye pass device pixel par chalta hai
+    // (putImageData transform nahi maanta), isliye scale uske baad lagta hai.
+    ctx.fillStyle = rgb(1); ctx.fillRect(0, 0, W * ss, H * ss);
+    const PS = 128 * ss;
+    const pores = fbm(PS, 40 * ss, ss > 1 ? 4 : 3, seed);
+    const img = ctx.getImageData(0, 0, W * ss, H * ss);
+    for (let y = 0; y < H * ss; y++) {
+      for (let x = 0; x < W * ss; x++) {
+        const k = 0.95 + pores[(y % PS) * PS + (x % PS)] * 0.10;
+        const i = (y * W * ss + x) * 4;
         img.data[i] *= k; img.data[i + 1] *= k * 0.995; img.data[i + 2] *= k * 0.985;
       }
     }
     ctx.putImageData(img, 0, 0);
+    if (ss !== 1) ctx.setTransform(ss, 0, 0, ss, 0, 0);
 
     const cx = W * 0.75;            // chehre ka kendra -- -Z disha
     const eyeY = H * 0.44;

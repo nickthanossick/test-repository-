@@ -39,15 +39,22 @@ console.log("stats:", JSON.stringify(s));
  */
 const SKIN_HEX = 0xc08a5e;
 const skin = await page.evaluate(() => {
+  /*
+   * Chehre ka texture 2:1 hota hai. Naap **tay nahi** hai: khiladi ka
+   * (`hero`) 1024x512 par banta hai, NPC ka 512x256 par. Pehle yahan seedha
+   * `width === 512` likha tha, aur Vicky ke texture badhte hi ye check chup
+   * chaap `null` dene laga -- jaanch fail hui, jabki rang bilkul theek tha.
+   */
   const img = window.__shimla.player.mesh.children
     .map((c) => c.material?.map?.image)
-    .find((m) => m && m.width === 512 && m.height === 256);
+    .find((m) => m && m.width >= 512 && m.width === m.height * 2);
   if (!img) return null;
   const cv = document.createElement("canvas");
   cv.width = img.width; cv.height = img.height;
   const cx = cv.getContext("2d");
   cx.drawImage(img, 0, 0);
-  const d = cx.getImageData(24, 24, 1, 1).data;   // gaal se door, saada twacha
+  const k = img.width / 512;                      // naap ke saath jagah bhi badhti hai
+  const d = cx.getImageData(24 * k, 24 * k, 1, 1).data;   // gaal se door, saada twacha
   return [d[0], d[1], d[2]];
 });
 const want = [(SKIN_HEX >> 16) & 255, (SKIN_HEX >> 8) & 255, SKIN_HEX & 255];
@@ -190,6 +197,21 @@ const grounded = await page.evaluate(() => {
   }
   const foot = Math.abs(S.player.pos.y - S.roads.groundAt(S.player.pos.x, S.player.pos.z));
 
+  /*
+   * **Mesh** ke pair zameen par hain ya nahi -- sirf `pos` nahi.
+   *
+   * Upar wala `foot` khel ke **tarki** bindu ko naapta hai, aur wo hamesha
+   * theek tha. Par model ki taang uss bindu se choti thi: talwa origin se
+   * 0.199 m upar tha, yaani har kirdaar 20 cm hawa mein khada tha aur ye
+   * jaanch use pakadti hi nahi thi (round 17 mein screenshot se pakda gaya).
+   * Isliye ab bounding box naapte hain -- wahi jo aankh dekhti hai.
+   *
+   * Idle mein saans ka bob sirf +-0.008 hai, isliye 0.06 ki chhoot kaafi hai.
+   */
+  S.player.mesh.updateMatrixWorld(true);
+  const box = new S.THREE.Box3().setFromObject(S.player.mesh);
+  const meshFoot = box.min.y - S.player.pos.y;
+
   // gaadi: pahiye ka nichla sira sadak ki satah par baithna chahiye
   const v = S.parked[0];
   v.placeAt(p.x, p.z, 0);
@@ -201,12 +223,13 @@ const grounded = await page.evaluate(() => {
   let bus = 0;
   const b = S.buses.buses[0];
   if (b) bus = Math.abs(b.mesh.position.y - S.roads.groundAt(b.mesh.position.x, b.mesh.position.z));
-  return { lift, foot, car, bus };
+  return { lift, foot, meshFoot: +meshFoot.toFixed(3), car, bus };
 });
 const groundOk = grounded.lift > 0.3 && grounded.foot < 0.05
   && grounded.car < 0.05 && grounded.bus < 0.6;
 console.log("zameen:", JSON.stringify({
   lift: +grounded.lift.toFixed(2), foot: +grounded.foot.toFixed(3),
+  meshFoot: grounded.meshFoot,
   car: +grounded.car.toFixed(3), bus: +grounded.bus.toFixed(2),
 }));
 
@@ -365,6 +388,8 @@ const checks = [
   ["control ki disha", ctlOk, JSON.stringify(ctl)],
   ["rukh saamne", facingOk, JSON.stringify(facing)],
   ["zameen par khada", groundOk, JSON.stringify(grounded)],
+  // model ke pair -- `pos` nahi, jo dikhta hai wo
+  ["pair zameen par", Math.abs(grounded.meshFoot) < 0.06, `meshFoot ${grounded.meshFoot} m`],
   ["sadak par traffic", s.trafficNear > 0, `${s.trafficNear} / ${s.traffic}`],
   ["camera peeche", camOk, JSON.stringify(cam)],
   ["gaadi naak ke bal", noseOk, JSON.stringify(nose)],

@@ -29,6 +29,7 @@ import { Dialogue } from "./dialogue.js";
 import { HUD } from "./hud.js";
 import { Audio } from "./audio.js";
 import { saveGame, loadGame } from "./save.js";
+import { PostFX } from "./postfx.js";
 
 /** Ghanta -> '14:30' */
 function fmtHour(h) {
@@ -98,10 +99,22 @@ async function boot() {
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(62, innerWidth / innerHeight, 0.5, 12000);
 
+  /*
+   * Post-processing.
+   *
+   * Nikhil: *"ye realistic kyu ni lgre?"* -- iska sabse bada jawab yahi tha
+   * ki post-processing thi hi nahi. Ab AO (aur `high` par halka bloom) hai.
+   * `low` par band rehta hai; wahan seedha `renderer.render()` chalta hai.
+   */
+  const post = new PostFX(renderer, scene, camera, Q.post);
+  console.info(`[Shimla] post-processing: ${post.enabled ? "on" : "off"}`);
+
   addEventListener("resize", () => {
     camera.aspect = innerWidth / innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(innerWidth, innerHeight);
+    const s = renderer.getDrawingBufferSize(new THREE.Vector2());
+    post.setSize(s.x, s.y);
   });
 
   // ------------------------------------------------------------------- world
@@ -274,7 +287,7 @@ async function boot() {
       debugCam = true;
       window.__shimla?.lookAt?.(w.x, y + 2.2, w.z, dist, elev);
     },
-    render: () => renderer.render(scene, camera),
+    render: () => post.render(),
   });
 
   const state = { money: 2500, mode: "foot", get quality() { return tier; }, vehicle: null, player, missions, weather,
@@ -814,15 +827,24 @@ async function boot() {
 
     if (!missions.active && missions.startableAt(pos)) hud.toast("E dabao - mission shuru karo", 0.4);
 
-    renderer.render(scene, camera);
+    post.render();
     input.endFrame();
   }
 
   // debugging ke liye -- Playwright test yahi padhta hai
   window.__shimla = {
     ready: true, THREE, scene, camera, renderer, terrain, roads, city, player, missions, wanted, chase, sky, dayNight,
-    bazaar, buses, traffic, crowd, panga, combat, colliders, parked, flashcards, audio, hud,
+    bazaar, buses, traffic, crowd, panga, combat, colliders, parked, flashcards, audio, hud, post,
     weather, state, data, get fps() { return fps; },
+    /*
+     * Post ke addons bundle mein aaye ya nahi.
+     *
+     * `post.enabled` se ye nahi pata chalta -- `low` tier par composer
+     * jaan-boojh kar band rehta hai, aur headless SwiftShader hamesha `low`
+     * deta hai. Isliye seedha module ki maujoodgi poochhte hain; artifact ka
+     * bundler ek baar addons ko chhod chuka hai aur wo chup-chaap toota tha.
+     */
+    hasPost: () => post.available,
     get stats() { return {
       triangles: renderer.info.render.triangles,
       drawCalls: renderer.info.render.calls,
