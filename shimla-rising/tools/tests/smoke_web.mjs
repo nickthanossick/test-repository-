@@ -463,6 +463,93 @@ const gaitOk = gait.convention < -0.05          // +kon = aage, jaisa maana tha
   && gait.kneeMin < -0.15                       // par peeche mudta zaroor hai
   && gait.elbowMin >= -0.001;                   // kohni kabhi peeche nahi
 
+/*
+ * Sadak ki satah aur `groundAt()` ek honi chahiye.
+ *
+ * Sadak ka mesh do kinaron se banta hai (har quad ke kone
+ * `terrain.heightAt(kinara) + lift` par), par `groundAt()` beech ki *zameen*
+ * lauta raha tha. Dhalan par ye do bilkul alag hote hain -- naapa gaya:
+ * 2426 bindu mein se 785 par 30 cm se zyada, aur sabse bure kone par -9.25 m
+ * se +18 m. Khiladi, gaadi, bus aur bheed sab isi se zameen lete hain,
+ * isliye dhalan wali har sadak par sab dhans jaate the ya tairte the.
+ *
+ * Ye keeda **kisi bhi purani jaanch mein nahi aaya** -- `zameen par khada`
+ * sirf ek samtal jagah dekhta tha. Isliye ab poore naksha par naapte hain.
+ */
+const surface = await page.evaluate(() => {
+  const S = window.__shimla, R = S.roads, T = S.terrain;
+  const drawn = (x, z) => {
+    const n = R.nearestNode(x, z);
+    if (!n) return null;
+    const w = n.node.road.spec.width_m / 2;
+    const u = (x - n.node.pos.x) * n.node.nx + (z - n.node.pos.z) * n.node.nz;
+    if (Math.abs(u) > w) return null;
+    const cx = x - n.node.nx * u, cz = z - n.node.nz * u;
+    const hm = T.heightAt(cx - n.node.nx * w, cz - n.node.nz * w);
+    const hp = T.heightAt(cx + n.node.nx * w, cz + n.node.nz * w);
+    const lift = n.node.road.type === "rail" ? 0.35 : 0.5;
+    return hm + (hp - hm) * ((u + w) / (2 * w)) + lift;
+  };
+  let n = 0, worst = 0, bad = 0;
+  for (const r of R.roads) {
+    if (r.type === "rail") continue;
+    const w = r.spec.width_m / 2;
+    for (let i = 2; i < r.points.length - 2; i += 7) {
+      const pt = r.points[i];
+      const nd = R.nearestNode(pt.x, pt.z);
+      for (const fr of [-0.8, -0.4, 0, 0.4, 0.8]) {
+        const x = pt.x + nd.node.nx * w * fr, z = pt.z + nd.node.nz * w * fr;
+        const d = drawn(x, z);
+        if (d === null) continue;
+        const e = Math.abs(d - R.groundAt(x, z));
+        n++; if (e > worst) worst = e;
+        if (e > 0.15) bad++;
+      }
+    }
+  }
+  return { n, worst: +worst.toFixed(2), bad };
+});
+console.log("sadak ki satah:", JSON.stringify(surface));
+const surfaceOk = surface.n > 500 && surface.bad === 0 && surface.worst < 0.15;
+
+/*
+ * Dukaanein sadak ke bahar hain?
+ *
+ * Nikhil: *"sari dukaein sadak k andr e ghus gai"*. Wajah ye thi ki bazaar ke
+ * segment `data/sanjauli.json` mein **apni** `width_m` rakhte hain, aur
+ * sadak chaudi karte waqt sirf `data/roads.json` badla gaya tha. Dukaan
+ * purani (sankri) chaudai ke hisaab se lagti rahi aur nayi chaudi sadak uske
+ * upar aa gayi.
+ *
+ * Isliye ab dono file ka mel **naapa** jaata hai: har segment ki chaudai usi
+ * type ke road_type se milni chahiye, aur har dukaan ka mukh sadak ke kinare
+ * se bahar hona chahiye.
+ */
+const shopsClear = await page.evaluate(() => {
+  const S = window.__shimla, R = S.roads;
+  const types = S.data.roads.road_types;
+  const mism = [];
+  for (const seg of S.data.sanjauliMap.segments) {
+    const want = types[seg.type]?.width_m;
+    if (want != null && Math.abs(want - seg.width_m) > 0.01) {
+      mism.push(`${seg.id}: ${seg.width_m} != ${want}`);
+    }
+  }
+  // har dukaan sadak ke kinare se bahar
+  let inside = 0, worst = 0, n = 0;
+  for (const st of S.bazaar.userData.stalls || []) {
+    const nd = R.nearestNode(st.x, st.z);
+    if (!nd) continue;
+    const w = nd.node.road.spec.width_m / 2;
+    const over = w - nd.dist;          // >0 = dukaan sadak ke andar
+    n++;
+    if (over > 0.5) { inside++; if (over > worst) worst = over; }
+  }
+  return { mism: mism.slice(0, 3), mismN: mism.length, n, inside, worst: +worst.toFixed(1) };
+});
+console.log("dukaanein:", JSON.stringify(shopsClear));
+const shopsOk = shopsClear.mismN === 0 && shopsClear.n > 100 && shopsClear.inside === 0;
+
 const checks = [
   ["console errors", errors.length === 0, errors.slice(0, 3).join(" | ")],
   ["page errors", pageErrors.length === 0, pageErrors.slice(0, 3).join(" | ")],
@@ -480,6 +567,8 @@ const checks = [
   ["pair zameen par", Math.abs(grounded.meshFoot) < 0.06, `meshFoot ${grounded.meshFoot} m`],
   ["ghutna peeche, kohni aage", gaitOk, JSON.stringify(gait)],
   ["college ke andar shuru", campusOk, JSON.stringify(campus)],
+  ["sadak ki satah = groundAt", surfaceOk, JSON.stringify(surface)],
+  ["dukaanein sadak ke bahar", shopsOk, JSON.stringify(shopsClear)],
   ["sadak par traffic", s.trafficNear > 0, `${s.trafficNear} / ${s.traffic}`],
   ["camera peeche", camOk, JSON.stringify(cam)],
   ["gaadi naak ke bal", noseOk, JSON.stringify(nose)],

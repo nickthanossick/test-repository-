@@ -165,10 +165,42 @@ export class RoadNetwork {
   }
 
   groundAt(x, z) {
+    /*
+     * **Sadak ki asli, khinchi hui satah** -- centre ki terrain oonchai nahi.
+     *
+     * Sadak ka mesh do kinaron se banta hai: har quad ke kone
+     * `terrain.heightAt(kinara) + lift` par hote hain, aur beech ki satah un
+     * dono ke beech **seedhi** hoti hai. Par yahan pehle
+     * `terrain.heightAt(x, z) + lift` lautaya jaata tha -- yaani beech ki
+     * *zameen*, jo dhalan par khinchi hui satah se bilkul alag hoti hai.
+     *
+     * Naapa gaya (2426 bindu): 32% jagah 30 cm se zyada ka farak, aur sabse
+     * bure kone par **-9.25 m se +18 m**. Isi wajah se khiladi, gaadi, bus
+     * aur bheed -- sab dhalan wali sadak par usme dhans jaate the ya upar
+     * tairte the. Nikhil: *"character b sadak k andr ghus gya... gadiyan b
+     * wat the hell"*.
+     *
+     * Ye keeda pehle bhi tha, par 12.5 m ki sadak par kinara sirf 6.25 m door
+     * tha; 17 m par lever dugna ho gaya aur baat khul kar saamne aa gayi.
+     *
+     * Ab wahi hisaab jo mesh khud karta hai: bindu ko centreline par project
+     * karo, dono kinaron ki terrain oonchai lo, aur beech mein lerp.
+     */
     const base = this.terrain.heightAt(x, z);
-    const r = this.roadAt(x, z, 1.0);
-    if (!r) return base;
-    return base + (r.spec.type === "rail" ? 0.35 : 0.5);
+    const n = this.nearestNode(x, z);
+    if (!n) return base;
+    const road = n.node.road;
+    const w = road.spec.width_m / 2;
+    // kinare ki patti (0.42 m) tak bhi sadak hi hai
+    const u = (x - n.node.pos.x) * n.node.nx + (z - n.node.pos.z) * n.node.nz;
+    if (Math.abs(u) > w + 0.42) return base;
+    const lift = road.type === "rail" ? 0.35 : 0.5;
+    // centreline par ka bindu, phir uske dono kinare
+    const cx = x - n.node.nx * u, cz = z - n.node.nz * u;
+    const hm = this.terrain.heightAt(cx - n.node.nx * w, cz - n.node.nz * w);
+    const hp = this.terrain.heightAt(cx + n.node.nx * w, cz + n.node.nz * w);
+    const t = THREE.MathUtils.clamp((u + w) / (2 * w), 0, 1);
+    return hm + (hp - hm) * t + lift;
   }
 
   roadAt(x, z, slack = 3) {

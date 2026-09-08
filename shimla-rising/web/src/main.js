@@ -203,6 +203,14 @@ async function boot() {
    */
   roads.setPlatforms(city.userData.platforms);
   const playerGround = (x, z) => {
+    /*
+     * Sadak par farsh nahi chalta.
+     *
+     * College road campus ki aayat ke beech se guzarti hai, aur wahan farsh
+     * sadak se 2.7 m neeche baithta tha -- yaani sadak par chalte hi khiladi
+     * usme dhas jaata tha. Sadak ki apni satah hamesha jeetegi.
+     */
+    if (roads.roadAt(x, z, 0.5)) return roads.groundAt(x, z);
     const p = roads.platformAt(x, z);
     /*
      * Farsh **hamesha** jeetta hai, `Math.max()` nahi.
@@ -267,8 +275,36 @@ async function boot() {
      * khada hota hai, andar nahi dhansta.
      */
     const camp = (city.userData.spawns || []).find((sp) => sp.id === "college");
-    const s0 = camp
-      ? colliders.freeSpotNear(camp.x, camp.z, camp.y + 1.0, 2.0)
+    /*
+     * Spawn wahan jahan campus ka farsh **hai aur sadak nahi**.
+     *
+     * Builder ka bindu forecourt par hai, par college road ab 13 m chaudi hai
+     * aur us bindu ke upar se guzarti hai. Sadak ki satah farsh se jeetti hai
+     * (upar `playerGround`), isliye khiladi terrace ke bajaye sadak par --
+     * yaani farsh se 2.6 m upar -- aa jaata tha.
+     *
+     * Isliye jagah **dhoondhte** hain, maan kar nahi chalte: builder ke bindu
+     * se bahar ki taraf ghere mein wo pehli jagah lo jahan platform mile aur
+     * sadak na ho. Ye khud theek karta rehta hai -- sadak phir chaudi ho to
+     * spawn apne aap aur andar khisak jaayega.
+     */
+    let campSpot = null;
+    if (camp) {
+      outer2:
+      for (const r of [0, 4, 8, 12, 16, 20, 26]) {
+        for (let a = 0; a < 12; a++) {
+          const th = (a / 12) * Math.PI * 2;
+          const x = camp.x + Math.cos(th) * r, z = camp.z + Math.sin(th) * r;
+          if (roads.platformAt(x, z) === null) continue;
+          if (roads.roadAt(x, z, 2.5)) continue;           // sadak se door raho
+          if (colliders.inside(x, playerGround(x, z) + 1.0, z, 0.6)) continue;
+          campSpot = { x, z };
+          break outer2;
+        }
+      }
+    }
+    const s0 = campSpot
+      ? colliders.freeSpotNear(campSpot.x, campSpot.z, playerGround(campSpot.x, campSpot.z) + 1.0, 2.0)
       : safeSpot(data.poiById.get("college_gate") ? "college_gate" : "vicky_garage");
     player.placeAt(s0.x, s0.z);
     // test ke liye: khel kahan shuru hua (spawn baad mein save se badal sakta hai)
@@ -280,7 +316,7 @@ async function boot() {
      * mukhya building ki taraf. Gate wale purane raaste par (fallback) wahi
      * sadak-align wala hisaab rehta hai.
      */
-    if (camp) {
+    if (camp && campSpot) {
       chase.yaw = camp.yaw;
       player.yaw = camp.yaw;
       chase.pitch = 0.24;

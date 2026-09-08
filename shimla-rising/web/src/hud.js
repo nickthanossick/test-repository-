@@ -174,16 +174,43 @@ export class HUD {
       c.fillRect(X - 1.2, Y - 1.2, 2.4, 2.4);
     }
 
-    c.fillStyle = "#e8c33a";
+    /*
+     * Marker apne **apne rang** mein.
+     *
+     * Nikhil: *"map m ye b dikha jana kahan h, mission kahan se shuru hone"*.
+     * `missions.js` pehle se teen tarah ke marker banata hai -- hara (abhi ka
+     * kaam), peela (mission ki shuruaat / objective) aur neela (side
+     * mission) -- par yahan sab ek hi `#e8c33a` se putt jaate the, isliye
+     * naksha dekh kar ye pata hi nahi chalta tha ki kaunsa nishan kis cheez
+     * ka hai. Rang ab marker khud batata hai.
+     *
+     * Jo nishan daayre se bahar hai wo kinare par chipak jaata hai aur uspar
+     * ek chhota teer bhi banta hai -- sirf gola dekh kar disha nahi padhti.
+     */
+    let nearest = null, nd = Infinity;
     for (const m of markers) {
+      const hex = m.userData?.markerColor ?? 0xe8c33a;
+      const kind = m.userData?.markerKind ?? "objective";
+      c.fillStyle = "#" + hex.toString(16).padStart(6, "0");
       const X = tx(m.position.x), Y = ty(m.position.z);
+      const dw = Math.hypot(m.position.x - p.x, m.position.z - p.z);
+      if (dw < nd) { nd = dw; nearest = { kind, hex }; }
       const cl = Math.hypot(X - cx, Y - cy);
-      const lim = W / 2 - 8;
-      if (cl > lim) {                       // kinare pe chipka do, direction dikhane ke liye
-        const k = lim / cl;
-        c.beginPath(); c.arc(cx + (X - cx) * k, cy + (Y - cy) * k, 3.2, 0, Math.PI * 2); c.fill();
+      const lim = W / 2 - 9;
+      if (cl > lim) {
+        const k = lim / cl, ex = cx + (X - cx) * k, ey = cy + (Y - cy) * k;
+        c.save();
+        c.translate(ex, ey);
+        c.rotate(Math.atan2(Y - cy, X - cx) + Math.PI / 2);
+        c.beginPath(); c.moveTo(0, -5.5); c.lineTo(4, 3.5); c.lineTo(-4, 3.5);
+        c.closePath(); c.fill();
+        c.restore();
       } else {
-        c.beginPath(); c.arc(X, Y, 4, 0, Math.PI * 2); c.fill();
+        c.beginPath(); c.arc(X, Y, kind === "start" ? 3.4 : 4.4, 0, Math.PI * 2); c.fill();
+        if (kind === "active" || kind === "objective") {
+          c.strokeStyle = "rgba(255,255,255,.75)"; c.lineWidth = 1.4;
+          c.beginPath(); c.arc(X, Y, 7.5, 0, Math.PI * 2); c.stroke();
+        }
       }
     }
 
@@ -196,5 +223,24 @@ export class HUD {
 
     c.strokeStyle = "rgba(255,255,255,.18)"; c.lineWidth = 1;
     c.beginPath(); c.arc(cx, cy, W / 2 - 1, 0, Math.PI * 2); c.stroke();
+
+    /*
+     * Sabse paas wale nishan tak ki **doori**.
+     *
+     * Sirf gola dikhne se ye nahi pata chalta ki wo 40 m door hai ya 900 m.
+     * Neeche ek chhoti patti par doori aur ye ki wo kaam hai ya nayi mission
+     * ki shuruaat.
+     */
+    if (nearest) {
+      const txt = (nd >= 1000 ? (nd / 1000).toFixed(1) + " km" : Math.round(nd) + " m")
+        + (nearest.kind === "start" ? "  mission" : "  kaam");
+      c.font = "600 11px ui-sans-serif, system-ui, sans-serif";
+      c.textAlign = "center";
+      const tw = c.measureText(txt).width + 12;
+      c.fillStyle = "rgba(12,16,22,.78)";
+      c.fillRect(cx - tw / 2, H - 27, tw, 16);
+      c.fillStyle = "#" + nearest.hex.toString(16).padStart(6, "0");
+      c.fillText(txt, cx, H - 15);
+    }
   }
 }

@@ -130,7 +130,46 @@ export function buildBazaar(terrain, roads, shopsJson, mapJson, pois, quality = 
 
     const p = at(seg, slot.t);
     const halfW = seg.spec.width_m / 2;
-    const off = halfW + 3.4;
+    /*
+     * Dukaan ko **asli khinchi hui sadak** se bahar rakho, sirf apne segment
+     * se nahi.
+     *
+     * Bazaar ke segment (`data/sanjauli.json`) aur khinchi hui sadak
+     * (`data/roads.json`) do **alag polyline** hain -- ek doosre ke aas-paas
+     * chalti hain par milti nahi. Dukaan apne segment se `halfW + 3.4` par
+     * lagti thi, aur wo bindu kisi doosri, chaudi sadak ke beech mein pad
+     * sakta tha. Sankri sadak par ye farak chhupa rehta tha; 17 m par
+     * **680 mein se 152 dukaanein** sadak ke andar aa gayi (sabse buri 7.5 m
+     * andar). Nikhil: *"sari dukaein sadak k andr e ghus gai"*.
+     *
+     * Isliye ab bahar ki taraf dhakelte hain jab tak asli sadak ka kinara
+     * (aur dukaan ki apni gehrai) saaf na ho jaye.
+     */
+    const DEP = 6.4;                                  // dukaan ki gehrai (neeche `D`)
+    /*
+     * Bahar dhakelte hain, par **sabse achhi** jagah yaad rakhte hue.
+     *
+     * Chaurahe par har dhakka dukaan ko kisi doosri sadak ke paas le jaata
+     * hai, isliye loop hamesha "poori tarah saaf" tak nahi pahunchta. Pehli
+     * koshish mein maine aise slot chhod diye the -- aur 680 mein se **353**
+     * hi bachi, yaani aadha bazaar gayab. Ab jo sabse zyada clearance mili
+     * wahi le lete hain, aur dukaan sirf tab chhodte hain jab uska **kendra
+     * hi** carriageway ke andar ho.
+     */
+    let off = halfW + 3.4, bestOff = off, bestGap = -Infinity;
+    for (let tries = 0; tries < 8; tries++) {
+      const qx = p.x + p.nx * slot.side * off, qz = p.z + p.nz * slot.side * off;
+      const rn = roads.nearestNode(qx, qz);
+      if (!rn) { bestOff = off; bestGap = Infinity; break; }
+      const half = rn.node.road.spec.width_m / 2;
+      const gap = rn.dist - half;                    // kendra kitna bahar hai
+      if (gap > bestGap) { bestGap = gap; bestOff = off; }
+      if (gap >= DEP / 2 + 0.6) break;               // mukh bhi saaf -- bas
+      off += (half + DEP / 2 + 0.6) - rn.dist;
+    }
+    off = bestOff;
+    // kendra hi sadak ke andar ho to yahan dukaan ban hi nahi sakti
+    if (bestGap < 0.6) continue;
     const bx = p.x + p.nx * slot.side * off;
     const bz = p.z + p.nz * slot.side * off;
     const gy = terrain.heightAt(bx, bz);

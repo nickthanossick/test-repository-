@@ -289,9 +289,23 @@ export class Crowd {
       const side = Math.random() < 0.5 ? -1 : 1;
       // Footpath ki chaudai bhar bikhrao -- sab ek hi lakeer par chalein to
       // qatar lagti hai, bheed nahi.
-      const off = seg.spec.width_m / 2 + 1.0 + Math.random() * 1.6;
-      const x = a.x + (b.x - a.x) * k + nx * side * off;
-      const z = a.z + (b.z - a.z) * k + nz * side * off;
+      let off = seg.spec.width_m / 2 + 1.0 + Math.random() * 1.6;
+      const px = a.x + (b.x - a.x) * k, pz = a.z + (b.z - a.z) * k;
+      /*
+       * Rahgeer bhi **asli sadak** ke bahar. Bazaar ka segment aur khinchi
+       * hui sadak do alag polyline hain (dekho `bazaar.js`), isliye sirf
+       * segment ki chaudai dekh kar log carriageway ke beech chalte dikhte
+       * the. Nikhil: *"chalte hue npc b"*.
+       */
+      {
+        const rn = this.roads.nearestNode(px + nx * side * off, pz + nz * side * off);
+        if (rn) {
+          const need = rn.node.road.spec.width_m / 2 + 1.2;
+          if (rn.dist < need) off += need - rn.dist;
+        }
+      }
+      const x = px + nx * side * off;
+      const z = pz + nz * side * off;
       const dist = Math.hypot(x - pos.x, z - pos.z);
       if (dist > KEEPER_RANGE || dist < 6) continue;
       /*

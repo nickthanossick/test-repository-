@@ -55,7 +55,7 @@ export class MissionSystem {
       const m = this.byId.get(id);
       if (!m || (this.completed.has(id) && !m.repeatable)) continue;
       const p = this.poiPos(m.start_poi);
-      if (p) this.markers.add(marker(p, m.side ? 0x5aa9e6 : 0xe8c33a, 3.2));
+      if (p) this.markers.add(marker(p, m.side ? 0x5aa9e6 : 0xe8c33a, 3.2, "start"));
     }
   }
 
@@ -65,10 +65,10 @@ export class MissionSystem {
     if (!o) return;
     if (o.type === "race") {
       const p = this.poiPos(o.checkpoints[this.raceIndex]);
-      if (p) this.markers.add(marker(p, 0x6cc27a, 4.5));
+      if (p) this.markers.add(marker(p, 0x6cc27a, 4.5, "active"));
     } else if (o.poi) {
       const p = this.poiPos(o.poi);
-      if (p) this.markers.add(marker(p, 0xe8c33a, o.type === "collect" ? 5 : 3.4));
+      if (p) this.markers.add(marker(p, 0xe8c33a, o.type === "collect" ? 5 : 3.4, "objective"));
     }
     for (const pk of this.pickups) this.markers.add(pk.mesh);
   }
@@ -228,8 +228,11 @@ export class MissionSystem {
   }
 }
 
-function marker(pos, color, radius) {
+function marker(pos, color, radius, kind = "objective") {
   const g = new THREE.Group();
+  // HUD ka minimap yahi padhta hai -- rang aur kism dono
+  g.userData.markerColor = color;
+  g.userData.markerKind = kind;
   const ring = new THREE.Mesh(
     new THREE.TorusGeometry(radius, 0.28, 6, 20),
     new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.9 }),
