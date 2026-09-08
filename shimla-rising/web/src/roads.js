@@ -137,6 +137,33 @@ export class RoadNetwork {
    *
    * Sab isi se zameen lein: khiladi, gaadi, bus aur bheed.
    */
+  /**
+   * Chalne layak farsh (campus ke terrace jaise).
+   *
+   * `groundAt()` sirf terrain + sadak jaanta hai. College ka campus cut-and-
+   * fill se banaya gaya ek ooncha slab hai -- uspar khada karne se khiladi
+   * uske andar dab jaata tha. `landmarks.js` ab apne farsh ki aayat bata deta
+   * hai aur wahi yahan aakar baithti hai.
+   *
+   * Ye **sirf khiladi** ke liye hai (`main.js` ka `playerGround`). Gaadi ka
+   * ground isse nahi guzarta, warna cars campus par chadh jaayengi.
+   */
+  setPlatforms(list) { this.platforms = list || []; }
+
+  /** `(x, z)` par farsh ki oonchai, ya `null`. */
+  platformAt(x, z) {
+    const ps = this.platforms;
+    if (!ps || !ps.length) return null;
+    let best = null;
+    for (const p of ps) {
+      const dx = x - p.x, dz = z - p.z;
+      const cy = Math.cos(-p.yaw), sy = Math.sin(-p.yaw);
+      const u = dx * cy - dz * sy, v = dx * sy + dz * cy;
+      if (Math.abs(u) <= p.hu && Math.abs(v) <= p.hv && (best === null || p.y > best)) best = p.y;
+    }
+    return best;
+  }
+
   groundAt(x, z) {
     const base = this.terrain.heightAt(x, z);
     const r = this.roadAt(x, z, 1.0);

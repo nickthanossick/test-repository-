@@ -422,12 +422,45 @@ export class Audio {
   say(text, { rate = 1.0, pitch = 1.0, volume = 0.9, gender = "male" } = {}) {
     const synth = window.speechSynthesis;
     if (!synth || !text || this.muted) return false;
+    /*
+     * Awaaz sunai hi nahi de rahi thi -- Nikhil: *"jo dialogue vicky bolra wo
+     * sunai dene chahiye"*. Teen alag wajah thi, teenon yahan theek hui:
+     *
+     * **1. Devanagari ek angrezi awaaz ko.** `toDevanagari()` hamesha lagta
+     *    tha. Jis machine par Hindi voice **install nahi** hai (Windows ka
+     *    default yahi hai) wahan Chrome ko `"देख के चल"` ek `en-US` voice ke
+     *    saath milta tha aur wo **chup** reh jaata tha -- na error, na awaaz.
+     *    Ab lipi awaaz dekh kar chunte hain: Devanagari sirf hi/mr/ne voice
+     *    ko, warna wahi roman Hinglish jo subtitle mein hai.
+     *
+     * **2. `getVoices()` shuru mein khaali hota hai.** Chrome use async
+     *    bharta hai. Pehli line aksar us khidki mein padti thi, voice `null`
+     *    milti thi aur `lang = "hi-IN"` bhi bina voice ke chup reh jaata tha.
+     *    Ab list khaali ho to line ko `voiceschanged` tak rok lete hain.
+     *
+     * **3. Chrome ka speechSynthesis atak jaata hai** (jaana-maana bug):
+     *    `speaking` sach rehta hai par kuch bolta nahi. `resume()` use
+     *    chhuda deta hai, aur wo bekaar call harmless hai.
+     */
+    const all = synth.getVoices?.() || [];
+    if (!all.length) {
+      // ek hi baar dobara koshish -- warna line hamesha ke liye kho jaati hai
+      if (!this._voiceWait) {
+        this._voiceWait = true;
+        const retry = () => { this._voiceWait = false; this.say(text, { rate, pitch, volume, gender }); };
+        synth.addEventListener?.("voiceschanged", retry, { once: true });
+        setTimeout(() => { if (this._voiceWait) retry(); }, 350);
+      }
+      return false;
+    }
     try {
       if (synth.speaking) synth.cancel();
-      const u = new SpeechSynthesisUtterance(toDevanagari(text));
+      synth.resume?.();
       const v = this.pickVoice(gender);
+      // Devanagari sirf usi awaaz ko jo use padh sakti ho
+      const devanagari = v ? /^(hi|mr|ne|sa)\b/i.test(v.lang || "") : false;
+      const u = new SpeechSynthesisUtterance(devanagari ? toDevanagari(text) : text);
       if (v) { u.voice = v; u.lang = v.lang; }
-      else u.lang = "hi-IN";
       u.rate = rate;
       u.pitch = Math.max(0.1, Math.min(2, pitch));
       u.volume = Math.min(1, volume * (0.55 + this.volume));

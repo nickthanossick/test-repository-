@@ -30,7 +30,15 @@ import { buildHuman } from "./human.js";
  */
 
 const DRIVABLE = new Set(["arterial", "street", "lane", "track"]);
-const LANE_OFFSET = 2.0;          // left-hand traffic -- India
+/*
+ * Left-hand traffic -- India. Ye ab sadak ki **apni chaudai** ka hissa hai,
+ * fix number nahi: 17 m ki arterial par 2 m ka offset saari gaadiyon ko beech
+ * ki patti par chipka deta tha, jaise sadak ek hi lane ki ho.
+ */
+const LANE_FRAC = 0.3;
+const LANE_MIN = 1.6, LANE_MAX = 4.6;
+const laneOffset = (spec) =>
+  Math.min(LANE_MAX, Math.max(LANE_MIN, (spec?.width_m ?? 8) * 0.5 * LANE_FRAC * 2));
 const GAP_M = 9;                  // aage wali gaadi se kam se kam itni doori
 const FULL_LOD_M = 85;            // itne paas poori gaadi, aage merged
 const RECYCLE_M = 300;            // itni door nikal gayi to naye sire se
@@ -169,7 +177,7 @@ export class Traffic {
     const eye = this.eye || playerPos;
     const p = at(car.lane, car.d);
     const nx = -p.uz, nz = p.ux;
-    const off = LANE_OFFSET * car.dir;
+    const off = laneOffset(car.lane?.road?.spec) * car.dir;
     const x = p.x + nx * off, z = p.z + nz * off;
     car.mesh.position.set(x, this.ground(x, z), z);
 

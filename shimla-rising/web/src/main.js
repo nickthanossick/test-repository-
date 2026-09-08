@@ -49,10 +49,27 @@ function mulberry32(a) {
 
 const lbar = document.querySelector("#lbar > i");
 const lmsg = document.getElementById("lmsg");
+const lpct = document.getElementById("lpct");
 const setProgress = (f, msg) => {
-  lbar.style.width = Math.round(f * 100) + "%";
+  const pct = Math.max(0, Math.min(100, Math.round(f * 100)));
+  lbar.style.width = pct + "%";
+  if (lpct) lpct.textContent = pct + "%";
   if (msg) lmsg.textContent = msg;
 };
+/*
+ * Browser ko ek frame paint karne do.
+ *
+ * Nikhil: *"game shuru me jb load ni hoti to percentage me dikhya kr"*. Sirf
+ * number dikhana kaafi nahi tha: `setProgress(0.5)` ke baad poori duniya
+ * (terrain, sadak, sheher, jungle, landmarks) **ek hi synchronous block**
+ * mein banti thi, isliye browser beech mein paint karta hi nahi tha aur bar
+ * 45% par jam kar seedha 100% par kood jaati thi -- yaani number hota bhi to
+ * jhootha lagta.
+ *
+ * Do `requestAnimationFrame` isliye ki ek ke baad style laga to hoti hai par
+ * hamesha paint nahi hoti; doosre tak wo screen par aa chuki hoti hai.
+ */
+const yieldFrame = () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
 
 async function boot() {
   setProgress(0.02, "Shimla ka data aa raha hai…");
@@ -60,6 +77,7 @@ async function boot() {
 
   const geo = new GeoReference(data.geo);
   setProgress(0.5, "terrain ban raha hai…");
+  await yieldFrame();
   const terrain = new Terrain(geo, data.terrainMeta, data.heightmapImage);
   terrain.geo = geo;
 
@@ -119,9 +137,11 @@ async function boot() {
 
   // ------------------------------------------------------------------- world
   setProgress(0.58, "pahad tarash rahe hain…");
+  await yieldFrame();
   scene.add(terrain.buildMesh(8, Q.terrainQuads));
 
   setProgress(0.70, "sadkein bichha rahe hain…");
+  await yieldFrame();
   const roads = new RoadNetwork(geo, terrain, data.roads);
   const roadGroup = roads.buildMesh();
   scene.add(roadGroup);
@@ -135,6 +155,7 @@ async function boot() {
   let forest = null;
 
   setProgress(0.80, "Shimla bas raha hai…");
+  await yieldFrame();
   // Sanjauli ka bazaar: Chowk se Dhalli tak dono taraf lagatar dukanein.
   // Ye city ke generic scatter se *pehle* banta hai taaki `buildCity` ko pata ho
   // ki corridor mein ghar nahi rakhne -- warna dukanein aur ghar aapas mein
@@ -158,6 +179,7 @@ async function boot() {
   forest = city.getObjectByName("forest");
 
   setProgress(0.90, "aasman aur mausam…");
+  await yieldFrame();
   const sky = new Sky(scene, terrain, renderer);
   sky.shadowRadius = Q.shadowRadius;
   sky.sun.shadow.mapSize.set(Q.shadowMap, Q.shadowMap);
@@ -168,7 +190,38 @@ async function boot() {
 
   // ------------------------------------------------------------------ actors
   setProgress(0.95, "Vicky taiyaar ho raha hai…");
-  const player = new Player(terrain, colliders, groundAt);
+  await yieldFrame();
+  /*
+   * Khiladi ki zameen mein **campus ka farsh** bhi shaamil hai.
+   *
+   * `groundAt` sirf terrain + sadak deta hai. College ka campus ek ooncha
+   * cut-and-fill slab hai; uspar khada karne se Vicky uske andar dab jaata
+   * tha -- aur "college ke andar se shuru" isi wajah se mumkin nahi tha.
+   *
+   * Gaadi ko ye **nahi** milta (`groundAt` waisa hi rehta hai), warna cars
+   * campus ke terrace par chadh jaayengi.
+   */
+  roads.setPlatforms(city.userData.platforms);
+  const playerGround = (x, z) => {
+    const p = roads.platformAt(x, z);
+    /*
+     * Farsh **hamesha** jeetta hai, `Math.max()` nahi.
+     *
+     * Pehli koshish mein maine `p > g ? p : g` likha tha -- ye maan kar ki
+     * terrace hamesha zameen se ooncha hoga. Naapne par ulta nikla: spawn wale
+     * bindu par plaza 2228.96 hai aur raw terrain 2231.54 -- yaani farsh
+     * zameen se **2.6 m neeche**. Wajah saaf hai: terrace cut-**and**-fill se
+     * banta hai; dhalan ke upri hisse ko *kaata* jaata hai aur neeche wale ko
+     * bhara. `max()` lene se khiladi us kate hue pahad par khada ho jaata tha,
+     * yaani slab ke andar.
+     *
+     * Kata hua hissa aankh ko dikhta bhi nahi (uske saamne retaining wall hai,
+     * jo collider bhi hai), isliye farsh ke andar aakar terrain ka koi matlab
+     * nahi rehta.
+     */
+    return p !== null ? p : roads.groundAt(x, z);
+  };
+  const player = new Player(terrain, colliders, playerGround);
   scene.add(player.mesh);
 
   // aas-paas kuch gaadiyan khadi kar do
@@ -197,6 +250,7 @@ async function boot() {
   const chase = new ChaseCamera(camera, terrain, colliders);
   const hud = new HUD(data, terrain);
 
+  let startAt = null;    // naya khel kahan shuru hua -- smoke test isse padhta hai
   /** POI pe rakho, par imaarat ke andar nahi -- pehle khaali jagah dhoondo. */
   function safeSpot(poiId, fallbackOffset = 6) {
     const p = data.poiById.get(poiId);
@@ -206,31 +260,44 @@ async function boot() {
   }
   {
     /*
-     * Spawn: **Sanjauli College ke gate par**.
-     *
-     * Nikhil: *"game random location s shuru nahi hogi, sanjauli college se
-     * shuru hogi -- phle back story cards fir mission"*. Pehle ye
-     * `vicky_garage` tha, jo kahani ke hisaab se ghar hai par pehla mission
-     * (`m01_pehla_din`) college ke gate par shuru hota hai -- yaani khel shuru
-     * hote hi khiladi ko poora Sanjauli paar karke aana padta tha.
-     *
-     * Camera sadak ke saath align hota hai: default yaw=0 Sanjauli ki dhalan
-     * mein seedha pahad ke andar dekhta hai, aur pehla frame ek hari deewar
-     * ban jaata hai.
+     * Nikhil: *"game shuru hmesha college k andr s hogi"*. Pehle spawn gate
+     * par tha -- sadak par, campus ke bahar. Ab `landmarks.js` ka college
+     * builder khud forecourt ka bindu deta hai (`spawns`), jo campus ke farsh
+     * par hai. Wo farsh ab `playerGround` ko dikhta hai, isliye Vicky uspar
+     * khada hota hai, andar nahi dhansta.
      */
-    const s0 = safeSpot(data.poiById.get("college_gate") ? "college_gate" : "vicky_garage");
+    const camp = (city.userData.spawns || []).find((sp) => sp.id === "college");
+    const s0 = camp
+      ? colliders.freeSpotNear(camp.x, camp.z, camp.y + 1.0, 2.0)
+      : safeSpot(data.poiById.get("college_gate") ? "college_gate" : "vicky_garage");
     player.placeAt(s0.x, s0.z);
-    const rn = roads.nearestNode(s0.x, s0.z, (r) => r.type !== "rail");
-    if (rn) {
-      // sadak ke saath dekho, dhalan se neeche ki taraf (jahan zyada door tak dikhta hai)
-      const t = new THREE.Vector3(-rn.node.nz, 0, rn.node.nx);
-      const ahead = terrain.heightAt(s0.x + t.x * 40, s0.z + t.z * 40);
-      const behind = terrain.heightAt(s0.x - t.x * 40, s0.z - t.z * 40);
-      const dir = ahead < behind ? t : t.negate();
-      chase.yaw = Math.atan2(-dir.x, -dir.z);
-      player.yaw = chase.yaw;
-      chase.pitch = 0.30;
+    // test ke liye: khel kahan shuru hua (spawn baad mein save se badal sakta hai)
+    startAt = { x: player.pos.x, y: player.pos.y, z: player.pos.z };
+    /*
+     * Pehla rukh. Campus ke andar sadak ka rukh bekaar hai (sadak campus ke
+     * bahar hai aur uske saath dekhne par pehla frame ek deewar ban jaata
+     * hai), isliye wahan builder ka apna `yaw` chalta hai -- forecourt se
+     * mukhya building ki taraf. Gate wale purane raaste par (fallback) wahi
+     * sadak-align wala hisaab rehta hai.
+     */
+    if (camp) {
+      chase.yaw = camp.yaw;
+      player.yaw = camp.yaw;
+      chase.pitch = 0.24;
       chase._init = false;
+    } else {
+      const rn = roads.nearestNode(s0.x, s0.z, (r) => r.type !== "rail");
+      if (rn) {
+        // sadak ke saath dekho, dhalan se neeche ki taraf (jahan zyada door tak dikhta hai)
+        const t = new THREE.Vector3(-rn.node.nz, 0, rn.node.nx);
+        const ahead = terrain.heightAt(s0.x + t.x * 40, s0.z + t.z * 40);
+        const behind = terrain.heightAt(s0.x - t.x * 40, s0.z - t.z * 40);
+        const dir = ahead < behind ? t : t.negate();
+        chase.yaw = Math.atan2(-dir.x, -dir.z);
+        player.yaw = chase.yaw;
+        chase.pitch = 0.30;
+        chase._init = false;
+      }
     }
   }
   {
@@ -291,6 +358,8 @@ async function boot() {
   });
 
   const state = { money: 2500, mode: "foot", get quality() { return tier; }, vehicle: null, player, missions, weather,
+                  get startX() { return startAt?.x; }, get startY() { return startAt?.y; },
+                  get startZ() { return startAt?.z; },
                   get hour() { return dayNight.hour; }, set hour(h) { dayNight.hour = h; } };
 
   // Awaaz state ke saath jaati hai, taaki `saveGame` use likh sake
@@ -327,7 +396,7 @@ async function boot() {
     /*
      * Nikhil: *"phle back story cards fir mission s shuru"*. Intro deck ke
      * band hote hi pehla mission apne aap chalu -- khiladi ko marker dhoondhne
-     * ki zaroorat nahi, wo college ke gate par khada hi hai.
+     * ki zaroorat nahi, wo college ke campus ke andar khada hi hai.
      *
      * `missions.start()` khud `cards` event bhejta hai, isliye m01 ka apna
      * deck bhi apne aap chalta hai. Do deck ke beech ek frame ka antar rakha
@@ -435,11 +504,22 @@ async function boot() {
     const vp = ch?.voice || {};
     const angry = /panga|gali|betiyachu|bedafu|bendaga|bedelo|benduga|bendiyaba/i.test(line.text)
       || line.speaker === "rahgeer";
+    /*
+     * Nikhil: *"uski awaj mard wali par funny"*.
+     *
+     * Vicky ka profile pehle pitch 0.78 par tha -- awaaz mard ki to thi par
+     * dheemi aur bhaari, chacha jaisi. Wo ab 1.02 / rate 1.16 par hai: wahi
+     * mard ki awaaz, par jawaan aur chalti hui. Aur jahan wo masti wali
+     * pahadi bhasha bolta hai (bawa, pataka, macho, kat gya) wahan thodi aur
+     * oonchi aur tez -- yahi use funny banata hai, awaaz badal kar nahi.
+     */
+    const masti = /\b(bawa|pataka|macho|kat\s*gya|kat\s*gaya|bhukkad|jhakaas|scene|mast)\b/i
+      .test(line.text);
     audio.say(line.text, {
       gender: vp.gender || "male",
-      pitch: (vp.pitch ?? 0.9) * (angry ? 0.94 : 1),
-      rate: (vp.rate ?? 1.0) * (angry ? 1.14 : 1),
-      volume: angry ? 1.0 : 0.9,
+      pitch: (vp.pitch ?? 0.9) * (angry ? 0.94 : masti ? 1.08 : 1),
+      rate: (vp.rate ?? 1.0) * (angry ? 1.14 : masti ? 1.10 : 1),
+      volume: angry || masti ? 1.0 : 0.92,
     });
   };
 
@@ -703,7 +783,8 @@ async function boot() {
         handbrake: input.down("Space"),
       }, weather.grip);
       player.pos.copy(v.pos);
-      if (!debugCam) chase.update(dt, v.pos, "vehicle", v.yaw);
+      // raftaar bhi -- camera usi se aage dekhta hai (look-ahead)
+      if (!debugCam) chase.update(dt, v.pos, "vehicle", v.yaw, v.speed);
       if (v.lastImpact) {
         // Deewar se takkar -- zor ke hisaab se awaaz aur nuksan
         audio.blip(90 + Math.min(120, v.lastImpact * 8), 0.18, 0.3);

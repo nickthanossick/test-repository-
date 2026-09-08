@@ -29,6 +29,39 @@ const s = await page.evaluate(() => window.__shimla.stats);
 console.log("stats:", JSON.stringify(s));
 
 /*
+ * Khel college ke **andar** shuru hota hai, gate par nahi.
+ *
+ * Campus ka farsh terrain se ooncha hai; agar `roads.setPlatforms()` na juda
+ * ho to khiladi slab ke andar dab kar spawn hoga aur ye farak sirf aankh se
+ * pakda jaayega. Isliye naapte hain: spawn wale bindu par platform milta hai,
+ * aur khiladi usi oonchai par khada hai.
+ */
+const campus = await page.evaluate(() => {
+  const S = window.__shimla;
+  const sp = (S.city.userData.spawns || []).find((q) => q.id === "college");
+  if (!sp) return { ok: false, why: "spawn nahi mila" };
+  const plat = S.roads.platformAt(sp.x, sp.z);
+  const terr = S.roads.groundAt(sp.x, sp.z);
+  return {
+    ok: true, plat: plat === null ? null : +plat.toFixed(2), terr: +terr.toFixed(2),
+    lift: plat === null ? null : +(plat - terr).toFixed(2),
+    dist: +Math.hypot(S.state.startX - sp.x, S.state.startZ - sp.z).toFixed(1),
+    startY: +S.state.startY.toFixed(2),
+  };
+});
+console.log("campus:", JSON.stringify(campus));
+/*
+ * Farsh milna chahiye aur khiladi **usi par** khada ho.
+ *
+ * `lift` (farsh - terrain) ka chinh jaan-boojh kar nahi jaancha jaata: terrace
+ * cut-and-fill hai, isliye kahin wo zameen se ooncha hai aur kahin neeche.
+ * Spawn wale bindu par wo 2.6 m **neeche** nikla -- aur yahi wo cheez thi jo
+ * pehli koshish mein `Math.max()` ki wajah se toot rahi thi.
+ */
+const campusOk = campus.ok && campus.plat !== null
+  && campus.dist < 12 && Math.abs(campus.startY - campus.plat) < 1.2;
+
+/*
  * Texture ka colour-space check.
  *
  * `new THREE.Color(hex)` ColorManagement ke saath hex ko sRGB se linear convert
@@ -375,6 +408,61 @@ const jack = await page.evaluate(() => {
 });
 console.log("gaadi kheenchi:", JSON.stringify(jack));
 
+/*
+ * Chaal ki disha -- ghutna peeche, kohni aage.
+ *
+ * Nikhil: *"age peeche sb wrong chal rha h"*. Rig mein ang neeche latakta hai
+ * aur `R_x(a)` use `(0, -L·cos a, -L·sin a)` par le jaata hai -- yaani
+ * `a > 0` = **aage**. Code mein ghutne ka chinh dhanaatmak tha (pakshi jaisi
+ * ulti taang) aur kohni ka rinaatmak (haath peeche tudte hue). Dono aankh se
+ * saaf dikhte the par kisi jaanch mein nahi aate the.
+ *
+ * Ye check do hisson mein hai, taaki wo apne aap ko sahi thehra sake:
+ *   1. **usool naapo** -- ek joint ko `+0.5` ghumao aur dekho ki uska sira
+ *      sach mein `-Z` (aage) jaata hai. Ye maan kar nahi chalte.
+ *   2. phir poore chaal ke chakkar mein: ghutna kabhi aage na mude aur kabhi
+ *      to peeche mude; kohni kabhi peeche na mude.
+ */
+const gait = await page.evaluate(() => {
+  const S = window.__shimla, T = S.THREE;
+  const base = { forward: 0, strafe: 0, walk: 0, turn: 0, run: false, jump: false };
+  const rig = S.player.mesh.userData.rig;
+  const knee = rig.legs[0].knee;
+
+  // ---- 1. usool: +0.5 ghumane par sira kis taraf jaata hai? ----
+  const was = knee.rotation.x;
+  const tipLocal = new T.Vector3(0, -0.4, 0);
+  knee.rotation.x = 0;
+  knee.updateMatrixWorld(true);
+  const a = knee.localToWorld(tipLocal.clone());
+  knee.rotation.x = 0.5;
+  knee.updateMatrixWorld(true);
+  const b = knee.localToWorld(tipLocal.clone());
+  knee.rotation.x = was;
+  // model ke apne frame mein laao
+  S.player.mesh.updateMatrixWorld(true);
+  const inv = S.player.mesh.matrixWorld.clone().invert();
+  const convention = b.applyMatrix4(inv).z - a.applyMatrix4(inv).z;   // <0 = aage
+
+  // ---- 2. chaal ka poora chakkar ----
+  let kneeMax = -9, kneeMin = 9, elbowMin = 9;
+  for (let i = 0; i < 60; i++) {
+    S.player.update(0.05, { ...base, walk: 1 }, S.chase.yaw);
+    for (const leg of rig.legs) {
+      kneeMax = Math.max(kneeMax, leg.knee.rotation.x);
+      kneeMin = Math.min(kneeMin, leg.knee.rotation.x);
+    }
+    for (const arm of rig.arms) elbowMin = Math.min(elbowMin, arm.elbow.rotation.x);
+  }
+  return { convention: +convention.toFixed(3), kneeMax: +kneeMax.toFixed(3),
+           kneeMin: +kneeMin.toFixed(3), elbowMin: +elbowMin.toFixed(3) };
+});
+console.log("chaal:", JSON.stringify(gait));
+const gaitOk = gait.convention < -0.05          // +kon = aage, jaisa maana tha
+  && gait.kneeMax <= 0.001                      // ghutna kabhi aage nahi
+  && gait.kneeMin < -0.15                       // par peeche mudta zaroor hai
+  && gait.elbowMin >= -0.001;                   // kohni kabhi peeche nahi
+
 const checks = [
   ["console errors", errors.length === 0, errors.slice(0, 3).join(" | ")],
   ["page errors", pageErrors.length === 0, pageErrors.slice(0, 3).join(" | ")],
@@ -390,6 +478,8 @@ const checks = [
   ["zameen par khada", groundOk, JSON.stringify(grounded)],
   // model ke pair -- `pos` nahi, jo dikhta hai wo
   ["pair zameen par", Math.abs(grounded.meshFoot) < 0.06, `meshFoot ${grounded.meshFoot} m`],
+  ["ghutna peeche, kohni aage", gaitOk, JSON.stringify(gait)],
+  ["college ke andar shuru", campusOk, JSON.stringify(campus)],
   ["sadak par traffic", s.trafficNear > 0, `${s.trafficNear} / ${s.traffic}`],
   ["camera peeche", camOk, JSON.stringify(cam)],
   ["gaadi naak ke bal", noseOk, JSON.stringify(nose)],

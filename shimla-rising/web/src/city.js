@@ -69,16 +69,52 @@ export function buildCity(terrain, roads, districts, pois, rng, quality = {}, op
     for (const n of near) {
       if (rng() > density) continue;
       const w = n.road.spec.width_m / 2;
+      /*
+       * Do kataar, ek nahi.
+       *
+       * Sadak chaudi karne aur ghar peeche khiskaane ke baad imaaratein 3588
+       * se **2049** reh gayi thi -- sadak to khul gayi par Sanjauli khaali
+       * lagne laga. Nikhil ko dono chahiye: khuli sadak aur zinda sheher.
+       *
+       * Jawab dhalan mein hai: asli Shimla mein ghar sadak ke *peeche*, ek ke
+       * upar ek chadhte jaate hain. Isliye ab har node par do kataar hain --
+       * saamne wali (footpath ke turant baad) aur peeche wali (14-24 m aur
+       * peeche). Ghanapan wapas aata hai bina sadak ko chhue.
+       */
       for (const side of [-1, 1]) {
-        if (rng() > 0.80) continue;
-        const off = w + 4.5 + rng() * 10;
+        for (const row of [0, 1]) {
+          if (rng() > (row === 0 ? 0.86 : 0.62)) continue;
+        /*
+         * Ghar **poora** sadak ke bahar.
+         *
+         * Pehle centre `w + 4.5` se shuru hota tha aur ghar ka apna naap baad
+         * mein `house()` ke andar tay hota tha (5-9.5 m chauda, random yaw).
+         * Nateeja: ek gali par ghar ka kona sadak ke **do metre andar** aa
+         * jaata tha. Collider to `roadClear` se chhota kar diya jaata tha
+         * (line neeche), par **mesh nahi** -- isliye deewar sadak par jhukti
+         * dikhti thi aur usme se gaadi nikal bhi jaati thi. Nikhil: *"bhout
+         * conjusted sa h"*.
+         *
+         * Ab naap pehle nikaalte hain, uska aadha vikarn jodte hain, aur uske
+         * baad 6 m ka footpath chhodte hain -- yaani geometry kabhi sadak
+         * chhooti hi nahi.
+         */
+        const bw = 5 + rng() * 4.5, bdep = 5 + rng() * 4.5;
+        const halfDiag = Math.hypot(bw, bdep) / 2;
+        const off = w + 6 + halfDiag + rng() * 8 + (row ? 14 + rng() * 10 : 0);
         const x = n.pos.x + side * off * n.nx;
         const z = n.pos.z + side * off * n.nz;
-        if (placed.occupied(x, z, 8.5)) continue;
+        // Ghar-ghar ka faasla bhi khula -- 8.5 par do 9.5 m ke ghar ek doosre
+        // mein ghus jaate the.
+        if (placed.occupied(x, z, 13)) continue;
+        // Peeche wali kataar bahut khadi dhalan par nahi -- wahan ghar
+        // plinth par tairta dikhta hai
+        if (row && terrain.slopeAt(x, z) > 0.72) continue;
         placed.add(x, z);
         placedCount++;
         house({ walls, roofs, plinths, windows, trim }, terrain, x, z, d, rng, col, colliders, facades,
-              off - n.road.spec.width_m / 2 - 1.0);
+              off - w - 1.0, bw, bdep);
+        }
       }
     }
   }
@@ -111,6 +147,8 @@ export function buildCity(terrain, roads, districts, pois, rng, quality = {}, op
   // Asli jagahein: har named POI ki apni imaarat, aur uske naam ka board.
   const lm = buildLandmarks(terrain, roads, pois, colliders);
   group.userData.crowdSpots = lm.userData.crowdSpots;
+  group.userData.platforms = lm.userData.platforms;
+  group.userData.spawns = lm.userData.spawns;
   group.add(lm);
   const signs = buildSigns(lm.userData.signs, terrain);
   group.add(signs);
@@ -133,9 +171,12 @@ export function buildCity(terrain, roads, districts, pois, rng, quality = {}, op
  *   - **gable chhat** bahar nikle eaves ke saath (pyramid nahi)
  *   - kabhi-kabhi **chimney**
  */
-function house(mb, terrain, x, z, d, rng, col, colliders, facadeCount = 2, roadClear = 99) {
-  const w = 5 + rng() * 4.5;
-  const dep = 5 + rng() * 4.5;
+function house(mb, terrain, x, z, d, rng, col, colliders, facadeCount = 2, roadClear = 99,
+               fixedW = 0, fixedDep = 0) {
+  // Naap bulane wala pehle hi nikaal chuka ho sakta hai -- usi se wo setback
+  // ginta hai, isliye yahan dobara random lena galat hoga.
+  const w = fixedW || (5 + rng() * 4.5);
+  const dep = fixedDep || (5 + rng() * 4.5);
   const floors = 2 + Math.floor(rng() * (d.wealth > 0.7 ? 3 : 2.6));
   const fh = 3.0;
   const yaw = rng() * Math.PI * 2;
@@ -318,8 +359,15 @@ function buildForest(terrain, roads, buildings, rng, TARGET = 9000) {
     // Khadi dhalan par jungle patla hota hai -- jad tikti nahi. Yahi
     // terrain ke splat se bhi mel khata hai (wahan chattan dikhti hai).
     if (slope > 0.55 && rng() < (slope - 0.55) * 2.2) continue;
+    /*
+     * Sadak khaali rakho -- ab uski **apni chaudai** ke hisaab se.
+     *
+     * Pehle ye 11 m fix tha. Sadak chaudi hone ke baad (arterial 17 m) uska
+     * aadha hi 8.5 m hai, yaani ped sadak ke kinare par nahi, kinare ke andar
+     * ug aate. Ab aadhi chaudai + 6 m ka footpath.
+     */
     const nr = roads.nearestNode(x, z);
-    if (nr && nr.dist < 11) continue;              // sadak khaali rakho
+    if (nr && nr.dist < nr.node.road.spec.width_m / 2 + 6) continue;
     if (buildings.occupied(x, z, 7)) continue;
     if (y < 1800 && rng() > 0.42) continue;        // deodar belt 1800 m se upar
     // chir neeche zyada, deodar upar zyada

@@ -24,11 +24,16 @@ HIGHWAY_MAP = {
 }
 
 ROAD_TYPES = {
-    "arterial":   {"width_m": 9.0, "speed_kmh": 55, "color": "#3a3a3e"},
-    "street":     {"width_m": 6.0, "speed_kmh": 40, "color": "#45454a"},
-    "lane":       {"width_m": 3.6, "speed_kmh": 25, "color": "#4e4e52"},
-    "pedestrian": {"width_m": 7.0, "speed_kmh": 0,  "color": "#6b6355"},
-    "track":      {"width_m": 4.0, "speed_kmh": 30, "color": "#5a4f3c"},
+    # Chaudai asli Shimla se zyada hai, jaan-boojh kar. Asli sadak par gaadi
+    # chalana aur camera ghumana dono tang lagte the -- Nikhil: "sadk ko bhout
+    # khula krde... place ki kami ni". Ye `data/roads.json` ke road_types se
+    # milti hui rehni chahiye, warna pipeline dobara chalne par khel wapas
+    # sankra ho jaayega.
+    "arterial":   {"width_m": 17.0, "speed_kmh": 55, "color": "#3a3a3e"},
+    "street":     {"width_m": 13.0, "speed_kmh": 40, "color": "#45454a"},
+    "lane":       {"width_m": 8.5, "speed_kmh": 25, "color": "#4e4e52"},
+    "pedestrian": {"width_m": 9.0, "speed_kmh": 0,  "color": "#6b6355"},
+    "track":      {"width_m": 6.0, "speed_kmh": 30, "color": "#5a4f3c"},
     "rail":       {"width_m": 2.6, "speed_kmh": 35, "color": "#4a4038"},
 }
 

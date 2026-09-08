@@ -129,7 +129,7 @@ function campus(c, mb) {
  * pahad ki taraf. Isliye main building +v par hai aur uska mukh -v ki taraf.
  */
 function college(c, mb) {
-  const { yaw, terrain, boards, fences, colliders, crowdSpots, banners } = c;
+  const { yaw, terrain, boards, fences, colliders, crowdSpots, banners, platforms, spawns } = c;
 
   /*
    * Poora campus dhalan par **upar** khiskaya hua hai.
@@ -554,6 +554,31 @@ function college(c, mb) {
     // hai -- warna student slab se utar kar hawa mein chalta rehta hai.
     crowdSpots.push({ x: px, z: pz, y: base, r: 2.5, kind: "campus" });
   }
+
+  /*
+   * ===================== chalne layak farsh (platform) =====================
+   *
+   * Campus ka farsh cut-and-fill se banta hai -- zameen se 3-6 m ooncha. Par
+   * khiladi ki zameen `roads.groundAt()` se aati hai, jo sirf terrain aur
+   * sadak jaanti hai. Isliye campus par khada karne se Vicky slab ke **andar**
+   * dab jaata tha, aur "college ke andar se shuru" mumkin hi nahi tha.
+   *
+   * Do aayat kaafi hain -- wahi do jo upar `B("stone", ...)` se bane hain.
+   * Inhe `roads.setPlatforms()` padhta hai aur sirf **khiladi** ka ground
+   * inhe dekhta hai; gaadi ka nahi, warna cars campus par chadh jaayengi.
+   */
+  const [ux, uz] = L(11, -1);
+  platforms.push({ x: ux, z: uz, hu: 27, hv: 14, yaw, y: PLAZA, name: "college-upper" });
+  const [lx, lz] = L(-31, -22);
+  platforms.push({ x: lx, z: lz, hu: 16, hv: 10, yaw, y: LOWER, name: "college-lower" });
+
+  /*
+   * Khel yahin se shuru hota hai -- Nikhil: *"game shuru hmesha college k andr
+   * se hogi"*. Forecourt par, mukhya building ki taraf mooh. Ye gate se ~30 m
+   * andar hai, isliye pehla frame campus dikhata hai, sadak nahi.
+   */
+  const [sx, sz] = L(-12, -4);
+  spawns.push({ id: "college", x: sx, z: sz, y: PLAZA, yaw: yaw + Math.PI / 2 });
 
   /*
    * ============================ campus ki hariyali =========================
@@ -1046,6 +1071,9 @@ export function buildLandmarks(terrain, roads, pois, colliders = null) {
    */
   const crowdSpots = [];
   const banners = [];
+  // chalne layak farsh (campus ke terrace) aur khel ka shuruaati bindu
+  const platforms = [];
+  const spawns = [];
 
   for (const p of pois.pois) {
     const fn = BUILDERS[p.landmark];
@@ -1068,6 +1096,7 @@ export function buildLandmarks(terrain, roads, pois, colliders = null) {
     const cy = Math.cos(yaw), sy = Math.sin(yaw);
     const ctx = {
       x, z, y, yaw, terrain, roads, poi: p, rng: seeded(p.id), mbRef: mb, boards, fences, colliders, crowdSpots, banners,
+      platforms, spawns,
       L: (u, v) => [x + u * cy - v * sy, z + u * sy + v * cy],
     };
     fn(ctx, mb);
@@ -1121,6 +1150,8 @@ export function buildLandmarks(terrain, roads, pois, colliders = null) {
   if (banners.length) g.add(buildBanners(banners));
 
   g.userData.crowdSpots = crowdSpots;
+  g.userData.platforms = platforms;
+  g.userData.spawns = spawns;
   g.userData.signs = signs;
   g.userData.landmarkCount = pois.pois.filter((p) => BUILDERS[p.landmark]).length;
   return g;

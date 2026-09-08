@@ -211,8 +211,17 @@ function inlineData() {
    * `heightmap_web.png` bhi likhta hai -- 1.6 MB. Wo na ho (purana data) to
    * poora wala hi chalega.
    */
-  const light = join(DATA, "heightmap_web.png");
-  const hmPath = existsSync(light) ? light : join(DATA, "heightmap.png");
+  /*
+   * Poora 2048 px ka heightmap.
+   *
+   * Pehle yahan halka `heightmap_web.png` (1024 px) jaata tha sirf file size
+   * ke liye. Nikhil: *"output m html file dio chahe file ka size kitna b bda
+   * krde"*. Poore naap par `heightAt()` ka sample chaar guna barik hai, aur
+   * khiladi ke pair, gaadi ke pahiye aur camera ki oonchai -- teenon wahi se
+   * aate hain. File ~3.7 MB se ~9 MB ho jaati hai; wo manzoor hai.
+   */
+  const full = join(DATA, "heightmap.png");
+  const hmPath = existsSync(full) ? full : join(DATA, "heightmap_web.png");
   const png = readFileSync(hmPath).toString("base64");
   console.log(`  heightmap: ${basename(hmPath)} (${(png.length / 1.37e6).toFixed(1)} MB)`);
   return { blob, png };

@@ -14,7 +14,18 @@ import { buildBody } from "./vehicle.js";
  */
 
 const STOP_SECONDS = 4.0;
-const LANE_OFFSET = 2.6;          // left-hand traffic -- India
+/*
+ * Left-hand traffic -- India. Ye ab sadak ki **apni chaudai** ka hissa hai,
+ * fix number nahi: 17 m ki arterial par 2 m ka offset saari gaadiyon ko beech
+ * ki patti par chipka deta tha, jaise sadak ek hi lane ki ho.
+ */
+const LANE_FRAC = 0.34;
+const LANE_MIN = 1.6, LANE_MAX = 4.6;
+// Bus ke segment `sanjauli.json` se aate hain, sadak se nahi -- unme
+// `width_m` hota hi nahi, isliye wahan fallback (8 m) lagta hai aur offset
+// lagbhag purana 2.6 hi rehta hai. Ye jaan-boojh kar hai, keeda nahi.
+const laneOffset = (spec) =>
+  Math.min(LANE_MAX, Math.max(LANE_MIN, (spec?.width_m ?? 8) * 0.5 * LANE_FRAC * 2));
 const GAP_M = 14;                 // aage wali bus se kam se kam itni doori
 
 export class BusSystem {
@@ -137,7 +148,7 @@ export class BusSystem {
       const p = this._at(bus.seg, bus.d);
       const nx = -p.uz, nz = p.ux;
       // Left-hand traffic: apni disha ke hisaab se baayein lane mein raho
-      const off = LANE_OFFSET * bus.dir;
+      const off = laneOffset(bus.seg?.road?.spec ?? bus.seg?.spec) * bus.dir;
       const x = p.x + nx * off, z = p.z + nz * off;
       const y = this.ground(x, z);
       // origin pahiye ke neeche hai -- koi offset nahi, warna bus tairti hai

@@ -62,13 +62,6 @@
       ],
       "objectives": [
         {
-          "id": "o1",
-          "type": "goto",
-          "text": "College ke gate tak pahuncho",
-          "poi": "college_gate",
-          "radius": 12
-        },
-        {
           "id": "o2",
           "type": "goto",
           "text": "Library mein attendance sheet dhoondo",
@@ -85,7 +78,8 @@
       ],
       "unlocks": [
         "m02_union_parcha"
-      ]
+      ],
+      "$comment": "Gate wala kaam hata diya gaya: khel ab college ke **andar** shuru hota hai (forecourt par), isliye \"gate tak pahuncho\" ulta lagta tha. Pehla kaam ab Library hai."
     },
     {
       "id": "m02_union_parcha",

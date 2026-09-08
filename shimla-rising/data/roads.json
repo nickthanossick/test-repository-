@@ -2,27 +2,27 @@
   "$comment": "Shimla ka sadak network, asli routes trace karke. Points [lat, lon] hain - engine georeference.json se world coords banata hai. tools/shimla_pipeline/ chalao to ye file asli OpenStreetMap data se replace ho jayegi.",
   "road_types": {
     "arterial": {
-      "width_m": 12.5,
+      "width_m": 17.0,
       "speed_kmh": 55,
       "color": "#3a3a3e"
     },
     "street": {
-      "width_m": 8.5,
+      "width_m": 13.0,
       "speed_kmh": 40,
       "color": "#45454a"
     },
     "lane": {
-      "width_m": 5.0,
+      "width_m": 8.5,
       "speed_kmh": 25,
       "color": "#4e4e52"
     },
     "pedestrian": {
-      "width_m": 7.0,
+      "width_m": 9.0,
       "speed_kmh": 0,
       "color": "#6b6355"
     },
     "track": {
-      "width_m": 4.0,
+      "width_m": 6.0,
       "speed_kmh": 30,
       "color": "#5a4f3c"
     },
@@ -30,7 +30,8 @@
       "width_m": 2.6,
       "speed_kmh": 35,
       "color": "#4a4038"
-    }
+    },
+    "$comment": "Chaudai jaan-boojh kar asli Shimla se zyada hai. Nikhil: \"sadk ko bhout khula krde taki gadi and chalne me dikkat na aye... place ki kami ni\". Asli Sanjauli ki sadak 6-9 m ki hai, par us par gaadi chalana aur camera ghumana dono tang lagte the. Terrain ka carve corridor 26 m ka hai, isliye ye chaudai usme aa jaati hai -- heightmap dobara banane ki zaroorat nahi."
   },
   "roads": [
     {

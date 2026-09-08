@@ -172,7 +172,7 @@ const TURN_RATE = 2.6;      // radian/second, arrows se ghoomne ki raftaar
     this.mesh.rotation.y = this.yaw;
 
     this._updateStates(dt, moving);
-    this._animate(moving);
+    this._animate(moving, dt, moving ? speed : 0);
     this._applyStates();
   }
 
@@ -214,10 +214,15 @@ const TURN_RATE = 2.6;      // radian/second, arrows se ghoomne ki raftaar
     const L = rig.arms[0];        // baayan haath -- beedi aur phone dono yahin
 
     if (this.onPhone) {
-      // haath kaan tak
-      L.shoulder.rotation.x = -1.05;
+      /*
+       * Haath kaan tak. Chinh gait ke saath milta hai: `rotation.x > 0` ang
+       * ko **aage** le jaata hai. Pehle yahan rinaatmak kon tha, isliye
+       * baazu aage-upar ki jagah **peeche** uthta tha aur phone sar ke
+       * peeche chala jaata tha.
+       */
+      L.shoulder.rotation.x = 0.62;
       L.shoulder.rotation.z = 0.42;
-      L.elbow.rotation.x = -2.15;
+      L.elbow.rotation.x = 2.25;
       // baat karte waqt halka sar hilana
       if (rig.head) rig.head.rotation.z = Math.sin(this.phoneT * 2.2) * 0.05;
     } else if (this.smokeT > 0) {
@@ -229,9 +234,9 @@ const TURN_RATE = 2.6;      // radian/second, arrows se ghoomne ki raftaar
       const up = t < 0.35 ? t / 0.35
         : t < 0.65 ? 1
         : 1 - (t - 0.65) / 0.35;
-      L.shoulder.rotation.x = -1.25 * up;
+      L.shoulder.rotation.x = 0.48 * up;
       L.shoulder.rotation.z = 0.30 * up;
-      L.elbow.rotation.x = -1.95 * up;
+      L.elbow.rotation.x = 2.05 * up;
       // ember tez jab beedi mooh par ho
       if (props?.ember) {
         props.ember.material.emissiveIntensity = 1.4 + (t > 0.35 && t < 0.65 ? 2.6 : 0);
@@ -241,32 +246,74 @@ const TURN_RATE = 2.6;      // radian/second, arrows se ghoomne ki raftaar
     }
   }
 
-  /** Chalne/daudne ka simple procedural gait -- kandha aur ghutna asli joints par. */
-  _animate(moving) {
+  /**
+   * Chaal.
+   *
+   * Nikhil: *"vicky ki movements fluid nahi h, age peeche sb wrong chal rha
+   * h... face stomach legs age facing hoti, back side peeth hoti h"*. Isme
+   * **teen** alag keede the:
+   *
+   * **1. Ghutna aur kohni ulte mudte the.** Rig mein `rotation.x` ka matlab
+   * saaf hai: ang neeche latakta hai `(0,-L,0)`, aur `R_x(a)` use
+   * `(0, -L·cos a, -L·sin a)` par le jaata hai -- yaani **`a > 0` ka matlab
+   * aage (`-Z`)**. Asli ghutna **peeche** mudta hai, isliye uska kon
+   * **rinaatmak** hona chahiye; asli kohni **aage** mudti hai, isliye uska
+   * kon **dhanaatmak**. Code mein dono ka chinh ulta tha -- ghutna pakshi ki
+   * tarah aage mudta tha aur haath peeche. Isi se chaal ulti dikhti thi.
+   *
+   * **2. Phase ghadi se chalta tha, kadam se nahi.** `performance.now()` se
+   * `sin` lene ka matlab: raftaar badle ya na badle, taangein utni hi tez
+   * chalti thi (pair phislte the), aur rukte hi `amp` ek frame mein 0 ho
+   * jaata tha -- taang jhatke se seedhi. Ab phase **tay ki gayi doori** se
+   * badhta hai aur `amp` dheere-dheere badalta hai.
+   *
+   * **3. Kohni ka mod `Math.abs()` par tha**, isliye har aadhe chakkar mein
+   * ek teekha kona aata tha. Ab wo bhi lagataar hai.
+   */
+  _animate(moving, dt, speed) {
     const rig = this.mesh.userData.rig;
     if (!rig) return;
-    const t = performance.now() / 1000;
-    const freq = this.running ? 13 : 8;
-    const amp = moving ? (this.running ? 0.85 : 0.48) : 0;
-    this._gait = (this._gait ?? 0) + (moving ? 0 : 0);
-    const sw = Math.sin(t * freq) * amp;
-    const sw2 = Math.sin(t * freq + Math.PI) * amp;
+
+    // ---- phase: har metre par utna hi, chahe fps kuch bhi ho -------------
+    const stride = this.running ? 1.95 : 1.42;      // metre prati aadha kadam
+    if (moving) this._gaitPhase = (this._gaitPhase ?? 0) + (speed * dt / stride) * Math.PI;
+    // ---- amp: shuru aur ant dono narm ------------------------------------
+    const want = moving ? (this.running ? 0.80 : 0.46) : 0;
+    const k = 1 - Math.exp(-dt * 9);                 // ~0.11 s ka time constant
+    this._gaitAmp = (this._gaitAmp ?? 0) + (want - (this._gaitAmp ?? 0)) * k;
+    const amp = this._gaitAmp;
+
+    const ph = this._gaitPhase ?? 0;
+    const sw = Math.sin(ph) * amp;
+    const sw2 = Math.sin(ph + Math.PI) * amp;
 
     rig.legs[0].hip.rotation.x = sw;
     rig.legs[1].hip.rotation.x = sw2;
-    // ghutna sirf peeche mudta hai
-    rig.legs[0].knee.rotation.x = Math.max(0, -sw) * 1.1;
-    rig.legs[1].knee.rotation.x = Math.max(0, -sw2) * 1.1;
-    // haath ulti taraf jhoolte hain
-    rig.arms[0].shoulder.rotation.x = sw2 * 0.8;
-    rig.arms[1].shoulder.rotation.x = sw * 0.8;
-    rig.arms[0].elbow.rotation.x = -Math.abs(sw2) * 0.55 - (moving ? 0.12 : 0.25);
-    rig.arms[1].elbow.rotation.x = -Math.abs(sw) * 0.55 - (moving ? 0.12 : 0.25);
+    /*
+     * Ghutna: taang jab **peeche** ho tab mudti hai, aur peeche hi mudti hai
+     * -- isliye kon rinaatmak. `-Math.max(0, -sw)` matlab: sw < 0 (taang
+     * peeche) hone par hi mod, aur wo mod negative.
+     */
+    rig.legs[0].knee.rotation.x = -Math.max(0, -sw) * 1.15;
+    rig.legs[1].knee.rotation.x = -Math.max(0, -sw2) * 1.15;
 
-    // saans/bob
-    this.mesh.position.y += moving
-      ? Math.abs(Math.sin(t * freq)) * (this.running ? 0.055 : 0.028)
-      : Math.sin(t * 1.6) * 0.008;
+    // haath ulti taraf jhoolte hain: daaya pair aage to baaya haath aage
+    rig.arms[0].shoulder.rotation.x = sw2 * 0.75;
+    rig.arms[1].shoulder.rotation.x = sw * 0.75;
+    /*
+     * Kohni hamesha thodi mudi rehti hai aur **aage** mudti hai (positive).
+     * Jab haath peeche jaata hai tab mod kam, aage jaate waqt zyada -- yahi
+     * asli chaal hai. `abs()` ki jagah `sin` ka aadha, taaki kona na aaye.
+     */
+    const bend = (s) => 0.22 + amp * 0.30 + s * 0.34;
+    rig.arms[0].elbow.rotation.x = bend(sw2);
+    rig.arms[1].elbow.rotation.x = bend(sw);
+
+    // saans/bob -- ye bhi amp ke saath aata-jaata hai, warna rukte hi jhatka
+    const bob = amp > 0.02
+      ? Math.abs(Math.sin(ph)) * (this.running ? 0.055 : 0.028) * (amp / 0.46)
+      : 0;
+    this.mesh.position.y += bob + Math.sin(performance.now() / 625) * 0.008 * (1 - amp / 0.46);
   }
 }
 
