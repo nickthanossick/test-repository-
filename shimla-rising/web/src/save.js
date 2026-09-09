@@ -1,5 +1,5 @@
 /** localStorage save. Sirf is browser mein rehta hai. */
-const KEY = "shimla-rising:v2";   // v2: round 20-21 mein geometry badli, purane save ki position ab deewar mein -- discard
+const KEY = "shimla-rising:v3";   // v3: R30 mein poora world badla (Sanjauli corridor, generic map gaya) -- purane save discard
 
 export function saveGame(state) {
   try {

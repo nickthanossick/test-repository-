@@ -96,6 +96,60 @@
       "counter": "glass",
       "glow": "#ffe8a0",
       "goods": "jewel"
+    },
+    "gift": {
+      "awning": "#c0397a",
+      "counter": "glass",
+      "glow": "#ffd0e8",
+      "goods": "gift"
+    },
+    "mart": {
+      "awning": "#c0293a",
+      "counter": "glass",
+      "glow": "#ffd0c0",
+      "goods": "mart"
+    },
+    "apparel": {
+      "awning": "#22242a",
+      "counter": "glass",
+      "glow": "#e8e8ee",
+      "goods": "apparel"
+    },
+    "uniforms": {
+      "awning": "#12365e",
+      "counter": "glass",
+      "glow": "#d8c88a",
+      "goods": "uniforms"
+    },
+    "optical": {
+      "awning": "#0f8a8a",
+      "counter": "glass",
+      "glow": "#d0fff4",
+      "goods": "optical"
+    },
+    "clinic": {
+      "awning": "#1560b0",
+      "counter": "glass",
+      "glow": "#d0e8ff",
+      "goods": "clinic"
+    },
+    "auto": {
+      "awning": "#1552a0",
+      "counter": "steel",
+      "glow": "#d8e8ff",
+      "goods": "auto"
+    },
+    "crockery": {
+      "awning": "#5a6b80",
+      "counter": "glass",
+      "glow": "#e0e8f0",
+      "goods": "crockery"
+    },
+    "school": {
+      "awning": "#e0a020",
+      "counter": "glass",
+      "glow": "#fff0c0",
+      "goods": "school"
     }
   },
   "shops": [
@@ -329,5 +383,29 @@
       "sub": "Innerwear · Socks",
       "kind": "cloth"
     }
+  ],
+  "_anchors_comment": "Asli dukanein jo user ke photos mein hain (Sanjauli Chowk -> Dhalli tunnel). 'side' L/R aur 'at' (chowk_dhalli segment par 0..1 doori) se bazaar.js inhe asli jagah/side par anchor karta hai; baaki slot generic 'shops' se bharte hain.",
+  "anchors": [
+    { "name": "JBD MOBILE ZONE", "sub": "Mobile Repair · Hardware", "kind": "mobile", "side": "L", "at": 0.028 },
+    { "name": "INDESIGN GRAPHIC", "sub": "Printing · Design", "kind": "photocopy", "side": "L", "at": 0.041 },
+    { "name": "SETHI CROCKERY HOUSE", "sub": "Crockery · Gifts", "kind": "crockery", "side": "L", "at": 0.054 },
+    { "name": "NEW GIFT ZONE", "sub": "Bags · Gifts · Toys", "kind": "gift", "side": "R", "at": 0.060 },
+    { "name": "SMOKEY", "sub": "Fashion Bags", "kind": "gift", "side": "R", "at": 0.073 },
+    { "name": "SUMMIT SUZUKI", "sub": "Arena · Service", "kind": "auto", "side": "L", "at": 0.082 },
+    { "name": "Dr BATRA'S", "sub": "Homeopathy Clinic", "kind": "clinic", "side": "R", "at": 0.098 },
+    { "name": "GUPTA JEES", "sub": "Electronics · Gifts", "kind": "general", "side": "R", "at": 0.116 },
+    { "name": "ANU FASHIONS", "sub": "Ladies Wear", "kind": "cloth", "side": "L", "at": 0.124 },
+    { "name": "AASHRI", "sub": "Boutique · Sanjauli", "kind": "cloth", "side": "L", "at": 0.138 },
+    { "name": "KHUBSURAT SELECTIONS", "sub": "Fashion Store", "kind": "cloth", "side": "R", "at": 0.146 },
+    { "name": "KUMAR SWEETS", "sub": "Mithai · Namkeen", "kind": "sweets", "side": "R", "at": 0.162 },
+    { "name": "LENSKART", "sub": "Eyewear", "kind": "optical", "side": "R", "at": 0.182 },
+    { "name": "SMART KIDS", "sub": "Admissions Open", "kind": "school", "side": "R", "at": 0.196 },
+    { "name": "VISHAL MEGA MART", "sub": "Family Store", "kind": "mart", "side": "R", "at": 0.214 },
+    { "name": "SURYA KUTHI FOOD", "sub": "Cloud Kitchen", "kind": "dhaba", "side": "L", "at": 0.208 },
+    { "name": "CHOPRA COMPLEX", "sub": "Shops · Offices", "kind": "general", "side": "L", "at": 0.232 },
+    { "name": "OCTAVE", "sub": "Menswear", "kind": "apparel", "side": "L", "at": 0.246 },
+    { "name": "PUBLIC CHOICE", "sub": "Leaders in Uniforms", "kind": "uniforms", "side": "L", "at": 0.258 },
+    { "name": "TITAN", "sub": "Watches", "kind": "jewel", "side": "L", "at": 0.270 },
+    { "name": "FOOT GALLERY", "sub": "Footwear", "kind": "cloth", "side": "L", "at": 0.282 }
   ]
 }

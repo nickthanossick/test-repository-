@@ -108,7 +108,11 @@ export function buildCity(terrain, roads, districts, pois, rng, quality = {}, op
   const colliders = opts.colliders || new Colliders(24);
   let placedCount = 0;
 
-  for (const d of districts.districts) {
+  // R30: `scatter:false` par generic ghar-bikhraav band -- world sirf Sanjauli
+  // corridor (bazaar + curated landmarks) + pahad/jungle rehta hai. Baaki sab
+  // (forest, landmarks, signs) waise hi banta hai.
+  const districtList = opts.scatter === false ? [] : districts.districts;
+  for (const d of districtList) {
     const c = terrain.geo.toWorld(d.lat, d.lon);
     const near = roads.nodes.filter((n) => {
       const dx = n.pos.x - c.x, dz = n.pos.z - c.z;
@@ -210,7 +214,7 @@ export function buildCity(terrain, roads, districts, pois, rng, quality = {}, op
   group.add(buildForest(terrain, roads, placed, rng, quality.treeCount ?? 9000));
 
   // Asli jagahein: har named POI ki apni imaarat, aur uske naam ka board.
-  const lm = buildLandmarks(terrain, roads, pois, colliders);
+  const lm = buildLandmarks(terrain, roads, pois, colliders, { corridorOnly: opts.corridorLandmarks });
   group.userData.crowdSpots = lm.userData.crowdSpots;
   group.userData.platforms = lm.userData.platforms;
   group.userData.spawns = lm.userData.spawns;

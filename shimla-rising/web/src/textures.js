@@ -953,6 +953,16 @@ export function signboard(text, sub = "", kind = "shop", seed = 0) {
       books:    { bg: "#1e4636", fg: "#f4e9cf", accent: "#e8c33a", border: "#e8c33a" },
       meat:     { bg: "#6b1c18", fg: "#ffe4d8", accent: "#ffffff", border: "#e8a08a" },
       jewel:    { bg: "#4a1030", fg: "#f0d27a", accent: "#f0c246", border: "#c9a84a" },
+      // R30 -- asli Dhalli-arm dukanon ke board rang (photos se)
+      gift:     { bg: "#c0397a", fg: "#fff0f7", accent: "#ffd24a", border: "#ffd0e8" },
+      mart:     { bg: "#c0293a", fg: "#ffffff", accent: "#1d4f8c", border: "#ffffff" },
+      apparel:  { bg: "#1b1c22", fg: "#f4f4f8", accent: "#c9a84a", border: "#8a8a92" },
+      uniforms: { bg: "#12365e", fg: "#ffffff", accent: "#e8c33a", border: "#d8c88a" },
+      optical:  { bg: "#0f8a8a", fg: "#ffffff", accent: "#0b3a4a", border: "#d0fff4" },
+      clinic:   { bg: "#1560b0", fg: "#ffffff", accent: "#e8c33a", border: "#d0e8ff" },
+      auto:     { bg: "#12408c", fg: "#ffffff", accent: "#e02a2a", border: "#d8e8ff" },
+      crockery: { bg: "#4a5b70", fg: "#f4f7fb", accent: "#e0a63a", border: "#c0cbd8" },
+      school:   { bg: "#e0a020", fg: "#3a2410", accent: "#c0293a", border: "#8f5a10" },
     };
     const pal = PALETTE[kind] || PALETTE.shop;
 

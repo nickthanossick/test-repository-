@@ -64,8 +64,9 @@ export function buildBazaar(terrain, roads, shopsJson, mapJson, pois, quality = 
   const interior = new MeshBuilder(0.4);
 
   const shops = shopsJson.shops;
+  const anchors = shopsJson.anchors || [];
   const kinds = shopsJson.kinds;
-  const byName = new Map(shops.map((s) => [s.name, s]));
+  const byName = new Map([...shops, ...anchors].map((s) => [s.name, s]));
   const signs = [];
   const wires = [];
   const stalls = [];      // shopkeeper yahan khade honge
@@ -110,6 +111,27 @@ export function buildBazaar(terrain, roads, shopsJson, mapJson, pois, quality = 
    * kone se andar nahi dekh paata tha.
    */
   const clearZones = landmarkClearZones(terrain, pois);
+
+  /*
+   * R30 -- asli photo-dukanein (Sanjauli Chowk -> Dhalli) apni asli jagah aur
+   * side par. Har anchor ko `chowk_dhalli` ke us khaali slot par baithao jiska
+   * `t` uske `at` ke sabse paas ho aur side mile. Baaki slot generic shops se
+   * bharte hain (dukan-kataar lagataar rahe). Ek anchor ek hi baar.
+   */
+  {
+    const dhalliSlots = mapJson.slots.filter((s) => s.segment === "chowk_dhalli");
+    const used = new Set();
+    for (const a of anchors) {
+      const want = a.side === "R" ? 1 : -1;
+      let best = null, bestD = Infinity;
+      for (const s of dhalliSlots) {
+        if (s.side !== want || s.shop || used.has(s.id)) continue;
+        const d = Math.abs(s.t - a.at);
+        if (d < bestD) { bestD = d; best = s; }
+      }
+      if (best) { best.shop = a.name; used.add(best.id); }
+    }
+  }
 
   for (const slot of mapJson.slots) {
     const seg = segs.get(slot.segment);

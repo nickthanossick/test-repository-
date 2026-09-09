@@ -925,8 +925,70 @@ function yard(c, mb) {
   }
 }
 
+/**
+ * Sanjauli Chowk ka **hara loha footbridge** -- har photo mein yahi pehchan.
+ *
+ * Sadak ke upar se guzarta hai (bus/truck neeche nikle), dono taraf lattice
+ * truss aur seedhiyan. Sadak ki disha se lambvat span karta hai.
+ */
+function chowkBridge(c, mb) {
+  const { x, z, y } = c;
+  const n = c.roads.nearestNode(x, z, (r) => r.type !== "rail");
+  const nx = n ? n.node.nx : 1, nz = n ? n.node.nz : 0;   // sadak ke lambvat (paar)
+  const tx = n ? -n.node.nz : 0, tz = n ? n.node.nx : 1;  // sadak ke saath
+  const rw = n ? n.node.road.spec.width_m : 12;
+  const span = rw + 14, deckW = 2.6, H = 5.6;             // H = neeche clearance
+  const yawN = Math.atan2(nz, nx);                        // box lambai paar-disha mein
+  const P = (u, v) => [x + nx * u + tx * v, z + nz * u + tz * v];   // u=paar, v=sadak ke saath
+  const green = 0x2f6b3a;
+  // deck
+  hex(green); mb.metal.box(x, y + H, z, span, 0.35, deckW, C, yawN);
+  // dono taraf truss: top rail + posts
+  for (const side of [-1, 1]) {
+    const [rx, rz] = P(0, side * deckW / 2);
+    hex(green); mb.metal.box(rx, y + H + 1.55, rz, span, 0.16, 0.16, C, yawN);
+    for (let i = 0; i <= 10; i++) {
+      const [px, pz] = P((i / 10 - 0.5) * span, side * deckW / 2);
+      hex(green); mb.metal.box(px, y + H + 0.78, pz, 0.12, 1.55, 0.12, C, yawN);
+    }
+  }
+  // halki tin chhat
+  hex(0x9aa0a6); mb.tin.box(x, y + H + 1.75, z, span * 0.92, 0.1, deckW + 0.5, C, yawN);
+  // dono sire par utarne ki seedhiyan
+  for (const end of [-1, 1]) {
+    for (let s = 0; s < 6; s++) {
+      const [sx, sz] = P(end * (span / 2 - 0.5 + s * 0.85), 0);
+      hex(green); mb.metal.box(sx, y + H - s * 0.92, sz, 1.1, 0.9, deckW + 0.2, C, yawN);
+    }
+  }
+  if (c.crowdSpots) c.crowdSpots.push({ x: x + tx * 5, z: z + tz * 5 }, { x: x - tx * 5, z: z - tz * 5 });
+}
+
+/** IndianOil petrol pump -- canopy + do pump island + totem board. Chowk ke paas. */
+function petrol(c, mb) {
+  const { x, z, y, yaw, L } = c;
+  hex(0x8f8b84); mb.stone.box(x, y + 0.06, z, 16, 0.12, 12, C, yaw);        // forecourt
+  hex(0xf2f2f2); mb.metal.box(x, y + 5.0, z, 12, 0.55, 8, C, yaw);          // canopy
+  hex(0xe0521f); mb.metal.box(x, y + 4.66, z, 12.4, 0.42, 8.4, C, yaw);     // orange fascia
+  for (const [u, v] of [[-5, -3], [5, -3], [-5, 3], [5, 3]]) {
+    const [px, pz] = L(u, v); hex(0xd4d4d4); mb.metal.box(px, y + 2.5, pz, 0.42, 5, 0.42, C, yaw);
+  }
+  for (const u of [-2.4, 2.4]) {                                            // do dispenser island
+    const [ix, iz] = L(u, 0);
+    hex(0xdedede); mb.stone.box(ix, y + 0.4, iz, 1.4, 0.6, 3.2, C, yaw);
+    hex(0xeaeaf0); mb.metal.box(ix, y + 1.55, iz, 0.95, 2.1, 0.75, C, yaw);
+    hex(0x1552a0); mb.metal.box(ix, y + 2.3, iz, 1.05, 0.5, 0.85, C, yaw);
+  }
+  const [bx, bz] = L(7.6, -4.6);                                           // totem
+  hex(0xffffff); mb.metal.box(bx, y + 3.2, bz, 0.34, 6.4, 2.3, C, yaw);
+  hex(0xe0521f); mb.metal.box(bx, y + 4.4, bz, 0.38, 1.5, 2.4, C, yaw);
+  hex(0x1552a0); mb.metal.box(bx, y + 2.4, bz, 0.38, 1.5, 2.4, C, yaw);
+  if (c.crowdSpots) c.crowdSpots.push({ x: x + 5, z: z + 2 });
+}
+
 const BUILDERS = {
   college, chowki, campus, bazaar, shopfront, colonial, temple, junction, plaza, yard,
+  chowk_bridge: chowkBridge, petrol,
   // tunnel ab `tunnel.js` banata hai -- poora bore, sirf portal nahi
   tunnel_old: () => {},
   tunnel_new: () => {},
@@ -1012,6 +1074,7 @@ const FOOTPRINT = {
   // guzarne wali jagahein -- yahan collider nahi
   bazaar: { r: 0 }, junction: { r: 0 }, plaza: { r: 0 }, yard: { r: 0 },
   tunnel_old: { r: 0 }, tunnel_new: { r: 0 }, ground: { r: 0 }, gate: { r: 0 },
+  chowk_bridge: { r: 0 }, petrol: { r: 0 },
 };
 
 /**
@@ -1031,7 +1094,7 @@ const FOOTPRINT = {
 // generic ghar iske chaaron taraf khade ho jaate the -- bahar barrier aur
 // jeep ke liye jagah hi nahi bachti thi, aur arrest ke baad khiladi kisi
 // deewar ke beech nikalta tha.
-const CLEAR = { college: 42, chowki: 22 };
+const CLEAR = { college: 42, chowki: 22, petrol: 15 };
 
 export function landmarkClearZones(terrain, pois) {
   const out = [];
@@ -1057,7 +1120,7 @@ export function landmarkClearance(terrain, pois) {
   return out;
 }
 
-export function buildLandmarks(terrain, roads, pois, colliders = null) {
+export function buildLandmarks(terrain, roads, pois, colliders = null, opts = {}) {
   const mb = {
     stone: new MeshBuilder(0.32), plaster: new MeshBuilder(0.42),
     tin: new MeshBuilder(0.5), wood: new MeshBuilder(0.6),
@@ -1085,7 +1148,11 @@ export function buildLandmarks(terrain, roads, pois, colliders = null) {
   const platforms = [];
   const spawns = [];
 
+  // R30: corridor-only par sirf Sanjauli->Dhalli ke landmark bante hain (chowk,
+  // petrol pump, tunnel, footbridge...). Baaki poore Shimla ke POI ki imaarat
+  // nahi banti -- "map uda do".
   for (const p of pois.pois) {
+    if (opts.corridorOnly && !p.corridor) continue;
     const fn = BUILDERS[p.landmark];
     if (!fn) continue;
     const { x, z } = terrain.geo.toWorld(p.lat, p.lon);

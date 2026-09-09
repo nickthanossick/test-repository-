@@ -36,30 +36,20 @@ console.log("stats:", JSON.stringify(s));
  * pakda jaayega. Isliye naapte hain: spawn wale bindu par platform milta hai,
  * aur khiladi usi oonchai par khada hai.
  */
+/*
+ * R30: naya khel Sanjauli Chowk par shuru hota hai (college nahi). Naapte hain:
+ * spawn chowk ke paas hai aur khiladi zameen ke barabar khada hai (mesh ke pair
+ * `zameen par khada` check alag se dekhta hai).
+ */
 const campus = await page.evaluate(() => {
   const S = window.__shimla;
-  const sp = (S.city.userData.spawns || []).find((q) => q.id === "college");
-  if (!sp) return { ok: false, why: "spawn nahi mila" };
-  const plat = S.roads.platformAt(sp.x, sp.z);
-  const terr = S.roads.groundAt(sp.x, sp.z);
-  return {
-    ok: true, plat: plat === null ? null : +plat.toFixed(2), terr: +terr.toFixed(2),
-    lift: plat === null ? null : +(plat - terr).toFixed(2),
-    dist: +Math.hypot(S.state.startX - sp.x, S.state.startZ - sp.z).toFixed(1),
-    startY: +S.state.startY.toFixed(2),
-  };
+  const p = S.data.poiById.get("sanjauli_chowk");
+  const w = S.terrain.geo.toWorld(p.lat, p.lon);
+  const dist = Math.hypot(S.state.startX - w.x, S.state.startZ - w.z);
+  return { ok: true, dist: +dist.toFixed(1), startY: +S.state.startY.toFixed(2) };
 });
-console.log("campus:", JSON.stringify(campus));
-/*
- * Farsh milna chahiye aur khiladi **usi par** khada ho.
- *
- * `lift` (farsh - terrain) ka chinh jaan-boojh kar nahi jaancha jaata: terrace
- * cut-and-fill hai, isliye kahin wo zameen se ooncha hai aur kahin neeche.
- * Spawn wale bindu par wo 2.6 m **neeche** nikla -- aur yahi wo cheez thi jo
- * pehli koshish mein `Math.max()` ki wajah se toot rahi thi.
- */
-const campusOk = campus.ok && campus.plat !== null
-  && campus.dist < 12 && Math.abs(campus.startY - campus.plat) < 1.2;
+console.log("spawn:", JSON.stringify(campus));
+const campusOk = campus.ok && campus.dist < 30;
 
 /*
  * Texture ka colour-space check.
@@ -145,6 +135,11 @@ const ctl = await page.evaluate(() => {
   const base = { forward: 0, strafe: 0, walk: 0, turn: 0, run: false, jump: false };
   const run = (c, n = 30) => { for (let i = 0; i < n; i++) S.player.update(0.05, c, S.chase.yaw); };
 
+  // Khuli jagah par le jao -- control mapping ki jaanch hai, na ki spawn ke
+  // aas-paas ki dukanon se takrane ki. Arterial sadak ka beech khula hota hai.
+  const _r = S.roads.roads.find((r) => r.type === "arterial") || S.roads.roads[0];
+  const _m = _r.points[(_r.points.length / 2) | 0];
+  S.player.placeAt(_m.x, _m.z);
   S.chase.yaw = 0;                      // camera-aage = (0, -1)
   const p0 = S.player.pos.clone();
   run({ ...base, forward: 1 });
@@ -187,6 +182,9 @@ const facing = await page.evaluate(() => {
   const S = window.__shimla;
   const THREE = S.THREE;
   const base = { forward: 0, strafe: 0, walk: 0, turn: 0, run: false, jump: false };
+  const _r = S.roads.roads.find((r) => r.type === "arterial") || S.roads.roads[0];
+  const _m = _r.points[(_r.points.length / 2) | 0];
+  S.player.placeAt(_m.x, _m.z);              // khuli jagah -- rukh ki jaanch, takrane ki nahi
   S.player.yaw = 0;                          // apna rukh +Z
   const p0 = S.player.pos.clone();
   for (let i = 0; i < 30; i++) S.player.update(0.05, { ...base, walk: 1 }, S.chase.yaw);
@@ -745,7 +743,8 @@ const tiltOk = carTilt.n > 3 && carTilt.worstDeg < 5;
 const checks = [
   ["console errors", errors.length === 0, errors.slice(0, 3).join(" | ")],
   ["page errors", pageErrors.length === 0, pageErrors.slice(0, 3).join(" | ")],
-  ["buildings built", s.buildings > 500, s.buildings],
+  // R30: generic ghar hata diye -- ab corridor ki dukanein hi "buildings" hain
+  ["corridor shops bane", s.shops > 300, `shops ${s.shops}, generic ${s.buildings}`],
   ["trees built", s.trees > 3000, s.trees],
   ["roads built", s.roadKm > 20, s.roadKm],
   ["vehicles spawned", s.vehicles >= 10, s.vehicles],
@@ -758,7 +757,7 @@ const checks = [
   // model ke pair -- `pos` nahi, jo dikhta hai wo
   ["pair zameen par", Math.abs(grounded.meshFoot) < 0.06, `meshFoot ${grounded.meshFoot} m`],
   ["ghutna peeche, kohni aage", gaitOk, JSON.stringify(gait)],
-  ["college ke andar shuru", campusOk, JSON.stringify(campus)],
+  ["Sanjauli Chowk ke paas shuru", campusOk, JSON.stringify(campus)],
   ["sadak ki satah = groundAt", surfaceOk, JSON.stringify(surface)],
   ["dukaanein sadak ke bahar", shopsOk, JSON.stringify(shopsClear)],
   ["sadak samtal hai", flatOk, JSON.stringify(roadFlat)],

@@ -186,8 +186,13 @@ async function boot() {
   const tunnels = buildTunnels(terrain, roads, data.pois, colliders);
   scene.add(tunnels);
 
+  // R30: Nikhil ne poora generic Shimla map hatane ko kaha -- ab world sirf
+  // Sanjauli Chowk -> Dhalli corridor hai. `scatter:false` generic ghar band
+  // karta hai; `corridorLandmarks` sirf corridor ke landmark banata hai. Forest
+  // (pahad ki hariyali) aur bazaar corridor waise hi rehte hain.
   const city = buildCity(terrain, roads, data.districts, data.pois, mulberry32(31104877), Q,
-                         { keepClear: bazaar.userData.stalls, colliders });
+                         { keepClear: bazaar.userData.stalls, colliders,
+                           scatter: false, corridorLandmarks: true });
   scene.add(city);
   forest = city.getObjectByName("forest");
 
@@ -277,6 +282,9 @@ async function boot() {
   const hud = new HUD(data, terrain);
 
   let startAt = null;    // naya khel kahan shuru hua -- smoke test isse padhta hai
+  // R30: Nikhil ne missions hatane ko kaha -- abhi sirf free-roam world (Sanjauli
+  // Chowk -> Dhalli). Koi intro, koi mission marker, koi mission HUD panel.
+  const MISSIONS_ON = false;
   /** POI pe rakho, par imaarat ke andar nahi -- pehle khaali jagah dhoondo. */
   function safeSpot(poiId, fallbackOffset = 6) {
     const p = data.poiById.get(poiId);
@@ -321,9 +329,11 @@ async function boot() {
         }
       }
     }
+    // R30: naya khel Sanjauli Chowk par shuru -- corridor ka dil, footbridge ke
+    // neeche. (College campus ab corridor mein nahi, isliye camp null rehta hai.)
     const s0 = campSpot
       ? colliders.freeSpotNear(campSpot.x, campSpot.z, playerGround(campSpot.x, campSpot.z) + 1.0, 2.0)
-      : safeSpot(data.poiById.get("college_gate") ? "college_gate" : "vicky_garage");
+      : safeSpot("sanjauli_chowk", 9);
     player.placeAt(s0.x, s0.z);
     // test ke liye: khel kahan shuru hua (spawn baad mein save se badal sakta hai)
     startAt = { x: player.pos.x, y: player.pos.y, z: player.pos.z };
@@ -393,6 +403,8 @@ async function boot() {
   traffic.audio = audio;
   const wanted = new WantedSystem(scene, terrain, roads, data.vehicleById);
   const missions = new MissionSystem(scene, terrain, data);
+  // R30: free-roam -- koi mission marker (3D + minimap) aur koi startable nahi.
+  if (!MISSIONS_ON) { missions.markers.clear(); missions.available.clear(); }
   /*
    * Flashcards. Card ke peeche us jagah ka asli shot aata hai: camera wahin
    * `lookAt()` se jaata hai (wahi ray-march wala jo deewar ke peeche nahi
@@ -455,7 +467,7 @@ async function boot() {
       }
     }
     if (saved.weather) weather.set(saved.weather);
-    missions._refreshStartMarkers();
+    if (MISSIONS_ON) missions._refreshStartMarkers();
   }
 
   /*
@@ -464,16 +476,12 @@ async function boot() {
    * Sirf naye khel par: save maujood hai to khiladi ye pehle dekh chuka hai
    * aur har baar dobara dikhana chidhane wala hota.
    */
-  if (!saved) {
-    /*
-     * Nikhil: *"phle back story cards fir mission s shuru"*. Intro deck ke
-     * band hote hi pehla mission apne aap chalu -- khiladi ko marker dhoondhne
-     * ki zaroorat nahi, wo college ke campus ke andar khada hi hai.
-     *
-     * `missions.start()` khud `cards` event bhejta hai, isliye m01 ka apna
-     * deck bhi apne aap chalta hai. Do deck ke beech ek frame ka antar rakha
-     * hai -- warna jis Space se intro band hua wahi agla card bhi palat deta.
-     */
+  /*
+   * R30: missions hata diye -- naya khel seedha free-roam mein Sanjauli Chowk
+   * par shuru hota hai. Na intro deck, na pehla mission. (MISSIONS_ON=true
+   * karne par purana intro+mission flow wapas aa jaata hai.)
+   */
+  if (!saved && MISSIONS_ON) {
     const begin = () => {
       const first = missions.byId.get(data.missions.start_mission);
       if (first && !missions.active) requestAnimationFrame(() => missions.start(first));
@@ -693,6 +701,7 @@ async function boot() {
   }
 
   function tryStartMission() {
+    if (!MISSIONS_ON) { hud.toast("Free-roam: Sanjauli ghoomo, Dhalli tunnel tak jao."); return; }
     const m = missions.startableAt(playerWorldPos());
     if (m) { missions.start(m); return; }
     if (!missions.active) hud.toast("Yahan koi mission nahi. Peela marker dhoondo.");
@@ -1007,7 +1016,9 @@ async function boot() {
      * Ab teen haalat: chal raha mission (uske kaam ke aage doori), koi mission
      * shuru karne layak (uska naam + doori), ya sab poore.
      */
-    if (missions.active) {
+    if (!MISSIONS_ON) {
+      hud.setMission(null);          // free-roam: mission panel chhupa rahe
+    } else if (missions.active) {
       const target = missions.markers.children.find(
         (mk) => mk.userData?.markerKind === "active" || mk.userData?.markerKind === "objective");
       if (target) {
@@ -1031,7 +1042,7 @@ async function boot() {
     hud.setBars(player.health, player.stamina);
     hud.update(dt, pos, state.mode === "vehicle" ? state.vehicle.yaw : player.yaw, missions.markers.children);
 
-    if (!missions.active && missions.startableAt(pos)) hud.toast("E dabao - mission shuru karo", 0.4);
+    if (MISSIONS_ON && !missions.active && missions.startableAt(pos)) hud.toast("E dabao - mission shuru karo", 0.4);
 
     post.render();
     input.endFrame();

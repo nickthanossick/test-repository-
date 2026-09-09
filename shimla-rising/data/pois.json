@@ -309,8 +309,24 @@
       "type": "landmark",
       "district": "sanjauli",
       "icon": "circle",
-      "desc": "Sanjauli ka bheed-bhaad wala chauraha.",
-      "landmark": "bazaar",
+      "desc": "Sanjauli ka bheed-bhaad wala chauraha, upar hara loha footbridge.",
+      "landmark": "chowk_bridge",
+      "corridor": true,
+      "accuracy": "approx"
+    },
+    {
+      "id": "indianoil_pump",
+      "name": "IndianOil Petrol Pump",
+      "lat": 31.10852,
+      "lon": 77.19338,
+      "type": "landmark",
+      "district": "sanjauli",
+      "icon": "circle",
+      "desc": "Sanjauli Chowk ke paas, Dhalli road ki shuruaat par.",
+      "landmark": "petrol",
+      "corridor": true,
+      "sign": "INDIAN OIL",
+      "sign_sub": "Petrol · Diesel",
       "accuracy": "approx"
     },
     {
@@ -518,6 +534,7 @@
       "district": "sanjauli",
       "icon": "tunnel",
       "landmark": "tunnel_new",
+      "corridor": true,
       "accuracy": "approx",
       "sign": "SANJAULI–DHALLI TUNNEL",
       "sign_sub": "154 m · DOUBLE LANE",
@@ -645,6 +662,7 @@
       "lon": 77.205,
       "district": "sanjauli",
       "landmark": "junction",
+      "corridor": true,
       "accuracy": "approx",
       "sign": "DHALLI CHOWK",
       "sign_sub": ""
@@ -656,6 +674,7 @@
       "lon": 77.1934,
       "district": "sanjauli",
       "landmark": "busstand",
+      "corridor": true,
       "accuracy": "approx",
       "sign": "SANJAULI BUS STOP",
       "sign_sub": "HRTC"

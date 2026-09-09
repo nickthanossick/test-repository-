@@ -346,6 +346,28 @@ export function buildBody(spec) {
     }
   }
 
+  /*
+   * Body-colour pillars -- yahi glass-block ko asli greenhouse banate hain.
+   * A-pillar (windshield) peeche jhukta hai, C-pillar (backlight) aage; B-pillar
+   * seedha. Isse cab "box" nahi, khidkiyon-wali cabin lagta hai.
+   */
+  if (!isBike && !isBig && shape !== "offroad") {
+    const top = bodyH + cabH - 0.05, base = bodyH + 0.04;
+    const fz = -cabL / 2 + l * P.cabZ, bz = cabL / 2 + l * P.cabZ;
+    const pillar = (px, zBottom, zTop, thick = 0.07) => {
+      const dy = top - base, dz = zTop - zBottom;
+      const len = Math.hypot(dy, dz);
+      const m = add(new THREE.Mesh(new THREE.BoxGeometry(0.06, len, thick), paintMat));
+      m.position.set(px, (top + base) / 2, (zBottom + zTop) / 2);
+      m.rotation.x = Math.atan2(dz, dy);
+    };
+    for (const dx of [-1, 1]) {
+      pillar(dx * w * 0.42, fz, fz + cabL * 0.22, 0.09);   // A -- top peeche
+      pillar(dx * w * 0.44, l * P.cabZ, l * P.cabZ);        // B -- seedha
+      pillar(dx * w * 0.42, bz, bz - cabL * 0.18, 0.08);    // C -- top aage
+    }
+  }
+
   // --- lights ------------------------------------------------------------
   if (!isBike) {
     const headMat = new THREE.MeshStandardMaterial({
@@ -362,6 +384,14 @@ export function buildBody(spec) {
     const plate = add(new THREE.Mesh(new THREE.BoxGeometry(w * 0.34, 0.1, 0.02),
       TEX.plain(0xe9e6dd, 0.7)));
     plate.position.set(0, bodyH * 0.34, l / 2 + 0.05);
+    // aage grille (kaala slatted) + chrome patti -- nose ko "chehra" deta hai
+    if (!isBig) {
+      const grille = add(new THREE.Mesh(new THREE.BoxGeometry(w * 0.5, bodyH * 0.26, 0.05),
+        TEX.plain(0x0c0d10, 0.5, { metalness: 0.4 })));
+      grille.position.set(0, bodyH * 0.5, -l / 2 - 0.02);
+      const chrome = add(new THREE.Mesh(new THREE.BoxGeometry(w * 0.56, 0.05, 0.06), chromeMat));
+      chrome.position.set(0, bodyH * 0.64, -l / 2 - 0.03);
+    }
     // Battiyon ka material bahar dikha do -- traffic raat ko headlight jalata
     // hai aur brake par taillight tez karta hai. Har gaadi ka apna material
     // hai (yahin bana), isliye ek ki batti doosri par nahi jaati.
@@ -400,7 +430,8 @@ export function buildBody(spec) {
     : [[-w / 2, l * 0.32], [w / 2, l * 0.32], [-w / 2, -l * 0.32], [w / 2, -l * 0.32]];
   for (const [dx, dz] of axles) {
     const hub = new THREE.Group();
-    hub.position.set(dx * 0.94, rad, dz);
+    // pahiye body ke kinare par, thoda andar tuck (pehle bahar nikle hue lagte the)
+    hub.position.set(dx * 0.80, rad, dz);
     hub.userData.steers = dz < 0;          // aage ke pahiye (-Z forward hai)
     add(new THREE.Mesh(tyreGeo, rubberMat), hub);
     add(new THREE.Mesh(rimGeo, rimMat), hub);
