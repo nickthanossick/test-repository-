@@ -34,10 +34,10 @@ import { Pass, FullScreenQuad } from "../vendor/addons/postprocessing/Pass.js";
  *
  * ## Chain
  *
- *   RenderPass -> AO -> (bloom, sirf high) -> OutputPass -> FXAA
+ *   RenderPass -> AO -> bloom -> OutputPass -> FXAA
  *
- * `low` tier par poora composer band hai -- wahan seedha `renderer.render()`
- * chalta hai, bilkul pehle jaisa.
+ * Round 21: bloom ab teenon tier par (Vice City glow). `low` par sirf bloom
+ * chalta hai (AO nahi -- uska depth-pass mehnga hai).
  */
 
 /* ------------------------------------------------------------------ AO ---
@@ -315,13 +315,20 @@ export class PostFX {
     }
     if (cfg.bloom) {
       /*
-       * Halka bloom -- sirf jo sach mein chamak raha ho.
+       * Vice City wala glow (Nikhil: *"glow b la vice city wala jitna la skta"*).
        *
-       * threshold ooncha (0.9) rakha hai taaki dopahar ki safed deewar na
-       * chamke; strength kam, taaki khel dhundhla na lage. Raat ko dukan ke
-       * board aur gaadi ki headlight isi se jeete hain.
+       * Pehle ye bahut halka tha (strength 0.32, threshold 0.9) aur sirf `high`
+       * tier par -- yaani Nikhil ke laptop par dikhta hi nahi tha. Ab teenon
+       * tier par, aur bahut zyada neon: threshold neecha (0.62) taaki boards,
+       * lamp, khidki aur headlight sab pakde jayein; strength ooncha.
+       *
+       * `setNight()` ise waqt ke saath modulate karta hai -- din mein halka
+       * (warna dopahar dhundhla lage), shaam/raat mein poora neon. Base yahan
+       * din wala hai.
        */
-      this.bloom = new UnrealBloomPass(size, 0.32, 0.62, 0.9);
+      this._bloomDay = { strength: 0.55, threshold: 0.72 };
+      this._bloomNight = { strength: 1.15, threshold: 0.48 };
+      this.bloom = new UnrealBloomPass(size, this._bloomDay.strength, 0.72, this._bloomDay.threshold);
       this.composer.addPass(this.bloom);
     }
     this.composer.addPass(new OutputPass());
@@ -331,6 +338,20 @@ export class PostFX {
     this.composer.addPass(this.fxaa);
 
     this.setSize(size.x, size.y);
+  }
+
+  /**
+   * Bloom ko waqt ke saath badlo. `n` = raat ka anupaat (0 = din, 1 = raat).
+   *
+   * Din mein halka taaki dopahar ki safed deewar na chamke; raat mein poora
+   * neon taaki boards, lamp aur headlight Vice City jaise jagmagayein.
+   */
+  setNight(n) {
+    if (!this.bloom) return;
+    const t = n < 0 ? 0 : n > 1 ? 1 : n;
+    const d = this._bloomDay, ni = this._bloomNight;
+    this.bloom.strength = d.strength + (ni.strength - d.strength) * t;
+    this.bloom.threshold = d.threshold + (ni.threshold - d.threshold) * t;
   }
 
   setSize(w, h) {
@@ -343,6 +364,26 @@ export class PostFX {
 
   render() {
     if (!this.enabled) { this.renderer.render(this.scene, this.camera); return; }
+    /*
+     * `renderer.info` ko poore frame ka rakho, sirf aakhri pass ka nahi.
+     *
+     * Composer har pass ke shuru mein `renderer.render()` bulata hai, aur
+     * three.js default par har render ke pehle `info` reset kar deta hai --
+     * isliye frame ke baad `info.render.triangles` sirf **aakhri fullscreen
+     * pass** (FXAA quad = 1 triangle) dikhata tha. Round 20 tak `low` tier par
+     * composer band tha (seedha render), isliye ye chhupa raha; ab bloom har
+     * tier par hai to smoke ka "geometry rendered" ise 1 padhne laga.
+     *
+     * `autoReset` **sirf is call bhar** band rehta hai: shuru mein ek reset,
+     * antt mein wapas `true`. Isse info poore frame (RenderPass + post passes)
+     * ka jod dikhata hai, aur `perf.mjs` -- jo seedha `renderer.render()` se
+     * naapta hai aur auto-reset par tikta hai -- bina chhede sahi chalta hai
+     * (ye render() synchronous hai, isliye beech mein kuch aur nahi chalta).
+     */
+    const info = this.renderer.info;
+    info.autoReset = false;
+    info.reset();
     this.composer.render();
+    info.autoReset = true;
   }
 }

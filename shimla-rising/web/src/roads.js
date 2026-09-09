@@ -430,7 +430,7 @@ export class RoadNetwork {
 
           // bada girna: pathar ki retaining wall, sadak ke kinare se neeche
           const wTop = edgeY + 0.05;
-          const wBot = Math.max(gh - 0.8, wTop - 7.5);
+          const wBot = Math.max(gh - 0.8, wTop - 3.0);   // round 21: carve ke baad chhoti
           const h = wTop - wBot;
           face.wallMax = Math.max(face.wallMax, h);
           stone.box(ex, (wTop + wBot) / 2, ez, 0.5, h, len * 1.02, stoneCol,
@@ -490,7 +490,7 @@ export class RoadNetwork {
          * degree, yaani `run = drop * 0.58`). Wahi yahan bhi.
          */
         const cutTop = Math.max(wallGround, roadY) + 0.6;
-        const wallTop = Math.min(cutTop, roadY + 6.0);
+        const wallTop = Math.min(cutTop, roadY + 3.0);  // round 21: carve ke baad gap chhota, deewar chhoti
         /*
          * Neev 7.5 m se gehri nahi.
          *
@@ -499,7 +499,7 @@ export class RoadNetwork {
          * `wallGround` sadak se kai metre neeche hota hai -- naapa gaya, kul
          * **12.1 m** ki pathar ki deewar.
          */
-        const wallBottom = Math.max(Math.min(roadY, wallGround) - 1.2, wallTop - 7.5);
+        const wallBottom = Math.max(Math.min(roadY, wallGround) - 1.2, wallTop - 3.0);
         const wallH = wallTop - wallBottom;
         /*
          * Wall sirf wahan jahan sach mein **kaat** hui hai.

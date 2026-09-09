@@ -136,13 +136,22 @@ async function boot() {
   });
 
   // ------------------------------------------------------------------- world
-  setProgress(0.58, "pahad tarash rahe hain…");
-  await yieldFrame();
-  scene.add(terrain.buildMesh(8, Q.terrainQuads));
-
-  setProgress(0.70, "sadkein bichha rahe hain…");
+  /*
+   * Kram badla (round 21): pehle sadak ka network banao, phir zameen ko sadak
+   * tak grade karo (`carveToRoads`), tab terrain mesh banao. Warna dikhne wali
+   * zameen sadak ke neeche apni dhalan par reh jaati thi aur beech ka gap oonchi
+   * grey deewar dhakti thi. Road nodes apni `y` raw terrain se pehle hi cache
+   * kar lete hain, isliye `groundAt()`/physics nahi badalte.
+   */
+  setProgress(0.62, "sadkein bichha rahe hain…");
   await yieldFrame();
   const roads = new RoadNetwork(geo, terrain, data.roads);
+
+  setProgress(0.68, "pahad ko sadak tak tarash rahe hain…");
+  await yieldFrame();
+  terrain.carveToRoads(roads);
+  scene.add(terrain.buildMesh(8, Q.terrainQuads));
+
   const roadGroup = roads.buildMesh();
   scene.add(roadGroup);
 
@@ -419,7 +428,22 @@ async function boot() {
       // (aur campus ke farsh par to poore teen metre).
       const sp = colliders.freeSpotNear(saved.pos.x, saved.pos.z,
                                         playerGround(saved.pos.x, saved.pos.z) + 1, 1.2);
-      player.placeAt(sp.x, sp.z);
+      /*
+       * Save ki position kisi deewar/imaarat ke andar to nahi?
+       *
+       * Nikhil ka gussa isi se tha: `file://` par Chrome saara localStorage ek
+       * hi origin mein rakhta hai, isliye purani download ka save nayi build
+       * mein load ho jaata tha -- aur jis jagah wo khada tha wahan ab (badli
+       * hui geometry mein) deewar hai. Camera deewar ke andar, sab grey. v2 key
+       * ne purane save maar diye, par aage bhi koi geometry badle to yahan
+       * jaanch: agar bahaal ki hui jagah kisi collider ke andar ho, college ke
+       * andar wapas bhej do.
+       */
+      if (colliders.inside(sp.x, playerGround(sp.x, sp.z) + 1.0, sp.z, 0.5)) {
+        player.placeAt(startAt.x, startAt.z);
+      } else {
+        player.placeAt(sp.x, sp.z);
+      }
     }
     if (saved.weather) weather.set(saved.weather);
     missions._refreshStartMarkers();
@@ -924,6 +948,7 @@ async function boot() {
     }
 
     dayNight.update(dt, camera);   // waqt, sooraj, taare, raat ki roshni, mausam
+    post.setNight(dayNight.nightness);   // Vice City glow -- raat ko poora neon
     sky.update(camera);
     sky.fitShadow(pos);            // shadow camera khiladi ke saath chalta hai
     dialogue.update(dt);

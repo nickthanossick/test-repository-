@@ -485,9 +485,16 @@ const surface = await page.evaluate(() => {
    * hairpin par 5 m tuti hui thi).
    *
    * Ab reference wahi hai jo `buildMesh()` **khinchta** hai, seedhe uske quad
-   * se: segment (a, b) ke quad ke saare kone `lerp(h(a), h(b), t) + lift` par
+   * se: segment (a, b) ke quad ke saare kone `lerp(a.y, b.y, t) + lift` par
    * hote hain, chaudai se koi farak nahi padta. Bindu bhi usi quad ke andar
    * se uthaya jaata hai, isliye kis segment ka hai ye poochhna hi nahi padta.
+   *
+   * Round 21: reference **node ki apni `y`** se, `T.heightAt` se nahi. Ab
+   * `carveToRoads` terrain ko sadak tak grade karta hai, isliye `T.heightAt`
+   * carved (aur thoda texel-gol) hota hai -- par `buildMesh` to seedha `a.y`
+   * (raw centreline) khinchta hai, aur `groundAt` bhi wahi. Yahi asli tulna
+   * hai; `T.heightAt` lene se jaanch carve ki texel-imprecision naap kar
+   * jhoothi fail deti thi.
    */
   let n = 0, worst = 0, bad = 0, overlap = 0;
   for (const r of R.roads) {
@@ -497,7 +504,7 @@ const surface = await page.evaluate(() => {
       const a = r.points[j], b = r.points[j + 1];
       const dx = b.x - a.x, dz = b.z - a.z, L = Math.hypot(dx, dz) || 1;
       const nx = -dz / L, nz = dx / L;
-      const ha = T.heightAt(a.x, a.z), hb = T.heightAt(b.x, b.z);
+      const ha = a.y, hb = b.y;               // buildMesh jo khinchta hai (raw centreline)
       for (const t of [0.25, 0.5, 0.75]) {
         const cx = a.x + dx * t, cz = a.z + dz * t;
         const want = ha + (hb - ha) * t + lift;          // quad jo khinchta hai
@@ -624,10 +631,61 @@ console.log("sadak samtal:", JSON.stringify(roadFlat));
  */
 const face = await page.evaluate(() => window.__shimla.roads.faceStats);
 console.log("kinare ka chehra:", JSON.stringify(face));
-const faceOk = face && face.wallMax <= 8.0        // pathar ki seedhi wall
-  && face.fillMaxDeg <= 50                        // bhraav: 16 m cap ke saath itna hi
+/*
+ * Round 21: ab zameen ko sadak tak grade kiya (`terrain.carveToRoads`), isliye
+ * kinare ka gap chhota, aur deewar bhi -- cap `roadY + 3.0`. Isliye jaanch bhi
+ * sakht: koi bhi pathar ki deewar `3.5 m` se oonchi nahi honi chahiye. Yahi
+ * "towering grey" ko wapas aane se rokta hai.
+ */
+const faceOk = face && face.wallMax <= 3.5        // carve + cap ke baad chhoti
+  && face.fillMaxDeg <= 50                        // bhraav: mitti ka apna kon
   && face.cutMaxDeg <= 62;                        // chattan ka kata hua chehra
 const flatOk = roadFlat.n > 300 && roadFlat.worst < 0.05;
+
+/*
+ * **Sadak zameen ke barabar** hai -- yahi Nikhil ki asli shikayat thi
+ * (*"sadkein itni height me kyu ki? thodi si uper rkh"*).
+ *
+ * Round 20 mein sadak samtal to ho gayi par uski dikhne wali zameen apni
+ * dhalan par neeche reh gayi, aur beech ka 5-10 m gap oonchi grey deewar
+ * dhakti thi. Round 21 mein `carveToRoads` zameen ko hi sadak ki oonchai tak
+ * le aata hai. Ye jaanch usi ko naapti hai: har sadak ke kinare (`±0.9·w`) par
+ * **carved terrain** ki oonchai aur sadak ki satah (`groundAt`) ka farak chhota
+ * ho -- 1.2 m se kam. (Pehle kai jagah 5-10 m tha.)
+ */
+const levelGround = await page.evaluate(() => {
+  const S = window.__shimla, R = S.roads, T = S.terrain;
+  let n = 0, worst = 0, bad = 0, cross = 0;
+  for (const r of R.roads) {
+    if (r.type === "rail") continue;
+    const w = r.spec.width_m / 2;
+    for (let i = 2; i < r.points.length - 2; i += 4) {
+      const pt = r.points[i];
+      const nd = R.nearestNode(pt.x, pt.z);
+      if (!nd || nd.node.road !== r) continue;
+      for (const sd of [-1, 1]) {
+        const x = pt.x + nd.node.nx * w * 0.9 * sd, z = pt.z + nd.node.nz * w * 0.9 * sd;
+        /*
+         * Sirf wahan naapo jahan ye kinara sach mein **isi** sadak ka hai.
+         * Do sadak ke crossing par (flyover/tunnel jaisa) ek sadak doosri ke
+         * upar hoti hai; wahan zameen ek hi ko mil sakti hai, doosri ka kinara
+         * upar latak jaata hai. Wo genuine hai, carve ka keeda nahi -- ginte
+         * hain par naapte nahi.
+         */
+        const sg = R.nearestSegment(x, z);
+        if (!sg || sg.road !== r) { cross++; continue; }
+        // sadak ki satah = groundAt; dikhne wali zameen = carved terrain
+        const gap = Math.abs(R.groundAt(x, z) - T.heightAt(x, z));
+        n++; if (gap > worst) worst = gap;
+        if (gap > 1.2) bad++;
+      }
+    }
+  }
+  return { n, worst: +worst.toFixed(2), bad, cross };
+});
+console.log("sadak zameen ke barabar:", JSON.stringify(levelGround));
+// 3% tak chhoot -- coarse terrain mesh (10 m/vert) aur mod par thoda residual
+const levelOk = levelGround.n > 300 && levelGround.bad <= levelGround.n * 0.03;
 
 const carTilt = await page.evaluate(() => {
   const S = window.__shimla, T = S.THREE, R = S.roads;
@@ -674,6 +732,7 @@ const checks = [
   ["sadak ki satah = groundAt", surfaceOk, JSON.stringify(surface)],
   ["dukaanein sadak ke bahar", shopsOk, JSON.stringify(shopsClear)],
   ["sadak samtal hai", flatOk, JSON.stringify(roadFlat)],
+  ["sadak zameen ke barabar", levelOk, JSON.stringify(levelGround)],
   ["kinare ka chehra dhalwan", faceOk, JSON.stringify(face)],
   ["gaadi sadak ke saath", tiltOk, JSON.stringify(carTilt)],
   ["sadak par traffic", s.trafficNear > 0, `${s.trafficNear} / ${s.traffic}`],

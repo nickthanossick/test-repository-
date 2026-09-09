@@ -257,7 +257,7 @@ export function word(w) {
  */
 export function toDevanagari(text) {
   if (!text) return "";
-  if (/[ऀ-ॿ]/.test(text)) return text;
+  if (/[\u0900-\u097F]/.test(text)) return text;   // ASCII-safe: file:// charset-sniff se bhi na toote
   return String(text).replace(/[A-Za-z][A-Za-z']*/g, (m) => word(m));
 }
 

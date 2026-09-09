@@ -26,7 +26,9 @@ export const PRESETS = {
     pixelRatio: 1.0,
     detailScatter: 0,      // ghaas/chattan ka daayra, metres
     shadows: true,
-    post: null,            // koi post-processing nahi -- sabse halka
+    // Vice City glow har tier par (Nikhil). `low` par sirf bloom -- AO ka
+    // depth-pass mehnga hai, wo chhoda; bloom bas kuch blur pass hai.
+    post: { ao: false, bloom: true, samples: 0 },
     crowd: { keepers: 20, walkers: 14, dogs: 2, cows: 1, monkeys: 1 },
     buses: 3,
     traffic: 8,            // sadak par chalti gaadiyan
@@ -48,7 +50,7 @@ export const PRESETS = {
     pixelRatio: 1.25,
     detailScatter: 120,
     shadows: true,
-    post: { ao: true, aoScale: 0.5, bloom: false, samples: 4 },
+    post: { ao: true, aoScale: 0.5, bloom: true, samples: 4 },
     crowd: { keepers: 42, walkers: 28, dogs: 3, cows: 2, monkeys: 2 },
     buses: 5,
     traffic: 12,

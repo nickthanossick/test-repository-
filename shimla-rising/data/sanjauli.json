@@ -12,7 +12,7 @@
       "name": "Sanjauli - Dhalli Road (NH-5)",
       "road": "nh5_east",
       "type": "arterial",
-      "width_m": 17.0,
+      "width_m": 12.0,
       "oneway": false,
       "accuracy": "approx",
       "points": [
@@ -64,7 +64,7 @@
       "name": "Sanjauli Tunnel Road",
       "road": "sanjauli_tunnel_road",
       "type": "arterial",
-      "width_m": 17.0,
+      "width_m": 12.0,
       "oneway": false,
       "accuracy": "approx",
       "points": [
@@ -104,7 +104,7 @@
       "name": "Sanjauli - IGMC Road",
       "road": "igmc_road",
       "type": "arterial",
-      "width_m": 17.0,
+      "width_m": 12.0,
       "oneway": false,
       "accuracy": "approx",
       "points": [
@@ -148,7 +148,7 @@
       "name": "Navbahar Road",
       "road": "navbahar_road",
       "type": "street",
-      "width_m": 13.0,
+      "width_m": 10.0,
       "oneway": false,
       "accuracy": "approx",
       "points": [
@@ -188,7 +188,7 @@
       "name": "Sanjauli Bazaar Lane",
       "road": "sanjauli_inner",
       "type": "lane",
-      "width_m": 8.5,
+      "width_m": 7.0,
       "oneway": false,
       "accuracy": "approx",
       "points": [
@@ -224,7 +224,7 @@
       "name": "Upper Sanjauli Road",
       "road": "upper_sanjauli",
       "type": "street",
-      "width_m": 13.0,
+      "width_m": 10.0,
       "oneway": false,
       "accuracy": "approx",
       "points": [
@@ -260,7 +260,7 @@
       "name": "Dhingu Mata Road",
       "road": "dhingu_mata_road",
       "type": "lane",
-      "width_m": 8.5,
+      "width_m": 7.0,
       "oneway": false,
       "accuracy": "approx",
       "points": [
@@ -288,7 +288,7 @@
       "name": "Dhalli Bazaar",
       "road": "dhalli_bazaar_road",
       "type": "street",
-      "width_m": 13.0,
+      "width_m": 10.0,
       "oneway": false,
       "accuracy": "approx",
       "points": [
@@ -316,7 +316,7 @@
       "name": "Government College Road",
       "road": "gov_college_road",
       "type": "street",
-      "width_m": 13.0,
+      "width_m": 10.0,
       "oneway": false,
       "accuracy": "approx",
       "points": [

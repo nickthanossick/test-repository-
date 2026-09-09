@@ -67,6 +67,97 @@ export class Terrain {
   }
 
   /**
+   * Zameen ko **sadak tak le aao** -- cut aur fill, jaise asli pahadi sadak.
+   *
+   * Round 20 mein sadak ko chaudai bhar samtal kiya (theek tha -- warna dhalan
+   * par tirchha plane banta). Par phir sadak ke samtal kinare aur uske neeche
+   * ki apni-dhalan wali zameen ke beech 5-10 m ka gap reh jaata tha, jise
+   * pathar ki oonchi deewar dhakti thi. Nikhil ne wahi "bade grey plane"
+   * dekhe: *"ye sadkein itni height me kyu ki? thodi si uper rkh."*
+   *
+   * Asli sadak zameen ko hi kaat/bhar kar apne barabar laati hai. Yahan wahi:
+   * har road segment ke corridor ke andar ke heightmap texel ko us segment ki
+   * **centreline oonchai** (wahi jo `roads.groundAt()` deta hai, bas 0.5 m lift
+   * ke bina) ki taraf khainch lete hain, aur ~9 m tak feather karke asli
+   * terrain mein milaate hain. Nateeja: sadak par samtal bench, kinare se aage
+   * narm dhalan, aur deewar sirf ek chhoti curb.
+   *
+   * **Kram zaroori hai** (`main.js`): ye `RoadNetwork` banne ke baad par
+   * `buildMesh()` se pehle chalta hai. Road nodes apni `y` raw terrain se pehle
+   * hi cache kar chuke hote hain, isliye `groundAt()`/physics bilkul nahi
+   * badalte -- sirf **dikhne wali zameen** sadak se aakar milti hai.
+   */
+  carveToRoads(roads) {
+    const S = this.size, N = S * S;
+    const world = this.worldSize, half = this.half;
+    const toCol = (x) => ((x + half) / world) * (S - 1);
+    const colToX = (c) => (c / (S - 1)) * world - half;
+    const FEATHER = 9;              // metre -- corridor se aage narm milaav
+    const SHOULDER = 1.5;          // sadak ke kinare se itna aur poora samtal
+
+    /*
+     * Har texel par **sabse paas ki** sadak jeetti hai -- unke targets ka
+     * ausat nahi.
+     *
+     * Pehli koshish mein weighted-average liya tha, aur wo toota: mod par ya do
+     * sadak ke paas ek door (aur pahad par oonchi) segment feather-zone mein
+     * apni oonchai jod deta tha, jisse target local sadak se **upar** chala
+     * jaata. Nateeja: zameen sadak ke upar ubhar aati, khiladi usme dhas jaata,
+     * camera andar -- bilkul wahi grey box jo theek karna tha. Isliye ab sabse
+     * bhaari (nearest) segment ka target hi lete hain.
+     */
+    const bestW = new Float32Array(N);      // ab tak ka sabse bada bhaar
+    const bestT = new Float32Array(N);      // us segment ka target (centreline y)
+
+    for (const road of roads.roads) {
+      const halfW = road.spec.width_m / 2 + SHOULDER;
+      const reach = halfW + FEATHER;
+      const pts = road.points;
+      for (let s = 0; s < pts.length - 1; s++) {
+        const a = pts[s], b = pts[s + 1];
+        const ex = b.x - a.x, ez = b.z - a.z;
+        const segLen2 = ex * ex + ez * ez || 1;
+        const minX = Math.min(a.x, b.x) - reach, maxX = Math.max(a.x, b.x) + reach;
+        const minZ = Math.min(a.z, b.z) - reach, maxZ = Math.max(a.z, b.z) + reach;
+        let c0 = Math.floor(toCol(minX)), c1 = Math.ceil(toCol(maxX));
+        let r0 = Math.floor(toCol(minZ)), r1 = Math.ceil(toCol(maxZ));
+        c0 = c0 < 0 ? 0 : c0; r0 = r0 < 0 ? 0 : r0;
+        c1 = c1 >= S ? S - 1 : c1; r1 = r1 >= S ? S - 1 : r1;
+        for (let r = r0; r <= r1; r++) {
+          const z = colToX(r);
+          for (let c = c0; c <= c1; c++) {
+            const x = colToX(c);
+            let t = ((x - a.x) * ex + (z - a.z) * ez) / segLen2;
+            t = t < 0 ? 0 : t > 1 ? 1 : t;
+            const px = a.x + ex * t, pz = a.z + ez * t;
+            const d = Math.hypot(x - px, z - pz);
+            if (d >= reach) continue;
+            const w = d <= halfW ? 1 : 1 - (d - halfW) / FEATHER;
+            const ww = w * w * (3 - 2 * w);          // smoothstep
+            const idx = r * S + c;
+            if (ww > bestW[idx]) {
+              bestW[idx] = ww;
+              bestT[idx] = a.y + (b.y - a.y) * t;    // centreline oonchai (raw)
+            }
+          }
+        }
+      }
+    }
+
+    for (let i = 0; i < N; i++) {
+      const k = bestW[i];
+      if (k <= 0) continue;
+      /*
+       * mix(raw, target, k): k=1 (corridor) par poora sadak par, feather mein
+       * narm. Kyunki target = centreline (road mesh se 0.5 m neeche), aur mix
+       * kabhi target se upar nahi jaata, zameen sadak ke upar nahi ubharti --
+       * bas 0.5 m ka curb dikhta hai.
+       */
+      this.heights[i] = this.heights[i] * (1 - k) + bestT[i] * k;
+    }
+  }
+
+  /**
    * Chunked terrain mesh, smooth-shaded aur normal-mapped.
    *
    * Pehle ye flat-shaded tha, jisse 10 m ke quads saaf dikhte the aur poora

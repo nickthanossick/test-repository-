@@ -2,17 +2,17 @@
   "$comment": "Shimla ka sadak network, asli routes trace karke. Points [lat, lon] hain - engine georeference.json se world coords banata hai. tools/shimla_pipeline/ chalao to ye file asli OpenStreetMap data se replace ho jayegi.",
   "road_types": {
     "arterial": {
-      "width_m": 17.0,
+      "width_m": 12.0,
       "speed_kmh": 55,
       "color": "#3a3a3e"
     },
     "street": {
-      "width_m": 13.0,
+      "width_m": 10.0,
       "speed_kmh": 40,
       "color": "#45454a"
     },
     "lane": {
-      "width_m": 8.5,
+      "width_m": 7.0,
       "speed_kmh": 25,
       "color": "#4e4e52"
     },
