@@ -223,6 +223,57 @@ export function facade(seed = 21) {
 }
 
 /**
+ * Ground-floor **shopfront** -- rolling shutter + signboard.
+ *
+ * SA street ka sabse bada signal: neeche dukaanein. Ye tile ek bay (≈3 m) ka
+ * hai, sirf ek manzil oonchi (upar dohrata nahi -- shop builder ka box 3 m ka
+ * hi hai). Neeche plinth, phir loha shutter (naali-daar, normal map se ubhri),
+ * lintel, aur upar **signboard** (near-safed -> `col.setHex(shopColor)` se
+ * rangeen board). Bay ke kinare par patli seam taaki alag-alag dukaanein lagein.
+ */
+export function shopfront(seed = 41) {
+  return cached(`shopfront${seed}`, () => {
+    const S = 256;
+    const grain = fbm(S, 6, 4, seed);
+    const cv = canvas(S);
+    const ctx = cv.getContext("2d");
+    const img = ctx.createImageData(S, S);
+    const Hh = new Float32Array(S * S);
+    const Rr = new Float32Array(S * S);
+    for (let y = 0; y < S; y++) {
+      for (let x = 0; x < S; x++) {
+        const i = y * S + x;
+        const fy = y / S, fx = x / S;
+        let r, g, b, k = 0.9 + grain[i] * 0.18;
+        const seam = fx < 0.03 || fx > 0.97;            // bay ke beech gap
+        if (fy < 0.30) {                                 // signboard (tintable)
+          r = 232; g = 230; b = 224; Hh[i] = 0.62; Rr[i] = 0.7;
+          if (fy < 0.05 || fy > 0.27) { r = 150; g = 145; b = 136; Hh[i] = 0.7; } // frame
+        } else if (fy < 0.42) {                          // lintel / shutter box
+          r = 92; g = 90; b = 88; Hh[i] = 0.72; Rr[i] = 0.6;
+        } else if (fy < 0.92) {                          // rolling shutter (loha)
+          const rib = Math.sin(fy * 150) * 0.5 + 0.5;    // naali-daar
+          const v = 120 + rib * 40;
+          r = v; g = v * 0.99; b = v * 0.96; k = 0.9;
+          Hh[i] = 0.4 + rib * 0.25; Rr[i] = 0.42;
+        } else {                                         // neeche ka rail / plinth
+          r = 70; g = 68; b = 66; Hh[i] = 0.75; Rr[i] = 0.8;
+        }
+        if (seam) { r *= 0.5; g *= 0.5; b *= 0.5; Hh[i] = 0.2; }
+        img.data[i * 4] = r * k; img.data[i * 4 + 1] = g * k; img.data[i * 4 + 2] = b * k;
+        img.data[i * 4 + 3] = 255;
+      }
+    }
+    ctx.putImageData(img, 0, 0);
+    return {
+      map: texture(cv, 1, true),
+      normalMap: texture(normalMapFrom(Hh, S, 1.6)),
+      roughnessMap: texture(grey(Rr, S, 0, 1)),
+    };
+  });
+}
+
+/**
  * Naali-daar tin ki chhat.
  *
  * Shimla ki pehchaan yahi hai -- pahad pe har chhat corrugated tin ki hai,

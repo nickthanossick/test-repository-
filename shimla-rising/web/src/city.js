@@ -40,6 +40,12 @@ const WALLS = [
   0xd9c0a0,                                   // halka aadu
 ];
 
+// Dukaan ke board ka rang -- chatak, taaki gali "market" lage (SA jaisa).
+const SHOP_COLORS = [
+  0xc0392b, 0x2f6db0, 0x2e8b57, 0xe0a030, 0x8e44ad,
+  0xd35400, 0x16a085, 0xc0143c, 0x2c7873,
+];
+
 export function buildCity(terrain, roads, districts, pois, rng, quality = {}, opts = {}) {
   const group = new THREE.Group();
   group.name = "city";
@@ -59,7 +65,9 @@ export function buildCity(terrain, roads, districts, pois, rng, quality = {}, op
   const plinths = new ChunkedBuilder(0.35);
   const windows = new ChunkedBuilder(0.9);   // apna material -- raat ko jagmagati hain
   const facades = quality.windowFacades ?? 2;
-  const trim = new ChunkedBuilder(0.7);      // balcony, railing, chimney, floor bands
+  const trim = new ChunkedBuilder(0.7);      // balcony, railing, chimney, floor bands, parapet
+  const shop = new ChunkedBuilder(1 / 3);    // ground-floor shutter + board (facade jaisa tile)
+  const props = new ChunkedBuilder(0.5);     // chhat ki paani ki tanki, bijli ke khambe + taar
   const col = new THREE.Color();
   const placed = new SpatialGrid(16);
   // Bazaar corridor ki dukanein pehle ban chuki hain (bazaar.js). Unki jagahein
@@ -130,7 +138,7 @@ export function buildCity(terrain, roads, districts, pois, rng, quality = {}, op
         if (row && terrain.slopeAt(x, z) > 0.72) continue;
         placed.add(x, z);
         placedCount++;
-        house({ walls, roofs, plinths, windows, trim }, terrain, x, z, d, rng, col, colliders, facades,
+        house({ walls, roofs, plinths, windows, trim, shop, props }, terrain, x, z, d, rng, col, colliders, facades,
               off - w - 1.0, bw, bdep);
         }
       }
@@ -147,11 +155,19 @@ export function buildCity(terrain, roads, districts, pois, rng, quality = {}, op
     emissive: 0xffc978, emissiveIntensity: 0.0,   // raat ko main.js isse badhata hai
   });
   const trimMat = TEX.standard(TEX.fabric(0xffffff, 71, 30), { vertexColors: true, roughness: 0.78 });
+  const shopMat = TEX.standard(TEX.shopfront(), { vertexColors: true });
+  // tanki/khambe/taar -- saada vertex-colour material (rang per-box set hota hai)
+  const propMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.7, metalness: 0.2 });
+
+  // Bijli ke khambe aur taar -- gali ka SA-jaisa clutter.
+  buildStreetLines(terrain, roads, { props }, rng, quality);
 
   for (const [mb, mat, name] of [[plinths, plinthMat, "plinths"],
                                  [walls, wallMat, "buildings"],
                                  [roofs, roofMat, "roofs"],
                                  [trim, trimMat, "trim"],
+                                 [shop, shopMat, "shopfronts"],
+                                 [props, propMat, "props"],
                                  [windows, windowMat, "windows"]]) {
     if (!mb.count) continue;
     const mesh = mb.build(mat);
@@ -196,7 +212,8 @@ function house(mb, terrain, x, z, d, rng, col, colliders, facadeCount = 2, roadC
   // ginta hai, isliye yahan dobara random lena galat hoga.
   const w = fixedW || (5 + rng() * 4.5);
   const dep = fixedDep || (5 + rng() * 4.5);
-  const floors = 2 + Math.floor(rng() * (d.wealth > 0.7 ? 3 : 2.6));
+  // Zyada height variety -- SA mein 2 manzil ke ghar se 6 manzil ke block tak.
+  const floors = 2 + Math.floor(rng() * (d.wealth > 0.7 ? 4.4 : 3.2));
   const fh = 3.0;
   const yaw = rng() * Math.PI * 2;
   const cy = Math.cos(yaw), sy = Math.sin(yaw);
@@ -220,13 +237,32 @@ function house(mb, terrain, x, z, d, rng, col, colliders, facadeCount = 2, roadC
   col.setHex(0x9a9086);
   mb.plinths.box(x, base + 0.22, z, w * 1.04, 0.44, dep * 1.04, col, yaw);   // pathar ka course
 
-  // --- deewarein ---------------------------------------------------------
+  /*
+   * Do archetype:
+   *   urban       -- flat chhat, neeche **dukaan** (shutter+board), upar
+   *                  khidkiyon wali manzilein, chhat pe paani ki tanki
+   *   residential -- gable chhat, poori deewar khidkiyon wali
+   * Ooncha ghar aksar urban; chhota aksar residential -- SA jaisa mix.
+   */
+  const urban = floors >= 3 || rng() < 0.5;
+  const shopH = 3.0;
+  const wallBot = urban ? base + shopH : base;
+  const wallH = urban ? bodyH - shopH : bodyH;
+
+  // --- ground floor: dukaan (sirf urban) ---------------------------------
+  if (urban) {
+    col.setHex(SHOP_COLORS[(rng() * SHOP_COLORS.length) | 0]);
+    col.multiplyScalar(0.85 + rng() * 0.25);
+    mb.shop.box(x, base + shopH / 2, z, w * 1.02, shopH, dep * 1.02, col, yaw);
+  }
+
+  // --- deewarein (upar ki manzilein) -- facade texture se khidkiyan --------
   const wallHex = WALLS[(rng() * WALLS.length) | 0];
   col.setHex(wallHex);
   // Har ghar par halki chamak-jhilmil (0.9..1.08) -- ek hi rang wale ghar bhi
   // thode alag lagein, taaki ekdum saaf dohraav na dikhe.
   col.multiplyScalar(0.9 + rng() * 0.18);
-  mb.walls.box(x, base + bodyH / 2, z, w, bodyH, dep, col, yaw);
+  mb.walls.box(x, wallBot + wallH / 2, z, w, wallH, dep, col, yaw);
 
   // Collider sadak tak na pahunche: ghar centreline se `off` door hai, aur
   // road ka aadha hissa khaali rehna chahiye warna gaadi kinare par hi atak
@@ -260,20 +296,101 @@ function house(mb, terrain, x, z, d, rng, col, colliders, facadeCount = 2, roadC
     mb.windows.box(bx, by + 0.1, bz, w * 0.66, fh * 0.5, bd * 0.42, col, yaw); // sheeshe
   }
 
-  // --- gable chhat -------------------------------------------------------
-  col.setHex(ROOFS[(rng() * ROOFS.length) | 0]);
-  const ridgeAlongX = w >= dep;
-  mb.roofs.gableRoof(x, base + bodyH, z, w, dep,
-    1.5 + rng() * 1.4, 0.45 + rng() * 0.3, col, yaw, ridgeAlongX);
-
-  // --- chimney -----------------------------------------------------------
-  if (rng() < 0.32) {
-    const [chx, chz] = L((rng() - 0.5) * w * 0.5, (rng() - 0.5) * dep * 0.5);
-    col.setHex(0x7a6a5c);
-    mb.trim.box(chx, base + bodyH + 1.6, chz, 0.62, 3.0, 0.62, col, yaw);
-    col.setHex(0x4a423a);
-    mb.trim.box(chx, base + bodyH + 3.2, chz, 0.78, 0.18, 0.78, col, yaw);
+  if (urban) {
+    // --- flat chhat: slab + parapet + paani ki tanki (SA rooftop) --------
+    const ry = base + bodyH;
+    col.setHex(0x9a9086);
+    mb.roofs.box(x, ry + 0.08, z, w, 0.16, dep, col, yaw);            // chhat slab
+    col.setHex(0xcbc2b2);
+    const pt = 0.26, ph = 0.72;
+    const parap = (u, v, sx, sz) => {
+      const [px, pz] = L(u, v);
+      mb.trim.box(px, ry + ph / 2, pz, sx, ph, sz, col, yaw);
+    };
+    parap(0, dep / 2, w, pt); parap(0, -dep / 2, w, pt);
+    parap(w / 2, 0, pt, dep); parap(-w / 2, 0, pt, dep);
+    // paani ki kaali tanki (Sintex) -- 1-2
+    const nt = 1 + (rng() < 0.55 ? 1 : 0);
+    for (let t = 0; t < nt; t++) {
+      const [tx, tz] = L((rng() - 0.5) * w * 0.5, (rng() - 0.5) * dep * 0.5);
+      col.setHex(0x24242a); mb.props.box(tx, ry + 0.55, tz, 1.0, 0.9, 1.0, col, yaw);
+      col.setHex(0x121216); mb.props.box(tx, ry + 1.06, tz, 0.7, 0.16, 0.7, col, yaw);
+    }
+    // kabhi seedhi chadhne wali chhoti kothari (staircase head)
+    if (rng() < 0.4) {
+      col.setHex(wallHex); col.multiplyScalar(0.9);
+      const [sx2, sz2] = L(w * 0.22, dep * 0.18);
+      mb.walls.box(sx2, ry + 1.2, sz2, w * 0.34, 2.4, dep * 0.3, col, yaw);
+    }
+  } else {
+    // --- gable chhat -----------------------------------------------------
+    col.setHex(ROOFS[(rng() * ROOFS.length) | 0]);
+    const ridgeAlongX = w >= dep;
+    mb.roofs.gableRoof(x, base + bodyH, z, w, dep,
+      1.5 + rng() * 1.4, 0.45 + rng() * 0.3, col, yaw, ridgeAlongX);
+    // --- chimney -------------------------------------------------------
+    if (rng() < 0.32) {
+      const [chx, chz] = L((rng() - 0.5) * w * 0.5, (rng() - 0.5) * dep * 0.5);
+      col.setHex(0x7a6a5c);
+      mb.trim.box(chx, base + bodyH + 1.6, chz, 0.62, 3.0, 0.62, col, yaw);
+      col.setHex(0x4a423a);
+      mb.trim.box(chx, base + bodyH + 3.2, chz, 0.78, 0.18, 0.78, col, yaw);
+    }
   }
+}
+
+/**
+ * Bijli ke khambe aur latakte taar -- gali ka SA/Indian clutter.
+ *
+ * Har arterial/street ke kinare ~45 m par ek concrete khamba, uspar crossarm,
+ * aur do lagataar khambon ke beech ek jhulta taar (2 tukdon mein sag). Sab
+ * `props` merged builder mein jaata hai, isliye draw call nahi badhta. Low tier
+ * par khambe patle aur taar band -- perf ke liye.
+ */
+function buildStreetLines(terrain, roads, mb, rng, quality) {
+  const wires = (quality.treeCount ?? 9000) > 12000;   // medium+ par hi taar
+  const col = new THREE.Color();
+  const groundY = (x, z) => roads.groundAt(x, z);
+  for (const road of roads.roads) {
+    if (road.type === "rail" || road.type === "pedestrian") continue;
+    const w = road.spec.width_m / 2;
+    const pts = road.points;
+    let prevTop = null, acc = 0;
+    for (let i = 1; i < pts.length; i++) {
+      acc += Math.hypot(pts[i].x - pts[i - 1].x, pts[i].z - pts[i - 1].z);
+      if (acc < 45) { continue; }
+      acc = 0;
+      const a = pts[Math.max(0, i - 1)], b = pts[Math.min(pts.length - 1, i)];
+      const dx = b.x - a.x, dz = b.z - a.z, L2 = Math.hypot(dx, dz) || 1;
+      const nx = -dz / L2, nz = dx / L2;                 // road ke lambvat
+      const px = pts[i].x + nx * (w + 1.2), pz = pts[i].z + nz * (w + 1.2);
+      const gy = groundY(px, pz);
+      const poleH = 6.5;
+      const yaw = Math.atan2(nz, nx);
+      col.setHex(0x8a8378); mb.props.box(px, gy + poleH / 2, pz, 0.22, poleH, 0.22, col, yaw);
+      col.setHex(0x6b6459); mb.props.box(px, gy + poleH - 0.5, pz, 1.5, 0.12, 0.12, col, yaw);  // crossarm
+      const top = { x: px, y: gy + poleH - 0.35, z: pz };
+      if (wires && prevTop) {
+        // do lagataar khambon ke beech jhulta taar (2 tukde, beech mein sag)
+        const midx = (prevTop.x + top.x) / 2, midz = (prevTop.z + top.z) / 2;
+        const sag = Math.min(1.4, Math.hypot(top.x - prevTop.x, top.z - prevTop.z) * 0.03);
+        const mid = { x: midx, y: (prevTop.y + top.y) / 2 - sag, z: midz };
+        col.setHex(0x1a1a1c);
+        wireSeg(mb.props, prevTop, mid, col);
+        wireSeg(mb.props, mid, top, col);
+      }
+      prevTop = top;
+    }
+  }
+}
+
+/** Do bindu ke beech ek patla taar (box). */
+function wireSeg(builder, p0, p1, col) {
+  const dx = p1.x - p0.x, dz = p1.z - p0.z;
+  const cx = (p0.x + p1.x) / 2, cy = (p0.y + p1.y) / 2, cz = (p0.z + p1.z) / 2;
+  // box ka local +x world disha (cos yaw, sin yaw) mein jaata hai
+  const horiz = Math.hypot(dx, dz) || 1;
+  builder.box(cx, cy, cz, horiz, 0.05, 0.05, col, Math.atan2(dz, dx));
 }
 
 
