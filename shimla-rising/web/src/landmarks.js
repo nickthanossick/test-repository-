@@ -578,7 +578,17 @@ function college(c, mb) {
    * andar hai, isliye pehla frame campus dikhata hai, sadak nahi.
    */
   const [sx, sz] = L(-12, -4);
-  spawns.push({ id: "college", x: sx, z: sz, y: PLAZA, yaw: yaw + Math.PI / 2 });
+  /*
+   * Mooh seedha **mukhya building** ki taraf, forecourt ke paar.
+   *
+   * Pehle yahan `yaw + PI/2` tha -- ek campus-axis jo ek terrace/hedge ke block
+   * par ja padta tha, isliye pehla frame ek hara plane bhar deta tha (Nikhil ne
+   * baar-baar shikayat ki). Ab spawn se main building (L(0, MV)) tak ka rukh
+   * naapkar dete hain: khiladi forecourt ke paar imaarat dekhta hai, chase
+   * camera peeche se usi par. forward = (-sin, -cos), isliye building ki disha.
+   */
+  const [bx, bz] = L(0, MV);
+  spawns.push({ id: "college", x: sx, z: sz, y: PLAZA, yaw: Math.atan2(-(bx - sx), -(bz - sz)) });
 
   /*
    * ============================ campus ki hariyali =========================

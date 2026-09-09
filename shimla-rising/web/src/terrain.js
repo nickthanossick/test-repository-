@@ -32,6 +32,39 @@ export class Terrain {
       const u16 = (px[i * 4] << 8) | px[i * 4 + 1];
       this.heights[i] = this.elevMin + (u16 / 65535) * range;
     }
+
+    /*
+     * Dhalan ko **dabao** -- 70% samtal, 30% halki pahadi.
+     *
+     * Nikhil (do baar): *"itna uphill mat rkh... 70% plain 30% thoda sa hill,
+     * jyda ni"*. Aur ek screenshot jisme banda khadi hari dhalan ke andar ghus
+     * gaya tha -- kyunki asli Shimla DEM bahut khada hai (1150 m ka farak
+     * 8 km mein), aur itni dhalan par chase camera bhi pahad ke andar chala
+     * jaata hai.
+     *
+     * Isliye har oonchai ko **naksha ke beech (town) ki oonchai** ki taraf
+     * kheench lete hain, sirf `FLATTEN` hissa deviation rakhte hue. Center ki
+     * oonchai wahin rehti hai (spawn/sky/fog waise ke waise), par pahad 30%
+     * reh jaate hain -- khelne layak, GTA-jaisa samtal sheher, halki dhalanein.
+     *
+     * Ye sab kuch ke naapne se **pehle** hota hai: roads, campus, carve, mesh
+     * sab isi dabi hui zameen se banti hain, isliye poori tarah consistent.
+     */
+    const FLATTEN = 0.30;
+    const midCol = (this.size - 1) >> 1, midRow = (this.size - 1) >> 1;
+    const base = this.heights[midRow * this.size + midCol];
+    for (let i = 0; i < n; i++) {
+      this.heights[i] = base + (this.heights[i] - base) * FLATTEN;
+    }
+    // `elevMin/elevMax` asli hi rehte hain: rang/banding asli oonchai se aata
+    // hai (colorAt/_chunk y ko wapas khol lete hain), geometry dabi hui.
+    this._flatten = FLATTEN;
+    this._flattenBase = base;
+  }
+
+  /** Dabi hui oonchai ko asli oonchai mein wapas kholo (rang/banding ke liye). */
+  _unflatten(y) {
+    return this._flatten ? this._flattenBase + (y - this._flattenBase) / this._flatten : y;
   }
 
   /** Grid index se raw height. Edges pe clamp. */
@@ -331,7 +364,7 @@ export class Terrain {
          * dhalan par baith gaya tha. Shimla ki ridge deodar se dhaki hai;
          * khulapan Jakhoo (2455 m) ke aas-paas hi shuru hota hai.
          */
-        const dry = THREE.MathUtils.smoothstep(y, 2330, 2480) * 0.75;
+        const dry = THREE.MathUtils.smoothstep(this._unflatten(y), 2330, 2480) * 0.75;
         splat[t] = rockW;
         splat[t + 1] = dry * (1 - rockW);
         p += 3; t += 2;
@@ -367,6 +400,14 @@ export class Terrain {
    * aur 2350 m ke upar sardiyon mein barf.
    */
   colorAt(x, z, y, out) {
+    /*
+     * Rang ke liye oonchai **wapas khol lo** (un-flatten). Geometry to dabi hui
+     * hai (gentle hills), par color banding asli oonchai par tikni chahiye --
+     * warna sab ek hi deodar-hare band mein gir jaata aur pahad ek-rang lagta.
+     * Slope wali chattan geometry ki asli (gentle) dhalan se aati hai -- wo
+     * theek hai, dabi duniya mein kam chattan hi banti hai.
+     */
+    y = this._unflatten(y);
     const t = (y - this.elevMin) / (this.elevMax - this.elevMin);
     const slope = this.slopeAt(x, z);
 
