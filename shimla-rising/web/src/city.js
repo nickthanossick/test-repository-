@@ -46,6 +46,31 @@ const SHOP_COLORS = [
   0xd35400, 0x16a085, 0xc0143c, 0x2c7873,
 ];
 
+/*
+ * Dukaan ke naam ke board -- gali ko "padhne layak" banate hain (SA se upar).
+ *
+ * SA/Vice City ki galiyon mein har dukaan par uska naam likha hai; wahi cheez
+ * "basic" aur "asli" ka farak hai. Par har naya naam = naya texture = naya draw
+ * call, isliye poora pool sirf itna hi -- har naam ke `kind` se board ka rang
+ * bhi aata hai (`signboard`), aur ek hi naam ke saare board ek `InstancedMesh`
+ * mein aate hain: kul draw call = pool ka size (~15), ghar ki ginti se nahi.
+ */
+const SHOP_NAMES = [
+  ["NEGI STORE", "Kirana", "general"], ["SHARMA JI", "General", "shop"],
+  ["APNA DHABA", "Chai · Khana", "dhaba"], ["THAKUR MEDICOS", "Chemist", "medical"],
+  ["HIMACHAL SWEETS", "Mithai", "sweets"], ["VERMA CLOTH", "Kapda", "cloth"],
+  ["KUMAR MOBILE", "Recharge", "mobile"], ["PAHADI BAKERY", "Bakery", "bakery"],
+  ["RANA HARDWARE", "Loha · Paint", "hardware"], ["MEHTA STUDIO", "Photocopy", "photocopy"],
+  ["SANJAULI TEA", "Cafe", "dhaba"], ["DEV JEWELLERS", "Sona-Chandi", "jewel"],
+  ["GUPTA SABZI", "Sabziwala", "sabzi"], ["NEW BOOK DEPOT", "Books", "books"],
+  ["SHIMLA SALON", "Hair · Beauty", "salon"],
+];
+
+// Parked scooter ke rang + thele par sabzi/crate ke rang + bunting jhandiyan.
+const SCOOTER_COLORS = [0xb0392b, 0x2f6db0, 0x2e8b57, 0x37424c, 0xd0d2d4, 0xc27a1e];
+const CRATE_COLORS = [0xc0392b, 0xe0a030, 0x2e8b57, 0xd35400, 0x8e44ad];
+const BUNTING_COLORS = [0xd23b2e, 0xe8b93a, 0x2f8f4f, 0x2f6db0, 0xe86f2e];
+
 export function buildCity(terrain, roads, districts, pois, rng, quality = {}, opts = {}) {
   const group = new THREE.Group();
   group.name = "city";
@@ -69,6 +94,7 @@ export function buildCity(terrain, roads, districts, pois, rng, quality = {}, op
   const shop = new ChunkedBuilder(1 / 3);    // ground-floor shutter + board (facade jaisa tile)
   const props = new ChunkedBuilder(0.5);     // chhat ki paani ki tanki, bijli ke khambe + taar
   const col = new THREE.Color();
+  const boards = [];   // dukaan-naam board ki jagahein {x,y,z,yaw,idx} -- neeche instanced
   const placed = new SpatialGrid(16);
   // Bazaar corridor ki dukanein pehle ban chuki hain (bazaar.js). Unki jagahein
   // usi grid mein daal do taaki generic ghar unke andar na ghusein -- `occupied()`
@@ -138,8 +164,12 @@ export function buildCity(terrain, roads, districts, pois, rng, quality = {}, op
         if (row && terrain.slopeAt(x, z) > 0.72) continue;
         placed.add(x, z);
         placedCount++;
-        house({ walls, roofs, plinths, windows, trim, shop, props }, terrain, x, z, d, rng, col, colliders, facades,
-              off - w - 1.0, bw, bdep);
+        // Ghar ka mooh sadak ki taraf -- front face (-v) par board/dukaan/balcony
+        // sab sadak ko dikhein (random yaw se board ulta chhapta tha). Halka
+        // jitter taaki bilkul kataar-band robotic na lage.
+        const faceYaw = Math.atan2(-side * n.nx, side * n.nz);
+        house({ walls, roofs, plinths, windows, trim, shop, props, boards }, terrain, x, z, d, rng, col, colliders, facades,
+              off - w - 1.0, bw, bdep, faceYaw);
         }
       }
     }
@@ -189,7 +219,46 @@ export function buildCity(terrain, roads, districts, pois, rng, quality = {}, op
   group.add(signs);
   group.userData.landmarkCount = lm.userData.landmarkCount;
   group.userData.signCount = signs.userData.count;
-  group.userData.glowingSigns = signs.userData.glowingMaterials;
+
+  // Dukaan-naam board: naam ke hisaab se poolo (ek naam = ek texture = ek mesh),
+  // aur har naam ke saare board ek InstancedMesh mein -- kul ~15 draw call, chahe
+  // hazaaron dukaan hon. Raat ko jagmagate hain (glowing list mein daal diye).
+  const boardGlow = [];
+  if (boards.length) {
+    const byIdx = new Map();
+    for (const bd of boards) {
+      if (!byIdx.has(bd.idx)) byIdx.set(bd.idx, []);
+      byIdx.get(bd.idx).push(bd);
+    }
+    const geo = new THREE.PlaneGeometry(1, 0.25);              // 4:1, texture jaisa
+    const m = new THREE.Matrix4(), q = new THREE.Quaternion();
+    const e = new THREE.Euler(), pos = new THREE.Vector3(), scl = new THREE.Vector3();
+    for (const [idx, list] of byIdx) {
+      const [name, sub, kind] = SHOP_NAMES[idx];
+      const set = TEX.signboard(name, sub, kind, 100 + idx);
+      // FrontSide -- peeche se board dikhta hi nahi (DoubleSide se pichhli taraf
+      // se naam ulta chhapta tha). Har board apni sadak ki taraf mooh kiye hai.
+      const mat = new THREE.MeshStandardMaterial({
+        map: set.map, roughness: set.roughness, metalness: set.metalness,
+        emissiveMap: set.map, emissive: new THREE.Color(0xffffff), emissiveIntensity: 0,
+      });
+      boardGlow.push(mat);
+      const inst = new THREE.InstancedMesh(geo, mat, list.length);
+      for (let i = 0; i < list.length; i++) {
+        const bd = list[i];
+        // +Z ko front-outward (sadak ki taraf = sin yaw, -cos yaw) par le jaao:
+        // rotation.y = PI - yaw. Isse FrontSide board sadak se seedha padha jaata
+        // hai, ulta nahi (yaw+PI galat disha deta tha).
+        e.set(0, Math.PI - bd.yaw, 0); q.setFromEuler(e);
+        pos.set(bd.x, bd.y, bd.z); scl.set(bd.w, bd.w, 1);
+        m.compose(pos, q, scl); inst.setMatrixAt(i, m);
+      }
+      inst.instanceMatrix.needsUpdate = true;
+      inst.name = "shopboards";
+      group.add(inst);
+    }
+  }
+  group.userData.glowingSigns = signs.userData.glowingMaterials.concat(boardGlow);
   group.userData.windowMaterial = windowMat;
   return group;
 }
@@ -207,7 +276,7 @@ export function buildCity(terrain, roads, districts, pois, rng, quality = {}, op
  *   - kabhi-kabhi **chimney**
  */
 function house(mb, terrain, x, z, d, rng, col, colliders, facadeCount = 2, roadClear = 99,
-               fixedW = 0, fixedDep = 0) {
+               fixedW = 0, fixedDep = 0, faceYaw = null) {
   // Naap bulane wala pehle hi nikaal chuka ho sakta hai -- usi se wo setback
   // ginta hai, isliye yahan dobara random lena galat hoga.
   const w = fixedW || (5 + rng() * 4.5);
@@ -215,7 +284,9 @@ function house(mb, terrain, x, z, d, rng, col, colliders, facadeCount = 2, roadC
   // Zyada height variety -- SA mein 2 manzil ke ghar se 6 manzil ke block tak.
   const floors = 2 + Math.floor(rng() * (d.wealth > 0.7 ? 4.4 : 3.2));
   const fh = 3.0;
-  const yaw = rng() * Math.PI * 2;
+  // Sadak ki taraf mooh (front -v us disha mein), halke jitter ke saath. Purana
+  // random yaw board ko ulta aur dukaan ko deewar ki taraf kar deta tha.
+  const yaw = faceYaw == null ? rng() * Math.PI * 2 : faceYaw + (rng() - 0.5) * 0.4;
   const cy = Math.cos(yaw), sy = Math.sin(yaw);
   // local (u along width, v along depth) -> world
   const L = (u, v) => [x + u * cy - v * sy, z + u * sy + v * cy];
@@ -270,10 +341,58 @@ function house(mb, terrain, x, z, d, rng, col, colliders, facadeCount = 2, roadC
   const cr = Math.min(Math.max(w, dep) * 0.62, Math.max(0, roadClear));
   if (cr >= 2) colliders?.add(x, z, cr, base - drop - 1, base + bodyH + 4);
 
-  // --- har manzil ka chajja ----------------------------------------------
+  // Front face (sadak/dhalan ki taraf, local -v): ispar chhajje, AC, board.
+  // Ye woh "SA se upar" gehrai hai -- flat texture ke upar asli 3D relief jispe
+  // dhoop se sachi chhaya padti hai. Sab merged builder mein, draw call same.
+  const fx = sy, fz = -cy;                                  // front outward normal
+  const front = (u, out) => [x + u * cy + (dep / 2 + out) * sy,
+                             z + u * sy - (dep / 2 + out) * cy];
+
+  // --- har manzil ka chajja (ab gehra -- sachi shelf) --------------------
   col.setHex(0xbfb6a8);
   for (let f = 1; f < floors; f++) {
-    mb.trim.box(x, base + f * fh, z, w * 1.035, 0.16, dep * 1.035, col, yaw);
+    mb.trim.box(x, base + f * fh, z, w * 1.06, 0.22, dep * 1.06, col, yaw);
+    // front par thoda aur bahar nikla hua chhajja -- khidki ke upar dhoop-chhaya
+    const [sx, sz] = front(0, 0.28);
+    col.setHex(0xd7cebd);
+    mb.trim.box(sx, base + f * fh + 0.02, sz, w * 0.9, 0.14, 0.62, col, yaw);
+    col.setHex(0xbfb6a8);
+  }
+
+  // --- upar cornice + AC units (front face) ------------------------------
+  // Deewar ke sabse upar ek bahar nikla cornice band -- imaarat ko "topi".
+  {
+    const [cx2, cz2] = front(0, 0.34);
+    col.setHex(0xcbc2b2);
+    mb.trim.box(cx2, wallBot + wallH - 0.35, cz2, w * 0.98, 0.4, 0.7, col, yaw);
+  }
+  // window AC -- sparse, front face, kisi manzil par latka hua dabba
+  const nAc = urban ? (rng() < 0.6 ? 1 : 0) + (rng() < 0.3 ? 1 : 0) : (rng() < 0.35 ? 1 : 0);
+  for (let a = 0; a < nAc; a++) {
+    const af = 1 + Math.floor(rng() * Math.max(1, floors - 1));
+    const au = (rng() - 0.5) * w * 0.6;
+    const [ax, az] = front(au, 0.28);
+    col.setHex(0xe8e6df);
+    mb.props.box(ax, base + af * fh - 0.1, az, 0.86, 0.56, 0.5, col, yaw);
+    col.setHex(0x9aa0a2);                                    // grille
+    const [ax2, az2] = front(au, 0.55);
+    mb.props.box(ax2, base + af * fh - 0.1, az2, 0.8, 0.5, 0.06, col, yaw);
+  }
+
+  // --- dukaan ka naam-board + gali ki zindagi (sirf urban) ---------------
+  if (urban) {
+    // naam-board: shopfront ke signboard-patti par, thoda bahar nikla hua.
+    // Sirf jagah note karte hain -- board mesh neeche pool se instanced banta hai.
+    const idx = (rng() * SHOP_NAMES.length) | 0;
+    const [bx0, bz0] = front(0, 0.16);
+    mb.boards.push({ x: bx0, y: base + shopH - 0.62, z: bz0, yaw, idx, w: Math.min(w * 0.86, 4.4) });
+    // dukaan ke aage khadi scooter/thela -- gali "zinda" lage
+    if (rng() < 0.5) {
+      const su = (rng() - 0.5) * w * 0.5;
+      const [px0, pz0] = front(su, 1.35 + rng() * 0.6);
+      if (rng() < 0.6) scooter(mb.props, px0, base, pz0, yaw + (rng() - 0.5), col, rng);
+      else handcart(mb.props, px0, base, pz0, yaw + (rng() - 0.5), col, rng);
+    }
   }
 
   // --- khidkiyan ---------------------------------------------------------
@@ -378,6 +497,18 @@ function buildStreetLines(terrain, roads, mb, rng, quality) {
         col.setHex(0x1a1a1c);
         wireSeg(mb.props, prevTop, mid, col);
         wireSeg(mb.props, mid, top, col);
+        // kabhi-kabhi rangeen jhandiyan (bunting) -- tehwaar wali gali
+        if (rng() < 0.28) {
+          const n = 4;
+          for (let f = 1; f <= n; f++) {
+            const t = f / (n + 1);
+            const fxp = prevTop.x + (top.x - prevTop.x) * t;
+            const fzp = prevTop.z + (top.z - prevTop.z) * t;
+            const fyp = (prevTop.y + (top.y - prevTop.y) * t) - sag * (1 - Math.abs(2 * t - 1)) - 0.28;
+            col.setHex(BUNTING_COLORS[(rng() * BUNTING_COLORS.length) | 0]);
+            mb.props.box(fxp, fyp, fzp, 0.26, 0.34, 0.03, col, yaw);
+          }
+        }
       }
       prevTop = top;
     }
@@ -391,6 +522,50 @@ function wireSeg(builder, p0, p1, col) {
   // box ka local +x world disha (cos yaw, sin yaw) mein jaata hai
   const horiz = Math.hypot(dx, dz) || 1;
   builder.box(cx, cy, cz, horiz, 0.05, 0.05, col, Math.atan2(dz, dx));
+}
+
+/**
+ * Khadi scooter -- dukaan ke aage. Chhoti si, box-based, par gali turant zinda
+ * lagti hai (SA mein har footpath par gaadiyan khadi hain). `props` merged mesh
+ * mein jaati hai, isliye draw call nahi badhta. `v` = lambaai, `u` = side.
+ */
+function scooter(b, x, gy, z, yaw, col, rng) {
+  const cw = Math.cos(yaw), sw = Math.sin(yaw);
+  const P = (u, v) => [x + u * cw - v * sw, z + u * sw + v * cw];
+  const body = SCOOTER_COLORS[(rng() * SCOOTER_COLORS.length) | 0];
+  let p;
+  col.setHex(body);
+  p = P(0, -0.12); b.box(p[0], gy + 0.62, p[1], 0.36, 0.5, 0.66, col, yaw);   // seat/body
+  p = P(0, 0.34);  b.box(p[0], gy + 0.38, p[1], 0.3, 0.12, 0.62, col, yaw);   // footboard
+  p = P(0, 0.6);   b.box(p[0], gy + 0.78, p[1], 0.34, 0.62, 0.14, col, yaw);  // front apron
+  col.setHex(0x232327);
+  p = P(0, 0.66);  b.box(p[0], gy + 0.24, p[1], 0.12, 0.46, 0.46, col, yaw);  // aage ka pahiya
+  p = P(0, -0.56); b.box(p[0], gy + 0.24, p[1], 0.16, 0.46, 0.5, col, yaw);   // peeche ka pahiya
+  col.setHex(0x141416);
+  p = P(0, 0.62);  b.box(p[0], gy + 1.0, p[1], 0.52, 0.07, 0.07, col, yaw);   // handle
+}
+
+/**
+ * Thela (haath-gaadi) -- sabzi/phal wala. Lakdi ka platform, do pahiye, aur upar
+ * rangeen crate. Bhi `props` mein.
+ */
+function handcart(b, x, gy, z, yaw, col, rng) {
+  const cw = Math.cos(yaw), sw = Math.sin(yaw);
+  const P = (u, v) => [x + u * cw - v * sw, z + u * sw + v * cw];
+  let p;
+  col.setHex(0x8a6a44);
+  p = P(0, 0); b.box(p[0], gy + 0.72, p[1], 1.9, 0.14, 0.98, col, yaw);       // platform
+  col.setHex(0x6b5232);
+  for (const [u, v] of [[0.82, 0.36], [0.82, -0.36], [-0.82, 0.36], [-0.82, -0.36]]) {
+    p = P(u, v); b.box(p[0], gy + 0.36, p[1], 0.1, 0.72, 0.1, col, yaw);      // taangein
+  }
+  col.setHex(0x1b1b1f);
+  for (const s of [-1, 1]) { p = P(s * 0.88, 0); b.box(p[0], gy + 0.3, p[1], 0.14, 0.58, 0.58, col, yaw); }  // pahiye
+  for (let i = 0; i < 3; i++) {                                              // sabzi ke crate
+    col.setHex(CRATE_COLORS[(rng() * CRATE_COLORS.length) | 0]);
+    p = P((i - 1) * 0.56, (rng() - 0.5) * 0.28);
+    b.box(p[0], gy + 0.98, p[1], 0.44, 0.34, 0.62, col, yaw);
+  }
 }
 
 

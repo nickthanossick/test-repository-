@@ -173,7 +173,7 @@ export function plaster(hex = 0xd8cdb8, seed = 11) {
  */
 export function facade(seed = 21) {
   return cached(`facade${seed}`, () => {
-    const S = 256;
+    const S = 512;   // crisp (SA se upar)
     const grain = fbm(S, 8, 4, seed);
     const streak = fbm(S, 3, 3, seed + 51);
     const cv = canvas(S);
@@ -233,7 +233,7 @@ export function facade(seed = 21) {
  */
 export function shopfront(seed = 41) {
   return cached(`shopfront${seed}`, () => {
-    const S = 256;
+    const S = 512;   // crisp
     const grain = fbm(S, 6, 4, seed);
     const cv = canvas(S);
     const ctx = cv.getContext("2d");
