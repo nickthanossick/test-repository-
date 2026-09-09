@@ -582,7 +582,7 @@ export class RoadNetwork {
       g.add(grp);
       return grp;
     };
-    emit(road, TEX.standard(TEX.asphalt(), { vertexColors: true, roughness: 0.92 }),
+    emit(road, TEX.standard(TEX.asphalt(), { vertexColors: true, roughness: 0.72 }),   // round 22: halki nam-si chamak, sky reflections pakdti hai
          "road-surface", false);
     emit(stone, TEX.standard(TEX.plaster(0xffffff, 91), { vertexColors: true, roughness: 1.0 }),
          "road-walls");

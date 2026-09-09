@@ -195,6 +195,75 @@ const VERT = /* glsl */`
   }
 `;
 
+/* --------------------------------------------------------------- grade ---
+ *
+ * Cinematic colour grade. Nikhil: *"AAA graphics bana, aise maja ni ara."*
+ *
+ * Geometry procedural hai (koi scanned asset nahi -- saare host block hain),
+ * isliye "AAA" ka ehsaas **lighting aur grade** se aata hai, model se nahi.
+ * Ye pass aakhir mein (sRGB space mein) lagta hai aur film jaisa look deta hai
+ * -- par naapkar halka, taaki "instagram filter" na lage:
+ *
+ *   1. contrast  -- halki S-curve, midtones ko baithaye bina
+ *   2. split-tone -- shadows thodi teal-neeli (pahad ki thandak), highlights
+ *      thodi warm (Himachal ki dhoop). Yahi wo "teal-orange" cinematic rukh hai.
+ *   3. saturation -- zaraa badha, par skin/greenery jyada na chamke
+ *   4. vignette   -- kinare halke gehre, nazar beech par
+ *   5. grain      -- bahut halka chalta hua daana, taaki digital-flat na lage
+ *
+ * `amount` din/raat se aata hai (raat ko thoda kam, warna neon over ho jaaye).
+ */
+const GRADE_FRAG = /* glsl */`
+  precision highp float;
+  uniform sampler2D tDiffuse;
+  uniform vec2 resolution;
+  uniform float time;
+  uniform float amount;
+  varying vec2 vUv;
+
+  // luminance
+  float luma(vec3 c){ return dot(c, vec3(0.2126, 0.7152, 0.0722)); }
+
+  void main(){
+    vec3 c = texture2D(tDiffuse, vUv).rgb;
+
+    // 1. contrast -- pivot 0.5 ke around halki S-curve
+    c = mix(vec3(0.5), c, 1.0 + 0.14 * amount);
+
+    // 2. split-tone: shadows teal, highlights warm
+    float L = luma(c);
+    vec3 shadowTint = vec3(0.86, 0.98, 1.06);   // thodi teal
+    vec3 highTint   = vec3(1.06, 1.01, 0.90);   // thodi warm
+    vec3 tint = mix(shadowTint, highTint, smoothstep(0.15, 0.85, L));
+    c *= mix(vec3(1.0), tint, 0.35 * amount);
+
+    // 3. saturation
+    c = mix(vec3(L), c, 1.0 + 0.16 * amount);
+
+    // 4. vignette
+    vec2 d = vUv - 0.5;
+    float vig = smoothstep(0.92, 0.42, length(d) * 1.30);
+    c *= mix(1.0, vig, 0.20 * amount);   // halka -- dusk ko muddy na kare
+
+    // 5. film grain -- halka, chalta hua
+    float g = fract(sin(dot(vUv * resolution + time, vec2(12.9898, 78.233))) * 43758.5453);
+    c += (g - 0.5) * 0.018 * amount;
+
+    gl_FragColor = vec4(clamp(c, 0.0, 1.0), 1.0);
+  }
+`;
+
+const GradeShader = {
+  uniforms: {
+    tDiffuse: { value: null },
+    resolution: { value: new THREE.Vector2(1, 1) },
+    time: { value: 0 },
+    amount: { value: 1.0 },
+  },
+  vertexShader: VERT,
+  fragmentShader: GRADE_FRAG,
+};
+
 /**
  * Ek hi Pass jo do draw karta hai: pehle aadhi resolution par AO, phir uska
  * blur karke drishya par composite. Do alag Pass rakhne se composer ko ek aur
@@ -333,6 +402,12 @@ export class PostFX {
     }
     this.composer.addPass(new OutputPass());
 
+    // Cinematic grade -- sRGB space mein, OutputPass ke baad. `amount` waqt se.
+    if (cfg.grade !== false) {
+      this.grade = new ShaderPass(GradeShader);
+      this.composer.addPass(this.grade);
+    }
+
     // FXAA aakhir mein, sRGB ke baad -- wahi uski sahi jagah hai
     this.fxaa = new ShaderPass(FXAAShader);
     this.composer.addPass(this.fxaa);
@@ -347,11 +422,14 @@ export class PostFX {
    * neon taaki boards, lamp aur headlight Vice City jaise jagmagayein.
    */
   setNight(n) {
-    if (!this.bloom) return;
     const t = n < 0 ? 0 : n > 1 ? 1 : n;
-    const d = this._bloomDay, ni = this._bloomNight;
-    this.bloom.strength = d.strength + (ni.strength - d.strength) * t;
-    this.bloom.threshold = d.threshold + (ni.threshold - d.threshold) * t;
+    if (this.bloom) {
+      const d = this._bloomDay, ni = this._bloomNight;
+      this.bloom.strength = d.strength + (ni.strength - d.strength) * t;
+      this.bloom.threshold = d.threshold + (ni.threshold - d.threshold) * t;
+    }
+    // grade raat ko thoda kam -- warna neon over-grade ho jaata hai
+    if (this.grade) this.grade.material.uniforms.amount.value = 1.0 - t * 0.35;
   }
 
   setSize(w, h) {
@@ -359,6 +437,7 @@ export class PostFX {
     this.composer.setSize(w, h);
     this.ao?.setSize(w, h);
     this.bloom?.setSize(w, h);
+    if (this.grade) this.grade.material.uniforms.resolution.value.set(w, h);
     if (this.fxaa) this.fxaa.material.uniforms.resolution.value.set(1 / w, 1 / h);
   }
 
@@ -380,6 +459,7 @@ export class PostFX {
      * naapta hai aur auto-reset par tikta hai -- bina chhede sahi chalta hai
      * (ye render() synchronous hai, isliye beech mein kuch aur nahi chalta).
      */
+    if (this.grade) this.grade.material.uniforms.time.value = (performance.now() % 10000) / 1000;
     const info = this.renderer.info;
     info.autoReset = false;
     info.reset();
