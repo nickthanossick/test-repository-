@@ -325,6 +325,44 @@ export class RoadNetwork {
   }
 
   /**
+   * `(x, z)` ko dhakne wali **sabse neechi** sadak ki satah -- ya `null`.
+   *
+   * `surfaceAt` ka ulta. Terrain mesh ke vertex ko sadak tak neeche laane ke
+   * liye: har vertex ko dhakne wali sabse neechi sadak tak gira do, taaki
+   * terrain kisi bhi sadak se upar na rahe (warna 8-10 m ka mota mesh sankri
+   * carved sadak ke slot ke upar se pul bana deta hai aur us par khada khiladi
+   * hari zameen mein dhansa dikhta -- chowk par 3 m tak naapa gaya).
+   */
+  surfaceMinAt(x, z) {
+    const cell = this._cell;
+    const cx = (x / cell) | 0, cz = (z / cell) | 0;
+    let botY = null;
+    for (let iz = cz - 2; iz <= cz + 2; iz++) {
+      for (let ix = cx - 2; ix <= cx + 2; ix++) {
+        const arr = this._grid.get(ix * 100003 + iz);
+        if (!arr) continue;
+        for (const k of arr) {
+          const n = this.nodes[k];
+          const w = n.road.spec.width_m / 2 + 0.42;
+          const pts = n.road.points, i = n.i;
+          for (let j = i - 1; j <= i; j++) {
+            if (j < 0 || j + 1 >= pts.length) continue;
+            const a = pts[j], b = pts[j + 1];
+            const ex = b.x - a.x, ez = b.z - a.z;
+            const L2 = ex * ex + ez * ez || 1;
+            const t = Math.max(0, Math.min(1, ((x - a.x) * ex + (z - a.z) * ez) / L2));
+            const px = a.x + ex * t, pz = a.z + ez * t;
+            if ((x - px) * (x - px) + (z - pz) * (z - pz) > w * w) continue;
+            const y = a.y + (b.y - a.y) * t + (n.road.type === "rail" ? 0.35 : 0.5);
+            if (botY === null || y < botY) botY = y;
+          }
+        }
+      }
+    }
+    return botY;
+  }
+
+  /**
    * Sadak ka mesh + uska furniture.
    *
    * Shimla ki har pahadi sadak ek hi tarah bani hai: chadhai wali taraf pathar

@@ -150,7 +150,7 @@ async function boot() {
   setProgress(0.68, "pahad ko sadak tak tarash rahe hain…");
   await yieldFrame();
   terrain.carveToRoads(roads);
-  scene.add(terrain.buildMesh(8, Q.terrainQuads));
+  scene.add(terrain.buildMesh(8, Q.terrainQuads, roads));
 
   const roadGroup = roads.buildMesh();
   scene.add(roadGroup);
@@ -752,6 +752,7 @@ async function boot() {
   let debugCam = false;    // sirf testing ke liye -- viewPOI() isse on karta hai
   let ambientTimer = 1.0;  // aas-paas ki awaaz ki ghadi
   let selfTalkTimer = 6;
+  let gossipTimer = 4;    // aas-paas ke log aapas mein baat karte hain
   // Ctrl se bhaagna: **toggle**, hold nahi. Browser mein Ctrl+W tab band kar
   // deta hai aur JavaScript use rok nahi sakta (preventDefault ka koi asar
   // nahi). Ctrl dabaye rakh kar W se aage chalte to game beech mein band ho
@@ -954,6 +955,27 @@ async function boot() {
     if (selfTalkTimer <= 0) {
       selfTalkTimer = 5 + Math.random() * 3;
       if (!dialogue.busy && !flashcards.active) dialogue.playOne(idleKey(pos, district));
+    }
+
+    /*
+     * Aas-paas ke **log aapas mein** baat karte hain.
+     *
+     * Nikhil: *"thode aur dialogues add kr, log aapas m bat kre"* -- aur uske
+     * apne diye pahadi taane (tendua ghus gya, sabji mandi mein bendaga, kisko
+     * vote). Jab do ya zyada log paas hon aur koi aur baat na chal rahi ho, to
+     * ek chhota gappa (do kirdaar) chal jaata hai. Vicky ke khud-se-bolne se
+     * alag ghadi, taaki dono ek dusre ke upar na aayein.
+     */
+    gossipTimer -= dt;
+    if (gossipTimer <= 0) {
+      gossipTimer = 8 + Math.random() * 6;
+      if (!dialogue.busy && !flashcards.active && wanted.stars === 0) {
+        let near = 0;
+        for (const k of crowd.keepers) {
+          if (k.mesh.visible && k.mesh.position.distanceTo(pos) < 30) near++;
+        }
+        if (near >= 2) dialogue.play(`crowd:gossip${1 + ((Math.random() * 12) | 0)}`);
+      }
     }
 
     dayNight.update(dt, camera);   // waqt, sooraj, taare, raat ki roshni, mausam

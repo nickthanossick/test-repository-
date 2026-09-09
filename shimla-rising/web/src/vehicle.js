@@ -92,7 +92,17 @@ export class Vehicle {
     const ahead = 3;
     const hHere = this.ground(this.pos.x, this.pos.z);
     const hAhead = this.ground(this.pos.x + f.x * ahead, this.pos.z + f.z * ahead);
-    const grade = (hAhead - hHere) / ahead;             // + = chadhai
+    /*
+     * Grade **clamp** -- chowk par gaadi ruk jaati thi.
+     *
+     * `this.ground` ab `surfaceAt` hai (round 24), jo chauraahe par ek sadak se
+     * doosri (5 m oonchi) par kood jaata hai. Us kood se `grade` jhootha 1.6 tak
+     * ho jaata tha, aur `-9.81*grade` gaadi ki poori raftaar kha jaata -- Nikhil:
+     * *"gaadi chadhai hi nahi chad pari"*. Asli sadak (flatten ke baad) kabhi
+     * itni khadi nahi. Isliye physics ke liye grade ko ±0.4 mein baandh dete
+     * hain: asli halki chadhai chalti hai, phantom cliff gaadi nahi rokta.
+     */
+    const grade = THREE.MathUtils.clamp((hAhead - hHere) / ahead, -0.4, 0.4);
 
     let a = 0;
     if (ctl.throttle > 0) a += s.accel * ctl.throttle * (this.speed < 0 ? 1.8 : 1);

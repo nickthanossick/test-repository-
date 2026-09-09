@@ -125,22 +125,40 @@ export class Terrain {
     const world = this.worldSize, half = this.half;
     const toCol = (x) => ((x + half) / world) * (S - 1);
     const colToX = (c) => (c / (S - 1)) * world - half;
-    const FEATHER = 9;              // metre -- corridor se aage narm milaav
-    const SHOULDER = 1.5;          // sadak ke kinare se itna aur poora samtal
+    /*
+     * Corridor **chauda** (round 25).
+     *
+     * Carve heightmap (4 m texel) mein hota hai, par terrain **mesh** ~8-10 m
+     * ke vertex par sample hota hai. Sankri sadak/chauraahe par agar koi mesh
+     * vertex carve ki patti ke andar na gire, to mesh triangle sadak ke slot ke
+     * **upar se pul** bana deta hai -- sadak (aur us par khada khiladi) hari
+     * zameen mein dab jaata dikhta hai. Naapa gaya: chowk par terrain sadak se
+     * 3.3 m upar. Isliye patti chaudi: ab ~20 m tak vertex girte hain, mesh
+     * sadak ke saath baithta hai. Nikhil ko waise bhi zyada samtal chahiye.
+     */
+    const FEATHER = 12;            // metre -- corridor se aage narm milaav
+    const SHOULDER = 2.0;         // sadak ke kinare se itna aur poora samtal
 
     /*
-     * Har texel par **sabse paas ki** sadak jeetti hai -- unke targets ka
-     * ausat nahi.
+     * Har texel par **sabse NEECHI** dhakne wali sadak tak carve.
      *
-     * Pehli koshish mein weighted-average liya tha, aur wo toota: mod par ya do
-     * sadak ke paas ek door (aur pahad par oonchi) segment feather-zone mein
-     * apni oonchai jod deta tha, jisse target local sadak se **upar** chala
-     * jaata. Nateeja: zameen sadak ke upar ubhar aati, khiladi usme dhas jaata,
-     * camera andar -- bilkul wahi grey box jo theek karna tha. Isliye ab sabse
-     * bhaari (nearest) segment ka target hi lete hain.
+     * Pehle "sabse paas wali" (max-weight) lete the. Par chauraahe par do sadak
+     * alag oonchai par milti hain (Sanjauli Chowk: 6 sadak, 5 m tak farak). Agar
+     * terrain paas wali OONCHI sadak tak carve ho jaaye, to us par khada khiladi
+     * -- jo NEECHI sadak par hai (surfaceAt top de raha, par local texel oonchi
+     * wali ke paas) -- zameen mein 3 m dhansa dikhta tha (naapa gaya). Isliye
+     * ab **corridor ke andar (dist <= halfW) sabse neechi sadak** tak carve
+     * karte hain: terrain kisi bhi sadak se upar nahi rehta, isliye khiladi/
+     * gaadi kisi bhi sadak par ho, zameen mein kabhi nahi dhansta. Oonchi sadak
+     * apne fill/embankment par upar baithti hai (jaisa asli flyover).
+     *
+     * `coreT` = corridor ke andar sabse neechi centreline oonchai (w=1).
+     * `featT`/`featW` = corridor ke baahar (feather) sabse paas wali, narm milaav.
      */
-    const bestW = new Float32Array(N);      // ab tak ka sabse bada bhaar
-    const bestT = new Float32Array(N);      // us segment ka target (centreline y)
+    const coreT = new Float32Array(N).fill(Infinity);
+    const hasCore = new Uint8Array(N);
+    const featW = new Float32Array(N);
+    const featT = new Float32Array(N);
 
     for (const road of roads.roads) {
       const halfW = road.spec.width_m / 2 + SHOULDER;
@@ -165,12 +183,15 @@ export class Terrain {
             const px = a.x + ex * t, pz = a.z + ez * t;
             const d = Math.hypot(x - px, z - pz);
             if (d >= reach) continue;
-            const w = d <= halfW ? 1 : 1 - (d - halfW) / FEATHER;
-            const ww = w * w * (3 - 2 * w);          // smoothstep
+            const target = a.y + (b.y - a.y) * t;    // centreline oonchai (raw)
             const idx = r * S + c;
-            if (ww > bestW[idx]) {
-              bestW[idx] = ww;
-              bestT[idx] = a.y + (b.y - a.y) * t;    // centreline oonchai (raw)
+            if (d <= halfW) {                         // asli corridor -- sabse neechi lo
+              hasCore[idx] = 1;
+              if (target < coreT[idx]) coreT[idx] = target;
+            } else {                                  // feather band -- sabse paas wali
+              const w = 1 - (d - halfW) / FEATHER;
+              const ww = w * w * (3 - 2 * w);
+              if (ww > featW[idx]) { featW[idx] = ww; featT[idx] = target; }
             }
           }
         }
@@ -178,15 +199,12 @@ export class Terrain {
     }
 
     for (let i = 0; i < N; i++) {
-      const k = bestW[i];
-      if (k <= 0) continue;
-      /*
-       * mix(raw, target, k): k=1 (corridor) par poora sadak par, feather mein
-       * narm. Kyunki target = centreline (road mesh se 0.5 m neeche), aur mix
-       * kabhi target se upar nahi jaata, zameen sadak ke upar nahi ubharti --
-       * bas 0.5 m ka curb dikhta hai.
-       */
-      this.heights[i] = this.heights[i] * (1 - k) + bestT[i] * k;
+      if (hasCore[i]) {
+        this.heights[i] = coreT[i];                   // corridor: poori tarah sadak par
+      } else if (featW[i] > 0) {
+        const k = featW[i];
+        this.heights[i] = this.heights[i] * (1 - k) + featT[i] * k;
+      }
     }
   }
 
@@ -198,11 +216,12 @@ export class Terrain {
    * normal map surface ko kareeb se bhi tootne nahi deta -- geometry utni hi
    * hai, par dikhta modern hai.
    */
-  buildMesh(chunks = 8, quads = 96) {
+  buildMesh(chunks = 8, quads = 96, roads = null) {
     const group = new THREE.Group();
     group.name = "terrain";
     const chunkSize = this.worldSize / chunks;
     const mat = this._groundMaterial();
+    this._roads = roads;             // _chunk vertex ko sadak tak neeche laane ke liye
 
     for (let cz = 0; cz < chunks; cz++) {
       for (let cx = 0; cx < chunks; cx++) {
@@ -338,7 +357,20 @@ export class Terrain {
     for (let r = 0; r < vn; r++) {
       for (let q = 0; q < vn; q++) {
         const x = x0 + q * step, z = z0 + r * step;
-        const y = this.heightAt(x, z);
+        let y = this.heightAt(x, z);
+        /*
+         * Vertex ko sadak tak **neeche** kheench lo (agar sadak isse neeche ho).
+         *
+         * Heightmap to carve ho chuka hai, par ye mesh ~8-10 m ke vertex par
+         * sample hota hai -- sankri sadak/chauraahe par vertex slot ke bahar
+         * gir kar sadak ke upar pul bana deta tha (khiladi 3 m dhansa dikhta).
+         * Sabse neechi dhakne wali sadak tak clamp karne se terrain kisi bhi
+         * sadak se upar nahi rehta -- sirf neeche laata hai, kabhi upar nahi.
+         */
+        if (this._roads) {
+          const rs = this._roads.surfaceMinAt(x, z);
+          if (rs !== null && rs < y) y = rs;
+        }
         pos[p] = x; pos[p + 1] = y; pos[p + 2] = z;
         this.colorAt(x, z, y, c);
         col[p] = c.r; col[p + 1] = c.g; col[p + 2] = c.b;

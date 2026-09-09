@@ -18,7 +18,7 @@
 export const PRESETS = {
   low: {
     name: "Low",
-    terrainQuads: 64,      // chunk mein quads (8x8 chunks)
+    terrainQuads: 104,     // chunk mein quads (8x8 chunks) -- ~10 m/vert, sadak ke carve ko follow karta hai
     treeCount: 9000,
     windowFacades: 1,      // har ghar ki kitni deewaron pe khidkiyan
     shadowMap: 1024,
@@ -35,7 +35,7 @@ export const PRESETS = {
   },
   medium: {
     name: "Medium",
-    terrainQuads: 96,
+    terrainQuads: 136,
     treeCount: 20000,
     windowFacades: 2,
     shadowMap: 2048,
@@ -57,7 +57,7 @@ export const PRESETS = {
   },
   high: {
     name: "High",
-    terrainQuads: 128,
+    terrainQuads: 176,
     treeCount: 34000,
     windowFacades: 4,
     shadowMap: 4096,

@@ -134,6 +134,21 @@
         "pitch": 0.52,
         "rate": 0.8
       }
+    },
+    {
+      "id": "buddha",
+      "name": "Buddha ji",
+      "color": "#b89a6a"
+    },
+    {
+      "id": "chhora",
+      "name": "Chhora",
+      "color": "#d0883c"
+    },
+    {
+      "id": "aunty",
+      "name": "Aunty ji",
+      "color": "#c98fa0"
     }
   ],
   "$comment": ""

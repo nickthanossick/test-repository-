@@ -604,6 +604,126 @@
         "speaker": "vicky",
         "text": "Benduga, ab poora Sanjauli dekh raha hai."
       }
+    ],
+    "crowd:gossip1": [
+      {
+        "speaker": "buddha",
+        "text": "Macho, suna? Raat ko tendua ghus gya Sanjauli, upar wale mohalle mein."
+      },
+      {
+        "speaker": "chhora",
+        "text": "Bawa ji, kutte ko utha le gaya seedha. Bendaga faad di bechare ki."
+      }
+    ],
+    "crowd:gossip2": [
+      {
+        "speaker": "dukandaar",
+        "text": "Bedafu, sabji mandi mein kya hua pata hai?"
+      },
+      {
+        "speaker": "rahgeer",
+        "text": "Haan yaara, do bando ki bendaga tod di ek dusre ne. Tamatar ke daam pe."
+      }
+    ],
+    "crowd:gossip3": [
+      {
+        "speaker": "chhora",
+        "text": "Bawa ji yaara, kisko de re is baar vote?"
+      },
+      {
+        "speaker": "buddha",
+        "text": "Jo sadak banwa de macho, usi ko. Baaki sab ek jaise hain."
+      }
+    ],
+    "crowd:gossip4": [
+      {
+        "speaker": "aunty",
+        "text": "Macho, bandar chhat pe se saara raashan le gaye."
+      },
+      {
+        "speaker": "dukandaar",
+        "text": "Bedafu, Jakhoo wale to poora thaila hi utha le jaate hain."
+      }
+    ],
+    "crowd:gossip5": [
+      {
+        "speaker": "rahgeer",
+        "text": "Light gayi phir se bawa. Teesri baar aaj."
+      },
+      {
+        "speaker": "dukandaar",
+        "text": "Board wale so rahe hain macho. Inverter chaalu kar."
+      }
+    ],
+    "crowd:gossip6": [
+      {
+        "speaker": "chhora",
+        "text": "Bedafu, mausam itna benduga ho gaya achanak."
+      },
+      {
+        "speaker": "buddha",
+        "text": "Bawa, upar barf padi hai kal raat. Kufri thanda ho gaya."
+      }
+    ],
+    "crowd:gossip7": [
+      {
+        "speaker": "buddha",
+        "text": "Macho, is baar seb ka daam achha mila?"
+      },
+      {
+        "speaker": "dukandaar",
+        "text": "Kya bataun yaara, peti ka rate hi gir gaya. Mandi wale kha gaye."
+      }
+    ],
+    "crowd:gossip8": [
+      {
+        "speaker": "rahgeer",
+        "text": "Bus late hai phir se. Aadha ghanta ho gaya bawa."
+      },
+      {
+        "speaker": "chhora",
+        "text": "Driver chai pe gaya hoga guru dhaba pe. Aa jayega macho."
+      }
+    ],
+    "crowd:gossip9": [
+      {
+        "speaker": "chhora",
+        "text": "Macho, RKMV ki chhutti ho gayi. Bheed lag gayi bazaar mein."
+      },
+      {
+        "speaker": "buddha",
+        "text": "Bawa, tu bhi na. Chal apna kaam kar."
+      }
+    ],
+    "crowd:gossip10": [
+      {
+        "speaker": "rahgeer",
+        "text": "Bedafu, upar ka raasta band hai. Malba gir gaya barish mein."
+      },
+      {
+        "speaker": "aunty",
+        "text": "Bawa ji, ab ghoom ke jaana padega. Do ghante extra."
+      }
+    ],
+    "crowd:gossip11": [
+      {
+        "speaker": "chhora",
+        "text": "Macho, kal match dekha? Aakhri over mein haar gaye."
+      },
+      {
+        "speaker": "rahgeer",
+        "text": "Bedafu, poochh mat. Paise laga diye the maine."
+      }
+    ],
+    "crowd:gossip12": [
+      {
+        "speaker": "buddha",
+        "text": "Chal bawa, ek chai ho jaye guru dhaba pe."
+      },
+      {
+        "speaker": "chhora",
+        "text": "Haan yaara, is thand mein chai se badhiya kuch nahi."
+      }
     ]
   }
 }
