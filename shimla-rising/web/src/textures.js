@@ -133,25 +133,31 @@ export function plaster(hex = 0xd8cdb8, seed = 11) {
     const S = 256;
     const grain = fbm(S, 6, 5, seed);
     const stain = fbm(S, 2, 3, seed + 31);
+    const moss = fbm(S, 5, 4, seed + 61);            // neeche kaai/seelan
     const cv = canvas(S);
     const ctx = cv.getContext("2d");
     const base = srgb(hex);
     const img = ctx.createImageData(S, S);
     for (let i = 0; i < S * S; i++) {
+      const y = (i / S) | 0, ny = y / S;
       // barish ke daag: neeche ki taraf halka gehra
-      const y = (i / S) | 0;
-      const weather = 1 - Math.pow(y / S, 3) * 0.22 * (0.5 + stain[i]);
-      const k = (0.86 + grain[i] * 0.28) * weather;
-      img.data[i * 4] = base.r * 255 * k;
-      img.data[i * 4 + 1] = base.g * 255 * k;
-      img.data[i * 4 + 2] = base.b * 255 * k;
+      const weather = 1 - Math.pow(ny, 3) * 0.26 * (0.5 + stain[i]);
+      const k = (0.84 + grain[i] * 0.30) * weather;
+      let r = base.r * 255 * k, g = base.g * 255 * k, b = base.b * 255 * k;
+      // sabse neeche kaai/seelan -- halka hara-gehra, plinth ko zameen se joddta
+      const damp = Math.max(0, ny - 0.72) / 0.28 * Math.max(0, moss[i] - 0.35);
+      if (damp > 0) {
+        const m = Math.min(0.6, damp);
+        r = r * (1 - m) + 58 * m; g = g * (1 - m) + 70 * m; b = b * (1 - m) + 46 * m;
+      }
+      img.data[i * 4] = r; img.data[i * 4 + 1] = g; img.data[i * 4 + 2] = b;
       img.data[i * 4 + 3] = 255;
     }
     ctx.putImageData(img, 0, 0);
     return {
       map: texture(cv, 1, true),
-      normalMap: texture(normalMapFrom(grain, S, 1.1)),
-      roughnessMap: texture(grey(grain, S, 0.72, 0.96)),
+      normalMap: texture(normalMapFrom(grain, S, 1.2)),
+      roughnessMap: texture(grey(grain, S, 0.72, 0.98)),
     };
   });
 }
@@ -174,8 +180,12 @@ export function plaster(hex = 0xd8cdb8, seed = 11) {
 export function facade(seed = 21) {
   return cached(`facade${seed}`, () => {
     const S = 512;   // crisp (SA se upar)
-    const grain = fbm(S, 8, 4, seed);
-    const streak = fbm(S, 3, 3, seed + 51);
+    // Kai paimaane ka daana -- yahi "scanned" look ka raaz: ek hi flat rang nahi,
+    // balki bade dhabbe (seelan/dhool), madhyam bhoora-pan, aur mahin speckle.
+    const grain = fbm(S, 10, 5, seed);            // mahin plaster daana
+    const blotch = fbm(S, 3, 4, seed + 51);       // bade damp/dhool ke dhabbe
+    const speck = fbm(S, 48, 3, seed + 130);      // baareek speckle
+    const streak = fbm(S, 2, 4, seed + 77);       // vertical baha
     const cv = canvas(S);
     const ctx = cv.getContext("2d");
     const img = ctx.createImageData(S, S);
@@ -184,39 +194,81 @@ export function facade(seed = 21) {
     // window rect (canvas top-down): upar-beech mein, neeche sill+grime
     const wx0 = 0.24 * S, wx1 = 0.76 * S, wy0 = 0.15 * S, wy1 = 0.63 * S;
     const fr = 0.05 * S;
+    const wcx = (wx0 + wx1) / 2;
     for (let y = 0; y < S; y++) {
       for (let x = 0; x < S; x++) {
         const i = y * S + x;
         let r = 236, g = 234, b = 228;         // plaster (near-safed)
-        // neeche ki taraf halka gehra + khidki ke neeche daag ki dhaari
-        let k = (0.9 + grain[i] * 0.2) * (1 - Math.pow(y / S, 2) * 0.08);
-        Hh[i] = 0.5 + grain[i] * 0.06; Rr[i] = 0.9;
+        // Plaster ka rang: mahin daana + bade dhabbe se seelan/dhool (halka
+        // bhoora-hara shift) + speckle. Har texel thoda alag -- flat nahi.
+        const dirt = blotch[i];
+        r *= 1 - dirt * 0.16; g *= 1 - dirt * 0.13; b *= 1 - dirt * 0.10;   // dhabbe halke geheraa/peela
+        let k = (0.88 + grain[i] * 0.2 + (speck[i] - 0.5) * 0.06);
+        // Baked AO -- neeche dhool jamti hai, upar saaf; kinaron par halka gehra
+        const ny = y / S, nx = x / S;
+        k *= 1 - Math.pow(ny, 1.6) * 0.16;                         // neeche gehra
+        k *= 1 - Math.pow(Math.abs(nx - 0.5) * 2, 3) * 0.06;        // kinaare halka
+        Hh[i] = 0.5 + grain[i] * 0.06 + (speck[i] - 0.5) * 0.05; Rr[i] = 0.9 + grain[i] * 0.08;
         const inW = x >= wx0 && x <= wx1 && y >= wy0 && y <= wy1;
         const inFrame = !inW && x >= wx0 - fr && x <= wx1 + fr && y >= wy0 - fr && y <= wy1 + fr;
-        if (y > wy1 && x > wx0 && x < wx1) {   // sill ke neeche paani ke daag
-          k *= 1 - streak[i] * 0.22 * ((y - wy1) / (S - wy1));
+        if (y > wy1 && x > wx0 - fr && x < wx1 + fr) {   // sill ke neeche paani ke lambe daag
+          const t = (y - wy1) / (S - wy1);
+          const col = Math.abs(x - wcx) / (wx1 - wcx);           // do dhaar kinaron par gehri
+          const drip = streak[i] * (0.7 + col * 0.5);
+          k *= 1 - drip * 0.30 * t;
+          r *= 1 - drip * 0.10 * t; g *= 1 - drip * 0.08 * t;    // daag halka hara-bhoora
         }
-        if (inFrame) { r = 210; g = 204; b = 192; k = 0.96; Hh[i] = 0.75; Rr[i] = 0.7; }
-        else if (inW) {
+        if (inFrame) {
+          // frame ke andar ki taraf AO se gehra (recess)
+          const ax = Math.min(x - (wx0 - fr), (wx1 + fr) - x);
+          const ay = Math.min(y - (wy0 - fr), (wy1 + fr) - y);
+          const rec = 1 - Math.min(1, Math.min(ax, ay) / fr) * 0.35;
+          r = 208 * rec; g = 202 * rec; b = 190 * rec; k = 0.96; Hh[i] = 0.78; Rr[i] = 0.62;
+        } else if (inW) {
           const gx = (x - wx0) / (wx1 - wx0), gy = (y - wy0) / (wy1 - wy0);
-          const hl = Math.max(0, 1 - (gx + gy)) * 0.6;      // upar-baayein reflection
-          r = 38 + hl * 120; g = 52 + hl * 120; b = 66 + hl * 120; k = 1;
-          Hh[i] = 0.22; Rr[i] = 0.35;                        // sheesha: andar, chikna
-          if (Math.abs(gx - 0.5) < 0.028 || Math.abs(gy - 0.52) < 0.028) {  // mullion
-            r = 150; g = 145; b = 134; Hh[i] = 0.6; Rr[i] = 0.7;
+          // Sheesha: upar aasmani neela, neeche gehra kamra; upar-baayein chamak.
+          const hl = Math.max(0, 1 - (gx + gy)) * 0.7;            // reflection
+          const sky = Math.max(0, 1 - gy * 1.5);                  // upar sky reflect
+          r = 30 + hl * 130 + sky * 26; g = 44 + hl * 130 + sky * 40; b = 60 + hl * 130 + sky * 62;
+          k = 1; Hh[i] = 0.2; Rr[i] = 0.28;                       // sheesha: andar, chikna
+          // upar ka parda (curtain) -- har flat mein hota hai, halka kapda
+          if (gy < 0.34) {
+            const cw = 0.5 + 0.5 * Math.sin(gx * Math.PI * 9);    // pardey ki silvatein
+            r = 176 + cw * 40; g = 168 + cw * 38; b = 150 + cw * 34; Rr[i] = 0.7; Hh[i] = 0.42;
           }
-        } else if (y > wy1 && y < wy1 + fr * 1.5 && x > wx0 - fr && x < wx1 + fr) {
-          r = 184; g = 178; b = 166; Hh[i] = 0.68; Rr[i] = 0.75;   // sill
+          if (Math.abs(gx - 0.5) < 0.03 || Math.abs(gy - 0.52) < 0.03) {  // mullion
+            r = 150; g = 145; b = 134; Hh[i] = 0.62; Rr[i] = 0.68;
+          }
+        } else if (y > wy1 && y < wy1 + fr * 1.6 && x > wx0 - fr && x < wx1 + fr) {
+          r = 186; g = 180; b = 168; Hh[i] = 0.7; Rr[i] = 0.72;   // sill (aage nikla)
         }
-        if (y > S - 0.055 * S) { k *= 0.72; Hh[i] = 0.58; }        // floor ledge line
+        if (y > S - 0.055 * S) { k *= 0.68; Hh[i] = 0.56; }        // floor ledge line
         img.data[i * 4] = r * k; img.data[i * 4 + 1] = g * k; img.data[i * 4 + 2] = b * k;
         img.data[i * 4 + 3] = 255;
       }
     }
     ctx.putImageData(img, 0, 0);
+    // Baal jaisi darrarein (cracks) -- khidki ke kono se, aur ek lambi deewar par.
+    // Sirf albedo par (mahin), taaki plaster "purana/asli" lage.
+    ctx.strokeStyle = "rgba(60,54,46,0.5)";
+    ctx.lineWidth = 1.4;
+    let cs = (seed * 2654435761) >>> 0;
+    const crnd = () => ((cs = (cs * 1664525 + 1013904223) >>> 0) / 4294967296);
+    const crack = (px, py, dir, len) => {
+      ctx.beginPath(); ctx.moveTo(px, py);
+      let a = dir;
+      for (let s = 0; s < len; s += 6) {
+        a += (crnd() - 0.5) * 0.7; px += Math.cos(a) * 6; py += Math.sin(a) * 6;
+        ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+    };
+    crack(wx0 + fr, wy1 + fr, Math.PI * 0.62, 90 + crnd() * 80);   // khidki ke neeche-baayein kone se
+    crack(wx1 - fr, wy0 - fr, -Math.PI * 0.35, 60 + crnd() * 60);  // upar-daayein
+    crack(0.12 * S, 0.2 * S, Math.PI * 0.5, 120 + crnd() * 90);    // deewar par ek lambi
     return {
       map: texture(cv, 1, true),
-      normalMap: texture(normalMapFrom(Hh, S, 1.7)),
+      normalMap: texture(normalMapFrom(Hh, S, 1.9)),
       roughnessMap: texture(grey(Rr, S, 0, 1)),
     };
   });
@@ -235,6 +287,8 @@ export function shopfront(seed = 41) {
   return cached(`shopfront${seed}`, () => {
     const S = 512;   // crisp
     const grain = fbm(S, 6, 4, seed);
+    const rust = fbm(S, 5, 4, seed + 60);          // shutter par zang ke dhabbe
+    const dust = fbm(S, 3, 3, seed + 22);          // neeche jamti dhool
     const cv = canvas(S);
     const ctx = cv.getContext("2d");
     const img = ctx.createImageData(S, S);
@@ -251,23 +305,47 @@ export function shopfront(seed = 41) {
           if (fy < 0.05 || fy > 0.27) { r = 150; g = 145; b = 136; Hh[i] = 0.7; } // frame
         } else if (fy < 0.42) {                          // lintel / shutter box
           r = 92; g = 90; b = 88; Hh[i] = 0.72; Rr[i] = 0.6;
-        } else if (fy < 0.92) {                          // rolling shutter (loha)
+        } else if (fy < 0.92) {                          // rolling shutter (loha) -- ab zang aur khurdura
           const rib = Math.sin(fy * 150) * 0.5 + 0.5;    // naali-daar
-          const v = 120 + rib * 40;
+          const v = 116 + rib * 42;
           r = v; g = v * 0.99; b = v * 0.96; k = 0.9;
-          Hh[i] = 0.4 + rib * 0.25; Rr[i] = 0.42;
-        } else {                                         // neeche ka rail / plinth
-          r = 70; g = 68; b = 66; Hh[i] = 0.75; Rr[i] = 0.8;
+          Hh[i] = 0.4 + rib * 0.25; Rr[i] = 0.42 + rust[i] * 0.3;
+          // zang ke bhoore-laal dhabbe (neeche zyada)
+          const rr = Math.max(0, rust[i] - 0.5) * (0.4 + fy);
+          r = r * (1 - rr * 0.5) + 120 * rr; g = g * (1 - rr * 0.6) + 60 * rr; b = b * (1 - rr * 0.7) + 30 * rr;
+          // neeche dhool ki parat
+          if (fy > 0.72) { const d = (fy - 0.72) / 0.2 * dust[i]; k *= 1 - d * 0.35; }
+        } else {                                         // neeche ka rail / plinth (dhool jama)
+          r = 66; g = 64; b = 60; Hh[i] = 0.75; Rr[i] = 0.85;
+          r += dust[i] * 24; g += dust[i] * 22; b += dust[i] * 18;
         }
-        if (seam) { r *= 0.5; g *= 0.5; b *= 0.5; Hh[i] = 0.2; }
+        if (seam) { r *= 0.45; g *= 0.45; b *= 0.45; Hh[i] = 0.18; }
         img.data[i * 4] = r * k; img.data[i * 4 + 1] = g * k; img.data[i * 4 + 2] = b * k;
         img.data[i * 4 + 3] = 255;
       }
     }
     ctx.putImageData(img, 0, 0);
+    // Shutter par chipke poster/sticker -- rangeen chaukor, thode tedhe. Gali ka
+    // asli "lived-in" signal. Sirf albedo (mahin), shutter ke beech ke band mein.
+    let ps = (seed * 40503 + 12345) >>> 0;
+    const prnd = () => ((ps = (ps * 1664525 + 1013904223) >>> 0) / 4294967296);
+    const posters = ["#c94b3b", "#2f6db0", "#e0a63a", "#3a7d54", "#b0b4ba"];
+    for (let p = 0; p < 3; p++) {
+      const pw = S * (0.12 + prnd() * 0.1), ph = S * (0.09 + prnd() * 0.08);
+      const px = S * (0.14 + prnd() * 0.6), py = S * (0.5 + prnd() * 0.34);
+      ctx.save();
+      ctx.translate(px, py); ctx.rotate((prnd() - 0.5) * 0.16);
+      ctx.globalAlpha = 0.8;
+      ctx.fillStyle = posters[(prnd() * posters.length) | 0];
+      ctx.fillRect(-pw / 2, -ph / 2, pw, ph);
+      ctx.globalAlpha = 0.5; ctx.fillStyle = "#f4efe4";
+      ctx.fillRect(-pw / 2 + 4, -ph / 2 + ph * 0.34, pw - 8, ph * 0.12);   // text patti
+      ctx.restore();
+    }
+    ctx.globalAlpha = 1;
     return {
       map: texture(cv, 1, true),
-      normalMap: texture(normalMapFrom(Hh, S, 1.6)),
+      normalMap: texture(normalMapFrom(Hh, S, 1.7)),
       roughnessMap: texture(grey(Rr, S, 0, 1)),
     };
   });
@@ -315,27 +393,52 @@ export function corrugatedTin(hex = 0x8c3b2e, seed = 5) {
   });
 }
 
-/** Sadak ka asphalt -- daana, daraarein, aur ghisi hui patti. */
+/**
+ * Sadak ka asphalt -- ab "scanned" jaisa: pathar ka daana (aggregate), tar ke
+ * patch, daraaron ka jaal, aur tel ke chikne dhabbe (roughness mein).
+ *
+ * Sab kuch **tileable** (fbm wrap-around) hai, isliye sadak par dohraav ki seam
+ * nahi dikhti -- ek hi bada crack baar-baar nahi aata. 512px, taaki gaadi
+ * chalate waqt paas ka texture crisp rahe.
+ */
 export function asphalt(seed = 3) {
   return cached("asphalt", () => {
-    const S = 256;
-    const grain = fbm(S, 96, 4, seed);
-    const patch = fbm(S, 3, 3, seed + 17);
+    const S = 512;
+    const grain = fbm(S, 120, 4, seed);          // baareek tar daana
+    const aggr = fbm(S, 200, 2, seed + 5);        // pathar ke tukde (light speck)
+    const patch = fbm(S, 4, 3, seed + 17);        // alag-alag tar patch
+    const crackF = fbm(S, 14, 4, seed + 40);      // daraar ka jaal (ridged)
+    const oil = fbm(S, 6, 3, seed + 90);          // tel ke chikne dhabbe
     const cv = canvas(S);
     const ctx = cv.getContext("2d");
     const img = ctx.createImageData(S, S);
+    const H = new Float32Array(S * S);
+    const R = new Float32Array(S * S);
     for (let i = 0; i < S * S; i++) {
-      const k = 0.46 + grain[i] * 0.10 + patch[i] * 0.06;
-      img.data[i * 4] = k * 255 * 1.02;
-      img.data[i * 4 + 1] = k * 255;
-      img.data[i * 4 + 2] = k * 255 * 0.98;
+      // base tar: patch se halka gehra/halka, grain se daana
+      let k = 0.52 + grain[i] * 0.10 + (patch[i] - 0.5) * 0.09;
+      // pathar ke tukde -- chhote halke daane
+      const stone = Math.max(0, aggr[i] - 0.64) * 2.4;
+      k += stone * 0.22;
+      H[i] = 0.5 + grain[i] * 0.3 + stone * 0.4;
+      R[i] = 0.80 + grain[i] * 0.12;
+      // daraar ka jaal -- ridged noise, patli gehri lakeerein
+      const ridge = 1 - Math.abs(crackF[i] * 2 - 1);
+      if (ridge > 0.92) { const c = (ridge - 0.92) / 0.08; k *= 1 - c * 0.5; H[i] -= c * 0.4; R[i] += c * 0.1; }
+      // tel/paani ke chikne dhabbe -- gehre aur kam-khurdure (shine)
+      const wet = Math.max(0, oil[i] - 0.6) * 2.5;
+      k *= 1 - wet * 0.16; R[i] -= wet * 0.4;
+      const kk = Math.max(0, k);
+      img.data[i * 4] = kk * 255 * 1.02;
+      img.data[i * 4 + 1] = kk * 255;
+      img.data[i * 4 + 2] = kk * 255 * 0.98;
       img.data[i * 4 + 3] = 255;
     }
     ctx.putImageData(img, 0, 0);
     return {
       map: texture(cv, 1, true),
-      normalMap: texture(normalMapFrom(grain, S, 0.22)),
-      roughnessMap: texture(grey(grain, S, 0.70, 0.90)),
+      normalMap: texture(normalMapFrom(H, S, 0.6)),
+      roughnessMap: texture(grey(R, S, 0, 1)),
     };
   });
 }
