@@ -54,7 +54,7 @@ export function buildCity(terrain, roads, districts, pois, rng, quality = {}, op
    * triangle. `ChunkedBuilder` wahi merging karta hai, par jagah ke hisaab se
    * baant kar, taaki three.js door ke khaane chhod sake.
    */
-  const walls = new ChunkedBuilder(0.42);
+  const walls = new ChunkedBuilder(1/3);   // facade tile = 1 manzil (3 m) -- khidki har floor/bay par
   const roofs = new ChunkedBuilder(0.5);
   const plinths = new ChunkedBuilder(0.35);
   const windows = new ChunkedBuilder(0.9);   // apna material -- raat ko jagmagati hain
@@ -137,7 +137,8 @@ export function buildCity(terrain, roads, districts, pois, rng, quality = {}, op
     }
   }
 
-  const wallMat = TEX.standard(TEX.plaster(0xffffff), { vertexColors: true });
+  // GTA SA-jaisa: deewar par painted khidki-grid (facade texture), flat plaster nahi
+  const wallMat = TEX.standard(TEX.facade(), { vertexColors: true });
   const roofMat = TEX.standard(TEX.corrugatedTin(0xffffff), { vertexColors: true, metalness: 0.4 });
   const plinthMat = TEX.standard(TEX.plaster(0xffffff, 77), { vertexColors: true, roughness: 1.0 });
 
@@ -240,36 +241,10 @@ function house(mb, terrain, x, z, d, rng, col, colliders, facadeCount = 2, roadC
   }
 
   // --- khidkiyan ---------------------------------------------------------
-  // Kitni deewaron pe khidkiyan -- quality tier se. Low pe sirf saamne wali,
-  // high pe charon. Ghane sheher mein peeche wali khidkiyan aksar dikhti nahi,
-  // isliye ye sabse sasta quality knob hai.
-  const ALL = [
-    { n: [0, -1], half: dep / 2, span: w },
-    { n: [1, 0], half: w / 2, span: dep },
-    { n: [0, 1], half: dep / 2, span: w },
-    { n: [-1, 0], half: w / 2, span: dep },
-  ];
-  const facades = ALL.slice(0, Math.max(1, Math.min(4, facadeCount)));
+  // Ab khidkiyan **facade texture** mein painted hain (GTA SA jaisa) -- har
+  // manzil, har bay par, charon deewaron pe, aur ek bhi extra polygon nahi.
+  // Pehle yahan har khidki do box (frame + sheesha) banati thi; wo hata diya.
   const glassHex = rng() < 0.5 ? 0x2c3b46 : 0x38414a;
-  for (const fa of facades) {
-    const cols = Math.max(1, Math.min(2, Math.floor(fa.span / 2.6)));
-    for (let f = 0; f < Math.min(floors, 4); f++) {
-      const wy = base + f * fh + fh * 0.58;
-      for (let i = 0; i < cols; i++) {
-        const t = (i + 0.5) / cols - 0.5;
-        const along = t * fa.span * 0.82;
-        const u = fa.n[0] ? fa.n[0] * (fa.half + 0.03) : along;
-        const v = fa.n[0] ? along : fa.n[1] * (fa.half + 0.03);
-        const [wx, wz] = L(u, v);
-        const sx = fa.n[0] ? 0.18 : 1.05;
-        const sz = fa.n[0] ? 1.05 : 0.18;
-        col.setHex(0xe6ded0);                                   // safed frame
-        mb.trim.box(wx, wy, wz, sx, 1.45, sz, col, yaw);
-        col.setHex(glassHex);                                   // sheesha, thoda andar
-        mb.windows.box(wx, wy, wz, sx * 0.55, 1.2, sz * 0.55, col, yaw);
-      }
-    }
-  }
 
   // --- band balcony -- Shimla ki sabse pehchani cheez ---------------------
   if (rng() < 0.5 && floors >= 2) {

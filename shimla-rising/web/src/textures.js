@@ -157,6 +157,72 @@ export function plaster(hex = 0xd8cdb8, seed = 11) {
 }
 
 /**
+ * Building **facade** -- ek manzil ka ek bay (khidki + plaster + grime).
+ *
+ * GTA San Andreas ka raaz: building ek box hai, par uski **texture** par
+ * khidkiyon ki rows painted hoti hain. Yahi wo cheez hai jo flat rang ke box
+ * ko "building" banati hai. Ye tile ek floor (≈3 m) × ek bay (≈3 m) ka hai;
+ * deewar ke box par `uvScale = 1/3` se ye har manzil aur har 3 m par apne aap
+ * dohrata hai -- yaani poori khidki-grid, bina ek bhi extra polygon ke.
+ *
+ * Base near-white hai taaki `col.setHex(wallHex)` (Himachal palette) isse
+ * rang de -- har ghar apne rang ka, par khidkiyan sab par. Sheeshe ka kaancha
+ * neela, upar-baayein halki chamak; frame halka; sill; aur khidki ke neeche
+ * barish ke daag. Normal/roughness height-field se: sheesha andar aur chikna,
+ * frame ubhra, plaster khurdura.
+ */
+export function facade(seed = 21) {
+  return cached(`facade${seed}`, () => {
+    const S = 256;
+    const grain = fbm(S, 8, 4, seed);
+    const streak = fbm(S, 3, 3, seed + 51);
+    const cv = canvas(S);
+    const ctx = cv.getContext("2d");
+    const img = ctx.createImageData(S, S);
+    const Hh = new Float32Array(S * S);        // height (normal ke liye)
+    const Rr = new Float32Array(S * S);        // roughness
+    // window rect (canvas top-down): upar-beech mein, neeche sill+grime
+    const wx0 = 0.24 * S, wx1 = 0.76 * S, wy0 = 0.15 * S, wy1 = 0.63 * S;
+    const fr = 0.05 * S;
+    for (let y = 0; y < S; y++) {
+      for (let x = 0; x < S; x++) {
+        const i = y * S + x;
+        let r = 236, g = 234, b = 228;         // plaster (near-safed)
+        // neeche ki taraf halka gehra + khidki ke neeche daag ki dhaari
+        let k = (0.9 + grain[i] * 0.2) * (1 - Math.pow(y / S, 2) * 0.08);
+        Hh[i] = 0.5 + grain[i] * 0.06; Rr[i] = 0.9;
+        const inW = x >= wx0 && x <= wx1 && y >= wy0 && y <= wy1;
+        const inFrame = !inW && x >= wx0 - fr && x <= wx1 + fr && y >= wy0 - fr && y <= wy1 + fr;
+        if (y > wy1 && x > wx0 && x < wx1) {   // sill ke neeche paani ke daag
+          k *= 1 - streak[i] * 0.22 * ((y - wy1) / (S - wy1));
+        }
+        if (inFrame) { r = 210; g = 204; b = 192; k = 0.96; Hh[i] = 0.75; Rr[i] = 0.7; }
+        else if (inW) {
+          const gx = (x - wx0) / (wx1 - wx0), gy = (y - wy0) / (wy1 - wy0);
+          const hl = Math.max(0, 1 - (gx + gy)) * 0.6;      // upar-baayein reflection
+          r = 38 + hl * 120; g = 52 + hl * 120; b = 66 + hl * 120; k = 1;
+          Hh[i] = 0.22; Rr[i] = 0.35;                        // sheesha: andar, chikna
+          if (Math.abs(gx - 0.5) < 0.028 || Math.abs(gy - 0.52) < 0.028) {  // mullion
+            r = 150; g = 145; b = 134; Hh[i] = 0.6; Rr[i] = 0.7;
+          }
+        } else if (y > wy1 && y < wy1 + fr * 1.5 && x > wx0 - fr && x < wx1 + fr) {
+          r = 184; g = 178; b = 166; Hh[i] = 0.68; Rr[i] = 0.75;   // sill
+        }
+        if (y > S - 0.055 * S) { k *= 0.72; Hh[i] = 0.58; }        // floor ledge line
+        img.data[i * 4] = r * k; img.data[i * 4 + 1] = g * k; img.data[i * 4 + 2] = b * k;
+        img.data[i * 4 + 3] = 255;
+      }
+    }
+    ctx.putImageData(img, 0, 0);
+    return {
+      map: texture(cv, 1, true),
+      normalMap: texture(normalMapFrom(Hh, S, 1.7)),
+      roughnessMap: texture(grey(Rr, S, 0, 1)),
+    };
+  });
+}
+
+/**
  * Naali-daar tin ki chhat.
  *
  * Shimla ki pehchaan yahi hai -- pahad pe har chhat corrugated tin ki hai,
