@@ -159,8 +159,12 @@ async function boot() {
    * Zameen ki asli oonchai -- sadak ki satah samet. Khiladi, gaadi aur bus
    * sab isse lete hain; sirf terrain lene par sadak par sab aadha dhansa
    * rehta tha (sadak ka mesh terrain se 0.5 m upar hai).
+   *
+   * `surfaceAt` pehle: chowk/tunnel par jahan sadkein cross karti hain, gaadi
+   * bhi **sabse upar** wali par chale, niche wali ke andar nahi. Sadak ke bahar
+   * `groundAt` terrain de deta hai.
    */
-  const groundAt = (x, z) => roads.groundAt(x, z);
+  const groundAt = (x, z) => roads.surfaceAt(x, z) ?? roads.groundAt(x, z);
   let forest = null;
 
   setProgress(0.80, "Shimla bas raha hai…");
@@ -213,13 +217,18 @@ async function boot() {
   roads.setPlatforms(city.userData.platforms);
   const playerGround = (x, z) => {
     /*
-     * Sadak par farsh nahi chalta.
+     * Sadak par farsh nahi chalta, aur **sabse upar wali** sadak par khade ho.
      *
      * College road campus ki aayat ke beech se guzarti hai, aur wahan farsh
      * sadak se 2.7 m neeche baithta tha -- yaani sadak par chalte hi khiladi
      * usme dhas jaata tha. Sadak ki apni satah hamesha jeetegi.
+     *
+     * `surfaceAt` (groundAt nahi) isliye ki chowk/tunnel par jahan sadkein cross
+     * karti hain, khiladi niche wali ke bajaye **upar** wali par baithe -- warna
+     * upar wali sadak ka mesh sar ke upar aa jaata (Nikhil: "banda dhans gaya").
      */
-    if (roads.roadAt(x, z, 0.5)) return roads.groundAt(x, z);
+    const rs = roads.surfaceAt(x, z);
+    if (rs !== null) return rs;
     const p = roads.platformAt(x, z);
     /*
      * Farsh **hamesha** jeetta hai, `Math.max()` nahi.
@@ -1010,6 +1019,8 @@ async function boot() {
   window.__shimla = {
     ready: true, THREE, scene, camera, renderer, terrain, roads, city, player, missions, wanted, chase, sky, dayNight,
     bazaar, buses, traffic, crowd, panga, combat, colliders, parked, flashcards, audio, hud, post,
+    playerGround,   // test: sadak par player sabse upar wali satah par khada ho
+
     weather, state, data, get fps() { return fps; },
     /*
      * Post ke addons bundle mein aaye ya nahi.

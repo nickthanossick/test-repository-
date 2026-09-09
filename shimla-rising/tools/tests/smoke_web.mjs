@@ -687,6 +687,36 @@ console.log("sadak zameen ke barabar:", JSON.stringify(levelGround));
 // 3% tak chhoot -- coarse terrain mesh (10 m/vert) aur mod par thoda residual
 const levelOk = levelGround.n > 300 && levelGround.bad <= levelGround.n * 0.03;
 
+/*
+ * **Khiladi kisi sadak ke neeche nahi dhansta.**
+ *
+ * Sanjauli Chowk (aur tunnel portal) par 6 tak sadkein cross karti hain, ek
+ * doosri ke upar -- naapa gaya 5.3 m tak ka farak. Pehle khiladi/gaadi sabse
+ * *paas* wali (aksar niche) par baithte the aur upar wali sadak ka mesh sar ke
+ * upar aa jaata -- Nikhil ka screenshot: banda chowk ke beech kandhon tak
+ * dhansa. Ab `playerGround`/gaadi `surfaceAt` se **sabse upar** wali satah lete
+ * hain. Ye jaanch dono cheezein pakadti hai: (1) khiladi kabhi kisi sadak ke
+ * neeche na ho, aur (2) overlap sach mein maujood hai (warna check bina daant).
+ */
+const sink = await page.evaluate(() => {
+  const S = window.__shimla, R = S.roads;
+  let n = 0, worstUnder = 0, overlapMax = 0;
+  for (const nd of R.nodes) {
+    if (nd.i % 3 !== 0) continue;
+    const x = nd.pos.x, z = nd.pos.z;
+    const top = R.surfaceAt(x, z);
+    if (top === null) continue;
+    n++;
+    const under = top - S.playerGround(x, z);   // >0 = player kisi sadak ke neeche
+    if (under > worstUnder) worstUnder = under;
+    const ov = top - R.groundAt(x, z);           // overlap: sabse upar vs sabse paas
+    if (ov > overlapMax) overlapMax = ov;
+  }
+  return { n, worstUnder: +worstUnder.toFixed(2), overlapMax: +overlapMax.toFixed(2) };
+});
+console.log("sadak ke neeche nahi:", JSON.stringify(sink));
+const sinkOk = sink.n > 300 && sink.worstUnder < 0.05 && sink.overlapMax > 1.0;
+
 const carTilt = await page.evaluate(() => {
   const S = window.__shimla, T = S.THREE, R = S.roads;
   const road = S.roads.roads.find((r) => r.type === "arterial") || S.roads.roads[0];
@@ -733,6 +763,7 @@ const checks = [
   ["dukaanein sadak ke bahar", shopsOk, JSON.stringify(shopsClear)],
   ["sadak samtal hai", flatOk, JSON.stringify(roadFlat)],
   ["sadak zameen ke barabar", levelOk, JSON.stringify(levelGround)],
+  ["sadak ke neeche nahi dhansta", sinkOk, JSON.stringify(sink)],
   ["kinare ka chehra dhalwan", faceOk, JSON.stringify(face)],
   ["gaadi sadak ke saath", tiltOk, JSON.stringify(carTilt)],
   ["sadak par traffic", s.trafficNear > 0, `${s.trafficNear} / ${s.traffic}`],

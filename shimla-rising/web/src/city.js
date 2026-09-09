@@ -20,7 +20,25 @@ const ROOFS = [0x8c3b2e, 0x2f5d8a, 0x3f6b47, 0x6b6b70, 0x9c5a2b];
 /** Itni door tak poora ped; uske aage ek hi cone. */
 const NEAR_FOREST_M = 240;
 
-const WALLS = [0xb8ad98, 0xa99d86, 0x9f8e75, 0xb2a48d, 0x8a7b6c, 0xc0b6a4];
+/*
+ * Deewaron ka rang -- asli Himachal jaisa, sirf beige nahi.
+ *
+ * Nikhil: *"graphics AAA level chahie."* Sabse bada eyesore yahi tha -- poora
+ * sheher ek hi beige box lagta tha, kyunki palette mein har rang bhoora/beige
+ * hi tha. Asli Shimla/Himachal ke ghar rangeen hote hain: cream, halka neela,
+ * pudina hara, gulaabi, sarson-peela, halka jamuni. Palette light/pastel ki
+ * taraf jhuki hai (jaisa asli mein), par ab variety hai -- door se bhi sheher
+ * "jeeta hua" lagta hai, ek chapta beige nahi.
+ */
+const WALLS = [
+  0xe4ddcd, 0xd8cdb8, 0xcabfa6, 0xdccbb0,     // cream / beige (aam)
+  0xa9c4cf, 0x9fb8c8, 0xb3c9d1,               // halka neela
+  0xadc4a8, 0xbccaa6, 0xa7bd9c,               // pudina hara
+  0xd6b3ac, 0xd0aaa2,                         // halka gulaabi
+  0xceac6a, 0xbe9a58,                         // sarson / geru
+  0xb6adc0,                                   // halka jamuni
+  0xd9c0a0,                                   // halka aadu
+];
 
 export function buildCity(terrain, roads, districts, pois, rng, quality = {}, opts = {}) {
   const group = new THREE.Group();
@@ -204,6 +222,9 @@ function house(mb, terrain, x, z, d, rng, col, colliders, facadeCount = 2, roadC
   // --- deewarein ---------------------------------------------------------
   const wallHex = WALLS[(rng() * WALLS.length) | 0];
   col.setHex(wallHex);
+  // Har ghar par halki chamak-jhilmil (0.9..1.08) -- ek hi rang wale ghar bhi
+  // thode alag lagein, taaki ekdum saaf dohraav na dikhe.
+  col.multiplyScalar(0.9 + rng() * 0.18);
   mb.walls.box(x, base + bodyH / 2, z, w, bodyH, dep, col, yaw);
 
   // Collider sadak tak na pahunche: ghar centreline se `off` door hai, aur
