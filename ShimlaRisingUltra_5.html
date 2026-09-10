@@ -6881,7 +6881,16 @@ __m['ambience.js'] = (function(){
   ['pointerdown','keydown','touchstart'].forEach(ev=>window.addEventListener(ev,go,{once:false,passive:true}));
   if(el)el.addEventListener('pointerdown',go,{passive:true});
  }
- return {init,tick,start,setMuted,isMuted,unlockOn,get started(){return started;}};
+ // gaadi ka horn -- do-sur, halka
+ function honk(){if(!ctx||muted)return;const t=now(),g=ctx.createGain();g.connect(natureGain);
+  const o=ctx.createOscillator();o.type='square';o.connect(g);const f=ctx.createBiquadFilter();f.type='lowpass';f.frequency.value=1400;
+  o.frequency.setValueAtTime(420,t);o.frequency.setValueAtTime(360,t+.16);
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.14,t+.02);g.gain.setValueAtTime(.14,t+.14);
+  g.gain.linearRampToValueAtTime(0,t+.16);g.gain.linearRampToValueAtTime(.13,t+.19);g.gain.exponentialRampToValueAtTime(.0001,t+.42);
+  o.start(t);o.stop(t+.45);}
+ // maang par bhaunk (kutta alert)
+ function dogBark(){if(!ctx||muted)return;bark(now()+.02);}
+ return {init,tick,start,setMuted,isMuted,unlockOn,honk,dogBark,get started(){return started;}};
 })();
 
 /* ============================================================= wildlife.js ===
@@ -7068,6 +7077,345 @@ __m['wildlife.js'] = (function(){
 })();
 
 
+/* ============================================================== dialogue.js ==
+ * Sheher ko zinda karne wali cheez: log aapas mein baat karte hain, dhakka
+ * lage to ladte hain, main character khud se badbadaata hai, kutte bhaunkte
+ * hain. Sab kuch DOM speech-bubbles se -- 3D sar ki position screen par
+ * project hoti hai. 100+ non-repeating Hinglish lines, Shimla street flavour.
+ */
+__m['dialogue.js'] = (function(){
+ // ---- lines (sab alag alag, thode comedy, thode Himachali) ----
+ const AMBIENT=[
+  "Aaj to mausam ekdum badhiya hai bawa.","Chai pe leni chahiye thi yaar.",
+  "Yeh mehngai to kamar tod degi.","Sardi shuru ho gayi Shimla mein.",
+  "Kitni bheed hai aaj chowk pe.","Bijli phir se gayi thi subah.",
+  "Mall Road chalein kya?","Pahaadon mein zindagi slow hai, mast hai.",
+  "Kal barf padne wali hai sunni.","Ghar ka rasta lamba lagta hai aaj.",
+  "Bandar ne kal roti cheen li thi.","Yeh kutte bhi mast hain yahan ke.",
+  "Dhalli tunnel se jaldi pahunch jaayenge.","Momos kha lein station ke paas?",
+  "Scooter ka petrol khatam hone wala hai.","Arre yaar network hi nahi aa raha.",
+  "Dukaan band kyun hai aaj?","Thand mein garam chai ki baat hi alag.",
+  "Bag bahut bhaari ho gaya.","Ek photo kheech lu valley ki.",
+  "Sharma ji ka ladka foreign chala gaya.","Aaj savings pe dhyan dena hai."
+ ];
+ const BUS=[
+  "Macho, kya bewajah, bus nahi aa rahi bawa!","Aadhe ghante se khada hu bus ke liye.",
+  "HRTC wale aaj phir late hain.","Bus aaye to seat mil jaaye bas.",
+  "Chalo paidal hi nikalte hain.","Conductor ne kal chhutta nahi diya tha.",
+  "Yeh Dhalli wali bus kab aayegi?","Auto le lein kya, bhaad mein jaaye bus."
+ ];
+ const PHONE=[
+  "Haan maa, bas pahunch raha hu.","Oye yaar, amma ghar pe wait kar rahi hai.",
+  "Nahi nahi, main chowk pe hi hu.","Paise bhej diye, check kar le.",
+  "Aaj party pakki, tunnel ke us paar.","Beta padhai kar li? Jhooth mat bol.",
+  "Sun, doodh le aana aate waqt.","Signal weak hai, baad mein call karta hu.",
+  "Arre wo file office mein hi reh gayi.","Ho gaya kaam? Shaabaash.",
+  "Main 10 minute mein aa raha hu, ruk.","Tera scooter theek hua garage se?",
+  "Haan haan aa raha hu, chai chadha de.","Bhabhi ji ko namaste bolna."
+ ];
+ const CONVO_OPEN=[
+  "Aur bhai, kaisa hai? Kahan gayab tha?","Sun na, wo kaam ka kya hua?",
+  "Chal chai peene chalte hain.","Aaj kitni thand hai na yaar?",
+  "Tune match dekha kal raat?","Bhai udhaar wapas kab de raha hai?",
+  "Naya phone liya kya? Dikha zara.","Kya baat hai, aaj to formal mein ho!",
+  "Chal Mall Road ghoom ke aate hain.","Shaadi mein aa raha hai na Sharma ji ki?"
+ ];
+ const CONVO_REPLY=[
+  "Bas yaar, kaam mein busy tha.","Ho jaayega, tension mat le.",
+  "Haan chal, tu paisa dena aaj.","Thand to hai, sweater le aaya main.",
+  "Arre poora dekha, hum haar gaye.","De dunga bhai, itni jaldi kya hai.",
+  "Naya nahi, bhai ka purana hai.","Interview tha isliye, aur kya.",
+  "Chal, par jaldi wapas aana hai.","Zaroor aaunga, khaana wahin hai na?"
+ ];
+ const ANGRY=[
+  "Oye macho, dhang se chal le bedelo!","Andha hai kya? Dekh ke chal!",
+  "Oye teri bendaga tod deni maine!","Tereko dikhta nahi kya, oye?",
+  "Dhakka maar ke nikal gaya, badtameez!","Aankhein kholke chal bhai!",
+  "Zyada macho mat ban, side ho!","Oye ruk, kahan bhaag raha hai!",
+  "Tameez naam ki cheez hai ki nahi?","Pair pe pair rakh diya, gadhe!",
+  "Hatt ja samne se, jaldi hai mujhe!","Seedha chal, dikhta nahi kya?",
+  "Oye chikne, dekh ke chala kar!","Meri jagah pe kyun aa gaya, oye?",
+  "Bhai insaan hai ya bulldozer?","Sambhal ke, gira deta abhi!"
+ ];
+ const BRAG=[
+  "Janta kaun hu main? Poore Sanjauli ka baap!","Mere baap ki sadak hai yeh, samjha?",
+  "Ek phone karu to police aa jaayegi.","Sanjauli mein mujhe har koi jaanta hai.",
+  "Tu naya hai kya? Naam nahi suna mera?"
+ ];
+ const VENDOR=[
+  "Aao ji aao, fresh momos garam garam!","Sahab, ek baar dekh to lo, sasta hai!",
+  "Sabzi le lo, ekdum taaza aayi hai!","Discount chal raha hai, andar aaiye!",
+  "Chai le lo bhai, thand mein garam chai!","Best rate dunga, aap dukaan mein aao!",
+  "Naye design aaye hain, dekh lo ek baar!","Mobile cover, charger, sab milega!",
+  "Garam jalebi le lo, abhi utri hai!","Rok ke jao ji, bill to banwa lo!"
+ ];
+ const PLAYER=[
+  "Chalo, Dhalli tunnel ki taraf nikalte hain.","Yeh sheher sach mein zinda hai yaar.",
+  "Kitne kutte hain yahan, mast lag rahe.","Ek car le leta hu, paidal thak gaya.",
+  "Amma ke liye kuch le jaana hai.","Yeh chowk ka bridge kitna purana hai.",
+  "Thand lag rahi hai, chai zaroori hai.","Photo mode se sheher aur sundar dikhta.",
+  "Arre yeh kutta peechhe pad gaya!","Sanjauli se Dhalli, apna hi rasta hai.",
+  "Bhookh lag gayi, momos khaane hain.","Aaj to poora sheher ghoomunga.",
+  "Gaadi chalane mein maza aata hai yahan.","Itni bheed, sambhal ke chalna padega.",
+  "Meena Bazaar se kuch le lu kya?"
+ ];
+ const DOG=["Bhow bhow!","Grrr... bhow!","Bhow! Bhow! Bhow!","Rrrr bhow bhow!","Woof! Woof!","Bhow!!","Hau hau!"];
+ const HONK=["Peeeep! Side ho ja bhai!","Horn maar raha hu, sunai nahi deta?","Oye road pe kyun khada hai, hatt!","Jaane de bhai, jaldi hai!","Beep beep! Raasta de!"];
+
+ // ---- non-repeating shuffled draw per pool ----
+ function bag(arr){let q=[];return()=>{if(!q.length){q=arr.slice();for(let i=q.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[q[i],q[j]]=[q[j],q[i]];}}return q.pop();};}
+ const draw={ambient:bag(AMBIENT),bus:bag(BUS),phone:bag(PHONE),open:bag(CONVO_OPEN),reply:bag(CONVO_REPLY),angry:bag(ANGRY),brag:bag(BRAG),vendor:bag(VENDOR),player:bag(PLAYER),dog:bag(DOG),honk:bag(HONK)};
+
+ let box=null, pool=[], active=[], _v=null;
+ function css(){
+  const s=document.createElement('style');s.textContent=`
+   #bubbles{position:fixed;inset:0;z-index:3;pointer-events:none;overflow:hidden}
+   .bub{position:absolute;transform:translate(-50%,-100%);background:#12222acc;color:#f3ecda;
+    border:1px solid #d8ccaa5c;border-radius:11px;padding:6px 10px;font-size:12px;line-height:1.25;
+    max-width:190px;white-space:normal;text-align:center;box-shadow:0 6px 22px #0007;backdrop-filter:blur(4px);
+    opacity:0;transition:opacity .25s;letter-spacing:.01em}
+   .bub::after{content:'';position:absolute;left:50%;bottom:-7px;transform:translateX(-50%);
+    border:6px solid transparent;border-top-color:#12222acc}
+   .bub.show{opacity:1}
+   .bub.angry{background:#3a1414e0;border-color:#e0876c99;color:#ffd9cc}
+   .bub.angry::after{border-top-color:#3a1414e0}
+   .bub.player{background:#1b2a1ee6;border-color:#e9d49e;color:#f6ecc9}
+   .bub.player::after{border-top-color:#1b2a1ee6}
+   .bub.vendor{background:#14302be0;border-color:#63b79a88;color:#e8f5ee}
+   .bub.vendor::after{border-top-color:#14302be0}
+   .bub.dog{background:#241a12e0;border-color:#c79a6a88;color:#ffe6c8;font-weight:700;padding:4px 9px}
+   .bub.dog::after{border-top-color:#241a12e0}
+   .bub.honk{background:#3a3212e0;border-color:#e2c84c99;color:#fff4c8;font-weight:600}
+   .bub.honk::after{border-top-color:#3a3212e0}
+   @media(max-width:720px){.bub{font-size:11px;max-width:150px;padding:5px 8px}}`;
+  document.head.appendChild(s);
+ }
+ function init(THREE){
+  _v=new THREE.Vector3();css();
+  box=document.createElement('div');box.id='bubbles';document.body.appendChild(box);
+ }
+ function grab(){let el=pool.pop();if(!el){el=document.createElement('div');box.appendChild(el);}return el;}
+ // entity: {mesh|pos, headY}; text; cls
+ function say(ent,text,cls,life){
+  if(!box)return;if(ent._bub)return;                    // ek waqt par ek hi bubble
+  if(active.length>6){const old=active.shift();retire(old);}
+  const el=grab();el.className='bub '+(cls||'');el.textContent=text;
+  const b={el,ent,life:life||3.4,age:0};ent._bub=b;active.push(b);
+  requestAnimationFrame(()=>el.classList.add('show'));
+ }
+ function retire(b){if(!b)return;b.el.classList.remove('show');const el=b.el;setTimeout(()=>{el.className='bub';pool.push(el);},260);if(b.ent&&b.ent._bub===b)b.ent._bub=null;}
+
+ function headPos(ent){
+  const m=ent.mesh;const y=ent.headY!=null?ent.headY:1.75;
+  if(m)return _v.set(m.position.x,m.position.y+y,m.position.z);
+  return _v.set(ent.pos.x,ent.pos.y+y,ent.pos.z);
+ }
+ function project(ent,camera,w,h){
+  headPos(ent).project(camera);
+  if(_v.z>1)return null;                                 // camera ke peechhe
+  const x=(_v.x*.5+.5)*w, y=(-_v.y*.5+.5)*h;
+  if(x<-60||x>w+60||y<-60||y>h+60)return null;
+  return {x,y};
+ }
+
+ // -------- public: koi ent bulwao --------
+ function speak(ent,cat,cls,life){const t=draw[cat]?draw[cat]():cat;say(ent,t,cls||cat,life);}
+ function bump(ent,who){                                  // dhakka -> gussa
+  if(!ent._bub){speak(ent,'angry','angry',3.2);}
+  if(who&&who.isPlayer&&!who._bub&&Math.random()<.4)say(who,draw.brag(),'player',3.0);
+ }
+
+ // -------- har frame: bubbles update + scheduler --------
+ let ambT=1.5, convT=4, playerT=6, vendT=3;
+ function tick(dt, ctx){
+  if(!box)return;
+  const {camera,player,crowds,dogs}=ctx;
+  const w=innerWidth,h=innerHeight;
+  // reposition + age
+  for(let i=active.length-1;i>=0;i--){
+   const b=active[i];b.age+=dt;
+   const p=project(b.ent,camera,w,h);
+   if(!p||b.age>b.life){retire(b);active.splice(i,1);continue;}
+   b.el.style.left=p.x+'px';b.el.style.top=(p.y-16)+'px';
+   if(b.age>b.life-.3)b.el.classList.remove('show');
+  }
+  // gather visible idle crowd actors
+  const near=[];
+  for(const grp of crowds)for(const n of grp.list){
+   if(!n.mesh.visible||n._bub)continue;
+   const d=n.mesh.position.distanceTo(camera.position);
+   if(d<46){n._headY=grp.headY;near.push(n);}
+  }
+  // ambient chatter
+  ambT-=dt;
+  if(ambT<=0&&near.length){
+   const n=near[(Math.random()*near.length)|0];
+   const roll=Math.random();
+   const cat=roll<.28?'phone':roll<.44?'bus':roll<.56?'vendor':'ambient';
+   speak({mesh:n.mesh,headY:n._headY,set _bub(v){n._bub=v;},get _bub(){return n._bub;}},cat,cat==='vendor'?'vendor':'',3.6);
+   ambT=1.1+Math.random()*1.9;
+  }
+  // do log aapas mein baat (conversation pair)
+  convT-=dt;
+  if(convT<=0&&near.length>1){
+   const a=near[(Math.random()*near.length)|0];
+   let best=null,bd=5;
+   for(const b of near)if(b!==a){const dd=a.mesh.position.distanceTo(b.mesh.position);if(dd<bd){bd=dd;best=b;}}
+   if(best){
+    if('pause'in a)a.pause=2.4;if('pause'in best)best.pause=2.4;   // ruk kar baat
+    const ea={mesh:a.mesh,headY:a._headY,set _bub(v){a._bub=v;},get _bub(){return a._bub;}};
+    speak(ea,'open','',3.0);
+    const eb={mesh:best.mesh,headY:best._headY,set _bub(v){best._bub=v;},get _bub(){return best._bub;}};
+    setTimeout(()=>{if(best.mesh.visible)speak(eb,'reply','',3.0);},1500);
+   }
+   convT=5+Math.random()*5;
+  }
+  // main character khud se
+  playerT-=dt;
+  if(playerT<=0&&player&&!player._bub){
+   say({pos:player.pos,headY:1.85,isPlayer:true,set _bub(v){player._bub=v;},get _bub(){return player._bub;}},draw.player(),'player',3.4);
+   player._bub_owner=player;playerT=9+Math.random()*8;
+  }
+ }
+ return {init,tick,speak,say,bump,draw};
+})();
+
+/* =============================================================== traffic.js ==
+ * Chalti-firti gaadiyan -- Dhalli road par tunnel ki taraf aur wapas, aur
+ * Sanjauli wali sadak par. Player ke aage aaye to ruk jaati hain (aur horn).
+ */
+__m['traffic.js'] = (function(){
+ const {buildCar}=__m['step-car.js'];
+ const COLORS=[0xb43a34,0xdfe2dc,0x2f4a63,0x8a9296,0xe0c14a,0x35544a,0x6d3f38,0xf0efe6];
+ let idc=0;
+ function makeCar(world,scene,color){
+  const g=buildCar({color,plate:'HP 03 '+(1000+((idc++*137)%8999))});
+  scene.add(g);return g;
+ }
+ // ---- Dhalli path via world.dhalli.point(s) ----
+ function dhalliPos(world,s,lane){const p=world.dhalli.point(s,lane);return {x:p.x,z:p.z,yaw:Math.atan2(-p.fx,-p.fz)};}
+ // ---- Sanjauli straight (z axis) ----
+ function sanjauliPos(z,lane,dir){return {x:lane,z,yaw:dir>0?0:Math.PI};}
+
+ function spawn(world,scene){
+  const cars=[];
+  if(world.dhalli){
+   const S0=14,S1=world.dhalli.end-8;
+   // outbound (chowk -> tunnel) right lane
+   for(let i=0;i<3;i++)cars.push({kind:'dhalli',mesh:makeCar(world,scene,COLORS[i%COLORS.length]),
+     s:S0+i*95,dir:1,lane:2.3,speed:6.2+i,base:6.2+i,s0:S0,s1:S1,honk:0});
+   // inbound (tunnel -> chowk) left lane
+   for(let i=0;i<3;i++)cars.push({kind:'dhalli',mesh:makeCar(world,scene,COLORS[(i+4)%COLORS.length]),
+     s:S1-i*88,dir:-1,lane:-2.3,speed:6+i,base:6+i,s0:S0,s1:S1,honk:0});
+  }
+  // Sanjauli connecting road (z -190..-52)
+  const Z0=-190,Z1=-52;
+  for(let i=0;i<2;i++)cars.push({kind:'sanjauli',mesh:makeCar(world,scene,COLORS[(i+2)%COLORS.length]),
+    s:Z0+i*70,dir:1,lane:-2.2,speed:5+i,base:5+i,s0:Z0,s1:Z1,honk:0});
+  for(let i=0;i<2;i++)cars.push({kind:'sanjauli',mesh:makeCar(world,scene,COLORS[(i+6)%COLORS.length]),
+    s:Z1-i*70,dir:-1,lane:2.2,speed:5+i,base:5+i,s0:Z0,s1:Z1,honk:0});
+  return cars;
+ }
+
+ function posOf(world,c,s){return c.kind==='dhalli'?dhalliPos(world,s,c.lane):sanjauliPos(s,c.lane,c.dir);}
+
+ function tick(cars,world,player,playerCars,dt,camera,onHonk,dialogue){
+  const pp=player.pos;
+  for(const c of cars){
+   const m=c.mesh, dist=m.position.distanceTo(camera.position);
+   m.visible=dist<160;if(dist>200){c.s+=c.dir*c.base*dt;wrap(c);continue;}
+   // look ahead ~5m for player / player's driven car / other traffic
+   const ahead=posOf(world,c,c.s+c.dir*5);
+   let block=false;
+   if(Math.hypot(ahead.x-pp.x,ahead.z-pp.z)<3.0)block=true;
+   if(!block)for(const pc of playerCars){if(pc.mesh.visible===false)continue;if(Math.hypot(ahead.x-pc.pos.x,ahead.z-pc.pos.z)<3.2){block=true;break;}}
+   if(!block)for(const o of cars){if(o===c)continue;const ap=posOf(world,o,o.s);if(Math.hypot(ahead.x-ap.x,ahead.z-ap.z)<3.4){block=true;break;}}
+   const target=block?0:c.base;
+   c.speed+=(target-c.speed)*Math.min(1,dt*3.5);
+   c.s+=c.dir*c.speed*dt;wrap(c);
+   const p=posOf(world,c,c.s);
+   const y=world.groundAt(p.x,p.z);
+   m.position.set(p.x,y,p.z);m.rotation.y=p.yaw;
+   // spin wheels a touch
+   if(m.userData.wheels)for(const wl of m.userData.wheels){const sp=wl.children&&wl.children[0];if(sp)sp.rotation.x-=c.speed*dt*3.4;}
+   // honk when blocked by the player and close
+   if(block&&Math.hypot(m.position.x-pp.x,m.position.z-pp.z)<8){
+    c.honk-=dt;if(c.honk<=0){c.honk=2.5+Math.random()*3;if(onHonk)onHonk();
+     if(dialogue&&dist<55&&!c._bub)dialogue.say({mesh:m,headY:1.9,set _bub(v){c._bub=v;},get _bub(){return c._bub;}},dialogue.draw.honk(),'honk',2.4);}
+   }
+  }
+ }
+ function wrap(c){if(c.dir>0&&c.s>c.s1)c.s=c.s0;if(c.dir<0&&c.s<c.s0)c.s=c.s1;}
+ return {spawn,tick};
+})();
+
+/* ============================================================== landmarks.js ==
+ * Snapshots mein jo abhi tak nahi bane the: Indian Oil pump, New Diamond
+ * (sweets/bakery/restaurant) + VICIC Bank, aur Vishal Mega Mart.
+ */
+__m['landmarks.js'] = (function(){
+ const {box,tube}=__m['step-car.js'],{surface,sign}=__m['step-world.js'];
+ function add(world,scene){
+  const Y=world.roadY, C=world.colliders;
+  const cream=surface(5,2,2),plaster=surface(2,2,2),red=new THREE.MeshStandardMaterial({color:0xb4302f,roughness:.6}),
+   white=new THREE.MeshStandardMaterial({color:0xe9e7db,roughness:.85}),metal=new THREE.MeshStandardMaterial({color:0x67716d,metalness:.6,roughness:.5}),
+   glass=new THREE.MeshPhysicalMaterial({color:0x435c64,metalness:.2,roughness:.16,clearcoat:.6}),
+   dark=new THREE.MeshStandardMaterial({color:0x232a2c,roughness:.8}),
+   orange=new THREE.MeshStandardMaterial({color:0xf07d1a,roughness:.55}),blue=new THREE.MeshStandardMaterial({color:0x123a86,roughness:.5});
+
+  // ---------- Indian Oil petrol pump (Dhalli junction, left, set back) ----------
+  if(world.dhalli){
+   const p=world.dhalli.point(18,-12),g=new THREE.Group();g.position.set(p.x,world.groundAt(p.x,p.z),p.z);
+   g.rotation.y=Math.atan2(-p.fx,-p.fz);scene.add(g);
+   box(g,11,.12,8,0,.06,0,surface(0,2,2,0x9a9d9c));                 // forecourt slab
+   // canopy on four columns
+   for(const[x,z]of[[-4.2,-2.6],[4.2,-2.6],[-4.2,2.6],[4.2,2.6]])box(g,.34,4.6,.34,x,2.3,z,white);
+   box(g,10,.5,7.2,0,4.7,0,white);box(g,10.3,.55,.7,0,4.4,-3.6,orange);box(g,10.3,.55,.7,0,4.4,3.6,orange);
+   sign(g,[{text:'IndianOil',size:96}],5.4,1.0,0,4.42,-3.98,{side:false,bg:'#f2f2ea',fg:'#e2531f',border:'#123a86'});
+   // two dispensers
+   for(const dx of [-2.2,2.2]){box(g,.9,1.7,.7,dx,.85,0,red);box(g,.7,.7,.05,dx,1.25,.38,dark);
+    tube(g,[[dx+.3,1.5,.36],[dx+.9,1.1,.36],[dx+.9,.6,.36]],.05,dark);}
+   // price/brand pole by the road
+   box(g,.3,5.2,.3,-5,2.6,3.4,metal);box(g,2.1,1.5,.2,-5,5.4,3.4,blue);
+   sign(g,[{text:'FUEL',size:80},{text:'SANJAULI',size:30}],1.9,1.3,-5,5.4,3.51,{side:false,bg:'#123a86',fg:'#fff',border:'#f07d1a'});
+   const pc=world.dhalli.point(18,-12);C.add(pc.x,pc.z,11,8,world.groundAt(pc.x,pc.z)-.5,world.groundAt(pc.x,pc.z)+5.2);
+  }
+
+  // ---------- New Diamond (sweets/bakery/restaurant) + VICIC Bank ----------
+  // Sanjauli reference street, left side, free slot.
+  (function(){
+   const z=-134,side=-1,g=new THREE.Group();g.position.set(side*6,Y(z)+.16,z);g.rotation.y=Math.PI/2;scene.add(g);
+   const w=10,h=10.5,d=7;
+   box(g,w,1.8,d,0,-.85,-d/2,plaster);box(g,w,h,d,0,h/2,-d/2,cream);box(g,w+.25,.3,d+.2,0,h+.1,-d/2,white);
+   box(g,w-.35,2.5,.1,0,1.3,.1,dark);
+   for(let i=0;i<3;i++){const x=(i-1)*(w-.7)/3;box(g,(w-.9)/3,2.15,.06,x,1.3,.16,glass);box(g,.06,2.35,.1,x-(w-.7)/6,1.3,.22,metal);}
+   sign(g,[{text:'NEW DIAMOND',size:96},{text:'SWEETS · BAKERY · RESTAURANT',size:30}],w-.3,.95,0,3.0,.28,{side:false,bg:'#8c1f2a',fg:'#ffe1a6',border:'#e6c060'});
+   box(g,w+.2,.14,.9,0,3.55,.32,new THREE.MeshStandardMaterial({color:0xc9a13a,roughness:.6}));
+   // VICIC bank strip below-right
+   sign(g,[{text:'VICIC BANK',size:80}],4.4,.7,2.4,4.5,.2,{side:false,bg:'#0f5a86',fg:'#fff',border:'#0f5a86'});
+   for(let y=5.4;y<h-.7;y+=2.6)for(let x=-w/2+.9;x<w/2-.4;x+=1.6){box(g,1.15,1.5,.08,x,y,.05,glass);box(g,.05,1.35,.09,x,y,.13,cream);}
+   C.add(side*(6+d/2),z,d,w,Y(z),Y(z)+h+.5);
+   if(world.landmarks)world.landmarks.push('New Diamond + VICIC Bank');
+  })();
+
+  // ---------- Vishal Mega Mart (right side of Sanjauli street) ----------
+  (function(){
+   const z=-158,side=1,g=new THREE.Group();g.position.set(side*6,Y(z)+.16,z);g.rotation.y=-Math.PI/2;scene.add(g);
+   const w=11,h=8.6,d=7;
+   box(g,w,1.8,d,0,-.85,-d/2,plaster);box(g,w,h,d,0,h/2,-d/2,white);box(g,w+.25,.3,d+.2,0,h+.1,-d/2,cream);
+   box(g,w-.3,2.4,.1,0,1.25,.1,dark);
+   for(let i=0;i<4;i++){const x=-w/2+.9+i*(w-1.4)/3;box(g,(w-1.6)/4,2.0,.06,x,1.25,.16,glass);}
+   sign(g,[{text:'VISHAL',size:100},{text:'MEGA MART',size:44}],w-.4,1.15,0,3.1,.3,{side:false,bg:'#c62828',fg:'#ffffff',border:'#ffd24a'});
+   box(g,w+.2,.14,.9,0,3.75,.32,red);
+   for(let y=5.0;y<h-.6;y+=2.6)for(let x=-w/2+.9;x<w/2-.4;x+=1.7){box(g,1.2,1.5,.08,x,y,.05,glass);box(g,.05,1.35,.09,x,y,.13,white);}
+   C.add(side*(6+d/2),z,d,w,Y(z),Y(z)+h+.5);
+   if(world.landmarks)world.landmarks.push('Vishal Mega Mart');
+  })();
+ }
+ return {add};
+})();
+
+
 __m["main.js"] = (function(){
 const $=id=>document.getElementById(id),load=$('loading');
 function fail(e){load.hidden=false;$('loadmessage').textContent='Could not start the 3D scene. '+(e.message||e);$('retry').hidden=false;console.error(e);}
@@ -7086,6 +7434,8 @@ async function boot(){
  const camera=new THREE.PerspectiveCamera(55,innerWidth/innerHeight,.08,900);
  $('loadmessage').textContent='Building Sanjauli parking and the street…';await new Promise(r=>setTimeout(r,20));
  const living=__m['living-world.js'];const world=living.enrich(__m['dhalli.js'].build(__m['reference-street.js'].extendWorld(__m['step-world.js'].buildWorld())));scene.add(world.group);
+ // Missing landmarks from the snapshots: Indian Oil pump, New Diamond + VICIC Bank, Vishal Mega Mart.
+ __m['landmarks.js'].add(world,scene);
  const {Player}=__m['player.js'],{Vehicle}=__m['vehicle.js'];const player=new Player(world.terrain,world.colliders,world.groundAt);player.placeAt(world.spawn.x,world.spawn.z,world.spawn.yaw);scene.add(player.mesh);
  const input=new __m['input.js'].Input(renderer.domElement),chase=new __m['chase-camera.js'].ChaseCamera(camera,world.terrain,world.colliders);chase.yaw=world.spawn.yaw;chase.pitch=.07;chase.zoom=1.5;
  const fx=new __m['postfx.js'].PostFX(renderer,scene,camera,{ao:true,aoScale:.6,bloom:true,grade:false});if(fx.bloom){fx.bloom.strength=.19;fx.bloom.threshold=1.08;fx.bloom.radius=.46;}
@@ -7097,10 +7447,13 @@ async function boot(){
  const wildlife=__m['wildlife.js'];const birds=wildlife.spawnBirds(scene,world),dogs=wildlife.spawnDogs(scene,world),clouds=wildlife.spawnClouds(scene);
  // Ambient light music, birdsong and distant barks (WebAudio, unlocks on first input).
  const ambience=__m['ambience.js'];ambience.unlockOn(renderer.domElement);
+ // A living city: moving traffic + speech-bubble dialogue between people, dogs and the player.
+ const traffic=__m['traffic.js'].spawn(world,scene);const dialogue=__m['dialogue.js'];dialogue.init(THREE);
+ const crowds=[{list:pedestrians,headY:1.75},{list:dhalliNPCs,headY:1.75}];
  // Mobile controls use the same movement and interaction paths as the keyboard.
  for(const b of document.querySelectorAll('[data-key]')){const code=b.dataset.key;b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);input.keys.add(code);input._pressedOnce.add(code);});for(const event of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(event,()=>input.keys.delete(code));}
  let touch=null;renderer.domElement.addEventListener('pointerdown',e=>{if(e.pointerType==='touch')touch={id:e.pointerId,x:e.clientX,y:e.clientY};});renderer.domElement.addEventListener('pointermove',e=>{if(touch?.id===e.pointerId){input.mouseDX+=(e.clientX-touch.x)*1.1;input.mouseDY+=(e.clientY-touch.y)*1.1;touch.x=e.clientX;touch.y=e.clientY;}});renderer.domElement.addEventListener('pointerup',()=>touch=null);
- let drive=null,quality=true,photo=false,last=performance.now(),elapsed=0,toastUntil=0,manualCamera=0;
+ let drive=null,quality=true,photo=false,last=performance.now(),elapsed=0,toastUntil=0,manualCamera=0;const _plast={x:0,z:0};
  function toast(s){$('toast').textContent=s;$('toast').classList.add('show');toastUntil=elapsed+3.5;}
  // Extra liveliness the base rig-tick doesn't cover: idle head look-around and
  // a gentle breathing sway. Only touches the head node, so it never fights the
@@ -7121,7 +7474,7 @@ async function boot(){
  $('route').onclick=()=>{if(drive){drive.speed=0;drive.slip=0;drive.placeAt(1.4,world.spawn.z,world.spawn.yaw);player.pos.copy(drive.pos);}else player.placeAt(world.spawn.x,world.spawn.z,world.spawn.yaw);photo=false;chase._init=false;chase.yaw=world.spawn.yaw;dynamicBoxes();toast('Sanjauli Chowk · Dhalli road is to the right.');};$('quality').onclick=setQuality;$('reset').onclick=reset;$('photo').onclick=photoMode;$('help').onclick=()=>$('guide').hidden=!$('guide').hidden;$('closehelp').onclick=()=>$('guide').hidden=true;$('full').onclick=()=>{if(document.fullscreenElement)document.exitFullscreen?.();else document.documentElement.requestFullscreen?.().catch(()=>toast('Fullscreen is unavailable here.'));};
  function resize(){renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();const s=renderer.getDrawingBufferSize(new THREE.Vector2());fx.setSize(s.x,s.y);}addEventListener('resize',resize);
  load.hidden=true;dynamicBoxes();toast('Chowk → right turn → Dhalli Tunnel · F / E to use cars');
- window.__shimla={ready:true,stage:'Sanjauli + Chowk to Dhalli Tunnel',scene,world,player,cars,pedestrians,dhalliNPCs,birds,dogs,clouds,ambience,renderer,reset,interact,get driving(){return drive;},assets:ProductionAssets.manifest};
+ window.__shimla={ready:true,stage:'Sanjauli + Chowk to Dhalli Tunnel',scene,world,player,cars,pedestrians,dhalliNPCs,birds,dogs,clouds,traffic,dialogue,ambience,renderer,reset,interact,get driving(){return drive;},assets:ProductionAssets.manifest};
  function frame(now){requestAnimationFrame(frame);const dt=Math.min(.04,(now-last)/1000);last=now;elapsed+=dt;
   if(input.pressed('KeyR'))reset();if(input.pressed('KeyQ'))setQuality();if(input.pressed('KeyV'))photoMode();if(input.pressed('KeyF')||input.pressed('KeyE'))interact();if(input.pressed('KeyH'))player.onPhone=!player.onPhone;if(input.pressed('KeyM'))toggleSound();
   if(input.mouseDX||input.mouseDY)manualCamera=2.4;manualCamera=Math.max(0,manualCamera-dt);
@@ -7134,6 +7487,14 @@ async function boot(){
   wildlife.tickBirds(birds,dt,elapsed);wildlife.tickDogs(dogs,world,player,cars,dt,camera);wildlife.tickClouds(clouds,dt);
   liven(pedestrians,dt,elapsed,camera);liven(dhalliNPCs,dt,elapsed,camera);
   if(!photo)ambience.tick();
+  // Moving traffic (yields to the player and honks).
+  __m['traffic.js'].tick(traffic,world,player,cars,dt,camera,()=>ambience.honk(),dialogue);
+  // Dhakka lage to log ladte hain -- angry bubbles when the player barges through.
+  const pspeed=Math.hypot(player.pos.x-(_plast.x||player.pos.x),player.pos.z-(_plast.z||player.pos.z))/Math.max(.0001,dt);_plast.x=player.pos.x;_plast.z=player.pos.z;
+  if(!drive&&pspeed>1.1){for(const grp of crowds)for(const n of grp.list){if(!n.mesh.visible)continue;n._angryCd=(n._angryCd||0)-dt;if(n._angryCd<=0&&Math.hypot(n.mesh.position.x-player.pos.x,n.mesh.position.z-player.pos.z)<1.25){n._angryCd=4;dialogue.bump(n,{pos:player.pos,headY:1.85,isPlayer:true,get _bub(){return player._bub;},set _bub(v){player._bub=v;}});}}}
+  // Kutte alert hokar bhaunkte hain jab koi paas aaye.
+  for(const d of dogs){if(!d.mesh.visible)continue;d._barkCd=(d._barkCd||0)-dt;const dp=Math.hypot(d.x-player.pos.x,d.z-player.pos.z),dc=cars.some(c=>c!==drive&&Math.hypot(c.pos.x-d.x,c.pos.z-d.z)<5&&Math.abs(c.speed)>.4);if(d._barkCd<=0&&(dp<3.4||dc)){d._barkCd=2.5+Math.random()*3;ambience.dogBark();if(!d._bub&&d.mesh.position.distanceTo(camera.position)<60)dialogue.say({mesh:d.mesh,headY:.95,set _bub(v){d._bub=v;},get _bub(){return d._bub;}},dialogue.draw.dog(),'dog',1.8);}}
+  dialogue.tick(dt,{camera,player,crowds,dogs});
   sun.position.set(player.pos.x+30,player.pos.y+48,player.pos.z+23);sun.target.position.set(player.pos.x-6,player.pos.y+2,player.pos.z);dynamicBoxes();$('locationlabel').textContent=player.pos.x>255?'DHALLI TUNNEL':player.pos.x>12?'CHOWK → DHALLI ROAD':'SANJAULI · SHIMLA';$('mode').textContent=photo?'REFERENCE VIEW':drive?Math.round(drive.kmh)+' KM/H':'ON FOOT';const near=!drive&&nearest();$('prompt').hidden=photo||(!drive&&!near);$('prompt').textContent=drive?'F / E  ·  EXIT CAR':near?'F / E  ·  ENTER CAR':'';$('stamina').style.width=player.stamina+'%';if(elapsed>toastUntil)$('toast').classList.remove('show');input.endFrame();fx.render();
  }
  requestAnimationFrame(frame);
