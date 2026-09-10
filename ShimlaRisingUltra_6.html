@@ -7327,6 +7327,206 @@ __m['cinema.js'] = (function(){
 })();
 
 
+/* ============================================================== campaign.js ==
+ * Khedi Bhai · Operation Chitta.
+ *
+ * Kahani: Khedi Bhai Sanjauli College ka student, baap ki chhoti si garage hai,
+ * middle-class ghar. Sanjauli-Shimla mein chitta (drugs) bahut fail gaya hai.
+ * Police use undercover bhejti hai -- gangs mein 0 se ghus kar, top tak jaakar,
+ * poora racket samajh kar use tabaah karna hai. Par Khedi anti-hero hai: gang
+ * ke saath bhi kaam karta hai, police ke saath bhi.
+ *
+ * 10 missions. Har mission se pehle 2 cutscene us mission ko samjhati hain
+ * (cinema.js se). Wahi golden-marker + T mechanic.
+ */
+__m['campaign.js']=(function(){
+ const {box,tube}=__m['step-car.js'],{surface,sign}=__m['step-world.js'];
+
+ /* ---- story buildings + street ko aur alive karna ---- */
+ function build(world,scene){
+  const Y=world.roadY,C=world.colliders;
+  const cream=surface(5,2,2),plaster=surface(2,2,2),white=new THREE.MeshStandardMaterial({color:0xe9e7db,roughness:.85}),
+   glass=new THREE.MeshPhysicalMaterial({color:0x435c64,metalness:.2,roughness:.16,clearcoat:.6}),
+   dark=new THREE.MeshStandardMaterial({color:0x232a2c,roughness:.8}),steel=new THREE.MeshStandardMaterial({color:0x8a908d,metalness:.6,roughness:.45}),
+   redM=new THREE.MeshStandardMaterial({color:0xb4302f,roughness:.6}),blueM=new THREE.MeshStandardMaterial({color:0x1d4f86,roughness:.6}),
+   shutter=surface(9,1,1,0x9aa0a2);
+  function facade(name,side,z,w,h,bg,sub,fg){const g=new THREE.Group();g.position.set(side*6,Y(z)+.16,z);g.rotation.y=side<0?Math.PI/2:-Math.PI/2;scene.add(g);const d=7;
+   box(g,w,1.8,d,0,-.85,-d/2,plaster);box(g,w,h,d,0,h/2,-d/2,cream);box(g,w+.25,.3,d+.2,0,h+.1,-d/2,white);box(g,w-.35,2.45,.1,0,1.25,.1,dark);
+   for(let i=0;i<3;i++){const x=(i-1)*(w-.7)/3;box(g,(w-.9)/3,2.1,.06,x,1.25,.16,glass);}
+   sign(g,[{text:name,size:90},{text:sub,size:28}],w-.3,.92,0,3.0,.28,{side:false,bg,fg:fg||'#f3ebd6',border:bg});
+   box(g,w+.2,.13,.9,0,3.55,.3,cream);
+   for(let y=5.3;y<h-.7;y+=2.6)for(let x=-w/2+.9;x<w/2-.4;x+=1.6){box(g,1.15,1.5,.08,x,y,.05,glass);box(g,.05,1.35,.09,x,y,.13,cream);}
+   C.add(side*(6+d/2),z,d,w,Y(z),Y(z)+h+.5);if(world.landmarks)world.landmarks.push(name);return g;}
+
+  // --- Sanjauli College (Khedi yahin padhta hai) ---
+  const college=facade('SANJAULI COLLEGE',-1,-150,13,11,'#123a86','GOVT · DEGREE COLLEGE','#ffe1a6');
+  box(college,3.2,.2,3.2,0,0.1,3.0,cream);for(const x of[-1.3,1.3])box(college,.3,3.2,.3,x,1.6,3.0,cream);box(college,3.6,.5,.4,0,3.3,3.0,blueM);
+  sign(college,[{text:'RKMV · SANJAULI',size:64}],4.4,.6,0,4.5,.3,{side:false,bg:'#0d2f5f',fg:'#fff',border:'#0d2f5f'});
+  world.story=world.story||{};world.story.college={x:-4.9,z:-150};
+
+  // --- Dad's Garage (Sharma Motor Works) ---
+  (function(){const z=-46,side=1,g=new THREE.Group();g.position.set(side*6,Y(z)+.16,z);g.rotation.y=-Math.PI/2;scene.add(g);const w=9,h=5.4,d=7;
+   box(g,w,h,d,0,h/2,-d/2,plaster);box(g,w+.3,.3,d+.2,0,h+.1,-d/2,cream);
+   // rolling shutter bay
+   box(g,w-1.2,3.4,.15,0,1.7,.12,shutter);for(let i=0;i<10;i++)box(g,w-1.3,.03,.16,0,.5+i*.33,.2,dark);
+   sign(g,[{text:'SHARMA MOTOR WORKS',size:72},{text:'GARAGE · SERVICE · SPARES',size:26}],w-.2,.8,0,4.2,.28,{side:false,bg:'#2b2f36',fg:'#ffce4a',border:'#ffce4a'});
+   // tyres, toolbox, oil drums outside
+   for(let i=0;i<4;i++){const t=new THREE.Mesh(new THREE.TorusGeometry(.30,.12,8,18),dark);t.rotation.x=Math.PI/2;t.position.set(-3.2+i*.15,.3+i*.05,2.6);t.rotation.z=i*.4;g.add(t);}
+   const drum=new THREE.Mesh(new THREE.CylinderGeometry(.28,.28,.8,14),blueM);drum.position.set(3.3,.4,2.4);g.add(drum);
+   const drum2=new THREE.Mesh(new THREE.CylinderGeometry(.28,.28,.8,14),redM);drum2.position.set(3.3,.4,3.0);g.add(drum2);
+   box(g,1.0,.5,.5,2.2,.55,2.6,steel); // toolbox
+   C.add(side*(6+d/2),z,d,w,Y(z),Y(z)+h+.5);if(world.landmarks)world.landmarks.push('Sharma Motor Works');})();
+  world.story.garage={x:4.9,z:-46};
+
+  // --- extra shops to fill gaps + aliveness ---
+  facade('SHER-E-PUNJAB DHABA',-1,-58,8,8.2,'#8c2f1f','NON-VEG · TANDOOR','#ffd9a6');
+  facade('APNA MEDICOS',1,-112,7,8,'#177a55','CHEMIST · 24x7','#eafff2');
+  facade('SANJAULI XEROX',-1,-70,7,8,'#3a3f8c','PRINT · LAMINATION','#eaeaff');
+
+  /* ---- street dressing: awnings, hanging clothes, crates, streetlights, flags ---- */
+  const awnMat=[0xb4302f,0x1d6b55,0xc9a13a,0x2f4a8c,0x8c3a6b].map(c=>new THREE.MeshStandardMaterial({color:c,roughness:.8}));
+  const clothMat=[0x9a354d,0xb09157,0x506c71,0xc3b7a0,0x485951,0x3a6ea5].map(c=>new THREE.MeshStandardMaterial({color:c,roughness:.95,side:THREE.DoubleSide}));
+  const wood=new THREE.MeshStandardMaterial({color:0x7a5230,roughness:.9});
+  const dress=new THREE.Group();dress.name='street-dressing';scene.add(dress);
+  function groundY(x,z){return world.groundAt(x,z);}
+  // Sanjauli street both sides z -50..-190
+  for(let z=-54;z>-192;z-=7){for(const side of[-1,1]){const x=side*5.0,y=groundY(x,z);
+    // awning
+    const aw=new THREE.Mesh(new THREE.BoxGeometry(2.4,.08,1.1),awnMat[(Math.abs(z)+ (side>0?1:0))%5]);aw.position.set(side*4.4,y+2.9,z);aw.rotation.z=side*0.12;aw.castShadow=true;dress.add(aw);
+    // a couple of hanging garments under some awnings
+    if((Math.abs(z))%14<7){for(let k=0;k<3;k++){const c=new THREE.Mesh(new THREE.BoxGeometry(.3,.7,.05),clothMat[(k+Math.abs(z))%6]);c.position.set(side*4.7-side*0+(-0.5+k*0.5),y+1.7,z);dress.add(c);}}
+    // fruit/veg crate near some
+    if((Math.abs(z))%21<7){const cr=new THREE.Mesh(new THREE.BoxGeometry(.7,.4,.5),wood);cr.position.set(side*4.6,y+.2,z+1.2);dress.add(cr);
+      for(let f=0;f<5;f++){const fr=new THREE.Mesh(new THREE.SphereGeometry(.07,7,6),awnMat[f%5]);fr.position.set(side*4.6-.25+f*.12,y+.45,z+1.2);dress.add(fr);}}
+   }
+   // streetlight every ~21m
+   if(Math.abs(z)%21<7){const x=4.7,y=groundY(x,z);const pole=new THREE.Mesh(new THREE.CylinderGeometry(.06,.08,5.2,8),steel);pole.position.set(x,y+2.6,z);dress.add(pole);
+    const arm=new THREE.Mesh(new THREE.CylinderGeometry(.04,.04,1.1,6),steel);arm.rotation.z=Math.PI/2;arm.position.set(x-.55,y+5.1,z);dress.add(arm);
+    const lamp=new THREE.Mesh(new THREE.BoxGeometry(.3,.14,.5),new THREE.MeshStandardMaterial({color:0xffe6a0,emissive:0xffcf6a,emissiveIntensity:1.1}));lamp.position.set(x-1.05,y+5.0,z);dress.add(lamp);}
+  }
+  // string flags across the road near the chowk
+  for(let z=-60;z>-120;z-=18){const a=[-4.6,groundY(-4.6,z)+5.2,z],b=[4.6,groundY(4.6,z)+5.2,z];tube(dress,[a,[0,a[1]-.8,z],b],.02,dark);
+   for(let i=0;i<9;i++){const fl=new THREE.Mesh(new THREE.BoxGeometry(.02,.28,.34),clothMat[i%6]);const t=i/8;fl.position.set(-4.6+9.2*t,a[1]-.8+Math.sin(t*Math.PI)*.8-.2,z);dress.add(fl);}}
+  dress.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}});
+
+  // story locations that use the road spline
+  const P=world.dhalli.point.bind(world.dhalli);
+  world.story.police={x:4.5,z:-160};
+  world.story.lane={x:4.9,z:-72};
+  world.story.bench={x:4.9,z:-60};
+  world.story.adda=(()=>{const p=P(80,-6.3);return{x:p.x,z:p.z};})();
+  world.story.dealer1=(()=>{const p=P(40,5.2);return{x:p.x,z:p.z};})();
+  world.story.dealer2={x:-4.9,z:-96};
+  world.story.dealer3=(()=>{const p=P(160,-5.2);return{x:p.x,z:p.z};})();
+  world.story.supply=(()=>{const p=P(205,-3.1);return{x:p.x,z:p.z};})();
+  world.story.tunnel=(()=>{const p=P(world.dhalli.end-12,3.2);return{x:p.x,z:p.z};})();
+  world.story.warehouse=(()=>{const p=P(world.dhalli.end-70,-9);return{x:p.x,z:p.z};})();
+ }
+
+ /* ---- cutscene shot helper: tp() gives target {x,y,z}; offsets around it ---- */
+ function S(tp,f,t,lk,opts){opts=opts||{};return{dur:opts.dur||4.2,
+   from:(c,o)=>{const p=tp();o.set(p.x+f[0],p.y+f[1],p.z+f[2]);},
+   to:(c,o)=>{const p=tp();o.set(p.x+t[0],p.y+t[1],p.z+t[2]);},
+   look:(c,o)=>{const p=tp();o.set(p.x+lk[0],p.y+lk[1],p.z+lk[2]);},
+   title:opts.title,sub:opts.sub,speaker:opts.speaker,line:opts.line,female:opts.female};}
+
+ class Campaign{
+  constructor(world,scene,ui,cinema,player){
+   this.world=world;this.ui=ui;this.cinema=cinema;this.player=player;this.index=0;this.step=0;this.active=false;this.reward=0;this.done=[];this.time=0;this.hold=0;this.remaining=0;this.briefing=false;this._briefed=false;
+   const W=world,g=(k)=>()=>{const L=W.story[k];return{x:L.x,y:W.groundAt(L.x,L.z),z:L.z};};
+   const pt=(x,z)=>()=>({x,y:W.groundAt(x,z),z});
+   // helper to make a 2-beat briefing around a location
+   const brief=(tp,a,b)=>({shots:[
+     S(tp,[4,3,4],[2.4,2,2.4],[0,1.4,0],{dur:4.2,title:a.title,sub:a.sub,speaker:a.speaker,line:a.line,female:a.female}),
+     S(tp,[-3,1.8,3],[-1.6,1.5,2],[0,1.3,0],{dur:4.4,speaker:b.speaker,line:b.line,female:b.female})
+   ]});
+   this.missions=[
+    {title:'Bulawa — SP ka sandesh',origin:'Sanjauli · Police jeep',reward:0,loc:g('police'),
+     brief:brief(g('police'),
+      {title:'OPERATION CHITTA',sub:'SANJAULI · SHIMLA',speaker:'SP Rana',line:'Khedi, Sanjauli mein chitta ghar-ghar pahunch gaya hai. Bacche barbaad ho rahe hain.'},
+      {speaker:'SP Rana',line:'Tu local hai, college jaata hai, koi shaq nahi karega. Undercover ghusna hai — 0 se top tak.'}),
+     stages:[{label:'Police jeep par SP se milo · T',p:g('police'),foot:true}]},
+
+    {title:'Baap ki garage',origin:'Sharma Motor Works',reward:150,loc:g('garage'),
+     brief:brief(g('garage'),
+      {title:'COVER STORY',sub:'SHARMA MOTOR WORKS',speaker:'Papa',line:'Beta, garage mein haath bata de. Ghar kaise chalega warna?'},
+      {speaker:'Khedi (mann mein)',line:'Papa ko nahi bata sakta… main police ke liye kaam kar raha hu. Cover yahi garage hai.'}),
+     stages:[{label:'Garage par papa se milo (cover set karo) · T',p:g('garage'),foot:true}]},
+
+    {title:'College ka connection',origin:'Sanjauli College',reward:200,loc:g('college'),
+     brief:brief(g('college'),
+      {title:'PEHLA LEAD',sub:'SANJAULI COLLEGE',speaker:'Khedi',line:'Campus ke bahar ek peddler "Gullu" bachchon ko chitta bechta hai. Wahi entry point hai.'},
+      {speaker:'Khedi',line:'Pehchan-na hai kaun-kaun juda hai. Dhyan se — pakde gaye to khel khatam.'}),
+     stages:[{label:'College gate par Gullu ko dekho · T',p:g('college'),foot:true},{label:'Peddler ka theek pata — lane tak jao · T',p:g('lane'),foot:true}]},
+
+    {title:'Pehla sauda',origin:'Back lane',reward:250,loc:g('lane'),
+     brief:brief(g('lane'),
+      {title:'TRUST TEST',sub:'BACK LANE',speaker:'Gullu',line:'Naya hai? Ye packet adde tak pahuncha — bina khole. Tab baat karenge.'},
+      {speaker:'Khedi (mann mein)',line:'Pehla kadam. Trust jeetna zaroori hai — warna andar nahi ghus paunga.'}),
+     stages:[{label:'Packet lo (lane) · T',p:g('lane'),foot:true},{label:'Packet gang ke adde tak pahuncha · T',p:g('adda'),foot:true}]},
+
+    {title:'Gang mein entry',origin:'Gang ka adda',reward:350,loc:g('adda'),
+     brief:brief(g('adda'),
+      {title:'THE ADDA',sub:'DHALLI ROAD · HIDEOUT',speaker:'Tony',line:'Toh tu hai naya. Dekhte hain kitna dum hai. Aaj se tu apna aadmi.'},
+      {speaker:'Khedi',line:'Andar aa gaya. Ab dhyan — gang ka bhi banna hai, police ka bhi rehna hai.'}),
+     stages:[{label:'Adde par Tony se milo · T',p:g('adda'),foot:true}]},
+
+    {title:'Vasooli',origin:'Street dealers',reward:450,loc:g('dealer1'),
+     brief:brief(g('dealer1'),
+      {title:'RISE',sub:'COLLECTION RUN',speaker:'Tony',line:'Aaj se vasooli tera kaam. Teen dealer — paisa uthana, gadbad nahi.'},
+      {speaker:'Khedi (mann mein)',line:'Har naam, har paisa — sab police ko bhej raha hu. Anti-hero ka double game.'}),
+     stages:[{label:'Dealer 1 se vasooli · T',p:g('dealer1'),foot:true},{label:'Dealer 2 se vasooli · T',p:g('dealer2'),foot:true},{label:'Dealer 3 se vasooli · T',p:g('dealer3'),foot:true}]},
+
+    {title:'Maal kahan se aata hai',origin:'Dhalli supply',reward:600,loc:g('supply'),
+     brief:brief(g('supply'),
+      {title:'THE SUPPLY LINE',sub:'DHALLI TUNNEL ROUTE',speaker:'Khedi',line:'Maal Dhalli tunnel ke paar se aata hai. Aaj convoy ko follow karna hai — chhup ke.'},
+      {speaker:'SP Rana',line:'Route confirm kar, Khedi. Wahi chitta ki asli naali hai.'}),
+     stages:[{label:'Supply gaadi lo · F / E',p:g('supply'),car:true},{label:'Convoy ko tunnel ke paar follow karo',p:g('tunnel'),drive:true,auto:true},{label:'Route note karke utro · T',p:g('tunnel'),foot:true}]},
+
+    {title:'Dead drop',origin:'Bus stop bench',reward:400,loc:g('bench'),
+     brief:brief(g('bench'),
+      {title:'DOUBLE LIFE',sub:'DEAD DROP',speaker:'Khedi',line:'Bench ke neeche chit chhupani hai — saari intel police ko. Koi dekhe to gaya.'},
+      {speaker:'SP Rana',line:'Sambhal ke. Cover blow hua to hum bhi nahi bacha payenge.'}),
+     stages:[{label:'Bench par chupke se dead drop · paas 3 sec ruko',p:g('bench'),hold:3,foot:true}]},
+
+    {title:'Upar tak — Chaudhary',origin:'Warehouse',reward:800,loc:g('warehouse'),
+     brief:brief(g('warehouse'),
+      {title:'THE KINGPIN',sub:'WAREHOUSE · NEAR TUNNEL',speaker:'Chaudhary',line:'Suna hai tu tez hai. Poora Sanjauli mera hai. Ab tu mere andar ka aadmi.'},
+      {speaker:'Khedi (mann mein)',line:'Top pe pahunch gaya. Bas ek signal — aur poora racket khatam.'}),
+     stages:[{label:'Warehouse mein Chaudhary tak pahuncho · T',p:g('warehouse'),foot:true}]},
+
+    {title:'Bust — Operation Chitta',origin:'Warehouse',reward:1500,loc:g('warehouse'),
+     brief:brief(g('warehouse'),
+      {title:'THE BUST',sub:'FINAL RAID',speaker:'SP Rana',line:'Signal do Khedi — poori force taiyar hai. Aaj Sanjauli ka chitta khatam.'},
+      {speaker:'Khedi',line:'Danda nikaalo (G), patake chhodo signal ka (C) — aaj hisaab poora hoga!'}),
+     stages:[{label:'Signal ke patake chhodo (C) phir warehouse par T',p:g('warehouse'),foot:true},{label:'Chaudhary ko pakdo — market destroy · T',p:g('warehouse'),foot:true}]}
+   ];
+   const N=this.missions.length;
+   try{const v=JSON.parse(localStorage.getItem('shimla-chitta-v1')||'null');if(v&&Number.isInteger(v.completed)&&v.completed>=0&&v.completed<=N){this.index=v.completed;this.done=Array.from({length:this.index},(_,i)=>i);this.reward=this.missions.slice(0,this.index).reduce((a,j)=>a+j.reward,0);}}catch{}
+   const mat=new THREE.MeshStandardMaterial({color:0xf1c85c,emissive:0xc59725,emissiveIntensity:.8,transparent:true,opacity:.9});this.marker=new THREE.Group();const ring=new THREE.Mesh(new THREE.TorusGeometry(1.15,.055,8,40),mat);ring.rotation.x=Math.PI/2;this.marker.add(ring);const arrow=new THREE.Mesh(new THREE.ConeGeometry(.27,.6,4),mat);arrow.rotation.z=Math.PI;arrow.position.y=2.45;this.marker.add(arrow);scene.add(this.marker);this.N=N;this.render();
+  }
+  current(){return this.active?this.missions[this.index]?.stages[this.step]:null;}
+  target(){const s=this.current();if(s?.p)return s.p();const m=this.missions[this.index];return m?m.loc():{x:0,z:0};}
+  nearby(p,r=3.2){const t=this.target();return Math.hypot(p.x-t.x,p.z-t.z)<r&&Math.abs(p.y-this.world.groundAt(t.x,t.z))<2.8;}
+  _activate(){const m=this.missions[this.index];this.active=true;this.step=0;this.hold=0;this.remaining=m.limit||0;this.ui.toast('Mission '+(this.index+1)+': '+m.title);this.render();}
+  action(player,drive){if(this.briefing)return false;if(this.index>=this.N){this.ui.toast('Operation Chitta poora! Sanjauli aazaad. (Agle update mein aur missions)');return false;}
+   const m=this.missions[this.index];
+   if(!this.active){if(!this.nearby(player.pos)||drive){this.ui.toast(m.origin+' ke golden marker par paidal aao · T');return false;}
+    if(this.cinema&&m.brief&&!this._briefed){this._briefed=true;this.briefing=true;this.cinema.play(m.brief,()=>{this.briefing=false;this._activate();});return true;}
+    this._activate();return true;}
+   const s=this.current();if(s.car||s.auto||s.hold)return false;if(!this.nearby(player.pos)){this.ui.toast('Golden marker tak pahucho.');return false;}if(s.foot&&drive){this.ui.toast('Gaadi roko, F / E se utro, phir T.');return false;}this.advance();return true;}
+  advance(){if(!this.active)return;this.step++;this.hold=0;if(this.step>=this.missions[this.index].stages.length){const j=this.missions[this.index];if(!this.done.includes(this.index)){this.done.push(this.index);this.reward+=j.reward;}this.ui.toast('✔ '+j.title+' complete · ₹'+this.reward);this.index++;this.active=false;this.step=0;this._briefed=false;try{localStorage.setItem('shimla-chitta-v1',JSON.stringify({completed:this.index}));}catch{}}else this.ui.toast(this.current().label);this.render();}
+  abort(){if(this.active){this.active=false;this.step=0;this.hold=0;this.ui.toast('Mission reset · marker se dobara T.');}this.render();}
+  render(){const done=this.index>=this.N;this.ui.render?.({title:done?'OPERATION CHITTA · COMPLETE':this.missions[this.index].title,label:done?'Sanjauli aazaad · free roam':this.active?this.current().label:this.missions[this.index].origin+' · T se shuru',index:this.index,active:this.active,reward:this.reward});this.marker.visible=!done;const p=this.target();this.marker.position.set(p.x,this.world.groundAt(p.x,p.z)+.10,p.z);}
+  tick(dt,player,drive,camera){this.time+=dt;if(this.briefing){this.marker.visible=false;return;}const s=this.current();
+   if(this.active){if(s?.car&&drive)this.advance();else if(s?.auto&&drive&&this.nearby(player.pos,8))this.advance();else if(s?.hold){this.hold=!drive&&this.nearby(player.pos,3)?this.hold+dt:0;if(this.hold>=s.hold)this.advance();}}
+   const done=this.index>=this.N;this.marker.visible=!done;if(done){this.ui.prompt?.(false,'');return;}
+   const p=this.target();this.marker.position.set(p.x,this.world.groundAt(p.x,p.z)+.1,p.z);this.marker.children[1].position.y=2.5+Math.sin(this.time*2)*.15;this.marker.children[1].rotation.y=this.time*.7;const d=Math.hypot(player.pos.x-p.x,player.pos.z-p.z);this.ui.distance?.(Math.round(d),null,s?.hold?Math.round(this.hold/s.hold*100):null);this.ui.prompt?.(this.nearby(player.pos)&&!drive&&!s?.hold,this.active?'T · INTERACT':'T · MISSION + CUTSCENE');this.ui.pointer?.(new THREE.Vector3(p.x,this.world.groundAt(p.x,p.z)+2.4,p.z).project(camera),d);}
+ }
+ return{build,Campaign};
+})();
+
+
 __m["main.js"] = (function(){
 const $=id=>document.getElementById(id),load=$('loading');
 function fail(e){load.hidden=false;$('loadmessage').textContent='Could not start the 3D scene. '+(e.message||e);$('retry').hidden=false;console.error(e);}
@@ -7366,8 +7566,8 @@ async function boot(){
   const c=nearest();if(c){drive=c;player.mesh.visible=false;player.pos.copy(c.pos);chase.yaw=c.yaw;chase._init=false;dynamicBoxes();renderer.domElement.focus({preventScroll:true});toast('W / S drive · A / D steer · Space brake · F / E exit');}else toast('Come near any ground-level car and press F / E, or tap ENTER CAR.');
  }
  $('prompt').onclick=interact;
- const missionUI={toast,render:v=>{$('jobtitle').textContent=(v.index<5?'JOB '+(v.index+1)+' / 5 · ':'')+v.title;$('jobgoal').textContent=v.label;$('wallet').textContent='₹'+v.reward;},distance:(d,t,h)=>$('jobdistance').textContent=d+' m'+(t!==null&&t!==undefined?' · '+t+' sec':'')+(h!==null&&h!==undefined?' · '+h+'%':''),prompt:(yes,text)=>{$('jobaction').hidden=!yes;$('jobaction').textContent=text;},pointer:(v,d)=>{$('jobarrow').hidden=d<4||jobs?.index>=5;if(v.z<1){$('jobarrow').style.left=Math.max(6,Math.min(94,(v.x+1)*50))+'%';$('jobarrow').style.top=Math.max(24,Math.min(78,(1-v.y)*50))+'%';}else{$('jobarrow').style.left='50%';$('jobarrow').style.top='77%';}}};
- jobs=new __m['jobs.js'].Jobs(world,scene,missionUI);
+ const missionUI={toast,render:v=>{$('jobtitle').textContent=(v.index<10?'MISSION '+(v.index+1)+' / 10 · ':'')+v.title;$('jobgoal').textContent=v.label;$('wallet').textContent='₹'+v.reward;},distance:(d,t,h)=>$('jobdistance').textContent=d+' m'+(t!==null&&t!==undefined?' · '+t+' sec':'')+(h!==null&&h!==undefined?' · '+h+'%':''),prompt:(yes,text)=>{$('jobaction').hidden=!yes;$('jobaction').textContent=text;},pointer:(v,d)=>{$('jobarrow').hidden=d<4||jobs?.index>=10;if(v.z<1){$('jobarrow').style.left=Math.max(6,Math.min(94,(v.x+1)*50))+'%';$('jobarrow').style.top=Math.max(24,Math.min(78,(1-v.y)*50))+'%';}else{$('jobarrow').style.left='50%';$('jobarrow').style.top='77%';}}};
+ __m['campaign.js'].build(world,scene);jobs=new __m['campaign.js'].Campaign(world,scene,missionUI,null,player);
  streetLife=new __m['street-life.js'].StreetLife(world,player,[...pedestrians,...dhalliNPCs,...motion.actors],{say:(name,text,angry)=>{$('npctext').textContent=name+': '+text;$('npctext').hidden=false;$('npctext').classList.toggle('angry',angry);$('speechbubble').textContent=text;$('speechbubble').hidden=false;},clear:()=>{$('npctext').hidden=true;$('speechbubble').hidden=true;},position:v=>{const show=v.z<1&&Math.abs(v.x)<1&&Math.abs(v.y)<1;$('speechbubble').hidden=!show;if(show){$('speechbubble').style.left=(v.x+1)*50+'%';$('speechbubble').style.top=(1-v.y)*50+'%';}},hit:blocked=>{$('hurt').style.opacity=blocked?'.14':'.5';setTimeout(()=>$('hurt').style.opacity='0',160);}},()=>{reset();toast('Hosh aa gaya. Parking par wapas ho — job dobara le sakte ho.');});
  $('jobaction').onclick=()=>jobs.action(player,drive);$('sound').onclick=()=>{streetLife.voice=!streetLife.voice;streetLife.enableVoice();$('sound').textContent=streetLife.voice?'VOICE ON':'VOICE OFF';if(!streetLife.voice&&typeof speechSynthesis!=='undefined')speechSynthesis.cancel();};
  addEventListener('keydown',()=>streetLife.enableVoice());renderer.domElement.addEventListener('pointerdown',()=>streetLife.enableVoice());
@@ -7375,23 +7575,28 @@ async function boot(){
  const khedi=__m['khedi.js'].create(world,scene,player,camera,{toast,voiceEnabled:()=>streetLife.voice&&streetLife.voiceReady});
  // Cinematic cutscenes (3 acts play from the start; STORY button / replay).
  const cinema=__m['cinema.js'].create(camera,{player,friends:khedi.friends,world,voiceEnabled:()=>streetLife.voice&&streetLife.voiceReady,friend:n=>khedi.friends.find(f=>f.name===n)});
- function introShots(){const P=player.pos,V=(x,y,z)=>(c,o)=>o.set(x,y,z),atP=(dx,dy,dz)=>(c,o)=>o.set(P.x+dx,P.y+dy,P.z+dz),
-   vk=()=>khedi.friends.find(f=>f.name==='Vicky'),vkPos=(dx,dy,dz)=>(c,o)=>{const m=vk()?.mesh.position||P;o.set(m.x+dx,m.y+dy,m.z+dz);};
+ jobs.cinema=cinema;   // campaign ko cutscene player do (TDZ ke baad)
+ function introShots(){const P=player.pos,st=world.story||{},V=(x,y,z)=>(c,o)=>o.set(x,y,z),atP=(dx,dy,dz)=>(c,o)=>o.set(P.x+dx,P.y+dy,P.z+dz),
+   vk=()=>khedi.friends.find(f=>f.name==='Vicky'),vkPos=(dx,dy,dz)=>(c,o)=>{const m=vk()?.mesh.position||P;o.set(m.x+dx,m.y+dy,m.z+dz);},
+   atL=(k,dx,dy,dz)=>(c,o)=>{const L=st[k]||P;o.set(L.x+dx,world.groundAt(L.x,L.z)+dy,L.z+dz);};
   return {shots:[
    // ---- Act 1 · SHIMLA RISING ----
    {dur:5.0,from:atP(-11,34,11),to:atP(-5,25,5),look:atP(0,2,0),title:'SHIMLA RISING',sub:'SANJAULI · SHIMLA'},
    {dur:5.0,from:atP(-3,6,18),to:atP(-3,4,-15),lookFrom:atP(0,2,6),lookTo:atP(0,2,-22),speaker:'',line:'Pahaadon ki galiyan, jahan har mod pe ek kahani hai.'},
-   {dur:4.0,from:atP(9,13,9),to:atP(3.6,2.2,3.6),look:atP(0,1.4,0),title:'A KHEDI BHAI STORY',sub:'SAME STREETS · DIFFERENT STORIES'},
-   // ---- Act 2 · Khedi Bhai ----
-   {dur:4.6,from:atP(2.7,1.7,2.5),to:atP(-2.7,1.7,2.5),look:atP(0,1.3,0),speaker:'Khedi Bhai',line:'Naam Khedi Bhai. Sanjauli ka apna banda.'},
-   {dur:3.8,from:atP(-0.2,1.5,-2.7),to:atP(0,1.5,-2.1),look:atP(0,1.45,0),speaker:'Khedi Bhai',line:'Yahin paida hua, yahin ka bawa.'},
-   {dur:4.2,from:atP(-1.5,2.3,1.7),to:atP(-0.6,2.0,0.9),lookFrom:atP(10,1.5,0),lookTo:atP(32,2,0),speaker:'Khedi Bhai',line:'Aaj poora sheher ghoomunga… chai se shuru.'},
-   // ---- Act 3 · The Crew ----
-   {dur:4.2,from:vkPos(1.7,1.7,2.5),to:vkPos(1.1,1.6,1.9),look:vkPos(0,1.4,0),speaker:'Vicky',line:'Oye Khedi! Chai pe aaja, sab wait kar rahe!'},
-   {dur:4.0,from:atP(5,4,5),to:atP(2.5,2.6,3),look:vkPos(0,1.3,0),title:'THE CREW',sub:'VICKY · CHAUHAN · NEGI · SHILPA'},
-   {dur:3.6,from:atP(3,2.3,3),to:atP(1.8,1.6,1.9),look:atP(0,1.4,0),speaker:'Khedi Bhai',line:'Chalo… apni kahani shuru karte hain.'}
+   {dur:4.2,from:atP(9,13,9),to:atP(3.6,2.2,3.6),look:atP(0,1.4,0),title:'KHEDI BHAI',sub:'OPERATION CHITTA'},
+   // ---- Act 2 · Khedi kaun ----
+   {dur:4.4,from:atP(2.7,1.7,2.5),to:atP(-2.7,1.7,2.5),look:atP(0,1.3,0),speaker:'Khedi Bhai',line:'Naam Khedi Bhai. Sanjauli ka apna banda, yahin ka bawa.'},
+   // ---- Act 2.5 · Backstory: garage, college, family ----
+   {dur:4.6,from:atL('garage',6,3.2,6),to:atL('garage',3,2,3),look:atL('garage',0,1.7,0),title:'BAAP KI GARAGE',sub:'SHARMA MOTOR WORKS',speaker:'Khedi Bhai',line:'Papa ki chhoti si garage… middle-class ghar, mehnat ka guzara.'},
+   {dur:4.6,from:atL('college',7,4,7),to:atL('college',3.5,2.6,3.5),look:atL('college',0,2.2,0),title:'SANJAULI COLLEGE',speaker:'Khedi Bhai',line:'Din mein college, ek normal ladka. Par sheher andar se sad raha hai.'},
+   // ---- Act 3 · Chitta + police ----
+   {dur:4.6,from:atP(-2.4,3,2.4),to:atP(-1.1,2,1.1),look:atP(0,1.4,0),title:'CHITTA',sub:'SANJAULI · SHIMLA',speaker:'Khedi Bhai',line:'Galiyon mein chitta fail gaya. Dost, bacche… sab barbaad ho rahe.'},
+   {dur:5.0,from:atL('police',6,3,6),to:atL('police',3,2,3),look:atL('police',0,1.7,0),title:'OPERATION CHITTA',sub:'UNDERCOVER',speaker:'SP Rana',line:'Isliye maine tujhe chuna, Khedi. Andar ghus — 0 se top tak, poora racket tabaah kar.'},
+   // ---- Act 4 · The Crew + start ----
+   {dur:4.2,from:vkPos(1.7,1.7,2.5),to:vkPos(1.1,1.6,1.9),look:vkPos(0,1.4,0),title:'THE CREW',sub:'VICKY · CHAUHAN · NEGI · SHILPA',speaker:'Vicky',line:'Oye Khedi! Sab tere saath hain bhai.'},
+   {dur:3.8,from:atP(3,2.3,3),to:atP(1.8,1.6,1.9),look:atP(0,1.4,0),speaker:'Khedi Bhai',line:'Chalo… Operation Chitta shuru karte hain. Golden marker pe T dabao.'}
   ]};}
- function playIntro(){cinema.play(introShots(),()=>{chase._init=false;toast('5 town missions · Golden marker par T · H phone · J punch');});}
+ function playIntro(){cinema.play(introShots(),()=>{chase._init=false;toast('OPERATION CHITTA · 10 missions · Golden marker par T');});}
  $('story').onclick=()=>{if(!cinema.active())playIntro();};
  // Time of day control (fixes never-ending night) — cycles presets.
  const TIMES=[[6.5,'SUBAH'],[9,'DIN'],[13,'DOPAHAR'],[17,'SHAAM'],[20.5,'RAAT']];let timeIdx=1;
