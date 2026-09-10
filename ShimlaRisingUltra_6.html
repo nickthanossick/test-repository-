@@ -6,14 +6,14 @@
 
  .health{width:92px;height:4px;background:#491e2380;margin-top:10px}.health i{display:block;height:100%;background:#cc665c}.tools{flex-wrap:wrap;max-width:58%;justify-content:flex-end}#hurt{inset:0;box-shadow:inset 0 0 160px 50px #aa2424;opacity:0;transition:opacity .16s;z-index:6}#jobs{left:34px;top:142px;width:280px;background:#17252ed9;border:1px solid #caba8c4a;padding:14px 17px;border-radius:4px}#jobtitle{font-size:12px;line-height:1.5;margin:0 0 9px;color:#ecd5a1}#jobgoal{font-size:12px;line-height:1.6;margin:0 0 9px}#jobs small{font-size:9px;color:#bfcfc9}#wallet{float:right;font-size:11px;color:#d8ca9a;margin-left:7px}#jobaction{pointer-events:auto;bottom:calc(15% + 52px);left:50%;transform:translateX(-50%);background:#d7b76e;color:#17262c;border:0;border-radius:3px;padding:12px 17px;z-index:4;font-size:12px}#jobarrow{font-size:23px;color:#f7d77c;text-shadow:0 0 8px #463720;transform:translate(-50%,-50%)}#npctext{bottom:224px;left:50%;transform:translateX(-50%);background:#13262de8;border-left:3px solid #a5c39b;padding:10px 17px;max-width:70%;font-size:13px;line-height:1.5}#npctext.angry{border-color:#dc6663}#speechbubble{transform:translate(-50%,-100%);background:#f2ecd9;color:#273235;border-radius:5px;padding:8px 12px;font-size:11px;max-width:210px;text-align:center;box-shadow:0 2px 8px #0004}@media(max-width:720px){#jobs{top:144px;left:15px;width:220px;padding:10px}#jobtitle,#jobgoal{font-size:10px}.tools{max-width:95%;top:86px}#npctext{max-width:92%;font-size:11px;bottom:238px}#touch .actions{gap:3px;max-width:58%;flex-wrap:wrap;justify-content:flex-end}#touch .actions button{width:40px;font-size:9px}}
  </style></head><body>
-<div class="hud top"><div class="overline">SHIMLA RISING · HILLSIDE STORIES</div><h1>SANJAULI</h1><div class="sub"><span class="tag">OPEN WORLD</span> MALL ROAD · CHOWK · DHALLI</div></div>
+<div class="hud top"><div class="overline">NIKJYAR STUDIO · SHIMLA GULLIES</div><h1>SANJAULI</h1><div class="sub"><span class="tag">OPEN WORLD</span> MALL ROAD · CHOWK · DHALLI</div></div>
 <div class="tools"><button id="story" title="Replay the opening cutscenes">STORY</button><button id="time" title="Change time of day">☀ TIME</button><button id="parking" title="Return to parking">PARKING</button><button id="sound">VOICE ON</button><button id="route" title="Return to the new route at Chowk">CHOWK</button><button id="quality" title="Q · Graphics quality">ULTRA</button><button id="photo" title="V · View the parking facade">VIEW</button><button id="reset" title="R · Reset position and cars">RESET</button><button id="full" title="Fullscreen">⛶</button><button id="help" title="Controls">?</button></div>
 <div class="hud bottom"><div class="place"><span id="locationlabel">SANJAULI · SHIMLA</span><small id="mode">ON FOOT</small><small id="worldclock">DAY 1 · 16:19</small></div><div class="health"><i id="healthfill" style="width:100%"></i></div><div class="bar"><i id="stamina" style="width:100%"></i></div></div>
 <div class="hud controls"><span><b>WASD</b> MOVE</span><span><b>SHIFT</b> RUN</span><span><b>SPACE</b> JUMP</span><span><b>F</b> CAR</span><span><b>DRAG</b> LOOK</span></div>
 <button type="button" class="hud" id="prompt" hidden></button><div class="hud" id="toast"></div>
 <div id="guide" hidden><h2>Explore Sanjauli.</h2><p>Five different missions start around town. Follow the golden marker to the Tea House, Mobile Zone, Bank, Gurudwara and Vishal Mega Mart. Press T to interact. A full day passes automatically in 18 real minutes. Explore the showrooms near Dhalli Tunnel and look uphill for Dhingu Mata Mandir when you turn right at Chowk. NPCs chat, and may chase you if you shove them. J punches; hold K to block.</p><dl><dt>W A S D / arrows</dt><dd>Walk / drive</dd><dt>Mouse drag or click</dt><dd>Look around</dd><dt>Mouse wheel</dt><dd>Camera distance</dd><dt>Shift / Space</dt><dd>Run / jump</dd><dt>F or E / Space in car</dt><dd>Enter or exit / brake</dd><dt>V / R / Q</dt><dd>Reference view / reset / quality</dd><dt>T / M</dt><dd>Job action / mission panel</dd><dt>J / hold K</dt><dd>Punch / block</dd><dt>H</dt><dd>Phone — call Vicky, Chauhan, Negi, Shilpa</dd><dt>J / hold K</dt><dd>Punch / block — shove someone and they fight back</dd><dt>G</dt><dd>Danda nikaalo / rakho</dd><dt>C</dt><dd>Patake phodo 🎆</dd><dt>Y / ☀ TIME</dt><dd>Samay badlo (subah/din/shaam/raat)</dd><dt>B</dt><dd>Mute street sound</dd><dt>Esc</dt><dd>Release mouse</dd></dl><p class="note">Visual reconstruction from the supplied collage; dimensions are estimated. Building placement and the hilltop temple are game-scale interpretations. Temple reference: shridhingumatatemple.org. Browser voices are used when available. All game assets are embedded. Pahadi topi, beedi animation, moving street traffic, shopkeepers and animals are included.</p><button id="closehelp">BACK TO THE STREET</button></div>
 <div id="touch"><div class="pad"><button data-key="KeyW">↑</button><button data-key="KeyA">←</button><button data-key="KeyS">↓</button><button data-key="KeyD">→</button></div><div class="actions"><button data-key="ShiftLeft">RUN</button><button data-key="Space">JUMP</button><button data-key="KeyF">CAR</button><button data-key="KeyT">JOB</button><button data-key="KeyJ">HIT</button><button data-key="KeyK">BLOCK</button></div></div>
-<div class="hud" id="hurt"></div><div class="hud" id="jobs"><div id="wallet">₹0</div><h2 id="jobtitle"></h2><p id="jobgoal"></p><small id="jobdistance"></small><small> · T INTERACT · M HIDE</small></div><button class="hud" id="jobaction" hidden>T · START MISSION</button><div class="hud" id="jobarrow">◆</div><div class="hud" id="npctext" hidden></div><div class="hud" id="speechbubble" hidden></div><div id="loading"><div class="overline">SHIMLA RISING</div><h2>SANJAULI</h2><p>5 TOWN MISSIONS · A LIVING SANJAULI</p><div class="line"></div><p id="loadmessage">Starting the scene…</p><button id="retry" onclick="location.reload()" hidden>RELOAD</button></div>
+<div class="hud" id="hurt"></div><div class="hud" id="jobs"><div id="wallet">₹0</div><h2 id="jobtitle"></h2><p id="jobgoal"></p><small id="jobdistance"></small><small> · T INTERACT · M HIDE</small></div><button class="hud" id="jobaction" hidden>T · START MISSION</button><div class="hud" id="jobarrow">◆</div><div class="hud" id="npctext" hidden></div><div class="hud" id="speechbubble" hidden></div><div id="loading"><div class="overline">NIKJYAR STUDIO presents</div><h2>SHIMLA GULLIES</h2><p>OPERATION WHITE DEATH · SANJAULI</p><div class="line"></div><p id="loadmessage">Starting the scene…</p><button id="retry" onclick="location.reload()" hidden>RELOAD</button></div>
 
 <script>
 
@@ -6986,7 +6986,20 @@ __m['khedi.js'] = (function(){
    const bg=ctx.createGain();bg.connect(master);const bo=ctx.createBufferSource();bo.buffer=noiseBuf(.3);const bf=ctx.createBiquadFilter();bf.type='lowpass';bf.frequency.value=900;bo.connect(bf);bf.connect(bg);bg.gain.setValueAtTime(.5,t);bg.gain.exponentialRampToValueAtTime(.0001,t+.22);bo.start(t);bo.stop(t+.25);
    // ladi ke pat-pat (string of crackers)
    for(let i=0;i<14;i++){const tt=t+.15+i*.07+Math.random()*.03,g=ctx.createGain();g.connect(master);const o=ctx.createBufferSource();o.buffer=noiseBuf(.1);const f=ctx.createBiquadFilter();f.type='highpass';f.frequency.value=1500;o.connect(f);f.connect(g);g.gain.setValueAtTime(.22,tt);g.gain.exponentialRampToValueAtTime(.0001,tt+.06);o.start(tt);o.stop(tt+.08);}}
-  return {start,setMuted,unlock,horn,bark,engineRev,cracker,isMuted:()=>muted};
+  /* ---- cinematic SFX (intro film) ---- */
+  let sirenNode=null,heartNode=null;
+  function tone(freq,t,dur,vol,type){const g=ctx.createGain();g.connect(master);const o=ctx.createOscillator();o.type=type||'sine';o.frequency.value=freq;o.connect(g);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.start(t);o.stop(t+dur+.02);}
+  function filmSFX(name){if(!ctx){init();}if(!ctx)return;if(ctx.state==='suspended')ctx.resume();const t=now();
+   if(name==='commotion'){const s=ctx.createBufferSource();s.buffer=noiseBuf(2);s.loop=true;const f=ctx.createBiquadFilter();f.type='bandpass';f.frequency.value=500;f.Q.value=.6;const g=ctx.createGain();g.gain.value=.12;s.connect(f);f.connect(g);g.connect(master);s.start();setTimeout(()=>{try{g.gain.setTargetAtTime(0,now(),.6);s.stop(now()+1.4);}catch(e){}},4500);}
+   else if(name==='heartbeat'){if(heartNode)return;heartNode={on:true};let beat=t+.1;const loop=()=>{if(!heartNode||!heartNode.on)return;tone(60,beat,.14,.5,'sine');tone(48,beat+.18,.12,.42,'sine');beat+=.85;heartNode.timer=setTimeout(loop,850);};loop();}
+   else if(name==='flatline'){if(heartNode){heartNode.on=false;clearTimeout(heartNode.timer);heartNode=null;}const g=ctx.createGain();g.connect(master);const o=ctx.createOscillator();o.type='sine';o.frequency.value=1000;o.connect(g);g.gain.setValueAtTime(.18,t);g.gain.setValueAtTime(.18,t+2.4);g.gain.exponentialRampToValueAtTime(.0001,t+2.9);o.start(t);o.stop(t+3);}
+   else if(name==='cpr'){for(let i=0;i<5;i++)tone(880,t+i*.5,.1,.2,'square');}
+   else if(name==='ring'){for(let i=0;i<2;i++){tone(1150,t+i*.55,.22,.12,'sine');tone(1480,t+i*.55+.11,.22,.1,'sine');}}
+   else if(name==='siren'){if(sirenNode)return;const g=ctx.createGain();g.gain.value=.16;g.connect(master);const o=ctx.createOscillator();o.type='sawtooth';o.frequency.value=680;o.connect(g);const lfo=ctx.createOscillator();lfo.frequency.value=1.6;const lg=ctx.createGain();lg.gain.value=220;lfo.connect(lg);lg.connect(o.frequency);o.start();lfo.start();sirenNode={o,lfo,g};setTimeout(()=>stopFilm(),5200);}
+   else if(name==='scream'){const g=ctx.createGain();g.connect(master);const o=ctx.createOscillator();o.type='sawtooth';o.frequency.setValueAtTime(300,t);o.frequency.exponentialRampToValueAtTime(760,t+.25);o.frequency.exponentialRampToValueAtTime(500,t+1.1);const f=ctx.createBiquadFilter();f.type='bandpass';f.frequency.value=900;f.Q.value=2;o.connect(f);f.connect(g);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.3,t+.06);g.gain.exponentialRampToValueAtTime(.0001,t+1.6);o.start(t);o.stop(t+1.7);}
+   else if(name==='stop')stopFilm();}
+  function stopFilm(){try{if(sirenNode){sirenNode.g.gain.setTargetAtTime(0,now(),.3);sirenNode.o.stop(now()+.6);sirenNode.lfo.stop(now()+.6);sirenNode=null;}if(heartNode){heartNode.on=false;clearTimeout(heartNode.timer);heartNode=null;}}catch(e){}}
+  return {start,setMuted,unlock,horn,bark,engineRev,cracker,filmSFX,isMuted:()=>muted};
  })();
 
  /* --------------------------------------------------------- DOM label layer -*/
@@ -7025,12 +7038,12 @@ __m['khedi.js'] = (function(){
 
  /* ------------------------------------------------------------------ Phone -*/
  const CONTACTS={
-  vicky:{name:'Vicky',color:'#6ab0c8',female:false,
-   lines:[['Vicky','Oye Khedi bhai! Kahan mar gaya tha macho?'],
+  vicky:{name:'Bunty',color:'#6ab0c8',female:false,
+   lines:[['Bunty','Oye Khedi bhai! Kahan mar gaya tha macho?'],
           ['Khedi','Bawa yahin chowk pe hu, chai maar raha tha.'],
-          ['Vicky','Shaam ko Dhalli ki hawa lagane chalein?'],
+          ['Bunty','Shaam ko Dhalli ki hawa lagane chalein?'],
           ['Khedi','Pakka bhai, gaadi nikalta hu, tu ready reh.'],
-          ['Vicky','Chauhan aur Negi ko bhi bula leta hu phir.'],
+          ['Bunty','Chauhan aur Negi ko bhi bula leta hu phir.'],
           ['Khedi','Haan bula, party pakki aaj bawa!']]},
   chauhan:{name:'Chauhan',color:'#c98b57',female:false,
    lines:[['Chauhan','Khedi! Kal wala match dekha tha?'],
@@ -7073,7 +7086,7 @@ __m['khedi.js'] = (function(){
 
   /* ---- friends ---- */
   const FRIEND_DEF=[
-   {id:'vicky',name:'Vicky',x:-5.0,z:-176,female:false,opts:{build:'male',skin:0xb98a64,top:0x8a3b46,bottom:0x36414d,topi:true,beedi:true}},
+   {id:'vicky',name:'Bunty',x:-5.0,z:-176,female:false,opts:{build:'male',skin:0xb98a64,top:0x8a3b46,bottom:0x36414d,topi:true,beedi:true}},
    {id:'chauhan',name:'Chauhan',x:-6.4,z:-120,female:false,opts:{build:'male',skin:0xa97a54,top:0x2f4a5e,bottom:0x3a3f47,sneakers:true}},
    {id:'negi',name:'Negi',x:6.2,z:19,dh:true,female:false,opts:{build:'male',skin:0xba8b67,top:0x486a4c,bottom:0x414752,topi:true}},
    {id:'shilpa',name:'Shilpa',x:5.4,z:-118,female:true,opts:{build:'female',skin:0xc6996f,top:0x9c3c66,bottom:0x394a63,dupatta:0xd8b23f}}
@@ -7266,7 +7279,11 @@ __m['cinema.js'] = (function(){
    #cine .card.show{opacity:1}
    #cine .card h1{font-size:clamp(30px,7vw,72px);font-weight:400;letter-spacing:.16em;margin:0;color:#f5efe1;text-shadow:0 4px 30px #000}
    #cine .card p{font-size:clamp(11px,1.8vw,15px);letter-spacing:.34em;color:#d9c79a;margin:14px 0 0}
-   #cine .skip{position:absolute;right:26px;bottom:calc(12vh + 20px);pointer-events:auto;cursor:pointer;
+   #cine .card .studio{font-size:clamp(10px,1.6vw,13px);letter-spacing:.4em;color:#b9c2be;margin:0 0 20px}
+   #cine .black{position:absolute;inset:0;background:#000;opacity:0;transition:opacity .7s ease;pointer-events:none}
+   #cine .black.show{opacity:1}
+   #cine .black.fast{transition:opacity .18s}
+   #cine .skip{position:absolute;right:26px;bottom:calc(12vh + 20px);pointer-events:auto;cursor:pointer;z-index:2;
     background:#0d161bcc;border:1px solid #d8ccaa66;color:#f4ecda;border-radius:20px;padding:8px 16px;font-size:12px;letter-spacing:.14em}
    #cine .skip:hover{background:#dcc08a;color:#17272b}
    body.cinematic .controls,body.cinematic .tools,body.cinematic #jobs,body.cinematic #jobaction,
@@ -7274,14 +7291,14 @@ __m['cinema.js'] = (function(){
    body.cinematic #toast,body.cinematic #npctext,body.cinematic #khlabels,body.cinematic #speechbubble{opacity:0!important;transition:opacity .4s;pointer-events:none!important}`;
   document.head.appendChild(s);
   const box=document.createElement('div');box.id='cine';
-  box.innerHTML='<div class="bar top"></div><div class="bar bot"></div><div class="card"><h1></h1><p></p></div><div class="sub"><b></b><span></span></div><div class="skip">SKIP ▸</div>';
+  box.innerHTML='<div class="black"></div><div class="bar top"></div><div class="bar bot"></div><div class="card"><p class="studio"></p><h1></h1><p class="csub"></p></div><div class="sub"><b></b><span></span></div><div class="skip">SKIP ▸</div>';
   document.body.appendChild(box);
   return box;
  }
 
  function create(camera, ctx){
   const box=ui();
-  const elCard=box.querySelector('.card'),elH1=box.querySelector('.card h1'),elP=box.querySelector('.card p'),
+  const elCard=box.querySelector('.card'),elH1=box.querySelector('.card h1'),elStudio=box.querySelector('.card .studio'),elCsub=box.querySelector('.card .csub'),elBlack=box.querySelector('.black'),
    elSub=box.querySelector('.sub'),elSpk=box.querySelector('.sub b'),elTxt=box.querySelector('.sub span'),elSkip=box.querySelector('.skip');
   let seq=null,shot=0,t=0,running=false,onEnd=null,lastSpoke=-1;
   const from=new V(),to=new V(),lookF=new V(),lookT=new V(),tmp=new V(),tmp2=new V();
@@ -7290,17 +7307,23 @@ __m['cinema.js'] = (function(){
 
   function beginShot(){
    const sh=seq.shots[shot];t=0;lastSpoke=-1;
-   // resolve positions
-   sh.from(ctx,from);sh.to?sh.to(ctx,to):to.copy(from);
-   if(sh.look){sh.look(ctx,lookF);lookT.copy(lookF);}else{sh.lookFrom(ctx,lookF);sh.lookTo(ctx,lookT);}
-   // card
-   if(sh.title){elH1.textContent=sh.title;elP.textContent=sh.sub||'';elCard.classList.add('show');}else elCard.classList.remove('show');
+   // resolve positions (optional for black beats — keep camera where it is)
+   if(sh.from){sh.from(ctx,from);sh.to?sh.to(ctx,to):to.copy(from);}else{from.copy(camera.position);to.copy(from);}
+   if(sh.look){sh.look(ctx,lookF);lookT.copy(lookF);}else if(sh.lookFrom){sh.lookFrom(ctx,lookF);sh.lookTo(ctx,lookT);}else{camera.getWorldDirection(lookF);lookF.add(camera.position);lookT.copy(lookF);}
+   // fade to / from black
+   elBlack.classList.toggle('fast',!!sh.blackFast);
+   if(sh.black)elBlack.classList.add('show');else elBlack.classList.remove('show');
+   // title / studio card
+   if(sh.title){elStudio.textContent=sh.studio||'';elStudio.style.display=sh.studio?'block':'none';elH1.textContent=sh.title;elCsub.textContent=sh.sub||'';elCard.classList.add('show');}else elCard.classList.remove('show');
    // subtitle
    if(sh.line){elSpk.textContent=sh.speaker||'';elSpk.style.display=sh.speaker?'block':'none';elTxt.textContent=sh.line;elSub.classList.add('show');}
    else elSub.classList.remove('show');
+   // one-shot SFX cue
+   if(sh.sfx&&ctx.sfx)ctx.sfx(sh.sfx);
   }
   function endSeq(){
    running=false;box.classList.remove('on');document.body.classList.remove('cinematic');
+   elBlack.classList.remove('show');elCard.classList.remove('show');elSub.classList.remove('show');
    try{speechSynthesis&&speechSynthesis.cancel();}catch(e){}
    const cb=onEnd;onEnd=null;seq=null;if(cb)cb();
   }
@@ -7443,7 +7466,7 @@ __m['campaign.js']=(function(){
    this.missions=[
     {title:'Bulawa — SP ka sandesh',origin:'Sanjauli · Police jeep',reward:0,loc:g('police'),
      brief:brief(g('police'),
-      {title:'OPERATION CHITTA',sub:'SANJAULI · SHIMLA',speaker:'SP Rana',line:'Khedi, Sanjauli mein chitta ghar-ghar pahunch gaya hai. Bacche barbaad ho rahe hain.'},
+      {title:'OPERATION WHITE DEATH',sub:'SANJAULI · SHIMLA',speaker:'SP Rana',line:'Khedi, Sanjauli mein chitta ghar-ghar pahunch gaya hai. Bacche barbaad ho rahe hain.'},
       {speaker:'SP Rana',line:'Tu local hai, college jaata hai, koi shaq nahi karega. Undercover ghusna hai — 0 se top tak.'}),
      stages:[{label:'Police jeep par SP se milo · T',p:g('police'),foot:true}]},
 
@@ -7495,7 +7518,7 @@ __m['campaign.js']=(function(){
       {speaker:'Khedi (mann mein)',line:'Top pe pahunch gaya. Bas ek signal — aur poora racket khatam.'}),
      stages:[{label:'Warehouse mein Chaudhary tak pahuncho · T',p:g('warehouse'),foot:true}]},
 
-    {title:'Bust — Operation Chitta',origin:'Warehouse',reward:1500,loc:g('warehouse'),
+    {title:'Bust — White Death',origin:'Warehouse',reward:1500,loc:g('warehouse'),
      brief:brief(g('warehouse'),
       {title:'THE BUST',sub:'FINAL RAID',speaker:'SP Rana',line:'Signal do Khedi — poori force taiyar hai. Aaj Sanjauli ka chitta khatam.'},
       {speaker:'Khedi',line:'Danda nikaalo (G), patake chhodo signal ka (C) — aaj hisaab poora hoga!'}),
@@ -7509,7 +7532,7 @@ __m['campaign.js']=(function(){
   target(){const s=this.current();if(s?.p)return s.p();const m=this.missions[this.index];return m?m.loc():{x:0,z:0};}
   nearby(p,r=3.2){const t=this.target();return Math.hypot(p.x-t.x,p.z-t.z)<r&&Math.abs(p.y-this.world.groundAt(t.x,t.z))<2.8;}
   _activate(){const m=this.missions[this.index];this.active=true;this.step=0;this.hold=0;this.remaining=m.limit||0;this.ui.toast('Mission '+(this.index+1)+': '+m.title);this.render();}
-  action(player,drive){if(this.briefing)return false;if(this.index>=this.N){this.ui.toast('Operation Chitta poora! Sanjauli aazaad. (Agle update mein aur missions)');return false;}
+  action(player,drive){if(this.briefing)return false;if(this.index>=this.N){this.ui.toast('Operation White Death poora! Sanjauli aazaad. (Agle update mein aur missions)');return false;}
    const m=this.missions[this.index];
    if(!this.active){if(!this.nearby(player.pos)||drive){this.ui.toast(m.origin+' ke golden marker par paidal aao · T');return false;}
     if(this.cinema&&m.brief&&!this._briefed){this._briefed=true;this.briefing=true;this.cinema.play(m.brief,()=>{this.briefing=false;this._activate();});return true;}
@@ -7517,13 +7540,159 @@ __m['campaign.js']=(function(){
    const s=this.current();if(s.car||s.auto||s.hold)return false;if(!this.nearby(player.pos)){this.ui.toast('Golden marker tak pahucho.');return false;}if(s.foot&&drive){this.ui.toast('Gaadi roko, F / E se utro, phir T.');return false;}this.advance();return true;}
   advance(){if(!this.active)return;this.step++;this.hold=0;if(this.step>=this.missions[this.index].stages.length){const j=this.missions[this.index];if(!this.done.includes(this.index)){this.done.push(this.index);this.reward+=j.reward;}this.ui.toast('✔ '+j.title+' complete · ₹'+this.reward);this.index++;this.active=false;this.step=0;this._briefed=false;try{localStorage.setItem('shimla-chitta-v1',JSON.stringify({completed:this.index}));}catch{}}else this.ui.toast(this.current().label);this.render();}
   abort(){if(this.active){this.active=false;this.step=0;this.hold=0;this.ui.toast('Mission reset · marker se dobara T.');}this.render();}
-  render(){const done=this.index>=this.N;this.ui.render?.({title:done?'OPERATION CHITTA · COMPLETE':this.missions[this.index].title,label:done?'Sanjauli aazaad · free roam':this.active?this.current().label:this.missions[this.index].origin+' · T se shuru',index:this.index,active:this.active,reward:this.reward});this.marker.visible=!done;const p=this.target();this.marker.position.set(p.x,this.world.groundAt(p.x,p.z)+.10,p.z);}
+  render(){const done=this.index>=this.N;this.ui.render?.({title:done?'OPERATION WHITE DEATH · COMPLETE':this.missions[this.index].title,label:done?'Sanjauli aazaad · free roam':this.active?this.current().label:this.missions[this.index].origin+' · T se shuru',index:this.index,active:this.active,reward:this.reward});this.marker.visible=!done;const p=this.target();this.marker.position.set(p.x,this.world.groundAt(p.x,p.z)+.10,p.z);}
   tick(dt,player,drive,camera){this.time+=dt;if(this.briefing){this.marker.visible=false;return;}const s=this.current();
    if(this.active){if(s?.car&&drive)this.advance();else if(s?.auto&&drive&&this.nearby(player.pos,8))this.advance();else if(s?.hold){this.hold=!drive&&this.nearby(player.pos,3)?this.hold+dt:0;if(this.hold>=s.hold)this.advance();}}
    const done=this.index>=this.N;this.marker.visible=!done;if(done){this.ui.prompt?.(false,'');return;}
    const p=this.target();this.marker.position.set(p.x,this.world.groundAt(p.x,p.z)+.1,p.z);this.marker.children[1].position.y=2.5+Math.sin(this.time*2)*.15;this.marker.children[1].rotation.y=this.time*.7;const d=Math.hypot(player.pos.x-p.x,player.pos.z-p.z);this.ui.distance?.(Math.round(d),null,s?.hold?Math.round(this.hold/s.hold*100):null);this.ui.prompt?.(this.nearby(player.pos)&&!drive&&!s?.hold,this.active?'T · INTERACT':'T · MISSION + CUTSCENE');this.ui.pointer?.(new THREE.Vector3(p.x,this.world.groundAt(p.x,p.z)+2.4,p.z).project(camera),d);}
  }
  return{build,Campaign};
+})();
+
+
+/* ============================================================= intro-film.js ==
+ * Shimla Gullies ka cold-open. Chaar chhote sets sheher se door (x~2000) par
+ * bante hain — ghar ka kamra, ambulance wali sadak, hospital, police chowki.
+ * Cinema.js camera unhe dikhata hai; yahan sirf actors animate hote hain.
+ */
+__m['intro-film.js']=(function(){
+ const H=__m['human.js'];
+ const {box,tube}=__m['step-car.js'];
+ const BX=2000; // off-stage base
+ function create(scene,world){
+  const stage=new THREE.Group();stage.name='intro-film-stage';stage.visible=false;scene.add(stage);
+  const wall=new THREE.MeshStandardMaterial({color:0x3b3a3d,roughness:.95}),
+   floor=new THREE.MeshStandardMaterial({color:0x59493c,roughness:.95}),
+   whiteM=new THREE.MeshStandardMaterial({color:0xdfe2e6,roughness:.8}),
+   sheet=new THREE.MeshStandardMaterial({color:0xd7dbe0,roughness:.9}),
+   steel=new THREE.MeshStandardMaterial({color:0x9aa0a2,metalness:.6,roughness:.4}),
+   skin=new THREE.MeshStandardMaterial({color:0xb98a64,roughness:.9});
+  const actors={};
+
+  // ---------------- (a) ghar ka kamra (RZ=0) ----------------
+  const RZ=0;
+  box(stage,6,.2,6,BX,0,RZ,floor);
+  box(stage,6,3,.2,BX,1.5,RZ-3,wall);box(stage,.2,3,6,BX-3,1.5,RZ,wall);
+  // open door frame on +x wall (light spills)
+  box(stage,.2,3,1.2,BX+3,1.5,RZ+1.9,wall);box(stage,.2,3,2.6,BX+3,1.5,RZ-1.1,wall);
+  const doorGlow=new THREE.PointLight(0xffe6b0,4.5,10,2);doorGlow.position.set(BX+2.6,1.6,RZ+1.4);stage.add(doorGlow);
+  const bed=box(stage,2.4,.5,1.3,BX-1.6,.45,RZ-2,new THREE.MeshStandardMaterial({color:0x6a4b64,roughness:.9}));
+  // boy on the floor — syringe in hand, eyes up
+  const boy=H.buildHuman({build:'male',skin:0xc39a72,top:0x3a3f47,bottom:0x2b2f36});
+  boy.position.set(BX+.6,.2,RZ+.8);boy.rotation.z=Math.PI/2;boy.rotation.y=.3; // lying down
+  stage.add(boy);
+  const rig=boy.userData.rig;if(rig){rig.arms[0].shoulder.rotation.z=.5;rig.arms[1].shoulder.rotation.z=-.3;if(rig.legs){rig.legs[0].hip.rotation.x=.2;rig.legs[1].hip.rotation.x=-.1;}}
+  const syringe=new THREE.Mesh(new THREE.CylinderGeometry(.015,.015,.16,6),new THREE.MeshStandardMaterial({color:0xdfe6ea,transparent:true,opacity:.8}));
+  syringe.rotation.z=Math.PI/2;syringe.position.set(BX+.55,.22,RZ+.55);stage.add(syringe);
+  // maa
+  const mother=H.buildHuman({build:'female',skin:0xcaa079,top:0x8a3550,bottom:0x39406b,dupatta:0xd8b23f});
+  mother.position.set(BX-.5,.2,RZ+.5);stage.add(mother);
+  actors.mother={mesh:mother,base:new THREE.Vector3(BX-.5,.2,RZ+.5),phase:0};
+  actors.boy={mesh:boy};
+  const roomKey=new THREE.PointLight(0xbfc8d8,3.8,12,2);roomKey.position.set(BX-.5,2.6,RZ+1);stage.add(roomKey);
+
+  // ---------------- (b) ambulance + sadak (RZ=40) ----------------
+  const AZ=40;box(stage,7,.15,26,BX,0,AZ,new THREE.MeshStandardMaterial({color:0x23262b,roughness:.95}));
+  for(let z=AZ-11;z<AZ+12;z+=3)box(stage,.2,.02,1.2,BX,.09,z,whiteM);
+  const amb=new THREE.Group();
+  box(amb,2.0,1.8,4.2,0,1.1,0,whiteM);box(amb,2.02,1.0,2.4,0,1.5,1.0,new THREE.MeshStandardMaterial({color:0xc23b3b,roughness:.6}));
+  box(amb,1.9,.9,.05,0,1.4,-2.1,new THREE.MeshStandardMaterial({color:0x2a3238,roughness:.3}));
+  // red cross
+  box(amb,.6,.16,.03,0,1.4,2.12,new THREE.MeshStandardMaterial({color:0xc23b3b}));box(amb,.16,.6,.03,0,1.4,2.12,new THREE.MeshStandardMaterial({color:0xc23b3b}));
+  for(const s of[-1,1]){const w=new THREE.Mesh(new THREE.TorusGeometry(.42,.16,10,20),new THREE.MeshStandardMaterial({color:0x14161a}));w.rotation.y=Math.PI/2;w.position.set(s*1.02,.42,1.3);amb.add(w);const w2=w.clone();w2.position.z=-1.3;amb.add(w2);}
+  const beacon=new THREE.Mesh(new THREE.BoxGeometry(1.0,.28,.5),new THREE.MeshStandardMaterial({color:0xd23a3a,emissive:0xd23a3a,emissiveIntensity:2}));beacon.position.set(0,2.15,-.3);amb.add(beacon);
+  amb.position.set(BX,0,AZ-10);stage.add(amb);
+  const beaconLight=new THREE.PointLight(0xff3b3b,3,12,2);beaconLight.position.set(BX,3,AZ);stage.add(beaconLight);
+  actors.amb={mesh:amb,beacon,light:beaconLight,z0:AZ-11,z1:AZ+11};
+
+  // ---------------- (c) hospital (RZ=80) ----------------
+  const HZ=80;box(stage,7,.2,8,BX,0,HZ,new THREE.MeshStandardMaterial({color:0xcfd6da,roughness:.9}));
+  box(stage,7,3.4,.2,BX,1.7,HZ-4,whiteM);box(stage,.2,3.4,8,BX-3.5,1.7,HZ,whiteM);
+  for(const x of[-2,0,2]){const l=new THREE.Mesh(new THREE.BoxGeometry(1.2,.1,.5),new THREE.MeshStandardMaterial({color:0xffffff,emissive:0xcfe0ff,emissiveIntensity:1.2}));l.position.set(BX+x,3.3,HZ);stage.add(l);}
+  const gurney=box(stage,1.0,.7,2.2,BX,.7,HZ-.5,steel);box(stage,1.05,.1,2.25,BX,1.06,HZ-.5,sheet);
+  // patient (covered)
+  const patient=H.buildHuman({build:'male',skin:0xc39a72,top:0x9fb6c8,bottom:0x9fb6c8});patient.position.set(BX,1.1,HZ-.5);patient.rotation.z=Math.PI/2;stage.add(patient);
+  const docs=[];for(let i=0;i<2;i++){const d=H.buildHuman({build:'male',skin:0xb98a64,top:0xdfe6ea,bottom:0x4a5560});d.position.set(BX+(i?.8:-.8),.2,HZ-.5+(i?.4:-.4));d.rotation.y=i?-Math.PI/2:Math.PI/2;stage.add(d);docs.push(d);}
+  actors.docs=docs;actors.hz=HZ;
+  const hospKey=new THREE.PointLight(0xdfe8ff,2,12,2);hospKey.position.set(BX,3,HZ);stage.add(hospKey);
+  // doctor + maa (for the "nahi bacha paaye" beat) — placed toward +z of hospital
+  const doctor=H.buildHuman({build:'male',skin:0xa97a54,top:0xdfe6ea,bottom:0x4a5560});doctor.position.set(BX-.6,.2,HZ+3.4);doctor.rotation.y=.6;stage.add(doctor);
+  const mother2=H.buildHuman({build:'female',skin:0xcaa079,top:0x8a3550,bottom:0x39406b,dupatta:0xd8b23f});mother2.position.set(BX+.9,.2,HZ+4.0);mother2.rotation.y=-Math.PI+.4;stage.add(mother2);
+  actors.doctor=doctor;actors.mother2={mesh:mother2,base:new THREE.Vector3(BX+.9,.2,HZ+4.0),phase:0};
+
+  // ---------------- (d) police chowki (RZ=120) ----------------
+  const PZ=120;box(stage,8,.2,7,BX,0,PZ,new THREE.MeshStandardMaterial({color:0x6a6f6c,roughness:.9}));
+  box(stage,8,3.4,.2,BX,1.7,PZ-3,new THREE.MeshStandardMaterial({color:0x3a4750,roughness:.9}));
+  // projector slide
+  const slideTex=(()=>{const cv=document.createElement('canvas');cv.width=512;cv.height=288;const x=cv.getContext('2d');x.fillStyle='#0d1b2a';x.fillRect(0,0,512,288);x.fillStyle='#e6534b';x.font='bold 44px Arial';x.textAlign='center';x.fillText('1000+ DEATHS',256,90);x.fillStyle='#f3ecda';x.font='22px Arial';x.fillText('chitta overdose · 1 saal',256,140);x.fillStyle='#e6c060';x.font='bold 26px Arial';x.fillText('SANJAULI · SHIMLA',256,210);x.strokeStyle='#e6534b';x.lineWidth=6;x.strokeRect(12,12,488,264);return new THREE.CanvasTexture(cv);})();
+  const slide=new THREE.Mesh(new THREE.PlaneGeometry(3.4,1.9),new THREE.MeshStandardMaterial({map:slideTex,emissive:0xffffff,emissiveIntensity:.5,emissiveMap:slideTex}));slide.position.set(BX,2.0,PZ-2.85);stage.add(slide);
+  const desk=box(stage,2.2,.8,1.0,BX-1.4,.4,PZ+1.6,new THREE.MeshStandardMaterial({color:0x5a4632,roughness:.9}));
+  // file "WHITE DEATH"
+  const fileTex=(()=>{const cv=document.createElement('canvas');cv.width=256;cv.height=180;const x=cv.getContext('2d');x.fillStyle='#c9b98f';x.fillRect(0,0,256,180);x.fillStyle='#8c1f1f';x.font='bold 30px Arial';x.textAlign='center';x.fillText('WHITE',128,80);x.fillText('DEATH',128,120);x.strokeStyle='#8c1f1f';x.lineWidth=8;x.strokeRect(10,10,236,160);return new THREE.CanvasTexture(cv);})();
+  const file=new THREE.Mesh(new THREE.BoxGeometry(.5,.05,.7),new THREE.MeshStandardMaterial({map:fileTex}));file.position.set(BX-1.4,.84,PZ+1.6);stage.add(file);
+  // DC + Vicky + seated officers
+  const dc=H.buildHuman({build:'male',skin:0xa97a54,top:0x2b3a2b,bottom:0x243024,topi:false});dc.position.set(BX-1.4,.2,PZ+.6);dc.rotation.y=Math.PI;stage.add(dc);
+  const vicky=H.buildHuman({build:'male',skin:0xb98a64,top:0x3d5157,bottom:0x4b525b});vicky.position.set(BX+1.2,.2,PZ+1.2);vicky.rotation.y=-Math.PI/2;stage.add(vicky);
+  const offs=[];for(let i=0;i<3;i++){const o=H.buildHuman({build:'male',skin:0xb48761,top:0x2b3a2b,bottom:0x243024});o.position.set(BX-2+i*1.6,.2,PZ+2.6);o.rotation.y=0;stage.add(o);offs.push(o);}
+  const chowkiKey=new THREE.PointLight(0xdfe0c0,2.4,16,2);chowkiKey.position.set(BX,3.2,PZ);stage.add(chowkiKey);
+  actors.dc=dc;actors.vicky=vicky;actors.file=file;
+
+  // ---- animation loop refs ----
+  let filmActive=false,tt=0,savedFog=null,savedBg=null;
+  const sun=null;
+  function setPose(mesh,walk,phase,intensity){const r=mesh.userData.rig;if(!r)return;for(let i=0;i<2;i++){const a=Math.sin(phase+i*Math.PI);if(r.legs){r.legs[i].hip.rotation.x=a*.4*intensity;r.legs[i].knee.rotation.x=-Math.max(0,-a)*.5*intensity;}r.arms[i].shoulder.rotation.x=-a*.5*intensity;r.arms[i].elbow.rotation.x=.4;}}
+  function tick(dt){if(!filmActive)return;tt+=dt;
+   // mother frantic
+   const m=actors.mother;m.phase+=dt*6;setPose(m.mesh,true,m.phase,1);m.mesh.position.x=m.base.x+Math.sin(tt*1.7)*1.2;m.mesh.position.z=m.base.z+Math.cos(tt*1.3)*.9;m.mesh.rotation.y=Math.atan2(Math.cos(tt*1.3)*-1.3*.9,Math.sin(tt*1.7)*1.2*1.7);
+   // ambulance racing
+   const a=actors.amb;a.mesh.position.z+=dt*9;if(a.mesh.position.z>a.z1)a.mesh.position.z=a.z0;const fl=(Math.sin(tt*14)>0);a.beacon.material.emissiveIntensity=fl?2.6:.3;a.light.intensity=fl?4:.6;a.light.position.z=a.mesh.position.z;
+   // doctors CPR
+   for(let i=0;i<actors.docs.length;i++){const d=actors.docs[i],r=d.userData.rig;if(r){const p=Math.abs(Math.sin(tt*6));r.arms[0].shoulder.rotation.x=-1.2-p*.4;r.arms[1].shoulder.rotation.x=-1.2-p*.4;r.arms[0].elbow.rotation.x=.2;r.arms[1].elbow.rotation.x=.2;}}
+   // grieving mother2 sway
+   const m2=actors.mother2;m2.phase+=dt;m2.mesh.rotation.z=Math.sin(m2.phase*2)*.06;
+   // DC / vicky idle breathe
+   actors.vicky.rotation.z=Math.sin(tt*1.5)*.01;
+  }
+  function playFilm(cinema,onEnd){
+   stage.visible=true;filmActive=true;tt=0;
+   // fog ko haath nahi lagate (town-motion har frame fog.color set karta hai);
+   // film camera set ke bilkul paas hai isliye fog dikhta bhi nahi.
+   const seq={shots:shots()};
+   cinema.play(seq,()=>{filmActive=false;stage.visible=false;if(onEnd)onEnd();});
+  }
+  // absolute-position shot helpers
+  const pos=(x,y,z)=>(c,o)=>o.set(x,y,z);
+  function shots(){const R=0,A=40,HH=80,P=120;return [
+   // ---- Scene 1: ghar ka kamra ----
+   {dur:1.4,black:true,blackFast:false,from:pos(BX+2.9,1.7,R+1.4),look:pos(BX-.2,1.1,R+.2),sfx:'commotion'},
+   {dur:4.6,from:pos(BX+2.7,1.65,R+1.4),to:pos(BX+1.1,1.5,R+.7),look:pos(BX-.3,1.0,R+.2),speaker:'Maa',female:true,line:'Hey bhagwan… mere bache ko bacha le! Band-aid kahan hai…'},
+   {dur:4.6,from:pos(BX+1.7,1.25,R+1.7),to:pos(BX+1.05,.8,R+1.25),look:pos(BX+.55,.35,R+.8),speaker:'Maa',female:true,line:'Beta… aankhein khol! Uth ja mere lal!',sfx:'heartbeat'},
+   {dur:1.6,black:true,line:''},
+   // ---- Scene 2: ambulance ----
+   {dur:4.2,from:pos(BX-7,2.2,A-4),to:pos(BX-6,2,A+6),look:pos(BX,1.2,A+2),speaker:'',line:'Ambulance — IGMC ki taraf, full speed…',sfx:'siren'},
+   {dur:1.2,black:true},
+   // ---- Scene 3: hospital CPR ----
+   {dur:4.6,from:pos(BX-2.4,1.7,HH-3.2),to:pos(BX-1.2,1.6,HH-2),look:pos(BX,1.1,HH-.5),speaker:'Doctor',line:'Charge… hato! Ek… do… teen!',sfx:'cpr'},
+   {dur:2.4,black:true,line:'',sfx:'flatline'},
+   // ---- Scene 4: doctor tells maa ----
+   {dur:5.0,from:pos(BX-2.4,1.7,HH+2),to:pos(BX-1.2,1.6,HH+2.6),look:pos(BX+.4,1.4,HH+3.7),speaker:'Doctor',line:'Drug overdose tha… humne poori koshish ki, par hum bacha nahi paaye.'},
+   {dur:3.8,from:pos(BX+2.4,1.6,HH+4.5),to:pos(BX+1.6,1.5,HH+4.2),look:pos(BX+.9,1.4,HH+4),speaker:'Maa',female:true,line:'Nahiii!!! Mera bacha… mera bacha!',sfx:'scream'},
+   {dur:1.6,black:true,line:''},
+   // ---- Studio card ----
+   {dur:4.8,black:true,studio:'NIKJYAR STUDIO  presents',title:'SHIMLA GULLIES',sub:'SAME STREETS · DIFFERENT STORIES'},
+   {dur:1.0,black:true},
+   // ---- Police chowki ----
+   {dur:4.6,from:pos(BX-3.4,1.9,P-1),to:pos(BX-1.8,1.8,P-.2),look:pos(BX,1.7,P-2.6),speaker:'Officer',line:'Sir, pichhle 1 saal mein 1000 se zyada log chitta overdose se mar chuke hain.'},
+   {dur:4.4,from:pos(BX+2.6,1.8,P+.4),to:pos(BX+1.4,1.7,P+.2),look:pos(BX-1.4,1.6,P+.6),speaker:'DC',line:'Ye number girana bahut zaroori hai… warna Shimla haath se nikal jayega.'},
+   {dur:3.2,from:pos(BX-1.4,1.6,P+2.6),to:pos(BX-1.4,1.55,P+2.2),look:pos(BX-1.4,1.5,P+.6),speaker:'Phone',line:'Sir… abhi ek aur chitta ka case aaya hai.',sfx:'ring'},
+   {dur:4.6,from:pos(BX-3,1.8,P+1.4),to:pos(BX-1.9,1.7,P+1.0),look:pos(BX-1.4,1.6,P+.6),title:'OPERATION WHITE DEATH',speaker:'DC',line:'It\'s time to start Operation White Death.'},
+   {dur:4.8,from:pos(BX+.4,1.7,P+2),to:pos(BX-.4,1.6,P+1.6),lookFrom:pos(BX-1.4,1.5,P+.6),lookTo:pos(BX+1.2,1.5,P+1.2),speaker:'DC',line:'Vicky — we need to get to the streets, before the streets get to us.'},
+   {dur:4.2,from:pos(BX+2.2,1.7,P+1.6),to:pos(BX+1.4,1.6,P+1.3),look:pos(BX+1.2,1.5,P+1.2),speaker:'Vicky',line:'Ho jayega sir. Main andar ghusunga — Khedi Bhai ban ke.'},
+   {dur:1.6,black:true}
+  ];}
+  return {playFilm,tick,active:()=>filmActive};
+ }
+ return {create};
 })();
 
 
@@ -7574,8 +7743,10 @@ async function boot(){
  // Khedi Bhai's world: 4 friends (Vicky, Chauhan, Negi, Shilpa), phone calls, momo/beedi street life, ambience audio, extra buildings.
  const khedi=__m['khedi.js'].create(world,scene,player,camera,{toast,voiceEnabled:()=>streetLife.voice&&streetLife.voiceReady});
  // Cinematic cutscenes (3 acts play from the start; STORY button / replay).
- const cinema=__m['cinema.js'].create(camera,{player,friends:khedi.friends,world,voiceEnabled:()=>streetLife.voice&&streetLife.voiceReady,friend:n=>khedi.friends.find(f=>f.name===n)});
+ const cinema=__m['cinema.js'].create(camera,{player,friends:khedi.friends,world,voiceEnabled:()=>streetLife.voice&&streetLife.voiceReady,friend:n=>khedi.friends.find(f=>f.name===n),sfx:n=>khedi.ambience.filmSFX(n)});
  jobs.cinema=cinema;   // campaign ko cutscene player do (TDZ ke baad)
+ const introFilm=__m['intro-film.js'].create(scene,world);   // Shimla Gullies cold-open
+ function playFilm(){introFilm.playFilm(cinema,()=>{chase._init=false;toast('OPERATION WHITE DEATH · Golden marker par T se mission');});}
  function introShots(){const P=player.pos,st=world.story||{},V=(x,y,z)=>(c,o)=>o.set(x,y,z),atP=(dx,dy,dz)=>(c,o)=>o.set(P.x+dx,P.y+dy,P.z+dz),
    vk=()=>khedi.friends.find(f=>f.name==='Vicky'),vkPos=(dx,dy,dz)=>(c,o)=>{const m=vk()?.mesh.position||P;o.set(m.x+dx,m.y+dy,m.z+dz);},
    atL=(k,dx,dy,dz)=>(c,o)=>{const L=st[k]||P;o.set(L.x+dx,world.groundAt(L.x,L.z)+dy,L.z+dz);};
@@ -7597,7 +7768,7 @@ async function boot(){
    {dur:3.8,from:atP(3,2.3,3),to:atP(1.8,1.6,1.9),look:atP(0,1.4,0),speaker:'Khedi Bhai',line:'Chalo… Operation Chitta shuru karte hain. Golden marker pe T dabao.'}
   ]};}
  function playIntro(){cinema.play(introShots(),()=>{chase._init=false;toast('OPERATION CHITTA · 10 missions · Golden marker par T');});}
- $('story').onclick=()=>{if(!cinema.active())playIntro();};
+ $('story').onclick=()=>{if(!cinema.active())playFilm();};
  // Time of day control (fixes never-ending night) — cycles presets.
  const TIMES=[[6.5,'SUBAH'],[9,'DIN'],[13,'DOPAHAR'],[17,'SHAAM'],[20.5,'RAAT']];let timeIdx=1;
  function cycleTime(){timeIdx=(timeIdx+1)%TIMES.length;world.motion.setTime(TIMES[timeIdx][0]);toast('Samay: '+TIMES[timeIdx][1]);}
@@ -7607,10 +7778,10 @@ async function boot(){
  function photoMode(){photo=!photo;if(photo){document.exitPointerLock?.();camera.position.set(10,5.1,23);camera.lookAt(-8,4.5,0);toast('Reference view · V to return to walking');}else{chase._init=false;} $('photo').classList.toggle('active',photo);}
  $('route').onclick=()=>{if(jobs.active){toast('Job ke dauraan fast travel band hai.');return;}const target={x:2.7,z:-167,yaw:-Math.PI/2};if(drive){drive.speed=0;drive.slip=0;drive.placeAt(target.x,target.z,target.yaw);player.pos.copy(drive.pos);}else player.placeAt(target.x,target.z,target.yaw);photo=false;chase._init=false;chase.yaw=target.yaw;dynamicBoxes();toast('Sanjauli Chowk · Dhalli road is to the right.');};$('quality').onclick=setQuality;$('reset').onclick=reset;$('photo').onclick=photoMode;$('help').onclick=()=>$('guide').hidden=!$('guide').hidden;$('closehelp').onclick=()=>$('guide').hidden=true;$('full').onclick=()=>{if(document.fullscreenElement)document.exitFullscreen?.();else document.documentElement.requestFullscreen?.().catch(()=>toast('Fullscreen is unavailable here.'));};
  function resize(){renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();const s=renderer.getDrawingBufferSize(new THREE.Vector2());fx.setSize(s.x,s.y);}addEventListener('resize',resize);
- load.hidden=true;dynamicBoxes();playIntro();
- window.__shimla={ready:true,khedi,cinema,playIntro,stage:'Sanjauli + Chowk to Dhalli Tunnel',scene,world,motion,player,cars,pedestrians,dhalliNPCs,renderer,jobs,streetLife,camera,reset,interact,get driving(){return drive;},assets:ProductionAssets.manifest};
+ load.hidden=true;dynamicBoxes();playFilm();
+ window.__shimla={ready:true,khedi,cinema,introFilm,playFilm,stage:'Sanjauli + Chowk to Dhalli Tunnel',scene,world,motion,player,cars,pedestrians,dhalliNPCs,renderer,jobs,streetLife,camera,reset,interact,get driving(){return drive;},assets:ProductionAssets.manifest};
  function frame(now){requestAnimationFrame(frame);const dt=Math.min(.04,(now-last)/1000);last=now;elapsed+=dt;
-  const cine=cinema.active();if(cine){cinema.tick(dt);if(input.pressed('Enter')||input.pressed('Escape')||input.pressed('KeyP'))cinema.skip();}
+  const cine=cinema.active();if(cine){if(introFilm.active())introFilm.tick(dt);cinema.tick(dt);if(input.pressed('Enter')||input.pressed('Escape')||input.pressed('KeyP'))cinema.skip();}
   if(!cine){if(input.pressed('KeyT'))jobs.action(player,drive);if(input.pressed('KeyJ')&&!drive&&!photo)streetLife.punch();if(input.pressed('KeyM'))$('jobs').hidden=!$('jobs').hidden;if(input.pressed('KeyR'))reset();if(input.pressed('KeyQ'))setQuality();if(input.pressed('KeyV'))photoMode();if(input.pressed('KeyF')||input.pressed('KeyE'))interact();if(input.pressed('KeyH')){player.onPhone=!player.onPhone;khedi.phone.toggle(player.onPhone);}if(input.pressed('KeyB'))khedi.ambience.setMuted(!khedi.ambience.isMuted());if(input.pressed('KeyG')){const on=khedi.toggleDanda();streetLife.weapon=on;toast(on?'Danda nikala — J se maaro':'Danda rakh diya');}if(input.pressed('KeyC')){khedi.cracker();toast('Patake! 🎆');}if(input.pressed('KeyY'))cycleTime();}
   if(input.mouseDX||input.mouseDY)manualCamera=2.4;manualCamera=Math.max(0,manualCamera-dt);
   if(!photo&&!cine){chase.handleMouse(input.mouseDX,input.mouseDY);chase.handleWheel(input.wheelDY);
