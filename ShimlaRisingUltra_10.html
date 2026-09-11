@@ -10,7 +10,7 @@
 <div class="hud top"><div class="overline">NIKJYAR STUDIO · SHIMLA: KILLSHOT</div><h1>SANJAULI</h1><div class="sub"><span class="tag">ZOMBIE OUTBREAK</span> LOCKDOWN · CHITTA · KILLSHOT</div></div>
 <div class="tools"><button id="journalButton">CASE FILE</button><button id="saveButton">SAVE</button><button id="parking" title="Return to parking">PARKING</button><button id="sound">VOICE ON</button><button id="route" title="Return to the new route at Chowk">CHOWK</button><button id="quality" title="Q · Graphics quality">ULTRA</button><button id="timeBtn" title="N · Time of day">🕐 AUTO</button><button id="weatherBtn" title="B · Weather">☀ CLEAR</button><button id="photo" title="V · View the parking facade">VIEW</button><button id="reset" title="R · Reset position and cars">RESET</button><button id="full" title="Fullscreen">⛶</button><button id="help" title="Controls">?</button></div>
 <div class="hud bottom"><div class="place"><span id="locationlabel">SANJAULI · SHIMLA</span><small id="mode">ON FOOT</small><small id="worldclock">DAY 1 · 16:19</small></div><div class="health"><i id="healthfill" style="width:100%"></i></div><div class="bar"><i id="stamina" style="width:100%"></i></div></div>
-<div class="hud controls"><span><b>WASD</b> MOVE</span><span><b>SHIFT</b> RUN</span><span><b>SPACE</b> JUMP</span><span><b>F</b> CAR</span><span><b>J / G</b> HIT / DANDA</span></div>
+<div class="hud controls"><span><b>WASD</b> MOVE</span><span><b>SHIFT</b> RUN</span><span><b>LMB / J</b> FIRE</span><span><b>RMB / C</b> AIM</span><span><b>F</b> CAR</span><span><b>G</b> DANDA</span></div>
 <button type="button" class="hud" id="prompt" hidden></button><div class="hud" id="toast"></div>
 <div id="guide" hidden><h2>Explore Sanjauli.</h2><p>Twenty story missions begin at the Chowki and lead through Sanjauli, IGMC and the fictional depot. Use the Case File (M) to review evidence. Press R to retry the current checkpoint. Press T to interact. A full day passes automatically in 18 real minutes. Explore the showrooms near Dhalli Tunnel and look uphill for Dhingu Mata Mandir when you turn right at Chowk. NPCs chat, and may chase you if you shove them. J punches/slaps; G swings your danda; hold K to block. Repeated shoving, fights and dangerous driving bring police. Run out of sight to lose them, or press L near police to surrender. If caught, you go to Sanjauli Chowki and are released after a short custody scene.</p><dl><dt>W A S D / arrows</dt><dd>Walk / drive</dd><dt>Mouse drag or click</dt><dd>Look around</dd><dt>Mouse wheel</dt><dd>Camera distance</dd><dt>Shift / Space</dt><dd>Run / jump</dd><dt>F or E / Space in car</dt><dd>Enter or exit / brake</dd><dt>V / R / Q</dt><dd>Reference view / reset / quality</dd><dt>T / M</dt><dd>Job action / mission panel</dd><dt>J / G / hold K</dt><dd>Pataka / danda / block</dd><dt>L near police</dt><dd>Surrender</dd><dt>H / Esc</dt><dd>Phone / release mouse</dd></dl><p class="note">Visual reconstruction from the supplied collage; dimensions are estimated. Building placement and the hilltop temple are game-scale interpretations. Temple reference: shridhingumatatemple.org. Browser voices are used when available. All game assets are embedded. Pahadi topi, beedi animation, moving street traffic, shopkeepers and animals are included.</p><button id="closehelp">BACK TO THE STREET</button></div>
 <div id="touch"><div class="pad"><button data-key="KeyW">↑</button><button data-key="KeyA">←</button><button data-key="KeyS">↓</button><button data-key="KeyD">→</button></div><div class="actions"><button data-key="ShiftLeft">RUN</button><button data-key="Space">JUMP</button><button data-key="KeyF">CAR</button><button data-key="KeyT">TALK</button><button data-key="KeyM">CASE</button><button data-key="KeyJ">HIT</button><button data-key="KeyG">DANDA</button><button data-key="KeyL">GIVE UP</button><button data-key="KeyK">BLOCK</button></div></div>
@@ -5741,11 +5741,21 @@ class ChaseCamera {
     this.pos = new THREE.Vector3();
     this.look = new THREE.Vector3();
     this._init = false;
+    // aim-down-sights + recoil/shake (SHIMLA: KILLSHOT)
+    this.aim = 0; this.recoilPitch = 0; this.recoilYaw = 0; this.shake = 0;
   }
 
   handleMouse(dx, dy, sens = 0.0026) {
-    this.yaw -= dx * sens;
-    this.pitch = THREE.MathUtils.clamp(this.pitch + dy * sens, -0.42, 1.15);
+    const s = sens * (1 - this.aim * 0.4);           // aim karte waqt nishana narm
+    this.yaw -= dx * s;
+    this.pitch = THREE.MathUtils.clamp(this.pitch + dy * s, -0.42, 1.15);
+  }
+
+  /** Har goli pe camera ko jhatka — pitch upar, thoda yaw, + screen shake. */
+  kick(pitch = 0.03, yaw = 0.012, shake = 0.11) {
+    this.recoilPitch += pitch;
+    this.recoilYaw += (Math.random() - 0.5) * yaw * 2;
+    if (shake > this.shake) this.shake = shake;
   }
 
   /** Mouse wheel se zoom -- 0.65x (paas) se 1.7x (door) tak. */
@@ -5768,7 +5778,10 @@ class ChaseCamera {
      * saamne ki sadak gaadi ke peeche chhup jaati thi -- aage kya aa raha
      * hai, kuch dikhta hi nahi tha.
      */
-    this.targetDist = (drive ? 10.5 : 4.0) * this.zoom;
+    this.recoilPitch += (0 - this.recoilPitch) * Math.min(1, dt * 9);
+    this.recoilYaw += (0 - this.recoilYaw) * Math.min(1, dt * 9);
+    this.shake = Math.max(0, this.shake - dt * 0.55);
+    this.targetDist = (drive ? 10.5 : 4.0) * this.zoom * (1 - this.aim * 0.42);
     /*
      * Oonchai 4.2 se 4.9 -- 5.6 nahi.
      *
@@ -5870,8 +5883,17 @@ class ChaseCamera {
       lz -= Math.cos(headingYaw) * ahead;
     }
     this.look.lerp(_l.set(lx, lookY, lz), Math.min(1, dt * 12));
-    this.cam.position.copy(this.pos);
-    this.cam.lookAt(this.look);
+    // aim over-the-shoulder framing + recoil + shake — temp render pose, state untouched
+    let px = this.pos.x, py = this.pos.y, pz = this.pos.z, lx2 = this.look.x, ly2 = this.look.y, lz2 = this.look.z;
+    if (this.aim > 0.01) {
+      const rx = Math.cos(this.yaw), rz = -Math.sin(this.yaw), off = 0.75 * this.aim;
+      px += rx * off; pz += rz * off; lx2 += rx * off; lz2 += rz * off; py += 0.12 * this.aim; ly2 += 0.10 * this.aim;
+    }
+    ly2 += this.recoilPitch * this.dist * 0.8;
+    lx2 += Math.cos(this.yaw) * this.recoilYaw * this.dist; lz2 += -Math.sin(this.yaw) * this.recoilYaw * this.dist;
+    if (this.shake > 0.0001) { px += (Math.random() - 0.5) * this.shake; py += (Math.random() - 0.5) * this.shake; pz += (Math.random() - 0.5) * this.shake; }
+    this.cam.position.set(px, py, pz);
+    this.cam.lookAt(lx2, ly2, lz2);
   }
 }
 const _v = new THREE.Vector3(), _l = new THREE.Vector3();
@@ -7337,53 +7359,90 @@ __m['env-controls.js']=(function(){
 })();
 
 
+/* ============================================================ sfx.js
+ * Chhoti WebAudio synth — koi audio file nahi, sab live bnta hai (halka).
+ * Gun crack, headshot squelch, impact thud, zombie growl. Pehle user-gesture
+ * ke baad hi context banta/resume hota hai (browser autoplay policy).
+ */
+__m['sfx.js']=(function(){
+ let ctx=null,master=null,enabled=true,_growl=0;
+ function ac(){if(ctx)return ctx;try{const A=globalThis.AudioContext||globalThis.webkitAudioContext;if(!A)return null;ctx=new A();master=ctx.createGain();master.gain.value=.42;master.connect(ctx.destination);}catch(e){ctx=null;}return ctx;}
+ function noise(dur){const c=ac();if(!c)return null;const n=Math.max(1,Math.floor(c.sampleRate*dur)),b=c.createBuffer(1,n,c.sampleRate),d=b.getChannelData(0);for(let i=0;i<n;i++)d[i]=Math.random()*2-1;const s=c.createBufferSource();s.buffer=b;return s;}
+ function env(g,t,peak,dur){g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(peak,t+.002);g.gain.exponentialRampToValueAtTime(.0001,t+dur);}
+ function shot(){if(!enabled)return;const c=ac();if(!c)return;if(c.state==='suspended')c.resume();const t=c.currentTime;
+  const s=noise(.15);if(!s)return;const g=c.createGain(),f=c.createBiquadFilter();f.type='lowpass';f.frequency.setValueAtTime(4200,t);f.frequency.exponentialRampToValueAtTime(320,t+.12);s.connect(f);f.connect(g);g.connect(master);env(g,t,.95,.15);s.start(t);s.stop(t+.17);
+  const o=c.createOscillator(),og=c.createGain();o.type='square';o.frequency.setValueAtTime(180,t);o.frequency.exponentialRampToValueAtTime(55,t+.05);o.connect(og);og.connect(master);env(og,t,.4,.07);o.start(t);o.stop(t+.08);}
+ function head(){if(!enabled)return;const c=ac();if(!c)return;const t=c.currentTime;
+  const s=noise(.2);if(!s)return;const g=c.createGain(),f=c.createBiquadFilter();f.type='bandpass';f.frequency.setValueAtTime(900,t);f.frequency.exponentialRampToValueAtTime(180,t+.18);f.Q.value=1.4;s.connect(f);f.connect(g);g.connect(master);env(g,t,.8,.2);s.start(t);s.stop(t+.22);
+  const o=c.createOscillator(),og=c.createGain();o.type='sawtooth';o.frequency.setValueAtTime(220,t);o.frequency.exponentialRampToValueAtTime(50,t+.18);o.connect(og);og.connect(master);env(og,t,.3,.2);o.start(t);o.stop(t+.22);}
+ function impact(v=.6){if(!enabled)return;const c=ac();if(!c)return;const t=c.currentTime;const o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.setValueAtTime(140,t);o.frequency.exponentialRampToValueAtTime(45,t+.1);o.connect(g);g.connect(master);env(g,t,.4*v,.12);o.start(t);o.stop(t+.13);}
+ function growl(){if(!enabled)return;const c=ac();if(!c)return;const now=c.currentTime;if(now<_growl)return;_growl=now+.4;const t=now;const o=c.createOscillator(),g=c.createGain(),f=c.createBiquadFilter();o.type='sawtooth';o.frequency.setValueAtTime(70+Math.random()*30,t);o.frequency.linearRampToValueAtTime(48,t+.35);f.type='lowpass';f.frequency.value=420;o.connect(f);f.connect(g);g.connect(master);g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(.18,t+.08);g.gain.exponentialRampToValueAtTime(.0001,t+.4);o.start(t);o.stop(t+.42);}
+ return {shot,head,impact,growl,setEnabled(v){enabled=v;},resume(){const c=ac();if(c&&c.state==='suspended')c.resume();},get enabled(){return enabled;}};
+})();
+
 /* ============================================================ weapons.js
- * SHIMLA: KILLSHOT — Vicky ki bandook. Ek gun, infinite ammo. Camera ke
- * aage raycast (ray-sphere) se zombie ka SIR nishana banao. Sir pe laga to
- * dher; badan pe laga to sirf peeche dhakelta hai (marta nahi). Muzzle flash,
- * tracer aur ek chhoti pistol haath me — sab reusable, koi per-frame alloc nahi.
+ * SHIMLA: KILLSHOT — Vicky ki bandook. Ek gun, infinite ammo. Camera ke aage
+ * raycast se SIR nishana. Ab GTA-feel: aim mode (ADS zoom), recoil kick +
+ * screen shake, khoon ka fauwara, sir phaad-pop, awaaz. Sab pooled/synth.
  */
 __m['weapons.js']=(function(){
- function buildPistol(){const g=new THREE.Group();const met=new THREE.MeshStandardMaterial({color:0x17191d,metalness:.72,roughness:.38}),grey=new THREE.MeshStandardMaterial({color:0x2a2e33,metalness:.6,roughness:.5});
-  const slide=new THREE.Mesh(new THREE.BoxGeometry(.045,.055,.20),met);slide.position.set(0,0,.03);g.add(slide);
-  const barrel=new THREE.Mesh(new THREE.BoxGeometry(.03,.03,.10),met);barrel.position.set(0,.005,.15);g.add(barrel);
-  const grip=new THREE.Mesh(new THREE.BoxGeometry(.042,.12,.05),grey);grip.position.set(0,-.085,-.05);grip.rotation.x=.32;g.add(grip);
-  const guard=new THREE.Mesh(new THREE.TorusGeometry(.028,.008,6,10,Math.PI),grey);guard.position.set(0,-.04,.0);g.add(guard);
-  g.scale.set(1.15,1.15,1.15);return g;}
+ const SFX=__m['sfx.js'];
+ function buildPistol(){const g=new THREE.Group();const met=new THREE.MeshStandardMaterial({color:0x14161a,metalness:.8,roughness:.32}),grey=new THREE.MeshStandardMaterial({color:0x272b30,metalness:.55,roughness:.5}),gold=new THREE.MeshStandardMaterial({color:0xcaa24a,metalness:.9,roughness:.3});
+  const slide=new THREE.Mesh(new THREE.BoxGeometry(.05,.062,.235),met);slide.position.set(0,0,.04);g.add(slide);
+  const barrel=new THREE.Mesh(new THREE.CylinderGeometry(.017,.017,.12,10),met);barrel.rotation.x=Math.PI/2;barrel.position.set(0,.008,.18);g.add(barrel);
+  const grip=new THREE.Mesh(new THREE.BoxGeometry(.046,.14,.058),grey);grip.position.set(0,-.10,-.055);grip.rotation.x=.33;g.add(grip);
+  const guard=new THREE.Mesh(new THREE.TorusGeometry(.03,.008,6,12,Math.PI),grey);guard.position.set(0,-.045,.01);g.add(guard);
+  const trim=new THREE.Mesh(new THREE.BoxGeometry(.052,.01,.06),gold);trim.position.set(0,.03,.02);g.add(trim);
+  g.scale.set(1.25,1.25,1.25);return g;}
  function sphereT(ox,oy,oz,dx,dy,dz,cx,cy,cz,r){const ex=cx-ox,ey=cy-oy,ez=cz-oz,tca=ex*dx+ey*dy+ez*dz;if(tca<0)return -1;const d2=(ex*ex+ey*ey+ez*ez)-tca*tca;if(d2>r*r)return -1;const thc=Math.sqrt(r*r-d2),t=tca-thc;return t>0?t:tca+thc;}
+ class Gore{
+  constructor(scene){this.max=160;this.i=0;this.pos=new Float32Array(this.max*3);this.vel=new Float32Array(this.max*3);this.life=new Float32Array(this.max);
+   for(let k=0;k<this.max;k++)this.pos[k*3+1]=-9999;
+   const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(this.pos,3));this.geo=geo;
+   this.pts=new THREE.Points(geo,new THREE.PointsMaterial({color:0xa60c08,size:.13,transparent:true,opacity:.95,depthWrite:false}));this.pts.frustumCulled=false;this.pts.name='gore';scene.add(this.pts);}
+  burst(x,y,z,n,spread,up){for(let k=0;k<n;k++){const idx=this.i;this.i=(this.i+1)%this.max;this.pos[idx*3]=x;this.pos[idx*3+1]=y;this.pos[idx*3+2]=z;const a=Math.random()*6.283,e=.3+Math.random();this.vel[idx*3]=Math.cos(a)*spread*e;this.vel[idx*3+1]=up+Math.random()*spread*.7;this.vel[idx*3+2]=Math.sin(a)*spread*e;this.life[idx]=.5+Math.random()*.45;}this.geo.attributes.position.needsUpdate=true;}
+  tick(dt){let any=false;for(let k=0;k<this.max;k++){if(this.life[k]>0){this.life[k]-=dt;this.vel[k*3+1]-=dt*9.5;this.pos[k*3]+=this.vel[k*3]*dt;this.pos[k*3+1]+=this.vel[k*3+1]*dt;this.pos[k*3+2]+=this.vel[k*3+2]*dt;if(this.life[k]<=0)this.pos[k*3+1]=-9999;any=true;}}if(any)this.geo.attributes.position.needsUpdate=true;}
+ }
  class Weapon{
-  constructor(scene,player,camera,zombies,ui){Object.assign(this,{scene,player,camera,zombies,ui});
+  constructor(scene,player,camera,chase,zombies,ui){Object.assign(this,{scene,player,camera,chase,zombies,ui});
    this.cool=0;this.rate=.13;this.range=95;this.headR=.34;this.bodyR=.52;this.flashT=0;this.tracerT=0;
-   this.flash=new THREE.Sprite(new THREE.SpriteMaterial({color:0xffdf94,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending}));this.flash.scale.set(.7,.7,.7);this.flash.visible=false;scene.add(this.flash);
-   this.light=new THREE.PointLight(0xffce78,0,8);scene.add(this.light);
+   this.flash=new THREE.Sprite(new THREE.SpriteMaterial({color:0xffe6a0,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending}));this.flash.scale.set(.55,.55,.55);this.flash.visible=false;scene.add(this.flash);
+   this.light=new THREE.PointLight(0xffce78,0,9);scene.add(this.light);
    const tg=new THREE.BufferGeometry();tg.setAttribute('position',new THREE.BufferAttribute(new Float32Array(6),3));
-   this.tracer=new THREE.Line(tg,new THREE.LineBasicMaterial({color:0xfff0b4,transparent:true,opacity:0,depthWrite:false}));this.tracer.frustumCulled=false;scene.add(this.tracer);
-   this.gun=buildPistol();try{this.player.mesh.userData.rig.arms[1].elbow.add(this.gun);this.gun.position.set(0,-.24,.06);this.gun.rotation.set(.2,0,0);}catch(e){scene.add(this.gun);}
-   this._d=new THREE.Vector3();
+   this.tracer=new THREE.Line(tg,new THREE.LineBasicMaterial({color:0xfff2bc,transparent:true,opacity:0,depthWrite:false}));this.tracer.frustumCulled=false;scene.add(this.tracer);
+   this.gun=buildPistol();this.muzzle=new THREE.Object3D();this.muzzle.position.set(0,.01,.30);this.gun.add(this.muzzle);
+   try{this.player.mesh.userData.rig.arms[1].elbow.add(this.gun);this.gun.position.set(.02,-.26,.06);this.gun.rotation.set(.15,0,0);}catch(e){scene.add(this.gun);}
+   this.gore=new Gore(scene);this._d=new THREE.Vector3();this._mz=new THREE.Vector3();
   }
-  fire(){if(this.cool>0)return null;this.cool=this.rate;
-   const p=this.player.pos,ox=p.x,oy=p.y+1.42,oz=p.z;const dir=this.camera.getWorldDirection(this._d);let dx=dir.x,dy=dir.y,dz=dir.z;const dl=Math.hypot(dx,dy,dz)||1;dx/=dl;dy/=dl;dz/=dl;
+  fire(aiming){if(this.cool>0)return null;this.cool=this.rate;
+   this.gun.updateWorldMatrix(true,false);const mz=this.muzzle.getWorldPosition(this._mz);
+   const p=this.player.pos,ox=p.x,oy=p.y+1.42,oz=p.z;const d=this.camera.getWorldDirection(this._d);
+   const sp=aiming?.004:.032;let dx=d.x+(Math.random()-.5)*sp,dy=d.y+(Math.random()-.5)*sp,dz=d.z+(Math.random()-.5)*sp;const dl=Math.hypot(dx,dy,dz)||1;dx/=dl;dy/=dl;dz/=dl;
    let best=null;
-   for(const z of this.zombies.pool){if(!z.active||z.state==='dead')continue;const bp=z.mesh.position;
-    let part=null,t=this.range;
+   for(const z of this.zombies.pool){if(!z.active||z.state==='dead')continue;const bp=z.mesh.position;let part=null,t=this.range;
     const th=sphereT(ox,oy,oz,dx,dy,dz,bp.x,bp.y+1.5,bp.z,this.headR);if(th>0&&th<this.range){part='head';t=th;}
     else{const tb=sphereT(ox,oy,oz,dx,dy,dz,bp.x,bp.y+1.0,bp.z,this.bodyR);if(tb>0&&tb<this.range){part='body';t=tb;}}
-    if(part&&(!best||t<best.t))best={z,part,t};
-   }
+    if(part&&(!best||t<best.t))best={z,part,t};}
    const ex=ox+dx*(best?best.t:this.range),ey=oy+dy*(best?best.t:this.range),ez=oz+dz*(best?best.t:this.range);
-   // muzzle fx just in front of Vicky
-   this.flash.position.set(ox+dx*.7,oy+dy*.7,oz+dz*.7);this.flash.visible=true;this.flash.material.opacity=1;this.flashT=.05;this.flash.material.rotation=Math.random()*6.28;
-   this.light.position.copy(this.flash.position);this.light.intensity=2.6;
-   const pa=this.tracer.geometry.attributes.position;pa.setXYZ(0,ox+dx*.6,oy+dy*.6-.1,oz+dz*.6);pa.setXYZ(1,ex,ey,ez);pa.needsUpdate=true;this.tracer.material.opacity=.85;this.tracerT=.06;
-   if(best){if(best.part==='head'){this.zombies.kill(best.z);this.ui.hitmarker?.('SIR PHAAD! ',true);}else{this.zombies.stagger(best.z);this.ui.hitmarker?.('LAGA · sar pe maar!',false);}}
+   this.flash.position.copy(mz);this.flash.visible=true;this.flash.material.opacity=1;this.flashT=.05;this.flash.material.rotation=Math.random()*6.28;this.flash.scale.setScalar(.45+Math.random()*.25);
+   this.light.position.copy(mz);this.light.intensity=3.0;
+   const pa=this.tracer.geometry.attributes.position;pa.setXYZ(0,mz.x,mz.y,mz.z);pa.setXYZ(1,ex,ey,ez);pa.needsUpdate=true;this.tracer.material.opacity=.9;this.tracerT=.06;
+   this.chase&&this.chase.kick&&this.chase.kick(aiming?.016:.03,.012,aiming?.05:.11);
+   SFX&&SFX.shot();
+   if(best){const bp=best.z.mesh.position;if(best.part==='head'){this.zombies.kill(best.z,dx,dz);this.gore.burst(bp.x,bp.y+1.5,bp.z,20,3.4,1.6);SFX&&SFX.head();this.ui.hitmarker?.('SIR PHAAD!',true);}
+    else{this.zombies.stagger(best.z,dx,dz);this.gore.burst(ex,ey,ez,11,2.3,.9);SFX&&SFX.impact(.7);this.ui.hitmarker?.('LAGA · sir pe maar!',false);}}
    return best;
   }
-  tick(dt){this.cool=Math.max(0,this.cool-dt);
-   if(this.flashT>0){this.flashT-=dt;const k=Math.max(0,this.flashT/.05);this.flash.material.opacity=k;this.light.intensity=k*2.6;if(this.flashT<=0){this.flash.visible=false;this.flash.material.opacity=0;this.light.intensity=0;}}
-   if(this.tracerT>0){this.tracerT-=dt;this.tracer.material.opacity=Math.max(0,this.tracerT/.06)*.85;}
+  aimPose(aiming){const rig=this.player.mesh.userData.rig;if(!rig||aiming<.05)return;const a=Math.min(1,aiming);
+   rig.arms[1].shoulder.rotation.x=1.35*a;rig.arms[1].shoulder.rotation.z=0;rig.arms[1].elbow.rotation.x=.22;
+   rig.arms[0].shoulder.rotation.x=1.28*a;rig.arms[0].shoulder.rotation.z=.28*a;rig.arms[0].elbow.rotation.x=.5;}
+  tick(dt,aiming){this.cool=Math.max(0,this.cool-dt);this.gore.tick(dt);
+   if(this.flashT>0){this.flashT-=dt;const k=Math.max(0,this.flashT/.05);this.flash.material.opacity=k;this.light.intensity=k*3.0;if(this.flashT<=0){this.flash.visible=false;this.flash.material.opacity=0;this.light.intensity=0;}}
+   if(this.tracerT>0){this.tracerT-=dt;this.tracer.material.opacity=Math.max(0,this.tracerT/.06)*.9;}
+   if(aiming>.05)this.aimPose(aiming);
   }
  }
- return{Weapon};
+ return{Weapon,Gore};
 })();
 
 /* ============================================================ zombies.js
@@ -7395,6 +7454,7 @@ __m['weapons.js']=(function(){
  */
 __m['zombies.js']=(function(){
  const {buildHuman}=__m['human.js'];
+ const SFX=__m['sfx.js'];
  const SKINS=[0x6f8f6a,0x7c8a70,0x5f7a63,0x869079,0x6b7d6f];
  const TOPS=[0x39402f,0x2f2b28,0x40353a,0x2b3138,0x35302a];
  class Zombies{
@@ -7411,14 +7471,14 @@ __m['zombies.js']=(function(){
    return{mesh:m,rig:m.userData.rig,state:'idle',active:false,id:i,windup:0,cool:0,fall:0,staggerT:0,phase:Math.random()*6.28};
   }
   living(){let n=0;for(const z of this.pool)if(z.active&&z.state!=='dead')n++;return n;}
-  reset(){for(const z of this.pool){z.active=false;z.mesh.visible=false;z.state='idle';z.mesh.rotation.set(0,0,0);}this.spawnT=1.5;}
-  kill(z){if(!z||z.state==='dead')return;z.state='dead';z.fall=0;z.mesh.rotation.z=(Math.random()-.5)*.5;}
-  stagger(z){if(!z||z.state==='dead')return;z.state='stagger';z.staggerT=.35;z.cool=Math.max(z.cool,.55);z.windup=0;}
+  reset(){for(const z of this.pool){z.active=false;z.mesh.visible=false;z.state='idle';z.mesh.rotation.set(0,0,0);if(z.rig&&z.rig.head)z.rig.head.scale.setScalar(1);}this.spawnT=1.5;}
+  kill(z,dx=0,dz=0){if(!z||z.state==='dead')return;z.state='dead';z.fall=0;z.mesh.rotation.z=(Math.random()-.5)*.55;z.mesh.position.x+=dx*.35;z.mesh.position.z+=dz*.35;if(z.rig&&z.rig.head)z.rig.head.scale.setScalar(.01);}
+  stagger(z,dx=0,dz=0){if(!z||z.state==='dead')return;z.state='stagger';z.staggerT=.35;z.cool=Math.max(z.cool,.55);z.windup=0;z.mesh.position.x+=dx*.22;z.mesh.position.z+=dz*.22;}
   spawnOne(){const z=this.pool.find(z=>!z.active);if(!z)return;const pp=this.player.pos;
    for(let tr=0;tr<4;tr++){const ang=Math.random()*6.283,rad=28+Math.random()*13;let x=pp.x+Math.cos(ang)*rad,zz=pp.z+Math.sin(ang)*rad;
     const b=this.world.bounds;if(b){if(b.x)x=THREE.MathUtils.clamp(x,b.x[0]+2,b.x[1]-2);if(b.z)zz=THREE.MathUtils.clamp(zz,b.z[0]+2,b.z[1]-2);}
     const y=this.world.groundAt(x,zz);if(this.world.colliders?.inside&&this.world.colliders.inside(x,y+1,zz,.6))continue;
-    z.mesh.position.set(x,y,zz);z.mesh.visible=true;z.active=true;z.state='chase';z.fall=0;z.cool=.4+Math.random()*.4;z.mesh.rotation.set(0,0,0);return;}
+    z.mesh.position.set(x,y,zz);z.mesh.visible=true;z.active=true;z.state='chase';z.fall=0;z.cool=.4+Math.random()*.4;z.mesh.rotation.set(0,0,0);if(z.rig&&z.rig.head)z.rig.head.scale.setScalar(1);return;}
   }
   tick(dt,drive){if(!this.enabled){return;}this.time+=dt;this.invuln=Math.max(0,this.invuln-dt);
    const pp=this.player.pos;let minD=1e9;
@@ -7432,7 +7492,7 @@ __m['zombies.js']=(function(){
     if(z.state==='stagger'){z.staggerT-=dt;m.rotation.z=Math.sin(this.time*32)*.13;if(z.staggerT<=0){z.state='chase';m.rotation.z=0;}continue;}
     if(dist>1.28){z.state='chase';const step=Math.min(dist-1.05,this.speed*dt);this.world.colliders.sweep(p,dx/dist*step,dz/dist*step,.3,p.y+.8);p.y=this.world.groundAt(p.x,p.z);
      const r=z.rig,sw=Math.sin(this.time*6+z.phase)*.42;for(let i=0;i<2;i++){r.legs[i].hip.rotation.x=i?-sw:sw;r.legs[i].knee.rotation.x=-Math.max(0,i?sw:-sw)*.55;r.arms[i].shoulder.rotation.x=.95+Math.sin(this.time*3+z.phase+i*2)*.16;r.arms[i].elbow.rotation.x=.5;}r.head.rotation.z=Math.sin(this.time*2+z.phase)*.14;
-    }else{z.state='attack';const r=z.rig;for(const a of r.arms){a.shoulder.rotation.x=1.4;a.elbow.rotation.x=.28;}r.head.rotation.z=Math.sin(this.time*10)*.16;
+    }else{z.state='attack';const r=z.rig;for(const a of r.arms){a.shoulder.rotation.x=1.4;a.elbow.rotation.x=.28;}r.head.rotation.z=Math.sin(this.time*10)*.16;if(SFX&&Math.random()<.03)SFX.growl();
      if(z.cool<=0){z.cool=1.1;if(!drive&&this.invuln<=0){this.player.health=Math.max(0,this.player.health-this.dmg);this.invuln=.45;this.ui?.hit?.();if(this.player.health<=0){this.enabled=false;this.onPlayerDown&&this.onPlayerDown();return;}}}}
    }
    if(minD>6&&this.player.health<100&&this.player.health>0)this.player.health=Math.min(100,this.player.health+dt*3.5);
@@ -7492,7 +7552,7 @@ async function boot(){
  streetLife.police=police;streetLife.onOffence=(kind,actor)=>{if(actor?.authorized)return;if(kind!=='swing')jobs.trust=Math.max(0,jobs.trust-4);police.report(kind,actor);};streetLife.ui.impact=(text)=>{$('hitmarker').textContent=text;$('hitmarker').hidden=false;setTimeout(()=>$('hitmarker').hidden=true,250);};
  function missionAction(){if(jobs.dialogue){jobs.action(player,drive);return;}if(police.engaged){toast('Police se pehle bach lo, phir mission.');return;}jobs.action(player,drive);}
  $('jobaction').onclick=missionAction;
-$('sound').onclick=()=>{streetLife.voice=!streetLife.voice;cinema.voice=streetLife.voice;streetLife.enableVoice();$('sound').textContent=streetLife.voice?'VOICE ON':'VOICE OFF';if(!streetLife.voice&&typeof speechSynthesis!=='undefined')speechSynthesis.cancel();};
+$('sound').onclick=()=>{streetLife.voice=!streetLife.voice;cinema.voice=streetLife.voice;streetLife.enableVoice();__m['sfx.js'].setEnabled(streetLife.voice);__m['sfx.js'].resume();$('sound').textContent=streetLife.voice?'VOICE ON':'VOICE OFF';if(!streetLife.voice&&typeof speechSynthesis!=='undefined')speechSynthesis.cancel();};
  addEventListener('keydown',()=>streetLife.enableVoice());renderer.domElement.addEventListener('pointerdown',()=>streetLife.enableVoice());
  $('parking').onclick=()=>{if(jobs.locked)return;if(jobs.active){toast('Job chal rahi hai — marker follow karo.');return;}reset();};
  function setQuality(){autoScale=false;quality=!quality;renderer.setPixelRatio(Math.min(devicePixelRatio||1,quality?1.5:1.25));fx.enabled=quality;if(fx.ao)fx.ao.enabled=quality;world.vegetation.grassMesh.visible=quality;renderer.shadowMap.enabled=true;resize();$('quality').textContent=quality?'ULTRA':'BALANCED';toast(quality?'Ultra graphics · manual':'Standard graphics · manual — auto-scale off');}
@@ -7514,15 +7574,19 @@ $('sound').onclick=()=>{streetLife.voice=!streetLife.voice;cinema.voice=streetLi
  function zombieDown(){$('hurt').style.opacity='.92';setTimeout(()=>{$('hurt').style.opacity='0';},700);player.placeAt(safeZone.x,safeZone.z,safeZone.yaw);player.health=100;player.stamina=100;chase._init=false;chase.yaw=player.yaw;dynamicBoxes();zombies.reset();zombies.invuln=2.6;zombies.enabled=true;toast('INFECTED! Safe-zone par respawn · SIR pe maaro warna marte nahi!');}
  const zombies=new __m['zombies.js'].Zombies(world,scene,player,camera,zombieDown);
  zombies.ui={hit:()=>{$('hurt').style.opacity='.5';setTimeout(()=>$('hurt').style.opacity='0',150);}};
- const weapons=new __m['weapons.js'].Weapon(scene,player,camera,zombies,{hitmarker:(t,head)=>{$('hitmarker').textContent=t;$('hitmarker').style.color=head?'#ff5a45':'#ffe39a';$('hitmarker').hidden=false;setTimeout(()=>{$('hitmarker').hidden=true;},head?300:200);}});
- const crosshair=document.createElement('div');crosshair.id='crosshair';crosshair.style.cssText='position:fixed;left:50%;top:50%;width:24px;height:24px;margin:-12px 0 0 -12px;z-index:6;pointer-events:none;display:none';crosshair.innerHTML='<div style="position:absolute;left:50%;top:50%;width:4px;height:4px;margin:-2px;border-radius:50%;background:#ff5a45;box-shadow:0 0 7px #ff2d18"></div><div style="position:absolute;inset:0;border:2px solid rgba(255,255,255,.75);border-radius:50%;opacity:.5"></div>';document.body.appendChild(crosshair);
- renderer.domElement.addEventListener('pointerdown',e=>{if(e.button!==0||e.pointerType!=='mouse')return;if(cinema.active||jobs.locked||police.locked||photo||drive||jobs.menu||world.story.active)return;if(e.target!==renderer.domElement)return;weapons.fire();});
+ const weapons=new __m['weapons.js'].Weapon(scene,player,camera,chase,zombies,{hitmarker:(t,head)=>{$('hitmarker').textContent=t;$('hitmarker').style.color=head?'#ff5a45':'#ffe39a';$('hitmarker').hidden=false;setTimeout(()=>{$('hitmarker').hidden=true;},head?300:200);}});
+ const SFX=__m['sfx.js'];
+ const crosshair=document.createElement('div');crosshair.id='crosshair';crosshair.style.cssText='position:fixed;left:50%;top:50%;width:24px;height:24px;margin:-12px 0 0 -12px;z-index:6;pointer-events:none;display:none;transition:transform .08s';crosshair.innerHTML='<div style="position:absolute;left:50%;top:50%;width:4px;height:4px;margin:-2px;border-radius:50%;background:#ff5a45;box-shadow:0 0 7px #ff2d18"></div><div style="position:absolute;inset:0;border:2px solid rgba(255,255,255,.75);border-radius:50%;opacity:.5"></div>';document.body.appendChild(crosshair);
+ let rmbAim=false;const canShoot=()=>!(cinema.active||jobs.locked||police.locked||photo||drive||jobs.menu||world.story.active);
+ renderer.domElement.addEventListener('pointerdown',e=>{if(e.pointerType!=='mouse')return;if(e.button===2){rmbAim=true;e.preventDefault();return;}if(e.button!==0)return;if(!canShoot())return;if(e.target!==renderer.domElement)return;weapons.fire(chase.aim>.5);});
+ addEventListener('pointerup',e=>{if(e.button===2)rmbAim=false;});
+ renderer.domElement.addEventListener('contextmenu',e=>e.preventDefault());
  $('newStory').onclick=()=>jobs.startNew();$('continueStory').onclick=()=>jobs.continueGame();$('freeRoam').onclick=()=>jobs.freeRoam();$('skipcinema').onclick=()=>cinema.skip();$('dialognext').onclick=()=>jobs.answer(0);for(let i=0;i<3;i++)$('dialogchoice'+i).onclick=()=>jobs.answer(i);$('closejournal').onclick=()=>jobs.toggleJournal();$('replayintro').onclick=()=>jobs.replay();$('journalButton').onclick=()=>jobs.toggleJournal();$('saveButton').onclick=()=>jobs.save();
  function cycleTime(){const l=envCtl.cycleTime();$('timeBtn').textContent='🕐 '+l;toast('Samay: '+l);}
  function cycleWeather(){const l=envCtl.cycleWeather();$('weatherBtn').textContent=(l==='SNOW'?'❄ ':l==='RAIN'?'🌧 ':l==='FOG'?'🌫 ':'☀ ')+l;toast('Mausam: '+l);}
  $('timeBtn').onclick=cycleTime;$('weatherBtn').onclick=cycleWeather;
  function resize(){renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();const s=renderer.getDrawingBufferSize(new THREE.Vector2());fx.setSize(s.x,s.y);}addEventListener('resize',resize);
- load.hidden=true;$('quality').textContent='BALANCED';dynamicBoxes();toast('SHIMLA: KILLSHOT · Left-click / J = FIRE · SIR pe maaro! · G danda');
+ load.hidden=true;$('quality').textContent='BALANCED';dynamicBoxes();toast('SHIMLA: KILLSHOT · LMB/J = FIRE · RMB/C = AIM · SIR pe maaro warna marte nahi!');
  window.__shimla={ready:true,stage:'Sanjauli + Chowk to Dhalli Tunnel',cutscenes:__m['video-cutscene.js'],scene,world,motion,player,cars,pedestrians,dhalliNPCs,renderer,jobs,streetLife,police,cinema,camera,zombies,weapons,reset,interact,get driving(){return drive;},assets:ProductionAssets.manifest};
 
  // Cutscenes use one direct render pass and a small, consistently lit stage.
@@ -7547,15 +7611,18 @@ $('sound').onclick=()=>{streetLife.voice=!streetLife.voice;cinema.voice=streetLi
   if(!cinema.active){if(input.pressed('KeyN'))cycleTime();if(input.pressed('KeyB'))cycleWeather();}
   if(cinema.active){if(input.pressed('Escape'))cinema.skip();}
   else if(jobs.dialogue){if(jobs.dialogue.name==='CHECKPOINT'&&input.pressed('KeyR'))jobs.answer(0);else if(input.pressed('KeyT')||input.pressed('Enter')){if(!jobs.dialogue.choices.length)jobs.answer(0);}for(let i=0;i<3;i++)if(input.pressed('Digit'+(i+1)))jobs.answer(i);}
-  else if(!jobs.locked){if(input.pressed('KeyT'))missionAction();if(input.pressed('KeyG')&&!drive&&!photo&&!police.locked)streetLife.punch('danda');if(input.pressed('KeyL')&&!drive)police.surrender();if(input.pressed('KeyJ')&&!drive&&!photo&&!police.locked)weapons.fire();if(input.pressed('KeyR'))reset();if(input.pressed('KeyQ'))setQuality();if(input.pressed('KeyV'))photoMode();if(input.pressed('KeyF')||input.pressed('KeyE'))interact();if(input.pressed('KeyH')&&!police.locked){player.onPhone=!player.onPhone;if(police.engaged){streetLife.say({mesh:player.mesh,id:900,name:'Khedi Bhai'},'Ruk abhi krta mantri ko call!',false);police.nextSpeech=police.time+4;}}}
+  else if(!jobs.locked){if(input.pressed('KeyT'))missionAction();if(input.pressed('KeyG')&&!drive&&!photo&&!police.locked)streetLife.punch('danda');if(input.pressed('KeyL')&&!drive)police.surrender();if(input.pressed('KeyJ')&&!drive&&!photo&&!police.locked)weapons.fire(chase.aim>.5);if(input.pressed('KeyR'))reset();if(input.pressed('KeyQ'))setQuality();if(input.pressed('KeyV'))photoMode();if(input.pressed('KeyF')||input.pressed('KeyE'))interact();if(input.pressed('KeyH')&&!police.locked){player.onPhone=!player.onPhone;if(police.engaged){streetLife.say({mesh:player.mesh,id:900,name:'Khedi Bhai'},'Ruk abhi krta mantri ko call!',false);police.nextSpeech=police.time+4;}}}
   if(input.mouseDX||input.mouseDY)manualCamera=2.4;manualCamera=Math.max(0,manualCamera-dt);
   if(!photo&&!police.locked&&!jobs.locked){chase.handleMouse(input.mouseDX,input.mouseDY);chase.handleWheel(input.wheelDY);
    if(drive){drive.update(dt,{throttle:input.axis('KeyS','KeyW')||input.axis('ArrowDown','ArrowUp'),steer:input.axis('KeyD','KeyA')||input.axis('ArrowRight','ArrowLeft'),handbrake:input.down('Space')});player.pos.copy(drive.pos);chase.update(dt,drive.pos,'vehicle',manualCamera?null:drive.yaw,drive.speed);}
    else {const turn=input.axis('ArrowLeft','ArrowRight');player.update(dt,{strafe:input.axis('KeyD','KeyA'),forward:input.axis('KeyS','KeyW'),walk:input.axis('ArrowDown','ArrowUp'),turn,run:input.anyDown('ShiftLeft','ShiftRight'),jump:input.pressed('Space')},chase.yaw);chase.update(dt,player.pos,'foot',turn?player.yaw:null);}
   }
   if(!jobs.locked){living.tickCrowd(pedestrians,world,player,cars,dt,camera);__m['dhalli.js'].tick(world,player,camera,dt);world.vegetation.wind.value=elapsed;if(!photo)streetLife.tick(dt,drive,input.down('KeyK'),camera);}
-  weapons.tick(dt);zombies.enabled=!jobs.menu&&!cinema.active&&!world.story.active;if(!cinema.active)zombies.tick(dt,drive);
-  crosshair.style.display=(!cinema.active&&!jobs.locked&&!jobs.menu&&!drive&&!photo&&!world.story.active)?'block':'none';
+  const aimHeld=(rmbAim||input.down('KeyC'))&&canShoot();
+  chase.aim+=((aimHeld?1:0)-chase.aim)*Math.min(1,dt*10);
+  const wantFov=55-chase.aim*15;if(Math.abs(camera.fov-wantFov)>.05){camera.fov+=(wantFov-camera.fov)*Math.min(1,dt*10);camera.updateProjectionMatrix();}
+  weapons.tick(dt,chase.aim);zombies.enabled=!jobs.menu&&!cinema.active&&!world.story.active;if(!cinema.active)zombies.tick(dt,drive);
+  const showCH=(!cinema.active&&!jobs.locked&&!jobs.menu&&!drive&&!photo&&!world.story.active);crosshair.style.display=showCH?'block':'none';crosshair.style.transform=chase.aim>.5?'scale(.55)':'scale(1)';
   if(cinema.active)motion.lighting();else if(!jobs.locked)motion.tick(dt,camera,drive);envCtl.tick(dt);
   if(!jobs.locked)police.tick(dt,drive,input.down('KeyK'),camera);
   if(!police.locked&&!photo)jobs.tick(dt,player,drive,camera);
