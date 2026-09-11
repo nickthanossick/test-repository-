@@ -6934,6 +6934,61 @@ function build(w){
  // Terraced homes fill the hillside and distant gaps without occupying either road.
  let seed=10412;const rnd=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};const walls=[surface(2,2,2),surface(4,2,2),surface(5,2,2),surface(6,2,2)],roofs=[surface(8,2,2,0xb49a88),surface(8,2,2,0x92aca7),surface(8,2,2,0xc6a29c)];const placed=[];
  for(let tries=0;tries<2200&&placed.length<235;tries++){const x=-100+rnd()*625,z=-285+rnd()*325,width=6+rnd()*5,depth=6+rnd()*5;if(w.urban?.reserved(x,z,18))continue;if(Math.abs(x)<24&&z>-215&&z<43)continue;const q=w.dhalli.project(x,z);if(x>0&&q.dist<24)continue;if(Math.hypot(x-tx,z-tz)<30)continue;if(placed.some(p=>Math.hypot(p.x-x,p.z-z)<10))continue;const y=w.landscapeOverride(x,z),h=5+Math.floor(rnd()*4)*2.7;const g=new THREE.Group();g.position.set(x,y,z);g.rotation.y=(rnd()-.5)*.23;raw.add(g);B(g,width,h,depth,0,h/2,0,walls[placed.length%4]);B(g,width,2.5,depth,0,-1.1,0,stone);for(let yy=2;yy<h;yy+=2.7)for(let xx=-width/2+.8;xx<width/2-.3;xx+=1.6){B(g,.85,1.22,.07,xx,yy,depth/2+.04,glass);B(g,.88,.055,.15,xx,yy-.64,depth/2+.08,white);}const r=B(g,width+.6,.16,depth+.6,0,h+.12,0,roofs[placed.length%3]);r.rotation.x=.08;B(g,1.05,.9,1.05,width*.25,h+.52,0,dark);placed.push({x,z,width,depth});}
+ // ============ THE RIDGE · SHIMLA MALL ROAD (procedural landmarks) ============
+ try{(function(){
+  const C={x:-320,z:0},gy=w.groundAt(C.x,C.z);
+  w.ridge={x:C.x,z:C.z};
+  const sand=new THREE.MeshStandardMaterial({color:0xd8cdb4,roughness:.86}),roofRed=new THREE.MeshStandardMaterial({color:0x8f3a2e,roughness:.72}),timber=new THREE.MeshStandardMaterial({color:0x2b2018,roughness:.82}),bronze=new THREE.MeshStandardMaterial({color:0x59492f,metalness:.55,roughness:.5}),iron=new THREE.MeshStandardMaterial({color:0x1f2327,roughness:.5,metalness:.6}),benchG=new THREE.MeshStandardMaterial({color:0x2f5a3a,roughness:.6}),pave=new THREE.MeshStandardMaterial({color:0x8b8880,roughness:.95}),lampMat=new THREE.MeshStandardMaterial({color:0xffe6a6,emissive:0xffcf72,emissiveIntensity:1.1,roughness:.4}),lancet=new THREE.MeshStandardMaterial({color:0x20242c,roughness:.5,emissive:0x0a0c10});
+  const plaza=new THREE.Group();plaza.position.set(C.x,gy+.03,C.z);raw.add(plaza);B(plaza,74,.16,60,0,0,0,pave);
+  // --- Christ Church (north end) ---
+  const chZ=C.z-19,ch=new THREE.Group();ch.position.set(C.x,gy,chZ);raw.add(ch);
+  B(ch,12,9,24,0,4.5,0,sand);
+  for(const s of [-1,1]){const rf=new THREE.Mesh(new THREE.BoxGeometry(7.2,.35,24.6),roofRed);rf.position.set(s*3.35,9.6,0);rf.rotation.z=s*.82;ch.add(rf);}
+  for(let i=-2;i<=2;i++)for(const s of [-1,1]){B(ch,.7,6.5,.7,s*6.1,3.3,i*4.2,sand);const win=new THREE.Mesh(new THREE.BoxGeometry(.12,3.4,1.0),lancet);win.position.set(s*6.05,4.2,i*4.2+2.1);ch.add(win);}
+  const tw=new THREE.Group();tw.position.set(0,0,12.6);ch.add(tw);B(tw,6.4,19,6.4,0,9.5,0,sand);
+  for(const [ox,oz,ry] of [[0,3.25,0],[0,-3.25,0],[3.25,0,Math.PI/2],[-3.25,0,Math.PI/2]]){const lv=new THREE.Mesh(new THREE.BoxGeometry(2.6,3.2,.15),timber);lv.position.set(ox,15,oz);lv.rotation.y=ry;tw.add(lv);}
+  for(const cx of [-1,1])for(const cz of [-1,1]){const pin=new THREE.Mesh(new THREE.ConeGeometry(.55,2.6,4),sand);pin.position.set(cx*3.2,20.3,cz*3.2);pin.rotation.y=Math.PI/4;tw.add(pin);}
+  const clockTex=(function(){const cv=document.createElement('canvas');cv.width=cv.height=256;const x=cv.getContext('2d');x.fillStyle='#e9e2cf';x.beginPath();x.arc(128,128,120,0,7);x.fill();x.strokeStyle='#20242a';x.lineWidth=10;x.stroke();x.fillStyle='#20242a';for(let i=0;i<12;i++){const a=i/12*6.283;x.beginPath();x.arc(128+Math.cos(a)*100,128+Math.sin(a)*100,6,0,7);x.fill();}x.lineWidth=8;x.beginPath();x.moveTo(128,128);x.lineTo(128+38,128-58);x.stroke();x.lineWidth=6;x.beginPath();x.moveTo(128,128);x.lineTo(128-66,128+22);x.stroke();const t=new THREE.CanvasTexture(cv);t.colorSpace=THREE.SRGBColorSpace;return t;})();
+  const cf=new THREE.Mesh(new THREE.CircleGeometry(1.6,28),new THREE.MeshStandardMaterial({map:clockTex,emissive:0xffffff,emissiveMap:clockTex,emissiveIntensity:.28,roughness:.6}));cf.position.set(0,13.5,3.22);tw.add(cf);
+  B(ch,2.6,4,.4,0,2,15.85,new THREE.MeshStandardMaterial({color:0x3a2f24,roughness:.8}));
+  B(ch,12.4,.5,.3,0,.4,12.2,lampMat);
+  // --- Bandstand (east) ---
+  const bs=new THREE.Group();bs.position.set(C.x+22,gy,C.z+8);raw.add(bs);
+  const deck=new THREE.Mesh(new THREE.CylinderGeometry(3.8,4.0,.9,8),stone);deck.position.y=.45;bs.add(deck);
+  for(let i=0;i<8;i++){const a=i/8*6.283+.39;const col=new THREE.Mesh(new THREE.CylinderGeometry(.13,.13,3.1,8),white);col.position.set(Math.cos(a)*3.3,2.45,Math.sin(a)*3.3);bs.add(col);}
+  const railBS=new THREE.Mesh(new THREE.CylinderGeometry(3.5,3.5,.9,8,1,true),new THREE.MeshStandardMaterial({color:0xdedad0,roughness:.7}));railBS.position.y=1.4;bs.add(railBS);
+  const rf1=new THREE.Mesh(new THREE.ConeGeometry(4.6,1.8,8),roofRed);rf1.position.y=4.9;rf1.rotation.y=.39;bs.add(rf1);const rf2=new THREE.Mesh(new THREE.ConeGeometry(2.9,2.0,8),roofRed);rf2.position.y=6.3;rf2.rotation.y=.39;bs.add(rf2);const fin=new THREE.Mesh(new THREE.SphereGeometry(.2,8,6),gold);fin.position.y=7.5;bs.add(fin);
+  // --- Municipal Library (west, mock-Tudor) ---
+  const lib=new THREE.Group();lib.position.set(C.x-22,gy,C.z+6);lib.rotation.y=.35;raw.add(lib);
+  B(lib,18,6.5,10,0,3.25,0,white);B(lib,18,1.4,10,0,-.2,0,stone);const front=5.05;
+  for(let i=-4;i<=4;i++)B(lib,.2,6.5,.14,i*2,3.25,front,timber);
+  for(const yy of [.4,3.25,6.1])B(lib,18,.22,.14,0,yy,front,timber);
+  for(let i=-4;i<4;i++){const br=new THREE.Mesh(new THREE.BoxGeometry(.16,2.6,.12),timber);br.position.set(i*2+1,4.6,front);br.rotation.z=(i%2?1:-1)*.5;lib.add(br);}
+  for(let i=-4;i<4;i++)B(lib,1.4,1.7,.1,i*2+1,1.7,front+.05,glass);
+  for(const s of [-1,1]){const rf=new THREE.Mesh(new THREE.BoxGeometry(6,.3,10.6),roofRed);rf.position.set(s*3.9,8,0);rf.rotation.z=s*.66;lib.add(rf);}
+  sign(lib,[{text:'MUNICIPAL LIBRARY',size:64},{text:'SHIMLA',size:40}],5.4,1.3,0,2.5,front+.08,{side:false,bg:'#1c3a6e',fg:'#eef3ff',border:'#0f2244'});
+  // --- Gandhi statue (centre-front) ---
+  const gs=new THREE.Group();gs.position.set(C.x,gy,C.z+18);raw.add(gs);
+  B(gs,1.7,2.4,1.7,0,1.2,0,white);B(gs,2.1,.3,2.1,0,2.5,0,stone);
+  const torso=new THREE.Mesh(new THREE.CylinderGeometry(.26,.32,.7,10),bronze);torso.position.set(0,3.4,0);gs.add(torso);
+  const dhoti=new THREE.Mesh(new THREE.CylinderGeometry(.34,.42,.7,10),bronze);dhoti.position.set(0,2.85,0);gs.add(dhoti);
+  const neck=new THREE.Mesh(new THREE.CylinderGeometry(.08,.1,.12,8),bronze);neck.position.set(0,3.82,0);gs.add(neck);
+  const head=new THREE.Mesh(new THREE.SphereGeometry(.17,16,12),bronze);head.position.set(0,4.0,.02);head.scale.set(1,1.15,1.05);gs.add(head);
+  for(const s of [-1,1]){const e=new THREE.Mesh(new THREE.SphereGeometry(.05,8,6),bronze);e.position.set(s*.17,3.98,0);gs.add(e);const leg=new THREE.Mesh(new THREE.CylinderGeometry(.09,.08,.9,8),bronze);leg.position.set(s*.13,2.1,0);gs.add(leg);}
+  const armL=new THREE.Mesh(new THREE.CylinderGeometry(.07,.06,.8,8),bronze);armL.position.set(.3,3.4,.15);armL.rotation.z=-.4;armL.rotation.x=-.5;gs.add(armL);
+  const armR=new THREE.Mesh(new THREE.CylinderGeometry(.07,.06,.8,8),bronze);armR.position.set(-.3,3.35,0);armR.rotation.z=.3;gs.add(armR);
+  const stick=new THREE.Mesh(new THREE.CylinderGeometry(.03,.03,1.9,6),bronze);stick.position.set(.5,2.95,.3);gs.add(stick);
+  // --- Scandal Point signpost ---
+  function plankTex(txt){const cv=document.createElement('canvas');cv.width=256;cv.height=48;const x=cv.getContext('2d');x.fillStyle='#4a3524';x.fillRect(0,0,256,48);x.fillStyle='#f0e6d2';x.font='700 26px Georgia,serif';x.textAlign='center';x.textBaseline='middle';x.fillText(txt,128,26);const t=new THREE.CanvasTexture(cv);t.colorSpace=THREE.SRGBColorSpace;return t;}
+  const sp=new THREE.Group();sp.position.set(C.x+13,gy,C.z+20);raw.add(sp);const post=new THREE.Mesh(new THREE.CylinderGeometry(.1,.12,3.6,8),iron);post.position.y=1.8;sp.add(post);
+  for(const [txt,yy,dir] of [['THE MALL',3.0,1],['CHRIST CHURCH',2.6,-1],['SCANDAL POINT',2.2,1]]){const pl=new THREE.Mesh(new THREE.BoxGeometry(2.1,.34,.05),new THREE.MeshStandardMaterial({map:plankTex(txt),roughness:.7}));pl.position.set(dir*1.15,yy,0);sp.add(pl);}
+  // --- lamps + benches ---
+  function lamp(x,z){const g=new THREE.Group();g.position.set(x,gy,z);raw.add(g);const p2=new THREE.Mesh(new THREE.CylinderGeometry(.07,.1,4.2,8),iron);p2.position.y=2.1;g.add(p2);const hd=new THREE.Mesh(new THREE.BoxGeometry(.42,.42,.42),iron);hd.position.y=4.3;g.add(hd);const gl=new THREE.Mesh(new THREE.BoxGeometry(.3,.34,.3),lampMat);gl.position.y=4.3;g.add(gl);const cp=new THREE.Mesh(new THREE.ConeGeometry(.3,.28,4),iron);cp.position.y=4.62;cp.rotation.y=Math.PI/4;g.add(cp);}
+  function bench(x,z,rot){const g=new THREE.Group();g.position.set(x,gy,z);g.rotation.y=rot;raw.add(g);B(g,1.8,.1,.5,0,.5,0,benchG);B(g,1.8,.55,.08,0,.78,-.22,benchG);for(const s of [-1,1])B(g,.1,.5,.5,s*.82,.25,0,iron);}
+  for(let i=0;i<10;i++){const a=i/10*6.283;lamp(C.x+Math.cos(a)*26,C.z+Math.sin(a)*19);}
+  for(let i=0;i<5;i++){bench(C.x-22+i*11,C.z-22,0);bench(C.x-22+i*11,C.z+24,Math.PI);}
+  w.colliders.add(C.x,chZ,6.5,13,gy,gy+10);w.colliders.add(C.x,chZ+12.6,3.4,3.4,gy,gy+20);w.colliders.add(C.x+22,C.z+8,4.2,4.2,gy,gy+3);w.colliders.add(C.x-22,C.z+6,9.5,5.5,gy,gy+8);w.colliders.add(C.x,C.z+18,1.1,1.1,gy,gy+3);
+ })();}catch(e){console.error('Ridge build failed',e);}
  raw.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}});w.group.add(mergeStatic(raw));w.extraBuildings=placed;w.spawn={x:.8,z:21,yaw:.32};return w;
 }
 function hero(){const H=__m['human.js'],g=H.buildHuman({build:'male',hero:true,skin:0xb98a64,top:0x15181d,bottom:0x23262e,topi:true,danda:false,beedi:true,sneakers:true,phone:true});g.name='Vicky-enhanced';g.scale.x=.96;const head=g.getObjectByName('sculpted-photographic-head');head.scale.set(1.055,1.025,1.015);head.material=head.material.clone();head.material.roughness=.90;head.material.metalness=0;head.geometry=head.geometry.clone();const a=head.geometry.attributes.position;for(let i=0;i<a.count;i++){const x=a.getX(i),y=a.getY(i),z=a.getZ(i);if(z<-.08){const nose=Math.exp(-(x*x/.00045+(y+.018)**2/.001));a.setZ(i,z+.010*nose);}}head.geometry.computeVertexNormals();
@@ -7659,7 +7714,7 @@ $('sound').onclick=()=>{streetLife.voice=!streetLife.voice;cinema.voice=streetLi
   if(!police.locked&&!photo)jobs.tick(dt,player,drive,camera);
   if(cinema.active){try{cinema.tick(realDt);}catch(e){console.error('Cinematic recovered',e);cinema.skip();toast('Cutscene recovered · continue story.');}}else if(!police.locked&&!jobs.menu){world.story.cameraInRoom(camera,player);world.story.idle(elapsed);}
   if(jobs.menu){camera.position.set(8,world.roadY(-171)+5,-157);camera.lookAt(32,world.roadY(-171)+3,-171);}
-  world.expansion.tick(camera);polish.tick(camera);sky.position.copy(camera.position);dynamicBoxes();$('healthfill').style.width=player.health+'%';$('locationlabel').textContent=world.story.active?world.story.rooms[world.story.active].label:world.expansion.label(player.pos)||player.pos.x>435?'DHALLI TUNNEL':player.pos.x<-10?'MALL ROAD':player.pos.z<-194?'UPPER ROAD · NEW DIAMOND':player.pos.x>12?'CHOWK → DHALLI ROAD':'SANJAULI · SHIMLA';$('mode').textContent=photo?'REFERENCE VIEW':drive?Math.round(drive.kmh)+' KM/H':'ON FOOT';const near=!drive&&nearest();$('prompt').hidden=jobs.locked||police.locked||photo||(!drive&&!near);$('prompt').textContent=drive?'F / E · EXIT CAR':near?'F / E · ENTER CAR':'';$('stamina').style.width=player.stamina+'%';if(elapsed>toastUntil)$('toast').classList.remove('show');input.endFrame();renderScene();
+  world.expansion.tick(camera);polish.tick(camera);sky.position.copy(camera.position);dynamicBoxes();$('healthfill').style.width=player.health+'%';$('locationlabel').textContent=world.story.active?world.story.rooms[world.story.active].label:(world.ridge&&Math.hypot(player.pos.x-world.ridge.x,player.pos.z-world.ridge.z)<46)?'THE RIDGE · MALL ROAD':world.expansion.label(player.pos)||player.pos.x>435?'DHALLI TUNNEL':player.pos.x<-10?'MALL ROAD':player.pos.z<-194?'UPPER ROAD · NEW DIAMOND':player.pos.x>12?'CHOWK → DHALLI ROAD':'SANJAULI · SHIMLA';$('mode').textContent=photo?'REFERENCE VIEW':drive?Math.round(drive.kmh)+' KM/H':'ON FOOT';const near=!drive&&nearest();$('prompt').hidden=jobs.locked||police.locked||photo||(!drive&&!near);$('prompt').textContent=drive?'F / E · EXIT CAR':near?'F / E · ENTER CAR':'';$('stamina').style.width=player.stamina+'%';if(elapsed>toastUntil)$('toast').classList.remove('show');input.endFrame();renderScene();
   }catch(e){console.error('Game frame recovered',e);input.endFrame();if(cinema.active){cinema.skip();toast('Story resumed safely · press T at the marker.');}else fail(e);}
  }
  requestAnimationFrame(frame);
