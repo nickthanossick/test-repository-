@@ -6972,7 +6972,7 @@ function create(w,scene,player,cars,lights,clockUI){
  for(const r of w.expansion?.routes||[])for(let s=30;s<r.len;s+=35){const p=w.expansion.at(r,s,-6.3);streetLights.push(new THREE.Vector3(p.x,p.y+4.8,p.z));}
  const windowMats=[];const lightMats=new Set();for(const v of [...traffic.map(t=>t.mesh),...cars.map(c=>c.body)])if(v?.userData.lightMats)lightMats.add(v.userData.lightMats);scene.traverse(o=>{if(o.isMesh&&!Array.isArray(o.material)&&o.material.emissive&&o.material!==warm){if(o.material.map?.image?.width===768||o.material===lights.windowMat)windowMats.push(o.material);}});
  const starsGeo=new THREE.BufferGeometry(),sp=[];for(let i=0;i<700;i++){const a=i*2.399963,h=.08+((i*73)%691)/750,r=Math.sqrt(1-h*h)*650;sp.push(Math.cos(a)*r,h*650,Math.sin(a)*r);}starsGeo.setAttribute('position',new THREE.Float32BufferAttribute(sp,3));const stars=new THREE.Points(starsGeo,new THREE.PointsMaterial({size:1.3,color:0xe1edff,transparent:true,opacity:0,depthWrite:false}));scene.add(stars);
- const moon=new THREE.Mesh(new THREE.SphereGeometry(6,20,14),new THREE.MeshBasicMaterial({color:0xe4ecdf}));scene.add(moon);
+ const moon=new THREE.Mesh(new THREE.SphereGeometry(4.2,20,14),new THREE.MeshBasicMaterial({color:0x8f9cb8}));scene.add(moon);
  // Reusable smoke particles: radial alpha sprites, ember wisps and timed exhalation.
  const cv=document.createElement('canvas');cv.width=cv.height=64;const cc=cv.getContext('2d'),grad=cc.createRadialGradient(32,32,0,32,32,31);grad.addColorStop(0,'rgba(220,224,222,.8)');grad.addColorStop(.35,'rgba(210,215,215,.45)');grad.addColorStop(1,'rgba(200,205,205,0)');cc.fillStyle=grad;cc.fillRect(0,0,64,64);const texture=new THREE.CanvasTexture(cv),smoke=[];for(let i=0;i<42;i++){const m=new THREE.Sprite(new THREE.SpriteMaterial({map:texture,transparent:true,depthWrite:false,opacity:0,color:0xdfe2df}));m.visible=false;scene.add(m);smoke.push({mesh:m,life:0,max:0,v:new THREE.Vector3()});}
  let time=0,hour=18.05,day=1,smokeWait=0,smokeIndex=0,oldSmokeT=0,exhale=0,ambient=null,autoTime=true;
@@ -7507,7 +7507,7 @@ const $=id=>document.getElementById(id),load=$('loading');
 function fail(e){for(const id of ['cinematic','storymenu','storydialog']){const n=$(id);if(n)n.hidden=true;}document.body.classList.remove('story-cinema','story-dialogue');if(typeof speechSynthesis!=='undefined')speechSynthesis.cancel();load.hidden=false;$('loadmessage').textContent='Could not start the 3D scene. '+(e.message||e);$('retry').hidden=false;console.error(e);}
 async function boot(){
  $('loadmessage').textContent='Preparing embedded character and surface textures…';
- await ProductionAssets.load();ProductionAssets.wet.value=.05;
+ await ProductionAssets.load();ProductionAssets.wet.value=.12;
  const renderer=new THREE.WebGLRenderer({antialias:false,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.25));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.06;renderer.outputColorSpace=THREE.SRGBColorSpace;
  renderer.domElement.id='game';renderer.domElement.tabIndex=0;renderer.domElement.addEventListener('pointerdown',()=>renderer.domElement.focus({preventScroll:true}));document.body.prepend(renderer.domElement);
  renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();fail(new Error('Graphics context was lost. Reload to restart.'));});
@@ -7522,19 +7522,29 @@ async function boot(){
  __m['visual-polish.js'].install();const living=__m['living-world.js'];const world=living.enrich(__m['town-upgrade.js'].build(__m['expanded-map.js'].build(__m['urban.js'].build(__m['dhalli.js'].build(__m['reference-street.js'].extendWorld(__m['step-world.js'].buildWorld()))))));scene.add(world.group);__m['story-world.js'].build(world,scene);
  const {Player}=__m['player.js'],{Vehicle}=__m['vehicle.js'];const player=new Player(world.terrain,world.colliders,world.groundAt);player.placeAt(world.spawn.x,world.spawn.z,world.spawn.yaw);scene.add(player.mesh);
  const input=new __m['input.js'].Input(renderer.domElement),chase=new __m['chase-camera.js'].ChaseCamera(camera,world.terrain,world.colliders);chase.yaw=world.spawn.yaw;chase.pitch=-.09;chase.zoom=1.5;
- const fx=new __m['postfx.js'].PostFX(renderer,scene,camera,{ao:true,aoScale:.5,bloom:true,grade:false});if(fx.bloom){fx.bloom.strength=.12;fx.bloom.threshold=1.18;fx.bloom.radius=.35;}
- fx.enabled=false;if(fx.ao)fx.ao.enabled=false;
+ const fx=new __m['postfx.js'].PostFX(renderer,scene,camera,{ao:true,aoScale:.5,bloom:true,grade:true});
+ // SHIMLA: KILLSHOT — cinematic pipeline ON by default (neon grade + tasteful bloom).
+ // setNight() drives bloom between these; keep night glow strong-but-not-blown-out.
+ fx._bloomDay={strength:.38,threshold:.84};fx._bloomNight={strength:.46,threshold:.74};
+ if(fx.bloom){fx.bloom.strength=.42;fx.bloom.threshold=.8;fx.bloom.radius=.6;}
+ fx.enabled=true;if(fx.ao)fx.ao.enabled=false;
  const cars=[];const carSpecs=[{x:-3.12,z:19,color:0xe1e5e3,yaw:0,plate:'HP 03 2184'},{x:-3.12,z:1,color:0xb8c2c6,yaw:0,plate:'HP 03 6417'},{x:-3.12,z:-12,color:0xf0f0e7,yaw:0,plate:'HP 03 9052'},...world.parkedSpecs,...world.expansion.parked.filter((_,i)=>i%4===0).slice(0,8)];
  for(const [i,o]of carSpecs.entries()){const spec={...o,id:'parking-'+i,name:'Himalayan compact',shape:'hatch',class:'car',body:[1.7,1.7,4],top_speed_kmh:55,accel:5.6,brake:1,grip:.94};const car=new Vehicle(spec,world.terrain,{ground:world.groundAt,colliders:world.colliders});car.placeAt(o.x,o.z,o.yaw);scene.add(car.mesh);car.start={x:o.x,z:o.z,yaw:o.yaw};car.collider={x0:o.x-1,x1:o.x+1,z0:o.z-2.1,z1:o.z+2.1,lo:car.pos.y,hi:car.pos.y+1.8,disabled:false};world.colliders.dynamic.push(car.collider);cars.push(car);}
  $('loadmessage').textContent='Bringing the street to life…';await new Promise(r=>setTimeout(r,20));
  const pedestrians=living.spawnCrowd(world,scene);const dhalliNPCs=__m["dhalli.js"].populate(world,scene);
+ // --- Vice-City palms line the boulevard (merged static, ~3 draw calls) ---
+ (function(){const trunkMat=new THREE.MeshStandardMaterial({color:0x6b5638,roughness:.92}),frondA=new THREE.MeshStandardMaterial({color:0x2f6a34,roughness:.8}),frondB=new THREE.MeshStandardMaterial({color:0x3c7d3f,roughness:.8});const palms=new THREE.Group();
+  function palm(x,y,z,h,lean){const g=new THREE.Group();g.position.set(x,y,z);const seg=6;for(let i=0;i<seg;i++){const t=i/seg,r=.22-t*.12,sy=h/seg;const c=new THREE.Mesh(new THREE.CylinderGeometry(r*.82,r,sy,7),trunkMat);c.position.set(Math.sin(lean)*t*t*h*.5,sy*(i+.5),0);c.rotation.z=-lean*t;g.add(c);}const top=new THREE.Group();top.position.set(Math.sin(lean)*h*.5,h,0);g.add(top);const nf=8;for(let i=0;i<nf;i++){const a=i/nf*Math.PI*2;const f=new THREE.Mesh(new THREE.ConeGeometry(.16,1.7,4),i%2?frondA:frondB);f.position.set(Math.cos(a)*.65,-.1,Math.sin(a)*.65);f.rotation.z=Math.PI/2-.55;f.rotation.y=-a;f.scale.set(1,1,.42);top.add(f);}const nut=new THREE.Mesh(new THREE.SphereGeometry(.13,6,5),trunkMat);top.add(nut);palms.add(g);}
+  try{for(let s=24;s<world.dhalli.end-10;s+=17){for(const off of [7.6,-7.6]){const p=world.dhalli.point(s,off),y=world.groundAt(p.x,p.z);if(y<-50)continue;palm(p.x,y,p.z,4.2+Math.random()*1.6,.05+Math.random()*.05);}}}catch(e){}
+  try{for(let s=8;s<104;s+=14){for(const dx of [6.7,-6.7]){const p=world.urban.mall(s);palm(p.x+dx,world.groundAt(p.x+dx,p.z),p.z,4+Math.random()*1.4,.05*Math.sign(dx));}}}catch(e){}
+  palms.updateMatrixWorld(true);scene.add(__m['step-world.js'].mergeStatic(palms));})();
  // Mobile controls use the same movement and interaction paths as the keyboard.
  for(const b of document.querySelectorAll('[data-key]')){const code=b.dataset.key;b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);input.keys.add(code);input._pressedOnce.add(code);});for(const event of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(event,()=>input.keys.delete(code));}
  let touch=null;renderer.domElement.addEventListener('pointerdown',e=>{if(e.pointerType==='touch')touch={id:e.pointerId,x:e.clientX,y:e.clientY};});renderer.domElement.addEventListener('pointermove',e=>{if(touch?.id===e.pointerId){input.mouseDX+=(e.clientX-touch.x)*1.1;input.mouseDY+=(e.clientY-touch.y)*1.1;touch.x=e.clientX;touch.y=e.clientY;}});renderer.domElement.addEventListener('pointerup',()=>touch=null);
  const polish=__m['visual-polish.js'].apply(scene,player);
  const motion=__m['town-motion.js'].create(world,scene,player,cars,{skyMat,scene,hemi,sun,renderer},s=>$('worldclock').textContent=s);world.motion=motion;
  const envCtl=__m['env-controls.js'].create(scene,camera,motion);world.envCtl=envCtl;
- let streetLife=null,jobs=null,police=null;let drive=null,quality=false,photo=false,last=performance.now(),elapsed=0,toastUntil=0,manualCamera=0;let _fps=58,_asT=0,autoScale=true;
+ let streetLife=null,jobs=null,police=null;let drive=null,quality=false,photo=false,last=performance.now(),elapsed=0,toastUntil=0,manualCamera=0;let _fps=58,_asT=0,autoScale=true,_tier=2;
  function toast(s){$('toast').textContent=s;$('toast').classList.add('show');toastUntil=elapsed+3.5;}
  function dynamicBoxes(){for(const c of cars){const hw=Math.abs(Math.cos(c.yaw))*.93+Math.abs(Math.sin(c.yaw))*2.02,hd=Math.abs(Math.sin(c.yaw))*.93+Math.abs(Math.cos(c.yaw))*2.02;Object.assign(c.collider,{x0:c.pos.x-hw,x1:c.pos.x+hw,z0:c.pos.z-hd,z1:c.pos.z+hd,lo:c.pos.y,hi:c.pos.y+1.8,disabled:c===drive});}}
  function reset(){if(jobs?.locked)return;if(jobs?.active){jobs.retry();return;}if(police?.engaged){toast('Police active hai · bhaago ya paas jaakar L se surrender karo.');return;}jobs?.abort();streetLife?.reset();drive=null;photo=false;player.mesh.visible=true;player.placeAt(world.spawn.x,world.spawn.z,world.spawn.yaw);for(const c of cars)c.placeAt(c.start.x,c.start.z,c.start.yaw);chase._init=false;chase.yaw=world.spawn.yaw;chase.pitch=-.09;chase.zoom=1.5;dynamicBoxes();$('photo').classList.remove('active');}
@@ -7555,7 +7565,9 @@ async function boot(){
 $('sound').onclick=()=>{streetLife.voice=!streetLife.voice;cinema.voice=streetLife.voice;streetLife.enableVoice();__m['sfx.js'].setEnabled(streetLife.voice);__m['sfx.js'].resume();$('sound').textContent=streetLife.voice?'VOICE ON':'VOICE OFF';if(!streetLife.voice&&typeof speechSynthesis!=='undefined')speechSynthesis.cancel();};
  addEventListener('keydown',()=>streetLife.enableVoice());renderer.domElement.addEventListener('pointerdown',()=>streetLife.enableVoice());
  $('parking').onclick=()=>{if(jobs.locked)return;if(jobs.active){toast('Job chal rahi hai — marker follow karo.');return;}reset();};
- function setQuality(){autoScale=false;quality=!quality;renderer.setPixelRatio(Math.min(devicePixelRatio||1,quality?1.5:1.25));fx.enabled=quality;if(fx.ao)fx.ao.enabled=quality;world.vegetation.grassMesh.visible=quality;renderer.shadowMap.enabled=true;resize();$('quality').textContent=quality?'ULTRA':'BALANCED';toast(quality?'Ultra graphics · manual':'Standard graphics · manual — auto-scale off');}
+ const nightRatio=h=>{h=((h%24)+24)%24;if(h>=19||h<5)return 1;if(h>=8&&h<=17)return 0;if(h<8)return (8-h)/3;return (h-17)/2;};
+ function applyTier(){fx.enabled=true;if(fx.bloom)fx.bloom.enabled=_tier>=1;if(fx.ao)fx.ao.enabled=_tier>=3;renderer.setPixelRatio(Math.min(devicePixelRatio||1,_tier>=2?1.25:_tier>=1?1.05:.85));resize();$('quality')&&($('quality').textContent=['PERF','LOW','NEON','ULTRA'][_tier]);}
+ function setQuality(){autoScale=false;quality=!quality;renderer.setPixelRatio(Math.min(devicePixelRatio||1,quality?1.5:1.2));fx.enabled=true;if(fx.bloom)fx.bloom.enabled=true;if(fx.ao)fx.ao.enabled=quality;world.vegetation.grassMesh.visible=quality;renderer.shadowMap.enabled=true;resize();$('quality').textContent=quality?'ULTRA':'BALANCED';toast(quality?'Ultra neon graphics · manual':'Standard graphics · neon grade on');}
  function photoMode(){if(jobs?.locked||jobs?.active){toast('Story ke dauraan reference view band hai.');return;}if(police?.engaged){toast('Pursuit ke dauraan view mode band hai.');return;}photo=!photo;if(photo){document.exitPointerLock?.();camera.position.set(10,5.1,23);camera.lookAt(-8,4.5,0);toast('Reference view · V to return to walking');}else{chase._init=false;} $('photo').classList.toggle('active',photo);}
  $('route').onclick=()=>{if(jobs.locked)return;if(police?.engaged){toast('Police active hai · fast travel band.');return;}if(jobs.active){toast('Job ke dauraan fast travel band hai.');return;}const target={x:2.7,z:-167,yaw:-Math.PI/2};if(drive){drive.speed=0;drive.slip=0;drive.placeAt(target.x,target.z,target.yaw);player.pos.copy(drive.pos);}else player.placeAt(target.x,target.z,target.yaw);photo=false;chase._init=false;chase.yaw=target.yaw;dynamicBoxes();toast('Sanjauli Chowk · Dhalli road is to the right.');};$('quality').onclick=setQuality;$('reset').onclick=reset;$('photo').onclick=photoMode;$('help').onclick=()=>$('guide').hidden=!$('guide').hidden;$('closehelp').onclick=()=>$('guide').hidden=true;$('full').onclick=()=>{if(document.fullscreenElement)document.exitFullscreen?.();else document.documentElement.requestFullscreen?.().catch(()=>toast('Fullscreen is unavailable here.'));};
 
@@ -7586,7 +7598,7 @@ $('sound').onclick=()=>{streetLife.voice=!streetLife.voice;cinema.voice=streetLi
  function cycleWeather(){const l=envCtl.cycleWeather();$('weatherBtn').textContent=(l==='SNOW'?'❄ ':l==='RAIN'?'🌧 ':l==='FOG'?'🌫 ':'☀ ')+l;toast('Mausam: '+l);}
  $('timeBtn').onclick=cycleTime;$('weatherBtn').onclick=cycleWeather;
  function resize(){renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();const s=renderer.getDrawingBufferSize(new THREE.Vector2());fx.setSize(s.x,s.y);}addEventListener('resize',resize);
- load.hidden=true;$('quality').textContent='BALANCED';dynamicBoxes();toast('SHIMLA: KILLSHOT · LMB/J = FIRE · RMB/C = AIM · SIR pe maaro warna marte nahi!');
+ load.hidden=true;applyTier();dynamicBoxes();toast('SHIMLA: KILLSHOT · LMB/J = FIRE · RMB/C = AIM · SIR pe maaro warna marte nahi!');
  window.__shimla={ready:true,stage:'Sanjauli + Chowk to Dhalli Tunnel',cutscenes:__m['video-cutscene.js'],scene,world,motion,player,cars,pedestrians,dhalliNPCs,renderer,jobs,streetLife,police,cinema,camera,zombies,weapons,reset,interact,get driving(){return drive;},assets:ProductionAssets.manifest};
 
  // Cutscenes use one direct render pass and a small, consistently lit stage.
@@ -7602,10 +7614,11 @@ $('sound').onclick=()=>{streetLife.voice=!streetLife.voice;cinema.voice=streetLi
   finally{for(const child of hidden)child.visible=true;scene.fog=oldFog;renderer.shadowMap.enabled=oldShadow;cineKey.visible=cineFill.visible=false;}
  }
  function frame(now){requestAnimationFrame(frame);const realDt=Math.max(0,(now-last)/1000),dt=Math.min(.04,realDt);last=now;elapsed+=dt;
-  // Auto-scale: beauty on strong GPUs, back off on weak ones (never hang).
-  if(autoScale&&!cinema.active&&realDt>0){_fps+=((1/Math.max(realDt,.001))-_fps)*.08;_asT+=realDt;if(_asT>1.5){_asT=0;
-   if(_fps<32){if(fx.ao&&fx.ao.enabled)fx.ao.enabled=false;else if(fx.enabled){fx.enabled=false;$('quality')&&($('quality').textContent='PERFORMANCE');}}
-   else if(_fps>52){if(!fx.enabled){fx.enabled=true;if(fx.ao)fx.ao.enabled=true;$('quality')&&($('quality').textContent='ULTRA');}else if(fx.ao&&!fx.ao.enabled){fx.ao.enabled=true;}}}}
+  // Auto-scale tiers: the neon GRADE stays ON at every tier (cheapest, biggest
+  // look win). Under load we drop AO → pixel-ratio → bloom, never the composer.
+  if(autoScale&&!cinema.active&&realDt>0){_fps+=((1/Math.max(realDt,.001))-_fps)*.08;_asT+=realDt;if(_asT>1.4){_asT=0;
+   if(_fps<34&&_tier>0){_tier--;applyTier();}
+   else if(_fps>56&&_tier<3){_tier++;applyTier();}}}
   try{
   if(input.pressed('KeyM'))jobs.toggleJournal();
   if(!cinema.active){if(input.pressed('KeyN'))cycleTime();if(input.pressed('KeyB'))cycleWeather();}
@@ -7624,6 +7637,7 @@ $('sound').onclick=()=>{streetLife.voice=!streetLife.voice;cinema.voice=streetLi
   weapons.tick(dt,chase.aim);zombies.enabled=!jobs.menu&&!cinema.active&&!world.story.active;if(!cinema.active)zombies.tick(dt,drive);
   const showCH=(!cinema.active&&!jobs.locked&&!jobs.menu&&!drive&&!photo&&!world.story.active);crosshair.style.display=showCH?'block':'none';crosshair.style.transform=chase.aim>.5?'scale(.55)':'scale(1)';
   if(cinema.active)motion.lighting();else if(!jobs.locked)motion.tick(dt,camera,drive);envCtl.tick(dt);
+  if(fx.setNight)fx.setNight(nightRatio(motion.hour));
   if(!jobs.locked)police.tick(dt,drive,input.down('KeyK'),camera);
   if(!police.locked&&!photo)jobs.tick(dt,player,drive,camera);
   if(cinema.active){try{cinema.tick(realDt);}catch(e){console.error('Cinematic recovered',e);cinema.skip();toast('Cutscene recovered · continue story.');}}else if(!police.locked&&!jobs.menu){world.story.cameraInRoom(camera,player);world.story.idle(elapsed);}
