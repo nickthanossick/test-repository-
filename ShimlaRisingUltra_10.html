@@ -7120,7 +7120,8 @@ class Cinema{
  get story(){return this.w.story;}
  unlockAudio(){try{const A=globalThis.AudioContext||globalThis.webkitAudioContext;if(!A||this.audio)return;const ctx=new A(),gain=ctx.createGain();gain.gain.value=0;gain.connect(ctx.destination);const osc=ctx.createOscillator();osc.type='sine';osc.frequency.value=480;osc.connect(gain);osc.start();this.audio={ctx,gain,osc};ctx.resume?.();}catch{}}
  say(speaker,text){this.ui.subtitle(speaker,text);if(this.voice&&typeof speechSynthesis!=='undefined'&&typeof SpeechSynthesisUtterance!=='undefined'){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='hi-IN';u.rate=.94;u.pitch=speaker==='Kamla'?1.12:speaker==='Vicky'?.93:1;const v=speechSynthesis.getVoices().find(v=>v.lang.startsWith('hi'));if(v)u.voice=v;speechSynthesis.speak(u);}}
- play(name,done){if(this.active)this.finish(false);this.active=true;this.name=name;this.savedHour=this.motion.hour;this.playerWasVisible=this.player.mesh.visible;this.done=done;this.index=0;this.time=0;this.unlockAudio();this.shots=this.makeShots(name);this.ui.open(true);this.enterShot();}
+ play(name,done){const V=__m['video-cutscene.js'];if(V&&V.has(name)){this.active=true;const meta=({intro:{title:'SHIMLA GULLIES'},ending:{title:'SHIMLA GULLIES'}})[name]||{};if(V.play(name,meta,()=>{this.active=false;done&&done();},()=>{this._playEngine(name,done);}))return;this.active=false;}return this._playEngine(name,done);}
+ _playEngine(name,done){if(this.active)this.finish(false);this.active=true;this.name=name;this.savedHour=this.motion.hour;this.playerWasVisible=this.player.mesh.visible;this.done=done;this.index=0;this.time=0;this.unlockAudio();this.shots=this.makeShots(name);this.ui.open(true);this.enterShot();}
  makeShots(name){const S=(kind,dur,speaker,line,title)=>({kind,dur,speaker,line,title});if(name==='ending')return[S('hospital',7,'Meera','Emergency team tayyar hai. Tumne waqt par pahucha diya.'),S('wardHope',9,'Dr. Tara','Ab stable hai. Aaj ek aur ghar bach gaya.'),S('motherHope',9,'Kamla','Aman wapas nahi aayega… par kisi aur maa ka beta bach sakta hai.'),S('sunrise',10,'Vicky','Galiyan wahi hain. Ab umeed bhi hai.'),S('credits',10,'','', 'OPERATION COMPLETE')];if(name==='midpoint')return[S('briefing',8,'Meera','Naam milna aur sach milna ek cheez nahi. Humein galat aadmi dikhaya gaya.'),S('file',7,'Vicky','Bhaiji, andar se koi khabar de raha hai.'),S('sunrise',6,'Meera','Ab apne logon ko bachana hai.')];if(name==='operation')return[S('lookout',8,'Meera','Gawah, log aur saboot—teeno bachane hain.'),S('lookout',8,'Vicky','Galiyan apni hain. Aaj kisi ko akela nahi chhodenge.'),S('file',5,'Meera','Operation White Death. Team, move.')];return[
  S('rain',8,'',''),S('door',8,'Kamla','Hey Bhagwan… bacha le. Please mere bachche ko bacha le.'),S('mother',10,'Kamla','Bandage… first-aid box kahan hai? Aman!'),S('bed',9,'Kamla','Aman, meri taraf dekh… beta!'),S('black',1,'',''),S('ambulance',12,'',''),S('hospital',7,'Kamla','Please… mere bete ko bacha lo.'),S('cpr',10,'',''),S('corridor',7,'',''),S('doctor',10,'Dr. Tara','Humein afsos hai… hum Aman ko nahi bacha paaye. Overdose tha.'),S('grief',7,'Kamla','Nahi… Aman! Mere bachche!'),S('black',1.2,'',''),S('title',8,'','','SHIMLA GULLIES'),S('briefing',12,'Meera','Pichhle ek saal mein ek hazaar jaanen. Yeh sirf number nahi—ghar hain.'),S('phone',7,'Officer','Sir, one more suspected chitta case reported.'),S('dc',8,'DC Arvind',"It’s time to start Operation White Death."),S('file',6,'','','OPERATION WHITE DEATH'),S('vicky',10,'Meera','Tum in galiyon ko jaante ho. Humein log chahiye jo tumse baat karenge.'),S('handoff',10,'Meera','We need to get to the streets before the streets get to us.'),S('exit',7,'Vicky','Bhaiji… galiyan apni hain.')];}
  enterShot(){const shot=this.shots[this.index];if(!shot){this.finish();return;}this.time=0;this.story.hideCast();this.story.showRoom(null);this.player.mesh.visible=false;this.rain.visible=false;this.ui.title(shot.title||'',shot.kind==='title'?'NIKJYAR STUDIO PRESENTS':shot.kind==='credits'?'NIKJYAR STUDIO · SHIMLA GULLIES':'');this.ui.black(shot.kind==='black'||shot.kind==='title'||shot.kind==='credits'?1:0);this.say(shot.speaker||'',shot.line||'');this.setup(shot.kind);this.tick(0);}
@@ -7223,6 +7224,59 @@ class Jobs{
 }
 return{Jobs,KEY};
 })();
+/* ============================================================ video-cutscene.js
+ * Sora / Runway / Kling clips ko cutscene ki tarah chalata hai. Agar kisi
+ * scene ke liye clip register nahi hai, to false lautata hai -- tab in-engine
+ * cinematic chalti hai (game bina kisi video ke bhi chalta hai).
+ *
+ * Clip register karne ke tareeke:
+ *   window.SHIMLA_CUTSCENES = { intro:'cutscenes/intro.mp4', ending:'...' }
+ *   ya  __shimla.cutscenes.set('intro', url)
+ * URL relative path (HTML ke paas rakhi file), http(s), ya data: kuch bhi.
+ */
+__m['video-cutscene.js']=(function(){
+ let box=null,vid=null,subEl=null,titleEl=null,registry={},playing=false;
+ function ui(){
+  const s=document.createElement('style');s.textContent=`
+   #vcut{position:fixed;inset:0;z-index:30;background:#000;display:none;pointer-events:auto}
+   #vcut.on{display:block}
+   #vcut video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000}
+   #vcut .bar{position:absolute;left:0;right:0;height:8vh;background:#000;z-index:2}
+   #vcut .bar.top{top:0}#vcut .bar.bot{bottom:0}
+   #vcut .vtitle{position:absolute;top:11vh;left:0;right:0;text-align:center;z-index:3;color:#f5efe1;font-size:clamp(18px,3vw,34px);letter-spacing:.14em;text-shadow:0 3px 20px #000;opacity:.92}
+   #vcut .vsub{position:absolute;bottom:12vh;left:50%;transform:translateX(-50%);z-index:3;max-width:80%;text-align:center;color:#f4ecda;font-size:clamp(14px,2.4vw,22px);text-shadow:0 2px 12px #000;line-height:1.4}
+   #vcut .vskip{position:absolute;right:26px;bottom:calc(8vh + 18px);z-index:4;cursor:pointer;background:#0d161bcc;border:1px solid #d8ccaa66;color:#f4ecda;border-radius:20px;padding:8px 16px;font-size:12px;letter-spacing:.14em}
+   #vcut .vskip:hover{background:#dcc08a;color:#17272b}`;
+  document.head.appendChild(s);
+  box=document.createElement('div');box.id='vcut';
+  box.innerHTML='<video playsinline></video><div class="bar top"></div><div class="bar bot"></div><div class="vtitle"></div><div class="vsub"></div><div class="vskip">SKIP ▸</div>';
+  document.body.appendChild(box);
+  vid=box.querySelector('video');titleEl=box.querySelector('.vtitle');subEl=box.querySelector('.vsub');
+  box.querySelector('.vskip').addEventListener('click',()=>end());
+  vid.addEventListener('ended',()=>end());
+ }
+ let onDone=null,onFail=null,failed=false;
+ function end(){if(!playing)return;playing=false;box.classList.remove('on');try{vid.pause();vid.removeAttribute('src');vid.load();}catch(e){}const cb=onDone;onDone=null;onFail=null;if(cb)cb();}
+ function set(name,url){registry[name]=url;}
+ function source(name){return registry[name]||(globalThis.SHIMLA_CUTSCENES&&globalThis.SHIMLA_CUTSCENES[name])||null;}
+ function has(name){return !!source(name);}
+ // done() on natural end/skip; fail() if the clip can't load (caller runs in-engine)
+ function play(name,meta,done,fail){
+  if(!box)ui();const src=source(name);if(!src){if(fail)fail();return false;}
+  onDone=done;onFail=fail;failed=false;playing=true;
+  titleEl.textContent=(meta&&meta.title)||'';subEl.textContent=(meta&&meta.sub)||'';
+  box.classList.add('on');
+  let wd=null;const handleErr=()=>{if(failed)return;failed=true;playing=false;if(wd)clearTimeout(wd);box.classList.remove('on');try{vid.pause();vid.removeAttribute('src');}catch(e){}const f=onFail;onFail=onDone=null;if(f)f();};
+  vid.onerror=handleErr;vid.onstalled=handleErr;
+  wd=setTimeout(handleErr,4000);                          // clip na chale to in-engine
+  vid.onplaying=vid.onloadeddata=()=>{if(wd){clearTimeout(wd);wd=null;}};
+  vid.src=src;vid.currentTime=0;const p=vid.play();if(p&&p.catch)p.catch(handleErr);
+  return true;
+ }
+ return {set,has,play,end,get playing(){return playing;}};
+})();
+
+
 __m["main.js"] = (function(){
 const $=id=>document.getElementById(id),load=$('loading');
 function fail(e){for(const id of ['cinematic','storymenu','storydialog']){const n=$(id);if(n)n.hidden=true;}document.body.classList.remove('story-cinema','story-dialogue');if(typeof speechSynthesis!=='undefined')speechSynthesis.cancel();load.hidden=false;$('loadmessage').textContent='Could not start the 3D scene. '+(e.message||e);$('retry').hidden=false;console.error(e);}
@@ -7292,7 +7346,7 @@ $('sound').onclick=()=>{streetLife.voice=!streetLife.voice;cinema.voice=streetLi
  $('newStory').onclick=()=>jobs.startNew();$('continueStory').onclick=()=>jobs.continueGame();$('freeRoam').onclick=()=>jobs.freeRoam();$('skipcinema').onclick=()=>cinema.skip();$('dialognext').onclick=()=>jobs.answer(0);for(let i=0;i<3;i++)$('dialogchoice'+i).onclick=()=>jobs.answer(i);$('closejournal').onclick=()=>jobs.toggleJournal();$('replayintro').onclick=()=>jobs.replay();$('journalButton').onclick=()=>jobs.toggleJournal();$('saveButton').onclick=()=>jobs.save();
  function resize(){renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();const s=renderer.getDrawingBufferSize(new THREE.Vector2());fx.setSize(s.x,s.y);}addEventListener('resize',resize);
  load.hidden=true;$('quality').textContent='BALANCED';dynamicBoxes();toast('Khedi Bhai · J pataka · G danda · K block · L surrender');
- window.__shimla={ready:true,stage:'Sanjauli + Chowk to Dhalli Tunnel',scene,world,motion,player,cars,pedestrians,dhalliNPCs,renderer,jobs,streetLife,police,cinema,camera,reset,interact,get driving(){return drive;},assets:ProductionAssets.manifest};
+ window.__shimla={ready:true,stage:'Sanjauli + Chowk to Dhalli Tunnel',cutscenes:__m['video-cutscene.js'],scene,world,motion,player,cars,pedestrians,dhalliNPCs,renderer,jobs,streetLife,police,cinema,camera,reset,interact,get driving(){return drive;},assets:ProductionAssets.manifest};
 
  // Cutscenes use one direct render pass and a small, consistently lit stage.
  const cineKey=new THREE.DirectionalLight(0xffe7cc,2.2),cineFill=new THREE.HemisphereLight(0xbddef4,0x62594e,1.2);scene.add(cineKey,cineKey.target,cineFill);cineKey.visible=cineFill.visible=false;
