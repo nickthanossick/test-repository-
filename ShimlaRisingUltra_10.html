@@ -6989,6 +6989,48 @@ function build(w){
   for(let i=0;i<5;i++){bench(C.x-22+i*11,C.z-22,0);bench(C.x-22+i*11,C.z+24,Math.PI);}
   w.colliders.add(C.x,chZ,6.5,13,gy,gy+10);w.colliders.add(C.x,chZ+12.6,3.4,3.4,gy,gy+20);w.colliders.add(C.x+22,C.z+8,4.2,4.2,gy,gy+3);w.colliders.add(C.x-22,C.z+6,9.5,5.5,gy,gy+8);w.colliders.add(C.x,C.z+18,1.1,1.1,gy,gy+3);
  })();}catch(e){console.error('Ridge build failed',e);}
+ // ============ MESSAGE C — bigger map: stacked houses, stalls, pines, tunnel, cliffs ============
+ try{(function(){
+  const G=(x,z)=>w.groundAt(x,z);let cs=98317;const rn=()=>{cs=(cs*1664525+1013904223)>>>0;return cs/4294967296;};
+  const wallCols=[0xb9a58c,0xa88f74,0xc4b7a0,0x9a8f86,0xb0846a,0x8f9a8c,0xc7b28e],roofCols=[0x5f676b,0x8a5a3e,0x6e7175,0x7a4a36];
+  const balMat=new THREE.MeshStandardMaterial({color:0x20242a,roughness:.6,metalness:.4}),rock=new THREE.MeshStandardMaterial({color:0x6b6b63,roughness:.96}),tinA=new THREE.MeshStandardMaterial({color:0x8a5a3e,roughness:.7,metalness:.25}),tinB=new THREE.MeshStandardMaterial({color:0x6b7378,roughness:.7,metalness:.3}),counterM=new THREE.MeshStandardMaterial({color:0x6a5a44,roughness:.9}),pineTrunk=new THREE.MeshStandardMaterial({color:0x4a3a28,roughness:.9}),pineNeedle=new THREE.MeshStandardMaterial({color:0x2f4a34,roughness:.85}),concrete=new THREE.MeshStandardMaterial({color:0x9a978c,roughness:.92});
+  const goods=[new THREE.MeshStandardMaterial({color:0xb5462f,roughness:.8}),new THREE.MeshStandardMaterial({color:0x4f7d3a,roughness:.8}),new THREE.MeshStandardMaterial({color:0xc78a2a,roughness:.8})];
+  function house(gx,gz,rot,i){const y=G(gx,gz);if(y<-40||y>140)return;const g=new THREE.Group();g.position.set(gx,y,gz);g.rotation.y=rot;raw.add(g);
+   const floors=3+((rn()*3)|0),fw=6+rn()*3.4,fd=5.5+rn()*2.4,fh=2.7,wall=new THREE.MeshStandardMaterial({color:wallCols[i%wallCols.length],roughness:.9}),roofM=new THREE.MeshStandardMaterial({color:roofCols[i%4],roughness:.72,metalness:.28});
+   B(g,fw,floors*fh,fd,0,floors*fh/2,0,wall);B(g,fw+.2,1.5,fd+.2,0,-.55,0,stone);
+   for(let f=0;f<floors;f++)for(let wx=-fw/2+.9;wx<fw/2-.5;wx+=1.5){B(g,.82,1.12,.06,wx,f*fh+1.4,fd/2+.03,glass);B(g,.9,.06,.14,wx,f*fh+.78,fd/2+.07,white);}
+   const bal=((floors/2)|0)*fh+1.1;B(g,fw-.6,.08,1.0,0,bal,fd/2+.5,balMat);B(g,fw-.6,.05,.05,0,bal+.55,fd/2+.95,balMat);for(let bx=-fw/2+.5;bx<fw/2-.3;bx+=.62)B(g,.05,.55,.05,bx,bal+.3,fd/2+.95,balMat);
+   for(const s of [-1,1]){const rf=new THREE.Mesh(new THREE.BoxGeometry(fw*.62,.2,fd+.6),roofM);rf.position.set(s*fw*.26,floors*fh+.66,0);rf.rotation.z=s*.6;g.add(rf);}
+   w.colliders.add(gx,gz,fw*.55,fd*.55,y,y+floors*fh);}
+  function stall(gx,gz,rot,i){const y=G(gx,gz);if(y<-40||y>140)return;const g=new THREE.Group();g.position.set(gx,y,gz);g.rotation.y=rot;raw.add(g);const tin=i%2?tinA:tinB;
+   for(const sx of [-1.1,1.1])for(const sz of [0,1.4])B(g,.1,2.0,.1,sx,1.0,sz,balMat);
+   const roof=new THREE.Mesh(new THREE.BoxGeometry(2.7,.1,2.1),tin);roof.position.set(0,2.05,.7);roof.rotation.x=-.18;g.add(roof);
+   B(g,2.4,.8,.7,0,.7,.2,counterM);for(let k=0;k<5;k++)B(g,.32,.26,.32,-1+k*.5,1.25,.2,goods[k%3]);}
+  function pine(gx,gz,h){const y=G(gx,gz);if(y<-40||y>150)return;const g=new THREE.Group();g.position.set(gx,y,gz);raw.add(g);const tr=new THREE.Mesh(new THREE.CylinderGeometry(.12,.2,h*.4,6),pineTrunk);tr.position.y=h*.2;g.add(tr);for(let i=0;i<3;i++){const c=new THREE.Mesh(new THREE.ConeGeometry(h*.3*(1-i*.24),h*.44,7),pineNeedle);c.position.y=h*.42+i*h*.26;g.add(c);}}
+  function cliff(gx,gz,rot,sc){const y=G(gx,gz);const g=new THREE.Group();g.position.set(gx,y-2,gz);g.rotation.y=rot;g.scale.setScalar(sc);raw.add(g);for(let i=0;i<5;i++){const b=new THREE.Mesh(new THREE.BoxGeometry(2+rn()*2,3+rn()*3,2+rn()*2),rock);b.position.set((rn()-.5)*3,rn()*2,(rn()-.5)*2);b.rotation.set((rn()-.5)*.4,rn()*3,(rn()-.5)*.4);g.add(b);}}
+  // --- stacked houses hugging the Dhalli road (both sides) ---
+  let hi=0;for(let s=24;s<474;s+=13){for(const side of [-1,1]){const off=side*(10+rn()*6),p=w.dhalli.point(s,off);if(!p)continue;const q=w.dhalli.project(p.x,p.z);if(q&&q.dist<8)continue;house(p.x,p.z,Math.atan2(-side*p.rx,-side*p.rz),hi++);}}
+  // --- market stalls along the road frontage ---
+  for(let s=30;s<460;s+=26){const side=(s|0)%2?1:-1,off=side*8.2,p=w.dhalli.point(s,off);if(p)stall(p.x,p.z,Math.atan2(-side*p.rx,-side*p.rz),(s|0));}
+  // --- Sanjauli / upper-road infill ---
+  for(let i=0;i<26;i++){const gx=-40-rn()*70,gz=-30+rn()*70;if(Math.abs(gx)<8)continue;if(w.urban?.reserved&&w.urban.reserved(gx,gz,10))continue;house(gx,gz,rn()*6.28,hi++);}
+  // --- pines on the slopes above the roads (forest patches) ---
+  for(let i=0;i<140;i++){const s=20+rn()*450,off=(rn()<.5?-1:1)*(20+rn()*40),p=w.dhalli.point(s,off);if(!p)continue;pine(p.x,p.z,4+rn()*4);}
+  for(let i=0;i<40;i++){pine(-60-rn()*260,-40+rn()*90,4+rn()*4);}
+  // --- modular cliff faces along the valley edge ---
+  for(let s=40;s<460;s+=30){const p=w.dhalli.point(s,-19);if(p)cliff(p.x,p.z,Math.atan2(p.fx,p.fz),1+rn()*.8);}
+  // --- Dhalli tunnel portal ---
+  (function(){const p=w.dhalli.point(490,0);if(!p)return;const y=(w.dhalli.roadHeight?w.dhalli.roadHeight(p.x,p.z):G(p.x,p.z)),g=new THREE.Group();g.position.set(p.x,y,p.z);g.rotation.y=Math.atan2(p.fx,p.fz);raw.add(g);
+   B(g,16,9,3,0,4.5,0,concrete);B(g,7.2,7,3.4,0,3.5,0,new THREE.MeshStandardMaterial({color:0x0b0d0f,roughness:1}));// dark mouth
+   for(const sx of [-1,1])B(g,1.2,7,3.2,sx*4.6,3.5,0,rock);B(g,17,1.2,3.2,0,9,0,concrete);
+   const txt=(function(){const cv=document.createElement('canvas');cv.width=256;cv.height=64;const x=cv.getContext('2d');x.fillStyle='#20304a';x.fillRect(0,0,256,64);x.fillStyle='#eef3ff';x.font='700 30px Arial';x.textAlign='center';x.textBaseline='middle';x.fillText('DHALLI TUNNEL',128,32);const t=new THREE.CanvasTexture(cv);t.colorSpace=THREE.SRGBColorSpace;return t;})();
+   const sgn=new THREE.Mesh(new THREE.PlaneGeometry(6,1.5),new THREE.MeshStandardMaterial({map:txt,roughness:.7}));sgn.position.set(0,8,1.7);g.add(sgn);
+   w.colliders.add(p.x,p.z,8,1.6,y,y+9);})();
+  // --- Kufri hillside town (coordinate scatter near the Kufri end) ---
+  for(let i=0;i<26;i++){const gx=1060+rn()*320,gz=-370+rn()*100;house(gx,gz,rn()*6.28,hi++);}
+  for(let i=0;i<10;i++){stall(1120+rn()*240,-355+rn()*90,rn()*6.28,i);}
+  for(let i=0;i<30;i++){pine(1050+rn()*340,-380+rn()*120,4+rn()*4);}
+ })();}catch(e){console.error('Map fill (C) failed',e);}
  raw.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}});w.group.add(mergeStatic(raw));w.extraBuildings=placed;w.spawn={x:.8,z:21,yaw:.32};return w;
 }
 function hero(){const H=__m['human.js'],g=H.buildHuman({build:'male',hero:true,skin:0xb98a64,top:0x15181d,bottom:0x23262e,topi:true,danda:false,beedi:true,sneakers:true,phone:true});g.name='Vicky-enhanced';g.scale.x=.96;const head=g.getObjectByName('sculpted-photographic-head');head.scale.set(1.055,1.025,1.015);head.material=head.material.clone();head.material.roughness=.90;head.material.metalness=0;head.geometry=head.geometry.clone();const a=head.geometry.attributes.position;for(let i=0;i<a.count;i++){const x=a.getX(i),y=a.getY(i),z=a.getZ(i);if(z<-.08){const nose=Math.exp(-(x*x/.00045+(y+.018)**2/.001));a.setZ(i,z+.010*nose);}}head.geometry.computeVertexNormals();
