@@ -7026,11 +7026,23 @@ function build(w){
   function pine(gx,gz,h){const y=G(gx,gz);if(y<-40||y>150)return;const g=new THREE.Group();g.position.set(gx,y,gz);raw.add(g);const tr=new THREE.Mesh(new THREE.CylinderGeometry(.12,.2,h*.4,6),pineTrunk);tr.position.y=h*.2;g.add(tr);for(let i=0;i<3;i++){const c=new THREE.Mesh(new THREE.ConeGeometry(h*.3*(1-i*.24),h*.44,7),pineNeedle);c.position.y=h*.42+i*h*.26;g.add(c);}}
   function cliff(gx,gz,rot,sc){const y=G(gx,gz);const g=new THREE.Group();g.position.set(gx,y-2,gz);g.rotation.y=rot;g.scale.setScalar(sc);raw.add(g);for(let i=0;i<5;i++){const b=new THREE.Mesh(new THREE.BoxGeometry(2+rn()*2,3+rn()*3,2+rn()*2),rock);b.position.set((rn()-.5)*3,rn()*2,(rn()-.5)*2);b.rotation.set((rn()-.5)*.4,rn()*3,(rn()-.5)*.4);g.add(b);}}
   // --- stacked houses hugging the Dhalli road (both sides) ---
-  let hi=0;for(let s=24;s<474;s+=13){for(const side of [-1,1]){const off=side*(10+rn()*6),p=w.dhalli.point(s,off);if(!p)continue;const q=w.dhalli.project(p.x,p.z);if(q&&q.dist<8)continue;house(p.x,p.z,Math.atan2(-side*p.rx,-side*p.rz),hi++);}}
+  let hi=0;for(let s=24;s<474;s+=9.5){for(const side of [-1,1]){const off=side*(10+rn()*7),p=w.dhalli.point(s,off);if(!p)continue;const q=w.dhalli.project(p.x,p.z);if(q&&q.dist<8)continue;house(p.x,p.z,Math.atan2(-side*p.rx,-side*p.rz),hi++);}}
+  // a second, further-back row so hillsides feel built-up
+  for(let s=34;s<466;s+=17){for(const side of [-1,1]){const off=side*(18+rn()*8),p=w.dhalli.point(s,off);if(!p)continue;house(p.x,p.z,Math.atan2(-side*p.rx,-side*p.rz),hi++);}}
   // --- market stalls along the road frontage ---
   for(let s=30;s<460;s+=26){const side=(s|0)%2?1:-1,off=side*8.2,p=w.dhalli.point(s,off);if(p)stall(p.x,p.z,Math.atan2(-side*p.rx,-side*p.rz),(s|0));}
   // --- Sanjauli / upper-road infill ---
-  for(let i=0;i<26;i++){const gx=-40-rn()*70,gz=-30+rn()*70;if(Math.abs(gx)<8)continue;if(w.urban?.reserved&&w.urban.reserved(gx,gz,10))continue;house(gx,gz,rn()*6.28,hi++);}
+  for(let i=0;i<44;i++){const gx=-40-rn()*80,gz=-40+rn()*90;if(Math.abs(gx)<8)continue;if(w.urban?.reserved&&w.urban.reserved(gx,gz,10))continue;house(gx,gz,rn()*6.28,hi++);}
+  // --- named places (HUD labels + a signboard each) ---
+  w.namedPlaces=[];
+  function placeSign(gx,gz,rot,text){const g=new THREE.Group();g.position.set(gx,G(gx,gz),gz);g.rotation.y=rot;raw.add(g);const post=new THREE.Mesh(new THREE.CylinderGeometry(.08,.1,3,8),balMat);post.position.y=1.5;g.add(post);sign(g,[{text,size:52}],3.4,.85,0,3.0,.06,{side:false,bg:'#16202e',fg:'#eef3ff',border:'#0c141e'});}
+  // Lower Bazaar — dense stall row + signboard
+  for(let s=168;s<226;s+=5.5){const side=(s|0)%2?1:-1,p=w.dhalli.point(s,side*8.6);if(p)stall(p.x,p.z,Math.atan2(-side*p.rx,-side*p.rz),(s|0));}
+  {const p=w.dhalli.point(197,0);if(p){placeSign(p.x-9,p.z,Math.atan2(p.fx,p.fz),'LOWER BAZAAR');w.namedPlaces.push({x:p.x,z:p.z,r:34,label:'LOWER BAZAAR'});}}
+  // Sanjauli Bus Stand — shed + parked buses
+  {const bx=-52,bz=44,by=G(bx,bz);if(by>-40&&by<140){const g=new THREE.Group();g.position.set(bx,by,bz);raw.add(g);B(g,17,.25,6.5,0,3.3,0,tinB);for(const px of [-7.5,-2.5,2.5,7.5])B(g,.22,3.3,.22,px,1.65,-2.8,balMat);B(g,17,.5,.3,0,.9,2.8,counterM);for(let i=0;i<2;i++)B(g,7.4,2.7,2.7,-4.2+i*8.4,1.55,-.2,new THREE.MeshStandardMaterial({color:i?0xb03a2e:0x2e5a7a,roughness:.6}));w.colliders.add(bx,bz,9,3.4,by,by+3.4);placeSign(bx,bz+4.5,0,'SANJAULI BUS STAND');w.namedPlaces.push({x:bx,z:bz,r:26,label:'SANJAULI BUS STAND'});}}
+  // Ridge Viewpoint — railed deck + benches off the road
+  {const p=w.dhalli.point(300,-17);if(p){const y=G(p.x,p.z),g=new THREE.Group();g.position.set(p.x,y,p.z);raw.add(g);B(g,9,.3,5.5,0,.15,0,new THREE.MeshStandardMaterial({color:0x8a8378,roughness:.9}));for(let i=0;i<8;i++)B(g,.08,.85,.08,-4+i,.58,2.7,balMat);B(g,9,.08,.08,0,1.0,2.7,balMat);for(const bxx of [-2.4,2.4]){B(g,1.7,.1,.5,bxx,.55,0,new THREE.MeshStandardMaterial({color:0x2f5a3a,roughness:.6}));B(g,1.7,.5,.08,bxx,.82,-.22,new THREE.MeshStandardMaterial({color:0x2f5a3a,roughness:.6}));}placeSign(p.x,p.z-2.5,Math.PI,'RIDGE VIEWPOINT');w.namedPlaces.push({x:p.x,z:p.z,r:22,label:'RIDGE VIEWPOINT'});}}
   // --- pines on the slopes above the roads (forest patches) ---
   for(let i=0;i<140;i++){const s=20+rn()*450,off=(rn()<.5?-1:1)*(20+rn()*40),p=w.dhalli.point(s,off);if(!p)continue;pine(p.x,p.z,4+rn()*4);}
   for(let i=0;i<40;i++){pine(-60-rn()*260,-40+rn()*90,4+rn()*4);}
@@ -7527,8 +7539,9 @@ __m['weapons.js']=(function(){
  }
  class Weapon{
   constructor(scene,player,camera,chase,zombies,ui){Object.assign(this,{scene,player,camera,chase,zombies,ui});
-   this.cool=0;this.rate=.13;this.range=95;this.headR=.34;this.bodyR=.52;this.flashT=0;this.tracerT=0;
+   this.cool=0;this.rate=.10;this.range=100;this.headR=.36;this.bodyR=.52;this.flashT=0;this.tracerT=0;this.sparkT=0;
    this.flash=new THREE.Sprite(new THREE.SpriteMaterial({color:0xffe6a0,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending}));this.flash.scale.set(.55,.55,.55);this.flash.visible=false;scene.add(this.flash);
+   this.spark=new THREE.Sprite(new THREE.SpriteMaterial({color:0xd7d3c6,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending}));this.spark.scale.set(.28,.28,.28);this.spark.visible=false;scene.add(this.spark);
    this.light=new THREE.PointLight(0xffce78,0,9);scene.add(this.light);
    const tg=new THREE.BufferGeometry();tg.setAttribute('position',new THREE.BufferAttribute(new Float32Array(6),3));
    this.tracer=new THREE.Line(tg,new THREE.LineBasicMaterial({color:0xfff2bc,transparent:true,opacity:0,depthWrite:false}));this.tracer.frustumCulled=false;scene.add(this.tracer);
@@ -7539,7 +7552,9 @@ __m['weapons.js']=(function(){
   fire(aiming){if(this.cool>0)return null;this.cool=this.rate;
    this.gun.updateWorldMatrix(true,false);const mz=this.muzzle.getWorldPosition(this._mz);
    const p=this.player.pos,ox=p.x,oy=p.y+1.42,oz=p.z;const d=this.camera.getWorldDirection(this._d);
-   const sp=aiming?.004:.032;let dx=d.x+(Math.random()-.5)*sp,dy=d.y+(Math.random()-.5)*sp,dz=d.z+(Math.random()-.5)*sp;const dl=Math.hypot(dx,dy,dz)||1;dx/=dl;dy/=dl;dz/=dl;
+   const sp=aiming?.0018:.03;let dx=d.x+(Math.random()-.5)*sp,dy=d.y+(Math.random()-.5)*sp,dz=d.z+(Math.random()-.5)*sp;const dl=Math.hypot(dx,dy,dz)||1;dx/=dl;dy/=dl;dz/=dl;
+   // aim-assist while ADS: snap toward the nearest zombie head inside a small cone
+   if(aiming){let bd=.985,tgt=null;for(const z of this.zombies.pool){if(!z.active||z.state==='dead')continue;const bp=z.mesh.position,hx=bp.x-ox,hy=(bp.y+1.5)-oy,hz=bp.z-oz,hl=Math.hypot(hx,hy,hz)||1;if(hl<1.2||hl>this.range)continue;const dot=(hx*dx+hy*dy+hz*dz)/hl;if(dot>bd){bd=dot;tgt=[hx/hl,hy/hl,hz/hl];}}if(tgt){dx+=(tgt[0]-dx)*.6;dy+=(tgt[1]-dy)*.6;dz+=(tgt[2]-dz)*.6;const nl=Math.hypot(dx,dy,dz)||1;dx/=nl;dy/=nl;dz/=nl;}}
    let best=null;
    for(const z of this.zombies.pool){if(!z.active||z.state==='dead')continue;const bp=z.mesh.position;let part=null,t=this.range;
     const th=sphereT(ox,oy,oz,dx,dy,dz,bp.x,bp.y+1.5,bp.z,this.headR);if(th>0&&th<this.range){part='head';t=th;}
@@ -7553,6 +7568,7 @@ __m['weapons.js']=(function(){
    SFX&&SFX.shot();
    if(best){const bp=best.z.mesh.position;if(best.part==='head'){this.zombies.kill(best.z,dx,dz);this.gore.burst(bp.x,bp.y+1.5,bp.z,20,3.4,1.6);SFX&&SFX.head();this.ui.hitmarker?.('SIR PHAAD!',true);}
     else{this.zombies.stagger(best.z,dx,dz);this.gore.burst(ex,ey,ez,11,2.3,.9);SFX&&SFX.impact(.7);this.ui.hitmarker?.('LAGA · sir pe maar!',false);}}
+   else{this.spark.position.set(ex,ey,ez);this.spark.visible=true;this.spark.material.opacity=1;this.spark.scale.setScalar(.16+Math.random()*.16);this.sparkT=.05;}
    return best;
   }
   aimPose(aiming){const rig=this.player.mesh.userData.rig;if(!rig||aiming<.05)return;const a=Math.min(1,aiming);
@@ -7561,6 +7577,7 @@ __m['weapons.js']=(function(){
   tick(dt,aiming){this.cool=Math.max(0,this.cool-dt);this.gore.tick(dt);
    if(this.flashT>0){this.flashT-=dt;const k=Math.max(0,this.flashT/.05);this.flash.material.opacity=k;this.light.intensity=k*3.0;if(this.flashT<=0){this.flash.visible=false;this.flash.material.opacity=0;this.light.intensity=0;}}
    if(this.tracerT>0){this.tracerT-=dt;this.tracer.material.opacity=Math.max(0,this.tracerT/.06)*.9;}
+   if(this.sparkT>0){this.sparkT-=dt;this.spark.material.opacity=Math.max(0,this.sparkT/.05);if(this.sparkT<=0)this.spark.visible=false;}
    if(aiming>.05)this.aimPose(aiming);
   }
  }
@@ -7582,7 +7599,7 @@ __m['zombies.js']=(function(){
  class Zombies{
   constructor(world,scene,player,camera,onPlayerDown){Object.assign(this,{world,scene,player,camera,onPlayerDown});
    this.group=new THREE.Group();this.group.name='zombies';scene.add(this.group);
-   this.pool=[];this.max=42;this.want=11;this.enabled=false;this.time=0;this.invuln=0;this.spawnT=1;this.dmg=13;this.speed=1.75;this.maulT=0;this.peds=null;
+   this.pool=[];this.max=52;this.want=14;this.enabled=false;this.time=0;this.invuln=0;this.spawnT=1;this.dmg=13;this.speed=1.75;this.maulT=0;this.peds=null;
    for(let i=0;i<this.max;i++)this.pool.push(this.make(i));
   }
   make(i){const m=buildHuman({build:i%5===0?'female':'male',lod:'crowd',skin:SKINS[i%SKINS.length],top:TOPS[i%TOPS.length],bottom:0x23241d,hair:0x181b13,topi:false,beedi:false});
@@ -7605,7 +7622,7 @@ __m['zombies.js']=(function(){
   carKill(list){if(!this.enabled||!list||!list.length)return;for(const z of this.pool){if(!z.active||z.state==='dead')continue;const p=z.mesh.position;for(const c of list){const dx=p.x-c.x,dz=p.z-c.z;if(dx*dx+dz*dz<c.r*c.r){this.kill(z);p.x+=c.dx*1.4;p.z+=c.dz*1.4;z.mesh.rotation.z=(Math.random()-.5)*1.4;if(this.onGore)this.onGore(p.x,p.y+1.0,p.z,16);if(SFX)SFX.impact(1);break;}}}}
   maulPeds(){if(!this.peds)return;for(const a of this.peds){if(!a||!a.mesh||!a.mesh.visible||a.zombied||a.state==='chase'||a.state==='attack')continue;const ap=a.mesh.position;for(const z of this.pool){if(!z.active||z.state==='dead')continue;const zp=z.mesh.position;if(Math.abs(zp.y-ap.y)>2.2)continue;const dx=zp.x-ap.x,dz=zp.z-ap.z;if(dx*dx+dz*dz<2.1){a.hp=0;a.state='stunned';a.timer=999;a.zombied=true;a.mesh.rotation.z=1.4;if(this.onGore)this.onGore(ap.x,ap.y+1.0,ap.z,9);break;}}}}
   spawnOne(){const z=this.pool.find(z=>!z.active);if(!z)return;const pp=this.player.pos;
-   for(let tr=0;tr<4;tr++){const ang=Math.random()*6.283,rad=28+Math.random()*13;let x=pp.x+Math.cos(ang)*rad,zz=pp.z+Math.sin(ang)*rad;
+   for(let tr=0;tr<4;tr++){const ang=Math.random()*6.283,rad=30+Math.random()*22;let x=pp.x+Math.cos(ang)*rad,zz=pp.z+Math.sin(ang)*rad;
     const b=this.world.bounds;if(b){if(b.x)x=THREE.MathUtils.clamp(x,b.x[0]+2,b.x[1]-2);if(b.z)zz=THREE.MathUtils.clamp(zz,b.z[0]+2,b.z[1]-2);}
     const y=this.world.groundAt(x,zz);if(this.world.colliders?.inside&&this.world.colliders.inside(x,y+1,zz,.6))continue;
     z.mesh.position.set(x,y,zz);z.mesh.visible=true;z.active=true;z.state='chase';z.fall=0;z.cool=.4+Math.random()*.4;z.mesh.rotation.set(0,0,0);if(z.rig&&z.rig.head)z.rig.head.scale.setScalar(1);return;}
@@ -7725,8 +7742,9 @@ $('sound').onclick=()=>{streetLife.voice=!streetLife.voice;cinema.voice=streetLi
  setInterval(()=>{try{if(jobs.menu||cinema.active||jobs.locked||document.hidden)return;const near=streetLife.actors.filter(a=>a.mesh.visible&&a.state!=='chase'&&a.state!=='attack'&&a.mesh.position.distanceTo(player.pos)<20);if(!near.length)return;const a=near[(Math.random()*near.length)|0];streetLife.say(a,ZBANTER[(Math.random()*ZBANTER.length)|0],true);}catch(e){}},9000);
  const SFX=__m['sfx.js'];
  const crosshair=document.createElement('div');crosshair.id='crosshair';crosshair.style.cssText='position:fixed;left:50%;top:50%;width:24px;height:24px;margin:-12px 0 0 -12px;z-index:6;pointer-events:none;display:none;transition:transform .08s';crosshair.innerHTML='<div style="position:absolute;left:50%;top:50%;width:4px;height:4px;margin:-2px;border-radius:50%;background:#ff5a45;box-shadow:0 0 7px #ff2d18"></div><div style="position:absolute;inset:0;border:2px solid rgba(255,255,255,.75);border-radius:50%;opacity:.5"></div>';document.body.appendChild(crosshair);
- let rmbAim=false;const canShoot=()=>!(cinema.active||jobs.locked||police.locked||photo||drive||jobs.menu||world.story.active);
- renderer.domElement.addEventListener('pointerdown',e=>{if(e.pointerType!=='mouse')return;if(e.button===2){rmbAim=true;e.preventDefault();return;}if(e.button!==0)return;if(!canShoot())return;if(e.target!==renderer.domElement)return;weapons.fire(chase.aim>.5);});
+ let rmbAim=false,lmbHeld=false;const canShoot=()=>!(cinema.active||jobs.locked||police.locked||photo||drive||jobs.menu||world.story.active);
+ renderer.domElement.addEventListener('pointerdown',e=>{if(e.pointerType!=='mouse')return;if(e.button===2){rmbAim=true;e.preventDefault();return;}if(e.button!==0)return;if(e.target!==renderer.domElement)return;lmbHeld=true;if(canShoot())weapons.fire(chase.aim>.5);});
+ addEventListener('pointerup',e=>{if(e.button===0)lmbHeld=false;});addEventListener('blur',()=>{lmbHeld=false;});
  addEventListener('pointerup',e=>{if(e.button===2)rmbAim=false;});
  renderer.domElement.addEventListener('contextmenu',e=>e.preventDefault());
  $('newStory').onclick=()=>jobs.startNew();$('continueStory').onclick=()=>jobs.continueGame();$('freeRoam').onclick=()=>jobs.freeRoam();$('skipcinema').onclick=()=>cinema.skip();$('dialognext').onclick=()=>jobs.answer(0);for(let i=0;i<3;i++)$('dialogchoice'+i).onclick=()=>jobs.answer(i);$('closejournal').onclick=()=>jobs.toggleJournal();$('replayintro').onclick=()=>jobs.replay();$('journalButton').onclick=()=>jobs.toggleJournal();$('saveButton').onclick=()=>jobs.save();
@@ -7760,7 +7778,7 @@ $('sound').onclick=()=>{streetLife.voice=!streetLife.voice;cinema.voice=streetLi
   if(!cinema.active){if(input.pressed('KeyN'))cycleTime();if(input.pressed('KeyB'))cycleWeather();}
   if(cinema.active){if(input.pressed('Escape'))cinema.skip();}
   else if(jobs.dialogue){if(jobs.dialogue.name==='CHECKPOINT'&&input.pressed('KeyR'))jobs.answer(0);else if(input.pressed('KeyT')||input.pressed('Enter')){if(!jobs.dialogue.choices.length)jobs.answer(0);}for(let i=0;i<3;i++)if(input.pressed('Digit'+(i+1)))jobs.answer(i);}
-  else if(!jobs.locked){if(input.pressed('KeyT'))missionAction();if(input.pressed('KeyG')&&!drive&&!photo&&!police.locked)streetLife.punch('danda');if(input.pressed('KeyL')&&!drive)police.surrender();if(input.pressed('KeyJ')&&!drive&&!photo&&!police.locked)weapons.fire(chase.aim>.5);if(input.pressed('KeyR'))reset();if(input.pressed('KeyQ'))setQuality();if(input.pressed('KeyV'))photoMode();if(input.pressed('Digit8')||input.pressed('Numpad8')){const l=chase.cycleView();toast('Camera: '+l);}if(input.pressed('KeyF')||input.pressed('KeyE'))interact();if(input.pressed('KeyH')&&!police.locked){player.onPhone=!player.onPhone;if(police.engaged){streetLife.say({mesh:player.mesh,id:900,name:'Khedi Bhai'},'Ruk abhi krta mantri ko call!',false);police.nextSpeech=police.time+4;}}}
+  else if(!jobs.locked){if(input.pressed('KeyT'))missionAction();if(input.pressed('KeyG')&&!drive&&!photo&&!police.locked)streetLife.punch('danda');if(input.pressed('KeyL')&&!drive)police.surrender();if((lmbHeld||input.down('KeyJ'))&&canShoot())weapons.fire(chase.aim>.5);if(input.pressed('KeyR'))reset();if(input.pressed('KeyQ'))setQuality();if(input.pressed('KeyV'))photoMode();if(input.pressed('Digit8')||input.pressed('Numpad8')){const l=chase.cycleView();toast('Camera: '+l);}if(input.pressed('KeyF')||input.pressed('KeyE'))interact();if(input.pressed('KeyH')&&!police.locked){player.onPhone=!player.onPhone;if(police.engaged){streetLife.say({mesh:player.mesh,id:900,name:'Khedi Bhai'},'Ruk abhi krta mantri ko call!',false);police.nextSpeech=police.time+4;}}}
   if(input.mouseDX||input.mouseDY)manualCamera=2.4;manualCamera=Math.max(0,manualCamera-dt);
   if(!photo&&!police.locked&&!jobs.locked){chase.handleMouse(input.mouseDX,input.mouseDY);chase.handleWheel(input.wheelDY);
    if(drive){drive.update(dt,{throttle:input.axis('KeyS','KeyW')||input.axis('ArrowDown','ArrowUp'),steer:input.axis('KeyD','KeyA')||input.axis('ArrowRight','ArrowLeft'),handbrake:input.down('Space')});player.pos.copy(drive.pos);chase.update(dt,drive.pos,'vehicle',manualCamera?null:drive.yaw,drive.speed);}
@@ -7771,7 +7789,7 @@ $('sound').onclick=()=>{streetLife.voice=!streetLife.voice;cinema.voice=streetLi
   chase.aim+=((aimHeld?1:0)-chase.aim)*Math.min(1,dt*10);
   const wantFov=55-chase.aim*15;if(Math.abs(camera.fov-wantFov)>.05){camera.fov+=(wantFov-camera.fov)*Math.min(1,dt*10);camera.updateProjectionMatrix();}
   if(SFX&&streetLife.voice&&!jobs.menu)SFX.ambientStart();
-  {const nr=nightRatio(motion.hour);zombies.speed=1.75+nr*1.05;zombies.want=Math.min(40,Math.round((10+nr*20)*(player.pos.x>820?1.4:1)));}  // raat hote hi tez + bhaari horde
+  {const nr=nightRatio(motion.hour);zombies.speed=1.8+nr*1.1;zombies.want=Math.min(50,Math.round((14+nr*26)*(player.pos.x>820?1.4:1)));}  // raat hote hi tez + bhaari horde
   weapons.tick(dt,chase.aim);zombies.enabled=!jobs.menu&&!cinema.active&&!world.story.active;if(!cinema.active)zombies.tick(dt,drive);
   if(!cinema.active&&zombies.enabled){const carList=[];if(drive&&drive.kmh>12)carList.push({x:drive.pos.x,z:drive.pos.z,r:2.5,dx:-Math.sin(drive.yaw),dz:-Math.cos(drive.yaw)});for(const t of motion.traffic){if(Math.abs(t.actual)>4){carList.push({x:t.mesh.position.x,z:t.mesh.position.z,r:t.two?1.3:2.2,dx:-Math.sin(t.yaw),dz:-Math.cos(t.yaw)});}}if(carList.length)zombies.carKill(carList);}
   const showCH=(!cinema.active&&!jobs.locked&&!jobs.menu&&!drive&&!photo&&!world.story.active);crosshair.style.display=showCH?'block':'none';crosshair.style.transform=chase.aim>.5?'scale(.55)':'scale(1)';
@@ -7781,7 +7799,7 @@ $('sound').onclick=()=>{streetLife.voice=!streetLife.voice;cinema.voice=streetLi
   if(!police.locked&&!photo)jobs.tick(dt,player,drive,camera);
   if(cinema.active){try{cinema.tick(realDt);}catch(e){console.error('Cinematic recovered',e);cinema.skip();toast('Cutscene recovered · continue story.');}}else if(!police.locked&&!jobs.menu){world.story.cameraInRoom(camera,player);world.story.idle(elapsed);}
   if(jobs.menu){camera.position.set(8,world.roadY(-171)+5,-157);camera.lookAt(32,world.roadY(-171)+3,-171);}
-  world.expansion.tick(camera);polish.tick(camera);sky.position.copy(camera.position);dynamicBoxes();$('healthfill').style.width=player.health+'%';$('locationlabel').textContent=world.story.active?world.story.rooms[world.story.active].label:(world.ridge&&Math.hypot(player.pos.x-world.ridge.x,player.pos.z-world.ridge.z)<46)?'THE RIDGE · MALL ROAD':world.expansion.label(player.pos)||player.pos.x>435?'DHALLI TUNNEL':player.pos.x<-10?'MALL ROAD':player.pos.z<-194?'UPPER ROAD · NEW DIAMOND':player.pos.x>12?'CHOWK → DHALLI ROAD':'SANJAULI · SHIMLA';$('mode').textContent=photo?'REFERENCE VIEW':drive?Math.round(drive.kmh)+' KM/H':'ON FOOT';const near=!drive&&nearest();$('prompt').hidden=jobs.locked||police.locked||photo||(!drive&&!near);$('prompt').textContent=drive?'F / E · EXIT CAR':near?'F / E · ENTER CAR':'';$('stamina').style.width=player.stamina+'%';if(elapsed>toastUntil)$('toast').classList.remove('show');input.endFrame();renderScene();
+  world.expansion.tick(camera);polish.tick(camera);sky.position.copy(camera.position);dynamicBoxes();$('healthfill').style.width=player.health+'%';const _np=world.namedPlaces&&world.namedPlaces.find(pl=>Math.hypot(player.pos.x-pl.x,player.pos.z-pl.z)<pl.r);$('locationlabel').textContent=world.story.active?world.story.rooms[world.story.active].label:_np?_np.label:(world.ridge&&Math.hypot(player.pos.x-world.ridge.x,player.pos.z-world.ridge.z)<46)?'THE RIDGE · MALL ROAD':world.expansion.label(player.pos)||player.pos.x>435?'DHALLI TUNNEL':player.pos.x<-10?'MALL ROAD':player.pos.z<-194?'UPPER ROAD · NEW DIAMOND':player.pos.x>12?'CHOWK → DHALLI ROAD':'SANJAULI · SHIMLA';$('mode').textContent=photo?'REFERENCE VIEW':drive?Math.round(drive.kmh)+' KM/H':'ON FOOT';const near=!drive&&nearest();$('prompt').hidden=jobs.locked||police.locked||photo||(!drive&&!near);$('prompt').textContent=drive?'F / E · EXIT CAR':near?'F / E · ENTER CAR':'';$('stamina').style.width=player.stamina+'%';if(elapsed>toastUntil)$('toast').classList.remove('show');input.endFrame();renderScene();
   }catch(e){console.error('Game frame recovered',e);input.endFrame();if(cinema.active){cinema.skip();toast('Story resumed safely · press T at the marker.');}else fail(e);}
  }
  requestAnimationFrame(frame);
