@@ -7661,9 +7661,9 @@ __m['zombies.js']=(function(){
   constructor(world,scene,player,camera,onPlayerDown){Object.assign(this,{world,scene,player,camera,onPlayerDown});
    this.group=new THREE.Group();this.group.name='zombies';scene.add(this.group);
    this.pool=[];this.max=52;this.want=14;this.enabled=false;this.time=0;this.invuln=0;this.spawnT=1;this.dmg=13;this.speed=1.75;this.maulT=0;this.peds=null;
-   for(let i=0;i<this.max;i++)this.pool.push(this.make(i));
+   for(let i=0;i<10;i++)this.pool.push(this.make(i));
   }
-  make(i){const m=buildHuman({build:i%5===0?'female':'male',lod:'crowd',skin:SKINS[i%SKINS.length],top:TOPS[i%TOPS.length],bottom:0x23241d,hair:0x181b13,topi:false,beedi:false});try{const _hm=new THREE.MeshStandardMaterial({color:0x0c0d09,roughness:1});const _hair=new THREE.Mesh(new THREE.IcosahedronGeometry(.18,1),_hm);_hair.position.set(0,1.72,-.01);_hair.scale.set(1.18,1.02,1.24);m.add(_hair);const _tuft=new THREE.Mesh(new THREE.ConeGeometry(.06,.22,5),_hm);_tuft.position.set((Math.random()-.5)*.05,1.88,-.02);_tuft.rotation.x=-.15;m.add(_tuft);}catch(e){}const _b=1.16+(i%4)*.06;m.scale.set(_b*1.07,_b,_b*1.07);
+  make(i){const m=buildHuman({build:i%5===0?'female':'male',lod:'crowd',skin:SKINS[i%SKINS.length],top:TOPS[i%TOPS.length],bottom:0x23241d,hair:0x181b13,topi:false,beedi:false});m.scale.set(1.02,1.2,1.02);
    m.visible=false;this.group.add(m);
    const head=m.userData.rig.head;
    if(horrorFace)head.add(horrorFace.clone(true));else{const faceParts=new THREE.Group();
@@ -7684,7 +7684,7 @@ __m['zombies.js']=(function(){
   stagger(z,dx=0,dz=0){if(!z||z.state==='dead')return;z.state='stagger';z.staggerT=.35;z.cool=Math.max(z.cool,.55);z.windup=0;z.mesh.position.x+=dx*.22;z.mesh.position.z+=dz*.22;}
   carKill(list){if(!this.enabled||!list||!list.length)return;for(const z of this.pool){if(!z.active||z.state==='dead')continue;const p=z.mesh.position;for(const c of list){const dx=p.x-c.x,dz=p.z-c.z;if(dx*dx+dz*dz<c.r*c.r){this.kill(z);p.x+=c.dx*1.4;p.z+=c.dz*1.4;z.mesh.rotation.z=(Math.random()-.5)*1.4;if(this.onGore)this.onGore(p.x,p.y+1.0,p.z,16);if(SFX)SFX.impact(1);break;}}}}
   maulPeds(){if(!this.peds)return;for(const z of this.pool){if(!z.active||z.state==='dead'){continue;}z._prey=null;let bd=225;const zp=z.mesh.position;for(const a of this.peds){if(!a||!a.mesh||!a.mesh.visible||a.zombied||a.state==='chase'||a.state==='attack')continue;const ap=a.mesh.position;if(Math.abs(zp.y-ap.y)>2.2)continue;const dx=zp.x-ap.x,dz=zp.z-ap.z,d2=dx*dx+dz*dz;if(d2<2.6){a.hp=0;a.state='stunned';a.timer=999;a.zombied=true;a.mesh.rotation.z=1.4;if(this.onGore)this.onGore(ap.x,ap.y+1.0,ap.z,10);z._prey=null;break;}if(d2<bd){bd=d2;z._prey=a;}}}}
-  spawnOne(){const z=this.pool.find(z=>!z.active);if(!z)return;const pp=this.player.pos;
+  spawnOne(){let z=this.pool.find(z=>!z.active);if(!z){if(this.pool.length<this.max){z=this.make(this.pool.length);this.pool.push(z);}else return;}const pp=this.player.pos;
    for(let tr=0;tr<4;tr++){const ang=Math.random()*6.283,rad=30+Math.random()*22;let x=pp.x+Math.cos(ang)*rad,zz=pp.z+Math.sin(ang)*rad;
     const b=this.world.bounds;if(b){if(b.x)x=THREE.MathUtils.clamp(x,b.x[0]+2,b.x[1]-2);if(b.z)zz=THREE.MathUtils.clamp(zz,b.z[0]+2,b.z[1]-2);}
     const y=this.world.groundAt(x,zz);if(this.world.colliders?.inside&&this.world.colliders.inside(x,y+1,zz,.6))continue;
@@ -7815,7 +7815,7 @@ async function boot(){
  const sun=new THREE.DirectionalLight(0xffefd0,3.25);sun.position.set(30,48,23);sun.target.position.set(-6,2,0);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-43,right:43,top:42,bottom:-42,near:1,far:130});sun.shadow.bias=-.00015;sun.shadow.normalBias=.025;sun.shadow.radius=2;scene.add(sun,sun.target);
  const camera=new THREE.PerspectiveCamera(55,innerWidth/innerHeight,.08,900);
  $('loadmessage').textContent='Building Sanjauli parking and the street…';await new Promise(r=>setTimeout(r,20));
- __m['visual-polish.js'].install();const living=__m['living-world.js'];const world=living.enrich(__m['town-upgrade.js'].build(__m['expanded-map.js'].build(__m['urban.js'].build(__m['dhalli.js'].build(__m['reference-street.js'].extendWorld(__m['step-world.js'].buildWorld()))))));scene.add(world.group);__m['story-world.js'].build(world,scene);try{addOutbreakDecay(scene,world);}catch(_e){console.warn('decay',_e);}
+ __m['visual-polish.js'].install();const living=__m['living-world.js'];const world=living.enrich(__m['town-upgrade.js'].build(__m['expanded-map.js'].build(__m['urban.js'].build(__m['dhalli.js'].build(__m['reference-street.js'].extendWorld(__m['step-world.js'].buildWorld()))))));scene.add(world.group);__m['story-world.js'].build(world,scene);setTimeout(()=>{try{addOutbreakDecay(scene,world);}catch(_e){console.warn('decay',_e);}},1500);
  const {Player}=__m['player.js'],{Vehicle}=__m['vehicle.js'];const player=new Player(world.terrain,world.colliders,world.groundAt);player.placeAt(world.spawn.x,world.spawn.z,world.spawn.yaw);scene.add(player.mesh);
  const input=new __m['input.js'].Input(renderer.domElement),chase=new __m['chase-camera.js'].ChaseCamera(camera,world.terrain,world.colliders);chase.yaw=world.spawn.yaw;chase.pitch=-.09;chase.zoom=1.5;
  let fx=new __m['postfx.js'].PostFX(renderer,scene,camera,{ao:true,aoScale:.5,bloom:true,grade:true});
