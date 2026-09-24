@@ -6282,15 +6282,16 @@ const RIHAND={
     return g;
   },
   skinMat(veins,P){
-    const m=new THREE.MeshPhysicalMaterial({color:0x7a5846,roughness:.58,metalness:0,sheen:.22,sheenRoughness:.6,sheenColor:new THREE.Color(0x7a3426),
-      clearcoat:.06,clearcoatRoughness:.45});
+    const m=new THREE.MeshPhysicalMaterial({color:0x6b4838,roughness:.64,metalness:0,sheen:.08,sheenRoughness:.7,sheenColor:new THREE.Color(0x5a2c22),
+      clearcoat:0,clearcoatRoughness:.6});
     const n=veins.length, arr=[]; for(const [a,b,r] of veins){ arr.push(new THREE.Vector4(a.x,a.y,a.z,r),new THREE.Vector4(b.x,b.y,b.z,r)); }
     const K=P.fingers.map(f=>f.J[0]).concat(P.fingers.map(f=>f.J[1]),[P.T[1],P.T[2]]);
+    const J=P.fingers.map(f=>f.J[1]).concat(P.fingers.map(f=>f.J[2]),[P.T[1],P.T[2]]);
     m.onBeforeCompile=sh=>{
-      sh.uniforms.uV={value:arr}; sh.uniforms.uK={value:K};
+      sh.uniforms.uV={value:arr}; sh.uniforms.uK={value:K}; sh.uniforms.uJ={value:J};
       sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nvarying vec3 vHP;').replace('#include <begin_vertex>','#include <begin_vertex>\nvHP=position;');
       sh.fragmentShader=sh.fragmentShader.replace('#include <common>',`#include <common>
-        varying vec3 vHP; uniform vec4 uV[${n*2}]; uniform vec3 uK[${K.length}];
+        varying vec3 vHP; uniform vec4 uV[${n*2}]; uniform vec3 uK[${K.length}]; uniform vec3 uJ[${J.length}];
         float hH(vec3 p){ return fract(sin(dot(p,vec3(127.1,311.7,74.7)))*43758.5453); }
         float hN(vec3 p){ vec3 i=floor(p),f=fract(p); f=f*f*(3.-2.*f);
           return mix(mix(mix(hH(i),hH(i+vec3(1,0,0)),f.x),mix(hH(i+vec3(0,1,0)),hH(i+vec3(1,1,0)),f.x),f.y),
@@ -6304,7 +6305,10 @@ const RIHAND={
           float sN=hN(vHP*900.)*.5+hN(vHP*260.)*.35+hN(vHP*60.)*.15;
           float kn=0.; for(int i=0;i<${K.length};i++) kn=max(kn,1.-smoothstep(.004,.014,length(vHP-uK[i])));
           diffuseColor.rgb*=.86+.24*hN(vHP*40.)*(.7+.3*hN(vHP*140.));
-          diffuseColor.rgb=mix(diffuseColor.rgb,diffuseColor.rgb*vec3(1.12,.82,.78),kn*.55);
+          diffuseColor.rgb=mix(diffuseColor.rgb,diffuseColor.rgb*vec3(1.08,.86,.82),kn*.35);
+          /* skin folds over every finger joint, a little darker in the creases */
+          float cr=0.; for(int i=0;i<${J.length};i++){ float d=length(vHP-uJ[i]); cr=max(cr,(1.-smoothstep(.005,.0105,d))*smoothstep(.35,.95,.5+.5*sin(d*2700.+hN(vHP*500.)*2.))); }
+          diffuseColor.rgb*=1.-cr*.24;
           diffuseColor.rgb=mix(diffuseColor.rgb,diffuseColor.rgb*vec3(.55,.66,.92),sV*.7);
           diffuseColor.rgb*=.94+.06*sN;`)
         .replace('#include <roughnessmap_fragment>',`#include <roughnessmap_fragment>
@@ -6315,7 +6319,7 @@ const RIHAND={
             vec3 r1=cross(dpy,normal), r2=cross(normal,dpx); float det=dot(dpx,r1);
             vec3 grad=sign(det)*(hx*r1+hy*r2); normal=normalize(abs(det)*normal-grad); }`)
         .replace('#include <lights_fragment_end>',`#include <lights_fragment_end>
-          reflectedLight.indirectDiffuse+=diffuseColor.rgb*vec3(.09,.028,.018);`);
+          reflectedLight.indirectDiffuse+=diffuseColor.rgb*vec3(.035,.014,.01);`);
     };
     m.customProgramCacheKey=()=>'riSkin'+n;
     return m;
@@ -6383,7 +6387,7 @@ RI.buildView=function(T){
     console.log('RI hand',geo.attributes.position.count,'verts',(performance.now()-t0).toFixed(0),'ms');
   }catch(e){ console.warn('RI hand failed',e); }
   view.position.set(.26,-.235,-.3);
-  if(T.vm){ T.vm.position.set(.1,.04,-.1); T.vm.distance=1.4; T.vm.intensity=1.5; T.vm.color.setHex(0xfff1e4); }
+  if(T.vm){ T.vm.position.set(.1,.04,-.1); T.vm.distance=1.4; T.vm.intensity=.9; T.vm.color.setHex(0xfff1e4); }
   view.rotation.set(.05,.30,.02);
   view.scale.setScalar(1);
   view.traverse(o=>{ o.castShadow=false; o.receiveShadow=false; o.renderOrder=2; o.frustumCulled=false; });
@@ -16553,7 +16557,7 @@ const V7Post={
     this.mat=new THREE.ShaderMaterial({depthTest:false,depthWrite:false,vertexShader:this.VS,
       uniforms:{tColor:{value:this.rtC.texture},tAO:{value:this.rtAO.texture},tDepth:{value:this.rtMS.depthTexture},
         uAORes:{value:new THREE.Vector2(w>>1,h>>1)},uNear:{value:camera.near},uFar:{value:camera.far},uT:{value:0},uAOOn:{value:1},
-        uCA:{value:.010},uGrain:{value:.022}},
+        uCA:{value:.0018},uGrain:{value:.022}},
       fragmentShader:`uniform sampler2D tColor,tAO,tDepth; uniform vec2 uAORes; uniform float uNear,uFar,uT,uAOOn,uCA,uGrain; varying vec2 vUv;
         float vz(float d){ return (uNear*uFar)/((uFar-uNear)*d-uFar); }
         float h12(vec2 p){ vec3 q=fract(vec3(p.xyx)*.1031); q+=dot(q,q.yzx+33.33); return fract((q.x+q.y)*q.z); }
@@ -16566,8 +16570,8 @@ const V7Post={
               s+=texture2D(tAO,vUv+o).r*ww; w+=ww; }
             col*=w>.001?s/w:1.; }
           float l=dot(col,vec3(.2126,.7152,.0722));
-          col=mix(vec3(l),col,.86);
-          col*=mix(vec3(.90,1.,1.06),vec3(1.05,1.,.92),smoothstep(.015,.6,l));
+          col=mix(vec3(l),col,.93);
+          col*=mix(vec3(.95,1.,1.03),vec3(1.03,1.,.96),smoothstep(.015,.6,l));
           gl_FragColor=vec4(max(col,0.),1.);
           #include <tonemapping_fragment>
           #include <colorspace_fragment>
@@ -16575,7 +16579,7 @@ const V7Post={
     this.w=w; this.h=h; this.ready=true;
     /* bloom comes from three's own UnrealBloomPass, fetched once; until then (or if it can't load) there is simply no bloom */
     if(hdr) import('https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/postprocessing/UnrealBloomPass.js').then(mod=>{
-      const b=new mod.UnrealBloomPass(new THREE.Vector2(this.w,this.h),.34,.55,.9); b.setSize(this.w,this.h); this.bloom=b;
+      const b=new mod.UnrealBloomPass(new THREE.Vector2(this.w,this.h),.14,.2,2.6); b.setSize(this.w,this.h); this.bloom=b;
     }).catch(e=>console.warn('V7 bloom unavailable',e));
   },
   resize(w,h){
