@@ -6324,6 +6324,62 @@ const RIHAND={
     m.customProgramCacheKey=()=>'riSkin'+n;
     return m;
   },
+  /* a yellow cloth wrapped round the hand, Om printed all over it: the hand's own
+     surface pushed out by the cloth's thickness, with a few folds, the finger tips
+     left bare and the torch barrel kept clear so the grip still sits on the metal */
+  cloth(S){
+    const f=S.f, P=S.P, RB=this.RB, arm=P.arm, Wc=P.Wc;
+    const cap=(px,py,pz,a,b,r)=>{ const bx=b.x-a.x,by=b.y-a.y,bz=b.z-a.z, qx=px-a.x,qy=py-a.y,qz=pz-a.z;
+      const h=Math.max(0,Math.min(1,(qx*bx+qy*by+qz*bz)/(bx*bx+by*by+bz*bz))); return Math.hypot(qx-bx*h,qy-by*h,qz-bz*h)-r; };
+    const tips=P.fingers.map(fg=>[fg.J[2],fg.J[3],fg.r[2]+.0062]).concat([[P.T[2],P.T[3],.0112+.0062]]);
+    const fn=(x,y,z)=>{
+      const along=(x-Wc.x)*arm.x+(y-Wc.y)*arm.y+(z-Wc.z)*arm.z;
+      let c=f(x,y,z)-.0042;
+      c-=.00085*Math.sin(along*165+Math.sin(x*95+z*40)*2.2)+.00045*Math.sin(x*430+y*260)*Math.sin(z*380-y*150);
+      let t=1e9; for(const [a,b,r] of tips) t=Math.min(t,cap(x,y,z,a,b,r));
+      c=Math.max(c,-t);
+      if(z<.01&&z>-.28){ const b=Math.hypot(x,y)-RB-.0009; c=Math.max(c,-b); }
+      return c; };
+    const bb=S.bb.clone(); bb.expandByScalar(.008);
+    return {f:fn,bb};
+  },
+  clothMat(){
+    /* the print: one Om per tile, dark red on the yellow */
+    const N=256, c=document.createElement('canvas'); c.width=c.height=N; const g=c.getContext('2d');
+    g.fillStyle='#000'; g.fillRect(0,0,N,N); g.fillStyle='#fff'; g.textAlign='center'; g.textBaseline='middle';
+    const deva=(typeof V6!=='undefined'&&V6.deva)?V6.deva():false;
+    const put=(x,y,s)=>{ if(deva){ g.font='700 '+Math.round(s)+'px '+V6.DEVA_FONT; g.fillText('ॐ',x,y+s*.06); }
+      else { g.font='900 '+Math.round(s*.62)+'px "Arial Black",Arial,sans-serif'; g.fillText('OM',x,y); } };
+    put(N*.25,N*.27,N*.42); put(N*.75,N*.77,N*.42);
+    const t=new THREE.CanvasTexture(c); t.wrapS=t.wrapT=THREE.RepeatWrapping; t.anisotropy=4; t.needsUpdate=true;
+    const m=new THREE.MeshPhysicalMaterial({color:0xd99e12,roughness:.9,metalness:0,sheen:.55,sheenRoughness:.75,sheenColor:new THREE.Color(0xffd35a)});
+    m.onBeforeCompile=sh=>{
+      sh.uniforms.uOm={value:t};
+      sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nvarying vec3 vCP; varying vec3 vCN;')
+        .replace('#include <begin_vertex>','#include <begin_vertex>\nvCP=position; vCN=normal;');
+      sh.fragmentShader=sh.fragmentShader.replace('#include <common>',`#include <common>
+        varying vec3 vCP; varying vec3 vCN; uniform sampler2D uOm;
+        float cH(vec3 p){ return fract(sin(dot(p,vec3(127.1,311.7,74.7)))*43758.5453); }
+        float cN(vec3 p){ vec3 i=floor(p),f=fract(p); f=f*f*(3.-2.*f);
+          return mix(mix(mix(cH(i),cH(i+vec3(1,0,0)),f.x),mix(cH(i+vec3(0,1,0)),cH(i+vec3(1,1,0)),f.x),f.y),
+                     mix(mix(cH(i+vec3(0,0,1)),cH(i+vec3(1,0,1)),f.x),mix(cH(i+vec3(0,1,1)),cH(i+vec3(1,1,1)),f.x),f.y),f.z); }`)
+        .replace('#include <color_fragment>',`#include <color_fragment>
+          vec3 cw=pow(abs(normalize(vCN)),vec3(4.)); cw/=cw.x+cw.y+cw.z;
+          float cT=17.;
+          float ink=texture2D(uOm,vCP.yz*cT).r*cw.x+texture2D(uOm,vCP.xz*cT).r*cw.y+texture2D(uOm,vCP.xy*cT).r*cw.z;
+          float wv=cN(vCP*1500.)*.6+cN(vCP*420.)*.4;
+          diffuseColor.rgb*=.86+.2*wv;
+          diffuseColor.rgb*=1.-.22*smoothstep(.55,.9,cN(vCP*70.));
+          diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.42,.035,.02),smoothstep(.35,.7,ink)*.92);`)
+        .replace('#include <normal_fragment_maps>',`#include <normal_fragment_maps>
+          { float hgt=(cN(vCP*1500.)-.5)*.00012+(cN(vCP*380.)-.5)*.00025;
+            vec3 dpx=dFdx(-vViewPosition), dpy=dFdy(-vViewPosition); float hx=dFdx(hgt), hy=dFdy(hgt);
+            vec3 r1=cross(dpy,normal), r2=cross(normal,dpx); float det=dot(dpx,r1);
+            vec3 grad=sign(det)*(hx*r1+hy*r2); normal=normalize(abs(det)*normal-grad); }`);
+    };
+    m.customProgramCacheKey=()=>'riOmCloth';
+    return m;
+  },
   nails(f,P,g){
     const sp=RIspec(RK.plBeige,{c:0xd9b4a0,r:.28,d:0,w:0});
     const put=(a,b,r,len,wd)=>{ const ax=b.clone().sub(a).normalize(); const mid=a.clone().lerp(b,.55);
@@ -6380,7 +6436,10 @@ RI.buildView=function(T){
     const geo=RIHAND.mesh(S.f,S.bb,h);
     const skin=RIHAND.skinMat(RIHAND.veins(S.f,S.P),S.P);
     const hand=new THREE.Mesh(geo,skin); view.add(hand); T.hand=hand;
-    const hg=RIHAND.hairs(geo,S.P,RIQ.touch?2200:7000);
+    let clothed=false;
+    try{ const C=RIHAND.cloth(S); const cm=new THREE.Mesh(RIHAND.mesh(C.f,C.bb,h),RIHAND.clothMat()); view.add(cm); T.cloth=cm; clothed=true; }
+    catch(e){ console.warn('RI cloth failed',e); }
+    const hg=clothed?null:RIHAND.hairs(geo,S.P,RIQ.touch?2200:7000);
     if(hg){ const hm=new THREE.Mesh(hg,new THREE.MeshStandardMaterial({color:0x1c130d,roughness:.55,metalness:0,side:THREE.DoubleSide})); view.add(hm); }
     const ng=new GB(); RIHAND.nails(S.f,S.P,ng);
     const nm=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.3,metalness:0}); view.add(new THREE.Mesh(ng.geometry(),nm));
