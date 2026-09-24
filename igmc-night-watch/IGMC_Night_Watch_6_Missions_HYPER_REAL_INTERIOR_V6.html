@@ -16412,7 +16412,7 @@ const Mantra={
     const c=this.cfg();
     this.meter=Math.min(1,this.meter+1/c.need);
     try{ A.tone(174,168,.16,{g:.03}); }catch(_){}
-    if(this.meter>=1) this.start(c);
+    if(this.meter>=.999) this.start(c);
     this.draw();
   },
   play(){
