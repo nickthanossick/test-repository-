@@ -16395,9 +16395,9 @@ const Mantra={
   meter:0, hold:0, chant:0, rest:0, banish:false, audio:null, _key:'',
   cfg(){
     const m=(Story&&Story.mission)||1;
-    if(m<=2) return {need:5,decay:.40,hold:1.1,banish:true,rest:0,push:0};
+    if(m<=2) return {need:5,decay:.25,hold:1.1,banish:true,rest:0,push:0};
     const k=clamp(m-3,0,3);
-    return {need:9+k,decay:.60+k*.08,hold:[2.4,2.0,1.6,1.2][k],banish:false,rest:[8,9,10,11][k],push:[2.2,1.8,1.4,1.0][k]};
+    return {need:[7,8,8,9][k],decay:.30,hold:[2.4,2.0,1.6,1.2][k],banish:false,rest:[8,9,10,11][k],push:[2.2,1.8,1.4,1.0][k]};
   },
   threat(){
     return P.inside&&P.alive&&!State.over&&!!Ghost.obj&&Ghost.obj.visible&&Ghost.floor===P.floor&&
