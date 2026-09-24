@@ -1,0 +1,67 @@
+{
+  "name": "igmc-night-watch-desktop",
+  "productName": "IGMC Night Watch",
+  "version": "6.2.0",
+  "description": "IGMC: Night Watch — hardened desktop build (Electron) with an Ultra-PC graphics tier, for itch.io.",
+  "author": "Night Watch",
+  "license": "UNLICENSED",
+  "private": true,
+  "main": "electron/main.js",
+  "scripts": {
+    "protect": "node build/protect.mjs",
+    "start": "npm run protect && electron .",
+    "start:dev": "npm run protect -- --no-obfuscate && electron . --dev",
+    "dist:win": "npm run protect && electron-builder --win --x64",
+    "dist:win:portable": "npm run protect && electron-builder --win portable --x64",
+    "dist:win:installer": "npm run protect && electron-builder --win nsis --x64",
+    "publish:itch": "butler push release/IGMC-NightWatch-portable.exe YOUR_ITCH_USER/night-watch:windows --userversion 6.2.0"
+  },
+  "devDependencies": {
+    "@electron/fuses": "^1.8.0",
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8",
+    "javascript-obfuscator": "^4.1.1"
+  },
+  "build": {
+    "appId": "com.nightwatch.igmc",
+    "productName": "IGMC Night Watch",
+    "directories": {
+      "output": "release",
+      "buildResources": "assets"
+    },
+    "files": [
+      "electron/**/*",
+      "dist-web/**/*",
+      "package.json"
+    ],
+    "asar": true,
+    "compression": "maximum",
+    "electronFuses": {
+      "runAsNode": false,
+      "enableCookieEncryption": true,
+      "enableNodeOptionsEnvironmentVariable": false,
+      "enableNodeCliInspectArguments": false,
+      "enableEmbeddedAsarIntegrityValidation": true,
+      "onlyLoadAppFromAsar": true
+    },
+    "win": {
+      "target": [
+        { "target": "portable", "arch": ["x64"] },
+        { "target": "nsis", "arch": ["x64"] }
+      ],
+      "icon": "assets/icon.ico",
+      "artifactName": "IGMC-NightWatch-${arch}.${ext}"
+    },
+    "portable": {
+      "artifactName": "IGMC-NightWatch-portable.exe"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "IGMC-NightWatch-Setup-${version}.exe",
+      "shortcutName": "IGMC Night Watch"
+    }
+  }
+}

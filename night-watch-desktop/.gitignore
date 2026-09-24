@@ -1,0 +1,7 @@
+# deps & build output
+node_modules/
+release/
+dist-web/*.map
+
+# electron-builder caches
+.cache/
