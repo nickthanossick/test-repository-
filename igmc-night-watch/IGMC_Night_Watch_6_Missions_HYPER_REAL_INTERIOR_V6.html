@@ -5312,7 +5312,7 @@ RI.burn=function(n){ for(let i=0;i<n;i++) Math.random(); };
 RI.warmup=async function(set){
   const t0=performance.now();
   const say=(p,t)=>{ if(set) set(p,t); };
-  const busy=()=>State.playing&&!State.paused;          // the player got there first: stop
+  const busy=()=>!RI._force&&State.playing&&!State.paused;   // the player got there first: stop (unless the gate is waiting on it)
   const tex=new Set(), addTex=v=>{ if(v&&v.isTexture) tex.add(v); };
   scene.traverse(o=>{ const ms=o.material?(Array.isArray(o.material)?o.material:[o.material]):[];
     for(const m of ms){
@@ -16597,7 +16597,7 @@ const V7Post={
     this.cam=new THREE.OrthographicCamera(-1,1,1,-1,0,1); this.sc=new THREE.Scene();
     this.quad=new THREE.Mesh(new THREE.PlaneGeometry(2,2)); this.quad.frustumCulled=false; this.sc.add(this.quad);
     this.copy=new THREE.ShaderMaterial({uniforms:{t:{value:null}},vertexShader:this.VS,depthTest:false,depthWrite:false,toneMapped:false,
-      fragmentShader:'uniform sampler2D t; varying vec2 vUv; void main(){ gl_FragColor=texture2D(t,vUv); }'});
+      fragmentShader:'uniform sampler2D t; varying vec2 vUv; void main(){ vec4 c=texture2D(t,vUv); c.rgb=clamp(c.rgb,0.,48.); if(isnan(c.r)||isnan(c.g)||isnan(c.b)) c.rgb=vec3(0.); gl_FragColor=vec4(c.rgb,1.); }'});
     this.aoMat=new THREE.ShaderMaterial({depthTest:false,depthWrite:false,toneMapped:false,vertexShader:this.VS,
       uniforms:{tDepth:{value:this.rtMS.depthTexture},uProj:{value:camera.projectionMatrix},uProjInv:{value:camera.projectionMatrixInverse},
         uRes:{value:new THREE.Vector2(w,h)},uRadius:{value:.42},uK:{value:.9}},
@@ -18441,13 +18441,13 @@ const V9Dead={
 
 /* the floor's clutter and fittings were merged into one mesh each, 800k
    triangles that the camera and the torch's shadow pass had to draw whole
-   whatever they were looking at. Cut into 7 m tiles, everything behind the
+   whatever they were looking at. Cut into 9 m tiles, everything behind the
    player and outside the beam is skipped.                               */
 const V9Cull={
   split(F){
-    const C=7, nx=Math.ceil(2*HX/C), nz=Math.ceil(2*HZ/C), NB=nx*nz;
+    const C=9, nx=Math.ceil(2*HX/C), nz=Math.ceil(2*HZ/C), NB=nx*nz;
     for(const m of F.group.children.slice()){
-      if(!m.isMesh||m.isInstancedMesh||m.isSkinnedMesh||m.material!==MAT.prop) continue;
+      if(!m.isMesh||m.isInstancedMesh||m.isSkinnedMesh||m.material!==MAT.prop||!m.userData.riDetail) continue;
       const g=m.geometry, pos=g.attributes.position, idx=g.index;
       if(!pos||g.groups.length||g.morphAttributes.position) continue;
       const nT=(idx?idx.count:pos.count)/3; if(nT<40000) continue;
@@ -18507,7 +18507,7 @@ const V9Smooth={
   apply(){ try{ renderer.setPixelRatio(Math.max(.5,this.basePR*this.k)); }catch(_){} },
   set(k){ this.k=k; this.apply(); this.ema=16.7; this.over=0; this.good=0; this.wait=1.2; },
   tick(dt){
-    if(!(dt>0)||dt>.25) return;
+    if(!(dt>0)||dt>.25||V9Gate.busy) return;
     this.ema+=(dt*1000-this.ema)*.06;
     if(this.wait>0){ this.wait-=dt; return; }
     if(this.ema>19.5) this.over+=dt; else this.over=Math.max(0,this.over-dt*2);
@@ -18522,9 +18522,89 @@ const V9Smooth={
   try{ Quality.dpr(); }catch(_){} }
 { const _w=Quality.watch; Quality.watch=function(dt){ _w.call(this,dt);
     if(State.playing&&!State.paused&&!Cine.active&&!Tape.active&&!(typeof Flashback!=='undefined'&&Flashback.active)) V9Smooth.tick(dt); }; }
-{ const _b=V7Post.budget; V7Post.budget=function(){
-    if(V9Smooth.k>V9Smooth.min+1e-3){ this.lastT=performance.now(); this.slow=0; return; }
-    return _b.call(this); }; }
+/* once the resolution is at its floor and it is still under 45 fps, shed cost
+   one step at a time, cheapest-to-lose first: a smaller shadow map, 2x MSAA,
+   no AO, no bloom, and last of all the post pass itself */
+V7Post.budget=function(){
+  const now=performance.now(), dt=this.lastT?(now-this.lastT)/1000:0; this.lastT=now;
+  if(this.force||!State.playing||State.paused||V9Gate.busy||dt<=0||dt>.5) return;
+  if(V9Smooth.k>V9Smooth.min+1e-3){ this.slow=0; return; }
+  if(dt>1/45) this.slow+=dt; else this.slow=Math.max(0,this.slow-dt*.5);
+  if(this.slow<3) return;
+  this.slow=0; this.step=(this.step||0)+1;
+  const sp=Torch.spot;
+  if(this.step===1&&sp&&sp.shadow&&sp.shadow.mapSize.x>1024){ sp.shadow.mapSize.set(1024,1024); if(sp.shadow.map){ sp.shadow.map.dispose(); sp.shadow.map=null; } console.warn('V9: shadow map 1024 (frame rate)'); return; }
+  if(this.step<=2&&this.rtMS&&this.rtMS.samples>2){ this.rtMS.samples=2; this.rtMS.dispose(); console.warn('V9: MSAA 2x (frame rate)'); return; }
+  if(this.ao){ this.ao=false; console.warn('V7 post: AO off (frame rate)'); return; }
+  if(this.bloomOn&&this.bloom){ this.bloomOn=false; console.warn('V7 post: bloom off (frame rate)'); return; }
+  this.off=true; console.warn('V7 post: off (frame rate)');
+};
+
+
+/* ═════════════ V9: THE DOOR ═════════════
+   The GPU warm-up runs behind the menu and gave up the moment play began,
+   so a quick start walked into a hospital whose shaders were still being
+   built: a black, stuttering screen at the door. Now the hospital is not
+   shown until they are. The door fade holds on black while the warm-up
+   finishes (forced to finish now), one real frame of the view is drawn
+   off-screen to build the shadow and body shaders too, then it fades in. */
+const V9Gate={
+  busy:false,
+  async ready(){
+    if(this.busy) return; this.busy=true;
+    /* hold the black: a mission card or cutscene fading in on its own clock must not uncover a half-built frame */
+    const keep=()=>{ if(!this.busy) return; if(fade.style.opacity!=='1'){ fade.style.transition='none'; fade.style.opacity='1'; } requestAnimationFrame(keep); }; keep();
+    const fr=P.frozen; P.frozen=1;
+    try{
+      for(let i=0;i<2&&!RI.warm;i++){ RI._force=true; try{ await RI.warmup(null); }catch(e){ console.warn('V9 gate warmup',e); } finally{ RI._force=false; } }
+      this.prime();
+      await new Promise(r=>setTimeout(r,80));
+    }finally{ P.frozen=fr; this.busy=false; V9Smooth.wait=3; V9Smooth.ema=16.7; }
+  },
+  prime(){
+    const rt=new THREE.WebGLRenderTarget(64,64); let probe=null;
+    try{
+      const b=V9Dead.list[0];
+      if(b){ probe=new THREE.Mesh(b.mesh.geometry,b.mesh.material); probe.customDepthMaterial=b.mesh.customDepthMaterial;
+        probe.castShadow=true; probe.receiveShadow=true; probe.frustumCulled=false; probe.scale.setScalar(.4);
+        const q=new THREE.Quaternion(), v=new THREE.Vector3(); camera.getWorldQuaternion(q); camera.getWorldPosition(v);
+        probe.position.copy(v).add(new THREE.Vector3(0,-.3,-1.4).applyQuaternion(q)); scene.add(probe); }
+      head.updateMatrixWorld(true); scene.updateMatrixWorld(true);
+      try{ LightBudget.t=0; LightBudget.scanT=0; LightBudget.update(0); }catch(_){}
+      const prev=renderer.getRenderTarget(); renderer.shadowMap.needsUpdate=true;
+      renderer.setRenderTarget(rt); renderer.render(scene,camera); renderer.setRenderTarget(prev);
+    }catch(e){ console.warn('V9 gate prime',e); }
+    finally{ if(probe) scene.remove(probe); rt.dispose(); }
+  },
+  /* any other way in (Continue, respawn, a later mission): cover, build, uncover */
+  async cover(){
+    if(this.busy) return;
+    await this.ready();
+    fadeTo(0,600);
+  }
+};
+{ const _w=RI.warmup; RI.warmup=function(set){ return this._wp||(this._wp=_w.call(this,set).finally(()=>{ this._wp=null; })); }; }
+Story.enterBuilding=function(){
+  if(!this.canEnter) return;
+  this.canEnter=false;
+  fadeTo(1,500);
+  setTimeout(async()=>{
+    Ext.group.visible=false; Int.group.visible=true; P.inside=true; setRain(false);
+    A.indoor(true);
+    teleport(1,0,-(HZ-BAND-CORR/2),Math.PI);
+    try{ await V9Gate.ready(); }catch(e){ console.warn('V9 gate',e); }
+    fadeTo(0,700);
+    /* A restarted Mission 1 after the prologue death should not replay the
+       prologue. A completely new run resets OpeningScare.completed. */
+    if(typeof OpeningScare!=='undefined' && OpeningScare.completed){
+      Story.begin(1);
+    }else if(typeof OpeningScare!=='undefined'){
+      OpeningScare.start();
+    }
+  },560);
+};
+{ const _u=V6Int.update; V6Int.update=function(dt){ _u.call(this,dt);
+    if(P.inside&&!RI.warm&&!V9Gate.busy&&State.playing&&!State.paused) V9Gate.cover().catch(e=>console.warn('V9 gate',e)); }; }
 
 window.IGMC={P,State,Story,Ghost,Torch,Int,Ext,A,Music,Scream,Pandit,ITEMS,MISSIONS,MAT,camera,renderer,scene,key,head,RI,RIU,
   UI:{say,toast,setObjective,setPrompt,openDoc,closeDoc,die,pauseGame},
