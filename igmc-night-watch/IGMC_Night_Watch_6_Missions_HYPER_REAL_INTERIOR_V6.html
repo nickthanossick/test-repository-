@@ -17308,7 +17308,8 @@ const Vent={
       this.anim(dt,'crawl',2.3);
       this.scrapeT-=dt; if(this.scrapeT<=0){ this.scrapeT=.075+Math.random()*.06; this.scrape(1.1); Effects.shake(.35); }
       Torch.storm=Math.max(Torch.storm,1.2);
-      if(d<1.05||this.ph>2.2){
+      const ho=this.headOff(), hd=Math.hypot(P.x-(Ghost.x+ho.x),P.z-(Ghost.z+ho.z));
+      if(hd<1.0||d<.8||this.ph>2.2){
         this.phase='lunge'; this.ph=0;
         /* into his face: the second scream, the metal, the light, all on one frame */
         try{ Scream.play(1,{force:true,gain:1.5,rate:.92,dip:5}); }catch(_){}
@@ -17325,11 +17326,13 @@ const Vent={
     }
     if(this.phase==='lunge'){
       this.ph+=dt; const k=clamp(this.ph/.3,0,1), e=k*k;
-      const fx=-Math.sin(P.yaw), fz=-Math.cos(P.yaw), tx=P.x+fx*.34, tz=P.z+fz*.34;
+      /* her face, not her feet, is what ends up forty centimetres from his eyes */
+      this.anim(dt,'crawl',2.9);
+      const ho=this.headOff(), fx=-Math.sin(P.yaw), fz=-Math.cos(P.yaw);
+      const tx=P.x+fx*.4-ho.x, tz=P.z+fz*.4-ho.z, ty=clamp(P.camY-.05-ho.y,this.Y-1.7,this.Y+.6);
       Ghost.x=lerp(Ghost.x,tx,e); Ghost.z=lerp(Ghost.z,tz,e);
-      Ghost.obj.position.set(Ghost.x,this.Y+.14*e,Ghost.z); Ghost.obj.scale.setScalar(1+.18*e);
+      Ghost.obj.position.set(Ghost.x,lerp(this.Y,ty,e),Ghost.z); Ghost.obj.scale.setScalar(1+.05*e);
       Ghost.obj.rotation.y=Math.atan2(-(P.x-Ghost.x),-(P.z-Ghost.z));
-      this.anim(dt,e>.5?'killgrab':'crawl',e>.5?1.4:2.6);
       if(Ghost._neckBone) Ghost._neckBone.rotation.z+=Math.sin(this.t*48)*.14;
       camera.fov=lerp(72,54,e); camera.updateProjectionMatrix();
       P.pitch=lerp(P.pitch,-.2,1-Math.exp(-10*dt)); camera.rotation.x=P.pitch;
@@ -17363,6 +17366,14 @@ const Vent={
       this.scrapeT-=dt;
       if(this.scrapeT<=0){ this.scrapeT=8+Math.random()*7; for(let i=0;i<4;i++) setTimeout(()=>this.scrape(.35),i*(110+Math.random()*70)); }
     }
+  },
+  /* where her head is, relative to her feet, this frame */
+  headOff(){
+    const o=this._ho||(this._ho={x:0,y:1.9,z:0});
+    if(Ghost._headBone&&Ghost.obj){ Ghost.obj.updateMatrixWorld(true); const v=this._hv||(this._hv=new THREE.Vector3());
+      Ghost._headBone.getWorldPosition(v); o.x=v.x-Ghost.obj.position.x; o.y=v.y-Ghost.obj.position.y; o.z=v.z-Ghost.obj.position.z; }
+    else { o.x=0; o.z=0; o.y=1.9*(Ghost.obj?Ghost.obj.scale.y:1); }
+    return o;
   },
   anim(dt,name,speed){
     if(!Ghost._mixer) return;
