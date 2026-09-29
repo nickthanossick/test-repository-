@@ -1,4 +1,10 @@
 <!DOCTYPE html>
+<!--
+  IGMC: Night Watch
+  Copyright (c) 2026 NIKJYAR Studios. All rights reserved.
+  Made by NIKJYAR Studios. Unauthorised copying, redistribution, modification
+  or resale of this game or any part of it is prohibited.
+-->
 <html lang="en">
 <head>
 <meta charset="utf-8" />
@@ -8,13 +14,16 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="theme-color" content="#05060a" />
 <meta name="format-detection" content="telephone=no" />
-<title>IGMC: NIGHT WATCH — HYPER-REAL INTERIOR</title>
+<title>IGMC: NIGHT WATCH — NIKJYAR Studios</title>
 <!-- Interior visual rebuild: GPU-baked PBR surfaces, baked AO, procedurally modelled high-poly hospital props. Layout, missions, Naina and story items unchanged. -->
 <!-- Opening preserved. Difficulty: M1-3 restrained, M4-5 extreme; roof crawl guaranteed visible in late game. -->
 <!-- Story/flashback/epilogue visuals: Fal-generated pencil-anime frames, permanently embedded as compressed WebP data URIs. -->
 <!-- V6: voice-only audio (dialogue, narration, screams; one BOOM for falling debris), haunted interior (burst pipes, blood writing, flicker, falling ceiling), MC Shimla forecourt, wall-mounted extinguishers. -->
 <!-- single-file build: three.js, the IGMC scan, props, Nirmala and the terrain map are all inlined. Works offline, no server needed. -->
 <meta name="description" content="Six-mission first person horror inside the IGMC Shimla building." />
+<meta name="author" content="NIKJYAR Studios" />
+<meta name="copyright" content="© 2026 NIKJYAR Studios. All rights reserved." />
+<link rel="icon" type="image/png" href="data:image/png;base64,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" />
 <style>
   :root{
     --ink:#e8e3d8; --dim:#9a9488; --blood:#8c1b1b; --amber:#d9a441; --green:#3fbf7a;
@@ -184,6 +193,9 @@
   #death .title{color:#b02020;text-shadow:0 0 50px rgba(160,20,20,.6)}
   #win .title{color:#d9d3c6}
   .stat{font-size:11px;letter-spacing:.24em;color:var(--dim)}
+  .studio{margin-top:18px;font-size:10px;letter-spacing:.3em;color:var(--dim);opacity:.8;text-transform:uppercase}
+  .studio b{color:var(--ink);font-weight:600;letter-spacing:.34em}
+  html,body{-webkit-user-select:none;user-select:none;-webkit-user-drag:none}
 
   #credits{position:fixed;inset:0;z-index:24;display:none;align-items:center;justify-content:center;
     flex-direction:column;gap:22px;background:#000;text-align:center;padding:30px}
@@ -536,11 +548,24 @@
   <div id="cardsub"></div>
 </div>
 
+<script>
+/* © 2026 NIKJYAR Studios. The page keeps its content to itself: no context menu,
+   no dragging images out, and the save / view-source / developer-tools shortcuts do
+   nothing. Only the browser's default action is cancelled, so the game still sees
+   every key it uses. */
+(()=>{ const no=e=>{ e.preventDefault(); };
+  addEventListener('contextmenu',no,{capture:true});
+  addEventListener('dragstart',no,{capture:true});
+  addEventListener('keydown',e=>{ const k=(e.key||'').toLowerCase(), c=e.ctrlKey||e.metaKey;
+    if(e.key==='F12'||(c&&e.shiftKey&&(k==='i'||k==='j'||k==='c'||k==='k'))||(c&&!e.shiftKey&&(k==='u'||k==='s'||k==='p'))) no(e); },{capture:true});
+})();
+</script>
 <div class="screen" id="loader">
   <div class="sub">Indira Gandhi Medical College &middot; Shimla</div>
   <div class="title" style="font-size:clamp(22px,5vw,44px)">IGMC: NIGHT WATCH</div>
   <div id="bar"><i id="barfill"></i></div>
   <div id="loadmsg">LOADING</div>
+  <div class="studio">Made by <b>NIKJYAR Studios</b></div>
 </div>
 
 <div class="screen hide" id="menu">
@@ -568,6 +593,7 @@
     <b>ESC</b><span>pause</span>
   </div>
   <div class="stat">Play with headphones.</div>
+  <div class="studio">Made by <b>NIKJYAR Studios</b> &middot; &copy; 2026 NIKJYAR Studios &middot; All rights reserved</div>
 </div>
 
 <div class="screen hide" id="pause">
@@ -582,6 +608,7 @@
     <button class="btn touchonly" id="sensbtn" style="display:none">Look: NORMAL</button>
     <button class="btn" id="quitbtn" style="border-color:rgba(140,27,27,.5);color:#c26a6a">Menu</button>
   </div>
+  <div class="studio">&copy; 2026 <b>NIKJYAR Studios</b></div>
 </div>
 
 <div class="screen hide" id="death">

@@ -1,0 +1,4 @@
+build/
+launcher/game.bin
+launcher/key_gen.go
+launcher/rsrc_windows_*.syso

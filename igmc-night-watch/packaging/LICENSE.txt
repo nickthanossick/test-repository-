@@ -1,0 +1,50 @@
+IGMC: NIGHT WATCH
+Copyright (c) 2026 NIKJYAR Studios. All rights reserved.
+Made by NIKJYAR Studios.
+
+END USER LICENCE
+
+1. This game, its story, characters, code, artwork, models, sound and all
+   other content ("the Game") are the property of NIKJYAR Studios and are
+   protected by copyright law.
+
+2. You may install the Game on your own computer and play it for your
+   personal, non-commercial use.
+
+3. Without written permission from NIKJYAR Studios you may NOT:
+   - copy, share, upload or redistribute the Game or any part of it;
+   - sell, rent or lend the Game;
+   - modify, decompile, extract or reverse engineer the Game or its files;
+   - use any part of the Game in another product.
+
+4. The Game is provided "as is", without any warranty. NIKJYAR Studios is
+   not liable for any damage arising from its use.
+
+5. This is a horror game. It contains frightening images, blood, sudden loud
+   sounds and flashing lights. Player discretion is advised.
+
+THIRD-PARTY SOFTWARE
+
+The Game uses three.js (https://threejs.org), licensed under the MIT License:
+
+  Copyright (c) 2010-2025 three.js authors
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+
+Other third-party components remain under their own licences.
