@@ -2227,8 +2227,8 @@ class Builder{
   box(cx,cy,cz,sx,sy,sz,col,uvScale=0.5,tint=0.12){
     const hx=sx/2,hy=sy/2,hz=sz/2;
     const F=[
-      {n:[ 1,0,0],v:[[hx,-hy,-hz],[hx,-hy,hz],[hx,hy,hz],[hx,hy,-hz]],w:sz,h:sy},
-      {n:[-1,0,0],v:[[-hx,-hy,hz],[-hx,-hy,-hz],[-hx,hy,-hz],[-hx,hy,hz]],w:sz,h:sy},
+      {n:[ 1,0,0],v:[[hx,-hy,hz],[hx,-hy,-hz],[hx,hy,-hz],[hx,hy,hz]],w:sz,h:sy},
+      {n:[-1,0,0],v:[[-hx,-hy,-hz],[-hx,-hy,hz],[-hx,hy,hz],[-hx,hy,-hz]],w:sz,h:sy},
       {n:[0, 1,0],v:[[-hx,hy,-hz],[-hx,hy,hz],[hx,hy,hz],[hx,hy,-hz]],w:sz,h:sx},
       {n:[0,-1,0],v:[[-hx,-hy,hz],[-hx,-hy,-hz],[hx,-hy,-hz],[hx,-hy,hz]],w:sz,h:sx},
       {n:[0,0, 1],v:[[-hx,-hy,hz],[hx,-hy,hz],[hx,hy,hz],[-hx,hy,hz]],w:sx,h:sy},
@@ -17941,7 +17941,8 @@ const V8Bath={
     /* the corridor graffiti pass wrote on these walls too: the tiles go over it, so take it down */
     try{ const bm=new Set((V6Tex.bloodSet()||[]).map(v=>v.mat));
       for(const o of F.group.children) if(o.isMesh&&bm.has(o.material)&&o.position.x>r.x0-.3&&o.position.x<r.x1+.3&&o.position.z>r.z0-.3&&o.position.z<r.z1+.3) o.visible=false; }catch(_){}
-    const ix0=r.x0+T/2, ix1=r.x1-T/2, iz0=r.z0+T/2, iz1=r.z1-T/2;
+    /* a side on the building's outer wall ends at that wall's inner face, not at the plan edge */
+    const ix0=Math.max(r.x0,-HX+T/2)+T/2, ix1=Math.min(r.x1,HX-T/2)-T/2, iz0=Math.max(r.z0,-HZ+T/2)+T/2, iz1=Math.min(r.z1,HZ-T/2)-T/2;
     /* the room's own frame: s along the door wall, b from the door into the room */
     const D=r.door, ax=D.axis, dir=r.dir>0?1:-1;
     const b=ax==='x'?[0,dir]:[dir,0], s=ax==='x'?[1,0]:[0,1];
