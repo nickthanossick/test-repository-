@@ -5978,7 +5978,7 @@ RI.haunt=function(ctx){
       const l=rnd(fc.a+margin,fc.b-margin), p=onFace(fc,l,off); if(doorNear(p[0],p[1],1.3)) continue;
       if((ctx.spill||[]).some(m=>{ v3.setFromMatrixPosition(m); return Math.hypot(v3.x-p[0],v3.z-p[1])<1.0; })) continue;
       return {fc,x:p[0],z:p[1],ry:Math.atan2(fc.nx,fc.nz)}; } return null; };
-  const kindOf=k=>/^ward|maternity|icu|peds|psych/.test(k)?'ward':/^(office|duty|records)/.test(k)?'office':/^(store|pharmacy)/.test(k)?'store':
+  const kindOf=k=>k==='toilet'?'prayer':/^ward|maternity|icu|peds|psych/.test(k)?'ward':/^(office|duty|records)/.test(k)?'office':/^(store|pharmacy)/.test(k)?'store':
     /^ot/.test(k)?'ot':k==='waiting'?'waiting':k==='morgue'?'morgue':k==='prayer'?'prayer':'other';
   const bbB=(PROPS['01_hospital_bed']&&PROPS['01_hospital_bed'].boundingBox)||{min:{x:-1,z:-.5},max:{x:1,z:.5}};
   const bedAlongX=(bbB.max.x-bbB.min.x)>(bbB.max.z-bbB.min.z), bedHalfW=bedAlongX?(bbB.max.z-bbB.min.z)/2:(bbB.max.x-bbB.min.x)/2;
@@ -6507,7 +6507,7 @@ const SIGN_N=['01_shanti','02_swagat','03_tambakoo','04_hiv','05_beti','06_no_sm
 const SIGN_I={}; SIGN_N.forEach((n,i)=>SIGN_I[n]=i);
 const SIGN_COLS=5, SIGN_ROWS=6;
 /* which board belongs outside which kind of room */
-const ROOM_SIGN={maternity:'20_female_ward', ot:'23_ot', records:'30_authorized',
+const ROOM_SIGN={toilet:'19_toilet', maternity:'20_female_ward', ot:'23_ot', records:'30_authorized',
   office:'12_opd', duty:'12_opd', prayer:'01_shanti', storeA:'25_medicine',
   storeB:'18_pharmacy', wardA:'21_male_ward', wardB:'20_female_ward', icu:'22_icu',
   lab:'16_pathology', xray:'13_xray'};
@@ -6748,6 +6748,7 @@ function buildFloor(fi){
   F.special.storeB   =nearest(-24.5,-17.5,'storeB');
   F.special.wardA    =nearest(-13,17.5,'wardA');
   F.special.wardB    =nearest(13,-17.5,'wardB');
+  if(fi===1) F.special.toilet=nearest(-9,-17.5,'toilet');   /* the washroom — dressed in V8 */
 
   /* ---- props ---- */
   const addProp=(name,x,z,ry,opts={})=>{
@@ -6895,6 +6896,7 @@ function buildFloor(fi){
         sceneryProp('24_diya',cx-0.8,back,0,{solid:false});
         sceneryProp('26_gangajal_lota',cx-0.4,back,0,{solid:false});
         break;
+      case 'toilet': break;
       case 'storeA': case 'storeB':
         for(let i=0;i<3;i++) sceneryProp('08_hiding_locker',r.x0+1.1+i*1.15,back,ang);
         break;
@@ -16598,7 +16600,7 @@ const V7Post={
       fragmentShader:'uniform sampler2D t; varying vec2 vUv; void main(){ gl_FragColor=texture2D(t,vUv); }'});
     this.aoMat=new THREE.ShaderMaterial({depthTest:false,depthWrite:false,toneMapped:false,vertexShader:this.VS,
       uniforms:{tDepth:{value:this.rtMS.depthTexture},uProj:{value:camera.projectionMatrix},uProjInv:{value:camera.projectionMatrixInverse},
-        uRes:{value:new THREE.Vector2(w,h)},uRadius:{value:.55},uK:{value:1.25}},
+        uRes:{value:new THREE.Vector2(w,h)},uRadius:{value:.42},uK:{value:.9}},
       fragmentShader:`uniform sampler2D tDepth; uniform mat4 uProj,uProjInv; uniform vec2 uRes; uniform float uRadius,uK; varying vec2 vUv;
         vec3 vp(vec2 uv){ float d=texture2D(tDepth,uv).x; vec4 v=uProjInv*vec4(uv*2.-1.,d*2.-1.,1.); return v.xyz/v.w; }
         float ign(vec2 p){ return fract(52.9829189*fract(dot(p,vec2(.06711056,.00583715)))); }
@@ -16613,9 +16615,9 @@ const V7Post={
           for(int i=0;i<12;i++){ float fi=float(i); float rr=sqrt((fi+j)/12.); float a=a0+fi*2.3999632;
             vec2 o=vec2(cos(a),sin(a))*rr*sr; o.x*=uRes.y/uRes.x;
             vec3 v=vp(vUv+o)-P; float vv=dot(v,v);
-            occ+=max(0.,dot(v,N)*inversesqrt(vv+1e-6)-.12)*clamp(1.-vv/(uRadius*uRadius),0.,1.); }
+            occ+=max(0.,dot(v,N)*inversesqrt(vv+1e-6)-.2)*clamp(1.-vv/(uRadius*uRadius),0.,1.); }
           float ao=clamp(1.-uK*occ/12.,0.,1.);
-          gl_FragColor=vec4(vec3(mix(1.,ao,smoothstep(.35,.9,-P.z))),1.); }`});
+          gl_FragColor=vec4(vec3(mix(1.,ao,smoothstep(.9,1.6,-P.z))),1.); }`});
     this.mat=new THREE.ShaderMaterial({depthTest:false,depthWrite:false,vertexShader:this.VS,
       uniforms:{tColor:{value:this.rtC.texture},tAO:{value:this.rtAO.texture},tDepth:{value:this.rtMS.depthTexture},
         uAORes:{value:new THREE.Vector2(w>>1,h>>1)},uNear:{value:camera.near},uFar:{value:camera.far},uT:{value:0},uAOOn:{value:1},
@@ -16628,7 +16630,7 @@ const V7Post={
           vec3 col=vec3(texture2D(tColor,vUv-ca).r,texture2D(tColor,vUv).g,texture2D(tColor,vUv+ca).b);
           if(uAOOn>.5){ float zc=vz(texture2D(tDepth,vUv).x), s=0., w=0.; vec2 tx=1./uAORes;
             for(int j=-1;j<=1;j++) for(int i=-1;i<=1;i++){ vec2 o=vec2(float(i),float(j))*tx;
-              float zs=vz(texture2D(tDepth,vUv+o).x), ww=max(0.,1.-abs(zs-zc)/(abs(zc)*.05+.03));
+              float zs=vz(texture2D(tDepth,vUv+o).x), ww=max(0.,1.-abs(zs-zc)/(abs(zc)*.03+.02));
               s+=texture2D(tAO,vUv+o).r*ww; w+=ww; }
             col*=w>.001?s/w:1.; }
           float l=dot(col,vec3(.2126,.7152,.0722));
@@ -16674,6 +16676,10 @@ const V7Post={
       if(this.ao) this.pass(this.aoMat,this.rtAO);
       const u=this.mat.uniforms; u.uAOOn.value=this.ao?1:0; u.uT.value=State.t; u.uNear.value=camera.near; u.uFar.value=camera.far;
       this.pass(this.mat,null);
+      /* a shader that failed to build would leave a black screen: check once, fall back to the plain render */
+      if(!this._checked&&(this._n=(this._n||0)+1)>12){ this._checked=true;
+        for(const m of [this.copy,this.aoMat,this.mat]){ const pr=renderer.properties.get(m).currentProgram;
+          if(pr&&pr.diagnostics&&pr.diagnostics.runnable===false){ console.warn('V7 post: shader failed, plain render'); this.off=true; } } }
       return true;
     }catch(e){
       console.warn('V7 post disabled',e); this.off=true;
@@ -16907,11 +16913,12 @@ setInterval(()=>{ try{ Eerie.tick(); }catch(_){} },100);
 { const _rg=resumeGame; resumeGame=function(){ const r=_rg(); Eerie.kick(); return r; }; }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   THE VENT — Mission 2.
-   Floor 5's stairs are buried, so Dev crawls the service duct from a wall
-   grille on Floor 4 to one on Floor 5: a 100 m galvanised maze, 1.6 m wide
-   and 1.4 m high. It is empty... for fifteen seconds. Then she comes down
-   it on all fours, screaming, straight into his face.
+   THE VENT — on every floor.
+   Every floor has a low wall grille by the stairwell into the service duct:
+   a 100 m galvanised maze, 1.6 m wide and 1.4 m high, that comes out at the
+   grille on the floor above (the top floor's goes down). Mission 2 needs it:
+   Floor 5's stairs are buried. It is empty... for fifteen seconds. Then a
+   whisper right behind him, he spins round, and she is already in his face.
    The duct sits inside Int.group far below the basement. While Dev is in it
    the floors are hidden, so the frame draws almost nothing else, and the
    duct holds exactly as many lamps as the floor had, so nothing recompiles.
@@ -16922,7 +16929,7 @@ const Vent={
   Y:-40, EYE:.78, R:.34, built:false, active:false, done:false,
   group:null, live:null, hold:null, lamps:[], leaks:[], shafts:[],
   t:0, phase:'idle', ph:0, stepPh:0, scrapeT:9, g:null, flash:null,
-  inSpot:null, outSpot:null, inGrille:null, outGrille:null,
+  gr:{}, arrived:{}, from:4, to:5,
 
   /* ---------------- data ---------------- */
   f32(b64){ const s=atob(b64), u=new Uint8Array(s.length); for(let i=0;i<s.length;i++) u[i]=s.charCodeAt(i); return new Float32Array(u.buffer); },
@@ -17117,23 +17124,38 @@ const Vent={
   drop(G){ const {gr,F,p}=G; if(p.floorHatch){ gr.visible=false; return; }
     G.grp.remove(gr); F.group.add(gr); const ry=Math.atan2(p.nx,p.nz)+.5;
     gr.position.set(p.x+p.nx*.45+p.nz*.35,F.y+.03,p.z+p.nz*.45-p.nx*.35); gr.rotation.set(-Math.PI/2,0,ry,'YXZ'); },
-  arm(){
-    this.done=false;
-    try{ this.build(); }catch(e){ console.warn('vent build',e); }
+  /* one grille per floor, by the stairwell, built once */
+  ensureAll(){
+    try{ this.build(); }catch(e){ console.warn('vent build',e); return; }
     const dz=SWR.z0-2.4;
-    if(!this.inSpot){ this.inSpot=this.wallSpot(4,SW_DOOR_X,dz,3,11); this.inGrille=this.grille(4,this.inSpot); }
-    if(!this.outSpot){ this.outSpot=this.wallSpot(5,SW_DOOR_X,dz,5,14); this.outGrille=this.grille(5,this.outSpot); }
-    const p=this.inSpot;
-    hotspot({floor:4,x:p.x+p.nx*.7,z:p.z+p.nz*.7,y:3*FLOOR_H+.6,reach:2.6,label:'<b>E</b> — VENT GRILLE KHOLO · ANDAR JAO',
-      cond:()=>!this.active&&!this.done, fn:()=>this.enter()});
-    try{ Ghost._ensureAnim('crawl'); Ghost._ensureAnim('killgrab'); }catch(_){}
+    for(let fi=BASEMENT;fi<=TOP;fi++){
+      if(this.gr[fi]||!Int.floors[fi]) continue;
+      const p=this.wallSpot(fi,SW_DOOR_X,dz,3,11); if(!p) continue;
+      this.gr[fi]=this.grille(fi,p);
+    }
+    try{ Ghost._ensureAnim('crawl'); }catch(_){}
   },
+  canUse(fi){
+    return !this.active&&!this.busy&&State.playing&&!State.over&&P.inside&&P.floor===fi&&!Cine.active&&!Tape.active&&
+      !(typeof OpeningScare!=='undefined'&&OpeningScare.active)&&!(window.RitualTerror&&RitualTerror.active)&&
+      !(Ghost.mode!=='off'&&Ghost.deadly&&Ghost.floor===P.floor);
+  },
+  addHotspots(){
+    this.ensureAll();
+    for(const k in this.gr){ const fi=+k, G=this.gr[k], p=G.p;
+      hotspot({floor:fi,x:p.x+p.nx*.7,z:p.z+p.nz*.7,y:(fi-1)*FLOOR_H+.6,reach:2.6,
+        label:'<b>E</b> — VENT ME GHUSO · FLOOR '+(fi<TOP?fi+1:fi-1)+' TAK',
+        cond:()=>this.canUse(fi), fn:()=>this.enter(fi)}); }
+  },
+  /* Mission 2 wants him out on Floor 5 */
+  arm(){ this.arrived[5]=false; this.ensureAll(); },
 
   /* ---------------- in and out ---------------- */
   lampCount(){ let n=0; const walk=o=>{ if(!o.visible) return; if(o.isPointLight) n++; for(const c of o.children) walk(c); };
     walk(Int.group); if(Ext.group) walk(Ext.group); return n; },
-  enter(){
+  enter(fi){
     if(this.active||this.busy) return; this.busy=true;
+    this.from=fi===undefined?P.floor:fi; this.to=this.from<TOP?this.from+1:this.from-1;
     P.frozen=1; clearMoveInput();
     try{ A.boom(.32,'metal'); }catch(_){}
     Effects.shake(.25); fadeTo(1,380);
@@ -17146,7 +17168,7 @@ const Vent={
     for(const k in Int.floors) Int.floors[k].group.visible=false;
     this.group.visible=true;
     Ghost.hide(); Silh.hideAll(); try{ Scare.hide(); DoorPeek.finish(true); }catch(_){}
-    this.drop(this.inGrille);
+    { const G=this.gr[this.from]; if(G&&!G.open){ this.drop(G); G.open=true; } }
     const S=VENT_DATA.start;
     this.back={floor:P.floor};
     P.x=S[0]+.9; P.z=S[1]; P.yaw=-Math.PI/2; P.pitch=-.04; P.vx=P.vz=0; P.danger=0;
@@ -17155,26 +17177,31 @@ const Vent={
     this.t=0; this.phase='idle'; this.ph=0; this.stepPh=0; this.scrapeT=9; this.active=true; this.busy=false;
     try{ LightBudget.t=0; LightBudget.scanT=0; LightBudget.update(0); }catch(_){}
     try{ renderer.compile(scene,camera); }catch(_){}
-    ui.floorlab.textContent='VENT · FLOOR 4 → 5';
-    setObjective('Vent se Floor 5 tak crawl karo','Doosre sire ki grille — laal roshni');
+    ui.floorlab.textContent='VENT · FLOOR '+this.from+' → '+this.to;
+    this._obj=[ui.objective.textContent,ui.subobj.textContent];
+    setObjective('Vent se Floor '+this.to+' tak crawl karo','Doosre sire ki grille — laal roshni');
     fadeTo(0,900);
     setTimeout(()=>{ if(this.active&&this.phase==='idle') P.frozen=0; },350);
     toast('ANDAR BAHUT TANG HAI — <b>SHIFT</b> SE TEZ CRAWL');
   },
   leave(){
     if(!this.active) return;
-    this.active=false; this.done=true; this.phase='done';
+    this.active=false; this.phase='done'; this.arrived[this.to]=true;
     this.group.visible=false; this.lamps.forEach(L=>this.hold.add(L));
     Ghost.hide(); if(Ghost.obj){ Ghost.obj.scale.set(1,1,1); Ghost.obj.rotation.set(0,0,0); }
     if(this.flash) this.flash.style.opacity='0';
     try{ if(V7Post.mat) V7Post.mat.uniforms.uCA.value=.0018; }catch(_){}
     camera.fov=72; camera.updateProjectionMatrix(); camera.rotation.z=0; PlayerFeel.reset();
     Eerie.level=.55; P.danger=0;
-    const p=this.outSpot; this.drop(this.outGrille);
-    const ox=p.x+p.nx*1.0, oz=p.z+p.nz*1.0;
-    teleport(5,ox,oz,Math.atan2(-p.nx,-p.nz));
+    this.ensureAll();
+    const G=this.gr[this.to], F=Int.floors[this.to];
+    let ox,oz,yaw;
+    if(G){ const p=G.p; if(!G.open){ this.drop(G); G.open=true; } ox=p.x+p.nx*1.0; oz=p.z+p.nz*1.0; yaw=Math.atan2(-p.nx,-p.nz); }
+    else { const s=nearestNavSpot(F,SW_DOOR_X,SWR.z0-2.4,3); ox=s[0]; oz=s[1]; yaw=Math.PI; }
+    teleport(this.to,ox,oz,yaw);
+    if(this._obj) setObjective(this._obj[0],this._obj[1]);
     P.frozen=0; fadeTo(0,800);
-    toast('FLOOR 5 — BAHAR NIKAL AAYE');
+    toast('FLOOR '+this.to+' — BAHAR NIKAL AAYE');
   },
   abort(){
     if(!this.active&&!this.busy) return;
@@ -17229,14 +17256,14 @@ const Vent={
     const E=VENT_DATA.exit;
     if(this.phase==='after'||this.phase==='idle'){
       if(Math.hypot(P.x-E[0],P.z-(E[1]+.35))<1.05){
-        if(this.phase==='idle'){ this.phase='pre'; this.ph=0; this.t=Math.max(this.t,15); }
+        if(this.phase==='idle'){ this.phase='pre'; this.ph=0; this.t=Math.max(this.t,14.2); }
         else { this.phase='exit'; P.frozen=1; clearMoveInput(); try{ A.boom(.8,'metal'); }catch(_){} Effects.shake(.6);
           if(this.exitGr) this.exitGr.visible=false; fadeTo(1,360); setTimeout(()=>this.leave(),420); }
       }
     }
   },
   guide(){
-    if(!Guide.on||this.phase==='scare'||this.phase==='lunge'||this.phase==='black'){ ui.garrow.classList.remove('on'); ui.gdist.classList.remove('on'); return; }
+    if(!Guide.on||this.phase==='turn'||this.phase==='lunge'||this.phase==='black'){ ui.garrow.classList.remove('on'); ui.gdist.classList.remove('on'); return; }
     const a=this.ahead(P.x,P.z,26); if(!a) return;
     const dx=a[0]-P.x, dz=a[1]-P.z, cy=Math.cos(P.yaw), sy=Math.sin(P.yaw);
     const ang=Math.atan2(dx*cy-dz*sy,-dx*sy-dz*cy)*57.2958;
@@ -17250,74 +17277,58 @@ const Vent={
   /* ---------------- fifteen seconds of nothing, then her ---------------- */
   scare(dt){
     const r=this.raw();
-    if(this.phase==='idle'){
-      if(this.t>11.5){ this.phase='pre'; this.ph=0; }
-      return;
-    }
+    if(this.phase==='idle'){ if(this.t>12.2){ this.phase='pre'; this.ph=0; } return; }
     if(this.phase==='pre'){
       /* the building holds its breath; the torch starts to doubt itself */
       this.ph+=dt; Eerie.level=.02;
-      if(this.ph<dt*1.5&&r){ r.rawNoise(1.8,{f:520,q:11,g:.035}); r.rawTone(170,118,1.9,{g:.012,type:'sawtooth'}); }
-      if(Math.random()<dt*1.6) Torch.storm=Math.max(Torch.storm,.25);
-      if(this.t>=15){ this.phase='knock'; this.ph=0; try{ A.boom(.28,'metal'); }catch(_){} Effects.shake(.12); }
+      if(this.ph<dt*1.5&&r) r.rawNoise(1.6,{f:520,q:11,g:.03});
+      if(Math.random()<dt*1.4) Torch.storm=Math.max(Torch.storm,.22);
+      if(this.t>=14.2){
+        this.phase='whisper'; this.ph=0;
+        /* right behind him, close enough to feel */
+        try{ if(typeof VoiceSync!=='undefined') VoiceSync.play('dialogue/naina/ai_003',{vol:.62,maxWait:2500}); }catch(_){}
+        if(r) r.rawNoise(.55,{f:900,q:1.2,g:.05});
+        for(let i=0;i<3;i++) setTimeout(()=>this.scrape(.45),260+i*140);
+      }
       return;
     }
-    if(this.phase==='knock'){
+    if(this.phase==='whisper'){
       this.ph+=dt;
-      if(this.ph>.62&&!this._k2){ this._k2=true; try{ A.boom(.34,'metal'); }catch(_){} Effects.shake(.16); }
-      if(this.ph>1.25){
-        this._k2=false;
-        /* pick the longest straight run of duct around Dev — ahead of him if there is one */
-        const fwd=[-Math.sin(P.yaw),-Math.cos(P.yaw)], dirs=[fwd], a=this.ahead(P.x,P.z,40);
-        if(a){ const dx=a[0]-P.x, dz=a[1]-P.z, l=Math.hypot(dx,dz)||1; dirs.push([dx/l,dz/l]); }
-        dirs.push([1,0],[-1,0],[0,1],[0,-1]);
-        let best=null; for(const d of dirs){ const L=this.ray(P.x,P.z,d,8.5), s=L*(d===fwd?1.35:1); if(!best||s>best.s) best={d,L,s}; }
-        const D=clamp(best.L-.45,2.2,7.4);
-        this.g={x:P.x+best.d[0]*D,z:P.z+best.d[1]*D,yaw:Math.atan2(-best.d[0],-best.d[1])};
+      if(this.ph>=1.0){
+        /* which way does he spin? behind him if there is room, else the most open side */
+        const y=P.yaw, back=[Math.sin(y),Math.cos(y)], left=[-Math.cos(y),Math.sin(y)], right=[Math.cos(y),-Math.sin(y)], fwd=[-Math.sin(y),-Math.cos(y)];
+        let best=null;
+        for(const [d,pref] of [[back,1.6],[left,1],[right,1],[fwd,.55]]){ const L=this.ray(P.x,P.z,d,3.2), s=Math.min(L,2.2)*pref; if(!best||s>best.s) best={d,L,s}; }
+        const D=clamp(best.L-.35,1.0,1.55), d=best.d, g=this.g={x:P.x+d[0]*D,z:P.z+d[1]*D,yaw:Math.atan2(-d[0],-d[1]),from:P.yaw};
+        let dy=g.yaw-P.yaw; while(dy>Math.PI)dy-=Math.PI*2; while(dy<-Math.PI)dy+=Math.PI*2; g.dy=dy;
         P.frozen=1; clearMoveInput(); P.vx=P.vz=0;
-        Torch.forceOff=Math.max(Torch.forceOff,.5);
-        if(r) r.rawNoise(.25,{f:3200,q:.8,g:.06});
+        Ghost.mode='vent'; Ghost.deadly=false; Ghost.floor=P.floor; Ghost.x=g.x; Ghost.z=g.z;
+        Ghost.obj.visible=true; Ghost.obj.scale.set(1,1,1); Ghost.obj.position.set(g.x,this.Y,g.z);
+        Ghost.obj.rotation.set(0,Math.atan2(-(P.x-g.x),-(P.z-g.z)),0);
+        if(Ghost._visual){ Ghost._visual.rotation.x=0; Ghost._visual.rotation.z=0; }
+        this.anim(.016,'crawl',2.6);
         this.phase='turn'; this.ph=0;
       }
       return;
     }
     if(this.phase==='turn'){
-      /* in the dark his head is turned for him */
-      this.ph+=dt; let d=this.g.yaw-P.yaw; while(d>Math.PI)d-=Math.PI*2; while(d<-Math.PI)d+=Math.PI*2;
-      P.yaw+=d*Math.min(1,dt*9); P.pitch=lerp(P.pitch,-.08,1-Math.exp(-8*dt));
-      head.rotation.y=P.yaw; camera.rotation.x=P.pitch;
-      if(this.ph>.5){
-        const gg=this.g; Ghost.mode='vent'; Ghost.deadly=false; Ghost.floor=P.floor; Ghost.x=gg.x; Ghost.z=gg.z;
-        Ghost.obj.visible=true; Ghost.obj.scale.set(1,1,1); Ghost.obj.position.set(gg.x,this.Y,gg.z);
-        Ghost.obj.rotation.set(0,Math.atan2(-(P.x-gg.x),-(P.z-gg.z)),0);
-        if(Ghost._visual){ Ghost._visual.rotation.x=0; Ghost._visual.rotation.z=0; }
-        Torch.forceOff=0; Torch.storm=Math.max(Torch.storm,2.2);
-        try{ A.scream(1,{force:true,gain:1.45,dip:4.5}); }catch(_){}
-        if(r){ r.rawTone(58,34,1.4,{g:.5,type:'sine'}); r.rawNoise(.5,{f:180,q:.6,g:.4,type:'lowpass'}); }
-        Effects.shake(.9); P.pulse=Math.min(190,(P.pulse||90)+40); P.danger=1;
-        this.phase='scare'; this.ph=0; this.scrapeT=0;
-      }
-      return;
-    }
-    if(this.phase==='scare'){
-      /* she comes down the duct on all fours, far too fast */
-      this.ph+=dt;
-      const dx=P.x-Ghost.x, dz=P.z-Ghost.z, d=Math.hypot(dx,dz)||1, step=Math.min(d,dt*(6.2+this.ph*4));
-      Ghost.x+=dx/d*step; Ghost.z+=dz/d*step;
-      Ghost.obj.position.set(Ghost.x,this.Y,Ghost.z); Ghost.obj.rotation.y=Math.atan2(-(P.x-Ghost.x),-(P.z-Ghost.z));
-      this.anim(dt,'crawl',2.3);
-      this.scrapeT-=dt; if(this.scrapeT<=0){ this.scrapeT=.075+Math.random()*.06; this.scrape(1.1); Effects.shake(.35); }
-      Torch.storm=Math.max(Torch.storm,1.2);
-      const ho=this.headOff(), hd=Math.hypot(P.x-(Ghost.x+ho.x),P.z-(Ghost.z+ho.z));
-      if(hd<1.0||d<.8||this.ph>2.2){
+      /* a whip-turn, a fifth of a second */
+      this.ph+=dt; const k=clamp(this.ph/.2,0,1), e=1-Math.pow(1-k,3);
+      P.yaw=this.g.from+this.g.dy*e; head.rotation.y=P.yaw;
+      P.pitch=lerp(P.pitch,-.12,1-Math.exp(-12*dt)); camera.rotation.x=P.pitch;
+      camera.rotation.z+=Math.sin(k*Math.PI)*.09*(this.g.dy<0?-1:1);
+      camera.fov=72+Math.sin(k*Math.PI)*8; camera.updateProjectionMatrix();
+      this.anim(dt,'crawl',2.6);
+      if(k>=1){
         this.phase='lunge'; this.ph=0;
-        /* into his face: the second scream, the metal, the light, all on one frame */
-        try{ Scream.play(1,{force:true,gain:1.5,rate:.92,dip:5}); }catch(_){}
-        try{ playNainaLaugh(1.0); }catch(_){}
+        /* the frame he sees her: scream, metal, light, all at once */
+        try{ A.scream(1,{force:true,gain:1.5,dip:5}); }catch(_){}
+        setTimeout(()=>{ try{ Scream.play(1,{force:true,gain:1.5,rate:.9,dip:5}); }catch(_){} },260);
         if(r){ r.rawTone(1500,480,.95,{g:.22,type:'sawtooth'}); r.rawTone(1540,500,.95,{g:.12,type:'square'});
           r.rawNoise(.9,{f:2600,q:.7,g:.34}); r.rawTone(46,28,1.3,{g:.7,type:'sine'}); }
         try{ A.boom(1.3,'metal'); }catch(_){}
-        Effects.shake(2.4); Effects.pulse(1); P.pulse=190;
+        for(let i=0;i<4;i++) setTimeout(()=>this.scrape(1.2),i*70);
+        Effects.shake(2.4); Effects.pulse(1); P.pulse=190; P.danger=1; Torch.storm=Math.max(Torch.storm,2.2);
         if(this.flash) this.flash.style.opacity='.55';
         try{ if(V7Post.mat) V7Post.mat.uniforms.uCA.value=.045; }catch(_){}
         if(navigator.vibrate&&Touch.on&&Touch.haptics){ try{ navigator.vibrate([90,40,220,60,380]); }catch(_){} }
@@ -17326,7 +17337,7 @@ const Vent={
     }
     if(this.phase==='lunge'){
       this.ph+=dt; const k=clamp(this.ph/.3,0,1), e=k*k;
-      /* her face, not her feet, is what ends up forty centimetres from his eyes */
+      /* her face, not her feet, ends up forty centimetres from his eyes */
       this.anim(dt,'crawl',2.9);
       const ho=this.headOff(), fx=-Math.sin(P.yaw), fz=-Math.cos(P.yaw);
       const tx=P.x+fx*.4-ho.x, tz=P.z+fz*.4-ho.z, ty=clamp(P.camY-.05-ho.y,this.Y-1.7,this.Y+.6);
@@ -17343,7 +17354,7 @@ const Vent={
         this.phase='black'; this.ph=0; fadeTo(1,0); Torch.forceOff=1.9;
         Ghost.hide(); if(Ghost.obj) Ghost.obj.scale.set(1,1,1);
         if(this.flash) this.flash.style.opacity='0';
-        if(r){ r.rawTone(3950,3920,3.6,{g:.028,type:'sine'}); }
+        if(r) r.rawTone(3950,3920,3.6,{g:.028,type:'sine'});
         this._beat=0;
       }
       return;
@@ -17357,7 +17368,7 @@ const Vent={
         say('DEV','...wo yahin hai. Bhaag. BHAAG!',2.6); }
       if(this.ph>2.3){ this._up=false; this.phase='after'; this.ph=0; P.frozen=0; P.danger=.35; Eerie.level=.55;
         camera.fov=72; camera.updateProjectionMatrix();
-        setObjective('Vent se bahar niklo — Floor 5','Laal roshni ki taraf'); toast('BHAAGO — EXIT GRILLE TAK'); }
+        setObjective('Vent se bahar niklo — Floor '+this.to,'Laal roshni ki taraf'); toast('BHAAGO — EXIT GRILLE TAK'); }
       return;
     }
     if(this.phase==='after'){
@@ -17387,16 +17398,16 @@ const Vent={
     const beats=_m2();
     const at=beats.findIndex(b=>b&&/surgical cloth/i.test(b.obj||''));
     beats.splice(at>=0?at+1:3,0,{
-      obj:'Floor 5 ki seedhi band hai — vent se jao', sub:'Floor 4 · wall pe vent grille',
+      obj:'Floor 5 ki seedhi band hai — vent se jao', sub:'Floor 4 · stairwell ke paas wall grille',
       hint:'Upar ki seedhi malbe se band hai. Floor 4 ki wall pe neeche ek <b>vent grille</b> hai — uske paas <b>E</b> dabao, andar crawl karke Floor 5 tak jao. <b>SHIFT</b> se tez crawl.',
       enter(){ Vent.arm(); say('DEV','Seedhi upar se dhahi hui hai... ye vent Floor 5 tak jaata hoga.',3.4); },
       tick(){
-        if(!Vent.active&&!Vent.done&&P.inside&&P.floor>=5){
+        if(!Vent.active&&!Vent.arrived[5]&&P.inside&&P.floor>=5){
           teleport(4,SW_DOOR_X,SWR.z0-2.4,Math.PI);
           toast('UPAR KI SEEDHI MALBE SE BAND HAI — VENT SE JAO'); A.locked&&A.locked(); }
       },
-      guide(){ const p=Vent.inSpot; return (!p||Vent.active||Vent.done)?null:{floor:4,x:p.x+p.nx*.7,z:p.z+p.nz*.7,label:'Vent grille'}; },
-      done(){ return Vent.done; }
+      guide(){ const G=Vent.gr[4]; return (!G||Vent.active||Vent.arrived[5])?null:{floor:4,x:G.p.x+G.p.nx*.7,z:G.p.z+G.p.nz*.7,label:'Vent grille'}; },
+      done(){ return !!Vent.arrived[5]&&!Vent.active; }
     });
     return beats;
   };
@@ -17404,8 +17415,779 @@ const Vent={
 /* the frame is drawn from the duct while Dev is in it */
 { const _sr=startRun; startRun=function(m,quiet){ Vent.abort(); return _sr(m,quiet); }; }
 { const _sn=Save.snapshot.bind(Save); Save.snapshot=function(){ const d=_sn();
-    if(d&&Vent.active&&Vent.inSpot){ const p=Vent.inSpot; d.floor=4; d.x=+(p.x+p.nx*.9).toFixed(2); d.z=+(p.z+p.nz*.9).toFixed(2); d.yaw=+Math.atan2(-p.nx,-p.nz).toFixed(3); }
+    const G=Vent.active&&Vent.gr[Vent.from];
+    if(d&&G){ const p=G.p; d.floor=Vent.from; d.x=+(p.x+p.nx*.9).toFixed(2); d.z=+(p.z+p.nz*.9).toFixed(2); d.yaw=+Math.atan2(-p.nx,-p.nz).toFixed(3); }
     return d; }; }
+/* every mission start clears the hotspots: put the grilles' back */
+{ const _sb=Story.begin; Story.begin=function(m){ const r=_sb.call(this,m); try{ Vent.addHotspots(); }catch(e){ console.warn('vent hotspots',e); } return r; }; }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   V8 — the ground-floor washroom, rats that bolt from the torch, and a
+   torch with a real beam.
+   - WASHROOM: one room on the ground floor is tagged 'toilet' when the floor
+     is laid out (so nothing else is put in it). It gets 200 mm glazed wall
+     tiles to door height — crazed, cracked, some knocked out to the cement —
+     a cracked mosaic floor, a row of cubicles with doors hanging open, WCs
+     and pedestal basins (the supplied models' shapes and sizes, rebuilt with
+     rounded edges in the game's own ceramic/chrome/rust materials), cracked
+     mirrors (one with her words on it), a dripping tap and pipe, a floor
+     drain, blood, and a tube that will not stay lit.
+   - RATS: the supplied rat, on every floor and in the washroom. Put the torch
+     on one and it squeals and bolts.
+   - TORCH: a real reflector pattern (hot centre, rings, dust) projected by
+     the spot, finer shadow map and tighter shadow bias so shadows sit on
+     what casts them.
+   ═══════════════════════════════════════════════════════════════════════ */
+const RAT_OBJ=`# rat — IGMC Night Watch procedural model
+v 0.0000 0.0900 0.0000
+v 0.0000 0.0900 0.0000
+v 0.0000 0.0900 0.0000
+v 0.0000 0.0900 0.0000
+v 0.0000 0.0900 0.0000
+v 0.0000 0.0900 0.0000
+v 0.0000 0.0900 0.0000
+v 0.0000 0.0900 0.0000
+v 0.0191 0.0862 0.0000
+v 0.0135 0.0862 0.0135
+v 0.0000 0.0862 0.0191
+v -0.0135 0.0862 0.0135
+v -0.0191 0.0862 0.0000
+v -0.0135 0.0862 -0.0135
+v -0.0000 0.0862 -0.0191
+v 0.0135 0.0862 -0.0135
+v 0.0354 0.0754 0.0000
+v 0.0250 0.0754 0.0250
+v 0.0000 0.0754 0.0354
+v -0.0250 0.0754 0.0250
+v -0.0354 0.0754 0.0000
+v -0.0250 0.0754 -0.0250
+v -0.0000 0.0754 -0.0354
+v 0.0250 0.0754 -0.0250
+v 0.0462 0.0591 0.0000
+v 0.0327 0.0591 0.0327
+v 0.0000 0.0591 0.0462
+v -0.0327 0.0591 0.0327
+v -0.0462 0.0591 0.0000
+v -0.0327 0.0591 -0.0327
+v -0.0000 0.0591 -0.0462
+v 0.0327 0.0591 -0.0327
+v 0.0500 0.0400 0.0000
+v 0.0354 0.0400 0.0354
+v 0.0000 0.0400 0.0500
+v -0.0354 0.0400 0.0354
+v -0.0500 0.0400 0.0000
+v -0.0354 0.0400 -0.0354
+v -0.0000 0.0400 -0.0500
+v 0.0354 0.0400 -0.0354
+v 0.0462 0.0209 0.0000
+v 0.0327 0.0209 0.0327
+v 0.0000 0.0209 0.0462
+v -0.0327 0.0209 0.0327
+v -0.0462 0.0209 0.0000
+v -0.0327 0.0209 -0.0327
+v -0.0000 0.0209 -0.0462
+v 0.0327 0.0209 -0.0327
+v 0.0354 0.0046 0.0000
+v 0.0250 0.0046 0.0250
+v 0.0000 0.0046 0.0354
+v -0.0250 0.0046 0.0250
+v -0.0354 0.0046 0.0000
+v -0.0250 0.0046 -0.0250
+v -0.0000 0.0046 -0.0354
+v 0.0250 0.0046 -0.0250
+v 0.0191 -0.0062 0.0000
+v 0.0135 -0.0062 0.0135
+v 0.0000 -0.0062 0.0191
+v -0.0135 -0.0062 0.0135
+v -0.0191 -0.0062 0.0000
+v -0.0135 -0.0062 -0.0135
+v -0.0000 -0.0062 -0.0191
+v 0.0135 -0.0062 -0.0135
+v 0.0000 -0.0100 0.0000
+v 0.0000 -0.0100 0.0000
+v 0.0000 -0.0100 0.0000
+v -0.0000 -0.0100 0.0000
+v -0.0000 -0.0100 0.0000
+v -0.0000 -0.0100 -0.0000
+v -0.0000 -0.0100 -0.0000
+v 0.0000 -0.0100 -0.0000
+v -0.0300 0.0150 -0.0300
+v 0.0300 0.0150 -0.0300
+v 0.0300 0.0150 0.0700
+v -0.0300 0.0150 0.0700
+v -0.0300 0.0650 -0.0300
+v 0.0300 0.0650 -0.0300
+v 0.0300 0.0650 0.0700
+v -0.0300 0.0650 0.0700
+v 0.0000 0.0700 -0.0800
+v 0.0000 0.0700 -0.0800
+v 0.0000 0.0700 -0.0800
+v 0.0000 0.0700 -0.0800
+v 0.0000 0.0700 -0.0800
+v 0.0000 0.0700 -0.0800
+v 0.0150 0.0660 -0.0800
+v 0.0075 0.0660 -0.0670
+v -0.0075 0.0660 -0.0670
+v -0.0150 0.0660 -0.0800
+v -0.0075 0.0660 -0.0930
+v 0.0075 0.0660 -0.0930
+v 0.0260 0.0550 -0.0800
+v 0.0130 0.0550 -0.0575
+v -0.0130 0.0550 -0.0575
+v -0.0260 0.0550 -0.0800
+v -0.0130 0.0550 -0.1025
+v 0.0130 0.0550 -0.1025
+v 0.0300 0.0400 -0.0800
+v 0.0150 0.0400 -0.0540
+v -0.0150 0.0400 -0.0540
+v -0.0300 0.0400 -0.0800
+v -0.0150 0.0400 -0.1060
+v 0.0150 0.0400 -0.1060
+v 0.0260 0.0250 -0.0800
+v 0.0130 0.0250 -0.0575
+v -0.0130 0.0250 -0.0575
+v -0.0260 0.0250 -0.0800
+v -0.0130 0.0250 -0.1025
+v 0.0130 0.0250 -0.1025
+v 0.0150 0.0140 -0.0800
+v 0.0075 0.0140 -0.0670
+v -0.0075 0.0140 -0.0670
+v -0.0150 0.0140 -0.0800
+v -0.0075 0.0140 -0.0930
+v 0.0075 0.0140 -0.0930
+v 0.0000 0.0100 -0.0800
+v 0.0000 0.0100 -0.0800
+v -0.0000 0.0100 -0.0800
+v -0.0000 0.0100 -0.0800
+v -0.0000 0.0100 -0.0800
+v 0.0000 0.0100 -0.0800
+v 0.0060 0.0300 0.0500
+v 0.0019 0.0357 0.0500
+v -0.0049 0.0335 0.0500
+v -0.0049 0.0265 0.0500
+v 0.0019 0.0243 0.0500
+v 0.0020 0.0300 0.1900
+v 0.0006 0.0319 0.1900
+v -0.0016 0.0312 0.1900
+v -0.0016 0.0288 0.1900
+v 0.0006 0.0281 0.1900
+v 0.0000 0.0300 -0.0400
+v 0.0000 0.0300 0.1000
+v -0.0200 0.0820 -0.0800
+v -0.0200 0.0820 -0.0800
+v -0.0200 0.0820 -0.0800
+v -0.0200 0.0820 -0.0800
+v -0.0200 0.0820 -0.0800
+v -0.0129 0.0797 -0.0800
+v -0.0178 0.0797 -0.0733
+v -0.0257 0.0797 -0.0759
+v -0.0257 0.0797 -0.0841
+v -0.0178 0.0797 -0.0867
+v -0.0086 0.0737 -0.0800
+v -0.0165 0.0737 -0.0691
+v -0.0292 0.0737 -0.0733
+v -0.0292 0.0737 -0.0867
+v -0.0165 0.0737 -0.0909
+v -0.0086 0.0663 -0.0800
+v -0.0165 0.0663 -0.0691
+v -0.0292 0.0663 -0.0733
+v -0.0292 0.0663 -0.0867
+v -0.0165 0.0663 -0.0909
+v -0.0129 0.0603 -0.0800
+v -0.0178 0.0603 -0.0733
+v -0.0257 0.0603 -0.0759
+v -0.0257 0.0603 -0.0841
+v -0.0178 0.0603 -0.0867
+v -0.0200 0.0580 -0.0800
+v -0.0200 0.0580 -0.0800
+v -0.0200 0.0580 -0.0800
+v -0.0200 0.0580 -0.0800
+v -0.0200 0.0580 -0.0800
+v 0.0200 0.0820 -0.0800
+v 0.0200 0.0820 -0.0800
+v 0.0200 0.0820 -0.0800
+v 0.0200 0.0820 -0.0800
+v 0.0200 0.0820 -0.0800
+v 0.0271 0.0797 -0.0800
+v 0.0222 0.0797 -0.0733
+v 0.0143 0.0797 -0.0759
+v 0.0143 0.0797 -0.0841
+v 0.0222 0.0797 -0.0867
+v 0.0314 0.0737 -0.0800
+v 0.0235 0.0737 -0.0691
+v 0.0108 0.0737 -0.0733
+v 0.0108 0.0737 -0.0867
+v 0.0235 0.0737 -0.0909
+v 0.0314 0.0663 -0.0800
+v 0.0235 0.0663 -0.0691
+v 0.0108 0.0663 -0.0733
+v 0.0108 0.0663 -0.0867
+v 0.0235 0.0663 -0.0909
+v 0.0271 0.0603 -0.0800
+v 0.0222 0.0603 -0.0733
+v 0.0143 0.0603 -0.0759
+v 0.0143 0.0603 -0.0841
+v 0.0222 0.0603 -0.0867
+v 0.0200 0.0580 -0.0800
+v 0.0200 0.0580 -0.0800
+v 0.0200 0.0580 -0.0800
+v 0.0200 0.0580 -0.0800
+v 0.0200 0.0580 -0.0800
+o Body
+f 1 2 10 9
+f 2 3 11 10
+f 3 4 12 11
+f 4 5 13 12
+f 5 6 14 13
+f 6 7 15 14
+f 7 8 16 15
+f 8 1 9 16
+f 9 10 18 17
+f 10 11 19 18
+f 11 12 20 19
+f 12 13 21 20
+f 13 14 22 21
+f 14 15 23 22
+f 15 16 24 23
+f 16 9 17 24
+f 17 18 26 25
+f 18 19 27 26
+f 19 20 28 27
+f 20 21 29 28
+f 21 22 30 29
+f 22 23 31 30
+f 23 24 32 31
+f 24 17 25 32
+f 25 26 34 33
+f 26 27 35 34
+f 27 28 36 35
+f 28 29 37 36
+f 29 30 38 37
+f 30 31 39 38
+f 31 32 40 39
+f 32 25 33 40
+f 33 34 42 41
+f 34 35 43 42
+f 35 36 44 43
+f 36 37 45 44
+f 37 38 46 45
+f 38 39 47 46
+f 39 40 48 47
+f 40 33 41 48
+f 41 42 50 49
+f 42 43 51 50
+f 43 44 52 51
+f 44 45 53 52
+f 45 46 54 53
+f 46 47 55 54
+f 47 48 56 55
+f 48 41 49 56
+f 49 50 58 57
+f 50 51 59 58
+f 51 52 60 59
+f 52 53 61 60
+f 53 54 62 61
+f 54 55 63 62
+f 55 56 64 63
+f 56 49 57 64
+f 57 58 66 65
+f 58 59 67 66
+f 59 60 68 67
+f 60 61 69 68
+f 61 62 70 69
+f 62 63 71 70
+f 63 64 72 71
+f 64 57 65 72
+f 77 78 79 80
+f 73 76 75 74
+f 73 74 78 77
+f 74 75 79 78
+f 75 76 80 79
+f 76 73 77 80
+o Head
+f 81 82 88 87
+f 82 83 89 88
+f 83 84 90 89
+f 84 85 91 90
+f 85 86 92 91
+f 86 81 87 92
+f 87 88 94 93
+f 88 89 95 94
+f 89 90 96 95
+f 90 91 97 96
+f 91 92 98 97
+f 92 87 93 98
+f 93 94 100 99
+f 94 95 101 100
+f 95 96 102 101
+f 96 97 103 102
+f 97 98 104 103
+f 98 93 99 104
+f 99 100 106 105
+f 100 101 107 106
+f 101 102 108 107
+f 102 103 109 108
+f 103 104 110 109
+f 104 99 105 110
+f 105 106 112 111
+f 106 107 113 112
+f 107 108 114 113
+f 108 109 115 114
+f 109 110 116 115
+f 110 105 111 116
+f 111 112 118 117
+f 112 113 119 118
+f 113 114 120 119
+f 114 115 121 120
+f 115 116 122 121
+f 116 111 117 122
+o Tail
+f 123 124 129 128
+f 124 125 130 129
+f 125 126 131 130
+f 126 127 132 131
+f 127 123 128 132
+f 133 124 123
+f 134 128 129
+f 133 125 124
+f 134 129 130
+f 133 126 125
+f 134 130 131
+f 133 127 126
+f 134 131 132
+f 133 123 127
+f 134 132 128
+o Ears
+f 135 136 141 140
+f 136 137 142 141
+f 137 138 143 142
+f 138 139 144 143
+f 139 135 140 144
+f 140 141 146 145
+f 141 142 147 146
+f 142 143 148 147
+f 143 144 149 148
+f 144 140 145 149
+f 145 146 151 150
+f 146 147 152 151
+f 147 148 153 152
+f 148 149 154 153
+f 149 145 150 154
+f 150 151 156 155
+f 151 152 157 156
+f 152 153 158 157
+f 153 154 159 158
+f 154 150 155 159
+f 155 156 161 160
+f 156 157 162 161
+f 157 158 163 162
+f 158 159 164 163
+f 159 155 160 164
+f 165 166 171 170
+f 166 167 172 171
+f 167 168 173 172
+f 168 169 174 173
+f 169 165 170 174
+f 170 171 176 175
+f 171 172 177 176
+f 172 173 178 177
+f 173 174 179 178
+f 174 170 175 179
+f 175 176 181 180
+f 176 177 182 181
+f 177 178 183 182
+f 178 179 184 183
+f 179 175 180 184
+f 180 181 186 185
+f 181 182 187 186
+f 182 183 188 187
+f 183 184 189 188
+f 184 180 185 189
+f 185 186 191 190
+f 186 187 192 191
+f 187 188 193 192
+f 188 189 194 193
+f 189 185 190 194
+`;
+const V8Tex={
+  /* 2 m x 2 m of 200 mm glazed wall tiles: R = relief, G = roughness in the data map */
+  wallTiles(){
+    const N=1024, T=10, px=N/T, R=mulberry(8801);
+    const c=V6.canvas(N,N), g=c.getContext('2d'), d=V6.canvas(N,N), dg=d.getContext('2d');
+    const n=V6.fbm(N,N,4401,[128,40,10],[.55,.3,.15]);
+    g.fillStyle='#5b5a52'; g.fillRect(0,0,N,N); dg.fillStyle='rgb(40,235,0)'; dg.fillRect(0,0,N,N);
+    const missing=new Set(); for(let i=0;i<7;i++) missing.add(((R()*T)|0)+','+((R()*T)|0));
+    for(let j=0;j<T;j++)for(let i=0;i<T;i++){
+      const x=i*px+3, y=j*px+3, w=px-6;
+      if(missing.has(i+','+j)){
+        /* knocked out: rough cement, adhesive combing, a shadow under the top edge */
+        g.fillStyle='rgb('+(118+R()*14|0)+','+(114+R()*12|0)+','+(104+R()*10|0)+')'; g.fillRect(x-2,y-2,w+4,w+4);
+        g.strokeStyle='rgba(60,58,52,.35)'; g.lineWidth=3; for(let k=0;k<6;k++){ g.beginPath(); g.arc(x+w/2,y+w*1.4,w*(.5+k*.15),Math.PI*1.2,Math.PI*1.8); g.stroke(); }
+        g.fillStyle='rgba(0,0,0,.45)'; g.fillRect(x-2,y-2,w+4,5);
+        dg.fillStyle='rgb(0,245,0)'; dg.fillRect(x-2,y-2,w+4,w+4);
+        continue;
+      }
+      const tint=.92+R()*.08, gr=R()<.12?.85:1;
+      g.fillStyle='rgb('+(196*tint*gr|0)+','+(210*tint*gr|0)+','+(196*tint*gr|0)+')'; g.fillRect(x,y,w,w);
+      /* glaze: brighter in the middle, a soft bevel at the edge */
+      const lg=g.createLinearGradient(x,y,x+w,y+w); lg.addColorStop(0,'rgba(255,255,255,.10)'); lg.addColorStop(1,'rgba(0,0,0,.10)');
+      g.fillStyle=lg; g.fillRect(x,y,w,w);
+      dg.fillStyle='rgb(255,'+(40+R()*25|0)+',0)'; dg.fillRect(x+2,y+2,w-4,w-4);
+      dg.fillStyle='rgb(200,60,0)'; dg.fillRect(x,y,w,2); dg.fillRect(x,y,2,w); dg.fillRect(x,y+w-2,w,2); dg.fillRect(x+w-2,y,2,w);
+      /* crazing in the old glaze */
+      if(R()<.35){ g.strokeStyle='rgba(80,82,74,.25)'; g.lineWidth=.7;
+        for(let k=0;k<5;k++){ g.beginPath(); let cx=x+R()*w, cy=y+R()*w; g.moveTo(cx,cy); for(let s=0;s<4;s++){ cx+=(R()-.5)*w*.4; cy+=(R()-.5)*w*.4; g.lineTo(cx,cy); } g.stroke(); } }
+    }
+    /* cracks that run across several tiles */
+    for(let k=0;k<9;k++){
+      let cx=R()*N, cy=R()*N; const a0=R()*Math.PI*2;
+      g.strokeStyle='rgba(38,36,32,.9)'; dg.strokeStyle='rgb(0,250,0)'; g.lineWidth=2; dg.lineWidth=3;
+      g.beginPath(); dg.beginPath(); g.moveTo(cx,cy); dg.moveTo(cx,cy);
+      for(let s=0;s<14;s++){ const a=a0+(R()-.5)*1.2; cx+=Math.cos(a)*24; cy+=Math.sin(a)*24; g.lineTo(cx,cy); dg.lineTo(cx,cy);
+        if(R()<.2){ g.moveTo(cx,cy); g.lineTo(cx+(R()-.5)*50,cy+(R()-.5)*50); g.moveTo(cx,cy); } }
+      g.stroke(); dg.stroke();
+      g.strokeStyle='rgba(255,255,255,.22)'; g.lineWidth=1; g.stroke();
+    }
+    /* grime: rising damp from the floor, rust runs, a general brown film */
+    const im=g.getImageData(0,0,N,N), a=im.data;
+    for(let y=0;y<N;y++)for(let x=0;x<N;x++){ const k=(y*N+x)*4, v=y/N, nn=n[y*N+x];
+      const damp=smoothstepJS(.55,1,v)*(.55+.45*nn), film=.12+.25*nn;
+      const f=1-damp*.45-film*.35;
+      a[k]=a[k]*f+60*damp*.3; a[k+1]=a[k+1]*f+48*damp*.3; a[k+2]=a[k+2]*f+30*damp*.3; }
+    g.putImageData(im,0,0);
+    for(let i=0;i<14;i++){ const x=R()*N, w=4+R()*14, L=N*(.15+R()*.5), y0=R()*N*.3;
+      const lg=g.createLinearGradient(0,y0,0,y0+L); lg.addColorStop(0,'rgba(92,58,28,.45)'); lg.addColorStop(1,'rgba(92,58,28,0)');
+      g.fillStyle=lg; g.fillRect(x,y0,w,L); }
+    const map=V6.tex(c,{rep:true}), data=V6.tex(d,{srgb:false,rep:true});
+    return {map,data};
+  },
+  /* 2 m x 2 m of 100 mm floor mosaic, cracked, stained, a broken patch */
+  floorTiles(){
+    const N=1024, T=20, px=N/T, R=mulberry(8901), c=V6.canvas(N,N), g=c.getContext('2d'), d=V6.canvas(N,N), dg=d.getContext('2d');
+    const n=V6.fbm(N,N,4501,[160,48,12],[.5,.32,.18]);
+    g.fillStyle='#3a3833'; g.fillRect(0,0,N,N); dg.fillStyle='rgb(30,240,0)'; dg.fillRect(0,0,N,N);
+    for(let j=0;j<T;j++)for(let i=0;i<T;i++){ const x=i*px+2, y=j*px+2, w=px-4, b=((i+j)&1)?168:142, t=.9+R()*.1;
+      if(R()<.035){ g.fillStyle='#4a4740'; g.fillRect(x-1,y-1,w+2,w+2); dg.fillStyle='rgb(0,250,0)'; dg.fillRect(x-1,y-1,w+2,w+2); continue; }
+      g.fillStyle='rgb('+(b*t|0)+','+(b*t*.98|0)+','+(b*t*.92|0)+')'; g.fillRect(x,y,w,w);
+      dg.fillStyle='rgb(230,'+(60+R()*40|0)+',0)'; dg.fillRect(x+1,y+1,w-2,w-2); }
+    for(let k=0;k<7;k++){ let cx=R()*N, cy=R()*N; const a0=R()*6.28; g.strokeStyle='rgba(20,18,15,.85)'; g.lineWidth=2; dg.strokeStyle='rgb(0,250,0)'; dg.lineWidth=3;
+      g.beginPath(); dg.beginPath(); g.moveTo(cx,cy); dg.moveTo(cx,cy);
+      for(let s=0;s<18;s++){ const a=a0+(R()-.5)*1.3; cx+=Math.cos(a)*22; cy+=Math.sin(a)*22; g.lineTo(cx,cy); dg.lineTo(cx,cy); }
+      g.stroke(); dg.stroke(); }
+    const im=g.getImageData(0,0,N,N), a=im.data;
+    for(let q=0;q<N*N;q++){ const k=q*4, nn=n[q], f=1-(.2+.5*smoothstepJS(.45,.85,nn))*.55; a[k]=a[k]*f+22*(1-f); a[k+1]=a[k+1]*f+18*(1-f); a[k+2]=a[k+2]*f+10*(1-f); }
+    g.putImageData(im,0,0);
+    return {map:V6.tex(c,{rep:true}),data:V6.tex(d,{srgb:false,rep:true})};
+  },
+  /* a mirror hit once, hard: radial cracks from the impact and rings round it */
+  mirror(seed){
+    const N=512, R=mulberry(seed), c=V6.canvas(N,N), g=c.getContext('2d');
+    g.fillStyle='#fff'; g.fillRect(0,0,N,N);
+    const ix=N*(.3+R()*.4), iy=N*(.3+R()*.4);
+    g.strokeStyle='rgba(0,0,0,.85)'; g.lineWidth=1.6;
+    for(let k=0;k<18;k++){ let a=R()*6.28, x=ix, y=iy; g.beginPath(); g.moveTo(x,y);
+      for(let s=0;s<10;s++){ a+=(R()-.5)*.35; x+=Math.cos(a)*N*.07; y+=Math.sin(a)*N*.07; g.lineTo(x,y); } g.stroke(); }
+    for(let r=1;r<5;r++){ g.beginPath(); for(let k=0;k<=24;k++){ const a=k/24*6.28, rr=r*N*.06*(1+(R()-.5)*.35); const x=ix+Math.cos(a)*rr, y=iy+Math.sin(a)*rr; k?g.lineTo(x,y):g.moveTo(x,y); } g.stroke(); }
+    g.fillStyle='rgba(0,0,0,.9)'; g.beginPath(); g.arc(ix,iy,N*.018,0,7); g.fill();
+    /* old silvering failing round the edge */
+    const e=g.createRadialGradient(N/2,N/2,N*.3,N/2,N/2,N*.72); e.addColorStop(0,'rgba(0,0,0,0)'); e.addColorStop(1,'rgba(40,30,20,.75)'); g.fillStyle=e; g.fillRect(0,0,N,N);
+    return V6.tex(c);
+  },
+  /* the torch reflector: hot centre, a darker ring, a bright ring, soft fall-off, dust */
+  cookie(){
+    const N=256, c=V6.canvas(N,N), g=c.getContext('2d'), im=g.createImageData(N,N), a=im.data, R=mulberry(77);
+    const dust=[]; for(let i=0;i<40;i++) dust.push([R()*N,R()*N,1+R()*3,.25+R()*.35]);
+    for(let y=0;y<N;y++)for(let x=0;x<N;x++){
+      const dx=(x+.5)/N*2-1, dy=(y+.5)/N*2-1, r=Math.hypot(dx,dy);
+      let v=1-smoothstepJS(.62,.99,r);
+      v*=1-.2*Math.exp(-Math.pow((r-.27)/.05,2))+.12*Math.exp(-Math.pow((r-.36)/.04,2));
+      v*=.78+.22*(1-smoothstepJS(0,.2,r));
+      v*=.96+.04*Math.sin(Math.atan2(dy,dx)*9+r*30);
+      for(const [px,py,rr,s] of dust){ const q=Math.hypot(x-px,y-py); if(q<rr) v*=1-s*(1-q/rr); }
+      const k=(y*N+x)*4, c8=clamp(v,0,1)*255; a[k]=c8; a[k+1]=c8*.985; a[k+2]=c8*.95; a[k+3]=255; }
+    g.putImageData(im,0,0);
+    const t=new THREE.CanvasTexture(c); t.needsUpdate=true; return t;
+  }
+};
+
+const V8Bath={
+  room:null, F:null, entered:false,
+  mats:null,
+  mat(){
+    if(this.mats) return this.mats;
+    const wt=V8Tex.wallTiles(), ft=V8Tex.floorTiles();
+    const wall=new THREE.MeshStandardMaterial({map:wt.map,roughnessMap:wt.data,roughness:1,bumpMap:wt.data,bumpScale:IS_TOUCH?1.2:2.4,metalness:0,
+      polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-2});
+    const floor=new THREE.MeshStandardMaterial({map:ft.map,roughnessMap:ft.data,roughness:1,bumpMap:ft.data,bumpScale:IS_TOUCH?1:2,metalness:0,
+      polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-2});
+    if(RI.env){ wall.envMap=RI.env; wall.envMapIntensity=.35; floor.envMap=RI.env; floor.envMapIntensity=.25; }
+    return (this.mats={wall,floor});
+  },
+  /* a plane on a wall face (u along, 0..h up), tiled in metres/2 */
+  quad(parts,ox,oz,tx,tz,nx,nz,u0,u1,y0,y1,yb){
+    const g=new THREE.BufferGeometry(), P=[], N=[], U=[];
+    for(const [u,y] of [[u0,y0],[u1,y0],[u1,y1],[u0,y1]]){ P.push(ox+tx*u,yb+y,oz+tz*u); N.push(nx,0,nz); U.push(u/2,y/2); }
+    g.setAttribute('position',new THREE.Float32BufferAttribute(P,3)); g.setAttribute('normal',new THREE.Float32BufferAttribute(N,3));
+    g.setAttribute('uv',new THREE.Float32BufferAttribute(U,2));
+    /* wind so the face looks along its normal: (P1-P0)x(P2-P0) points along (-tz,0,tx) */
+    const facing=(-tz*nx+tx*nz)>0;
+    g.setIndex(facing?[0,1,2,0,2,3]:[0,2,1,0,3,2]); parts.push([g,null]);
+  },
+  build(F,fi){
+    const r=F.special&&F.special.toilet; if(!r) return;
+    this.room=r; this.F=F;
+    const T=WALL_T, y=F.y, CH=FLOOR_H-.55, R=mulberry(9091), M=this.mat();
+    const ix0=r.x0+T/2, ix1=r.x1-T/2, iz0=r.z0+T/2, iz1=r.z1-T/2;
+    /* the room's own frame: s along the door wall, b from the door into the room */
+    const D=r.door, ax=D.axis, dir=r.dir>0?1:-1;
+    const b=ax==='x'?[0,dir]:[dir,0], s=ax==='x'?[1,0]:[0,1];
+    const W=ax==='x'?ix1-ix0:iz1-iz0, Dp=ax==='x'?iz1-iz0:ix1-ix0;
+    const O=ax==='x'?[(ix0+ix1)/2,dir>0?iz0:iz1]:[dir>0?ix0:ix1,(iz0+iz1)/2];
+    const at=(u,v)=>[O[0]+s[0]*u+b[0]*v,O[1]+s[1]*u+b[1]*v];
+    const doorU=ax==='x'?D.x-O[0]:D.z-O[1];
+    const yawTo=(vx,vz)=>Math.atan2(vx,vz);          // local +Z onto (vx,vz)
+    const axisYaw=(vx,vz)=>Math.atan2(-vz,vx);       // local +X onto (vx,vz)
+    this.frame={at,b,s,W,Dp,O,y};
+
+    /* ---- tiles: walls to 2.1 m, the floor all over ---- */
+    const TH=2.1, wparts=[], fparts=[];
+    const wallFace=(u0,v0,u1,v1,inX,inZ)=>{ /* segment on the room plan from (u0,v0) to (u1,v1), normal (inX,inZ) world */
+      const p0=at(u0,v0), p1=at(u1,v1), L=Math.hypot(p1[0]-p0[0],p1[1]-p0[1]); if(L<.05) return;
+      const tx=(p1[0]-p0[0])/L, tz=(p1[1]-p0[1])/L;
+      this.quad(wparts,p0[0]+inX*.012,p0[1]+inZ*.012,tx,tz,inX,inZ,0,L,.0,TH,y); };
+    const hw=W/2, gap=.78;
+    wallFace(-hw,Dp,hw,Dp,-b[0],-b[1]);                        // back wall
+    wallFace(-hw,0,-hw,Dp,s[0],s[1]);                          // left
+    wallFace(hw,0,hw,Dp,-s[0],-s[1]);                          // right
+    if(doorU-gap>-hw) wallFace(-hw,0,doorU-gap,0,b[0],b[1]);  // door wall, either side of the opening
+    if(doorU+gap<hw) wallFace(doorU+gap,0,hw,0,b[0],b[1]);
+    { const g=new THREE.PlaneGeometry(ix1-ix0,iz1-iz0); g.rotateX(-Math.PI/2); g.translate((ix0+ix1)/2,y+.006,(iz0+iz1)/2);
+      const uv=g.attributes.uv; for(let i=0;i<uv.count;i++) uv.setXY(i,uv.getX(i)*(ix1-ix0)/2,uv.getY(i)*(iz1-iz0)/2); fparts.push([g,null]); }
+    const wm=new THREE.Mesh(V6.merge(wparts),M.wall); wm.receiveShadow=true; wm.renderOrder=1; F.group.add(wm);
+    const fm=new THREE.Mesh(V6.merge(fparts),M.floor); fm.receiveShadow=true; F.group.add(fm);
+
+    /* ---- the fixtures, in the game's own PBR ---- */
+    const gb=new GB(), col=F.riCol||(F.riCol=[]);
+    const cer=RIspec(RK.ceramic,{c:0xe2e0d6,r:.14,w:.55}), cerOld=RIspec(RK.ceramic,{c:0xd6d0bf,r:.2,w:.8});
+    const chrome=RIspec(RK.chrome,{w:.35}), rust=RIspec(RK.rust,{}), steel=RIspec(RK.steelDull,{w:.5});
+    const lam=RIspec(RK.paintCream,{c:0xa7a58f,w:.75}), lamDoor=RIspec(RK.paintCream,{c:0x9c9a84,w:.8});
+    const put=(geo,x,yy,z,ry,spec,sx,sy,sz,cf,rx,rz)=>gb.add(geo,MX(x,y+yy,z,rx||0,ry||0,rz||0,sx||1,sy||1,sz||1),spec,cf);
+    const stain=(x0,z0,ry)=>(x,yy,z,c,nrm)=>{ const h=yy-y;
+      if(h<.07) c.lerp(new THREE.Color(0x4a4032),.55);                                 // grime at the foot
+      if(nrm.y>.5&&h>.3&&h<.47) c.lerp(new THREE.Color(0x8a6a3a),.35*Math.random()+.2); // stains in the bowl
+    };
+    /* a WC: the supplied proportions (bowl r .18 to .45 m, seat, 400 x 400 x 150 tank on the wall) */
+    const wc=(x,z,ry,broken)=>{
+      const cf=stain(x,z,ry), rot=new THREE.Matrix4().makeRotationY(ry), P=(lx,ly,lz)=>{ const v=new THREE.Vector3(lx,ly,lz).applyMatrix4(rot); return [x+v.x,ly,z+v.z]; };
+      const L=(pts,seg)=>RIG.lathe(pts,seg||28);
+      const base=L([[0,0],[.12,0],[.125,.012],[.1,.05],[.105,.14],[.15,.24],[0,.24]]);
+      let p=P(0,0,0); put(base,p[0],0,p[2],ry,cerOld,1,1,1.3,cf);
+      const bowl=L([[.13,.23],[.165,.3],[.182,.4],[.183,.43],[.17,.445],[.15,.44],[.13,.41],[.11,.34],[.07,.26],[0,.25]]);
+      put(bowl,p[0],0,p[2],ry,cer,1,1,1.22,cf);
+      if(!broken){ const seat=RIG.torus(.16,.02,10,36); p=P(0,.453,0); put(seat,p[0],.453,p[2],ry,RIspec(RK.plBlack,{c:0x1d1c1a,w:.4}),1,1.22,.55,null,Math.PI/2);
+        const lid=RIG.rbox(.36,.018,.44,.008,2); p=P(0,.66,-.2); put(lid,p[0],.66,p[2],ry,RIspec(RK.plBlack,{c:0x1d1c1a,w:.4}),1,1,1,null,-1.45); }
+      const tank=RIG.rbox(.4,.38,.15,.03,3); p=P(0,.6,-.2); put(tank,p[0],.6,p[2],ry,cer,1,1,1,cf);
+      if(!broken){ const tl=RIG.rbox(.42,.03,.17,.01,2); p=P(0,.805,-.2); put(tl,p[0],.805,p[2],ry,cer); }
+      else { /* the cistern lid lies cracked in two on the floor */
+        const tl=RIG.rbox(.2,.03,.17,.01,2); p=P(.28,.02,.2); put(tl,p[0],.02,p[2],ry+.4,cer,1,1,1,null,.05);
+        p=P(.4,.03,.02); put(tl,p[0],.03,p[2],ry-.3,cer,1,1,1,null,-.08,.12); }
+      const lever=RIG.rbox(.06,.012,.012,.004,1); p=P(-.16,.74,-.12); put(lever,p[0],.74,p[2],ry,chrome);
+      const pipe=RIG.cyl(.013,.013,.5,10); p=P(.16,1.06,-.24); put(pipe,p[0],1.06,p[2],ry,rust);
+      col.push({x0:x-.25,z0:z-.3,x1:x+.25,z1:z+.3});
+    };
+    /* a pedestal basin: the supplied 500 x 400 bowl on a 700 mm pedestal, tap at the back */
+    const basin=(x,z,ry)=>{
+      const rot=new THREE.Matrix4().makeRotationY(ry), P=(lx,ly,lz)=>{ const v=new THREE.Vector3(lx,ly,lz).applyMatrix4(rot); return [x+v.x,ly,z+v.z]; };
+      const ped=RIG.lathe([[.085,0],[.1,.015],[.075,.08],[.07,.52],[.1,.68],[0,.7]],24); put(ped,x,0,z,ry,cerOld,1,1,1,(xx,yy,zz,c)=>{ if(yy-y<.06) c.lerp(new THREE.Color(0x4a4032),.5); });
+      /* body below, a rim round the top, and the bowl sunk between them */
+      put(RIG.rbox(.52,.12,.42,.04,3),x,.78,z,ry,cer);
+      let p;
+      for(const [lx,lz,w,d] of [[-.23,0,.06,.42],[.23,0,.06,.42],[0,.18,.52,.06],[0,-.18,.52,.06]]){ p=P(lx,.865,lz); put(RIG.rbox(w,.05,d,.015,2),p[0],.865,p[2],ry,cer); }
+      const cup=V6.inside(new THREE.SphereGeometry(1,24,10,0,Math.PI*2,Math.PI/2,Math.PI/2));
+      p=P(0,.885,.0); put(cup,p[0],.885,p[2],ry,cer,.2,.065,.15,(xx,yy,zz,c)=>{ c.lerp(new THREE.Color(0x7b5a34),.15+.25*Math.random()); });
+      p=P(0,.843,0); put(RIG.disk(.018,12),p[0],.843,p[2],ry,RIspec(RK.steelDull,{c:0x2a2a28}),1,1,1,null,-Math.PI/2);
+      for(const sx of [-.1,.1]){ p=P(sx,.93,-.16); put(RIG.cyl(.012,.016,.05,10),p[0],.93,p[2],ry,chrome); put(RIG.rbox(.045,.012,.012,.003,1),p[0],.96,p[2],ry,chrome); }
+      p=P(0,.95,-.165); put(RIG.cyl(.011,.011,.1,10),p[0],.95,p[2],ry,chrome);
+      p=P(0,1.0,-.12); put(RIG.cyl(.009,.009,.1,10),p[0],1.0,p[2],ry,chrome,1,1,1,null,Math.PI/2);
+      /* rust run from the tap down into the bowl */
+      p=P(0,.9,-.1); put(RIG.plane(.03,.12),p[0],.905,p[2],ry,RIspec(RK.rust,{c:0x6b3a18}),1,1,1,null,-1.2);
+      col.push({x0:x-.27,z0:z-.24,x1:x+.27,z1:z+.24});
+      return {tapX:P(0,1,-.07)[0],tapZ:P(0,1,-.07)[2]};
+    };
+
+    /* cubicles along the back wall, basins down the left wall */
+    const nSt=Math.max(2,Math.min(3,Math.floor((W-1.4)/1.05))), stW=1.02, stD=1.5;
+    const uR=hw, v1=Dp, v0=Dp-stD;
+    for(let i=0;i<=nSt;i++){ const u=uR-i*stW;
+      const c0=at(u,v0), c1=at(u,v1), mx=(c0[0]+c1[0])/2, mz=(c0[1]+c1[1])/2;
+      if(i>0){ put(RIG.rbox(.035,1.72,stD-.02,.008,2),mx,.2+.86,mz,yawTo(b[0],b[1]),lam);
+        col.push({x0:Math.min(c0[0],c1[0])-.04,z0:Math.min(c0[1],c1[1])-.04,x1:Math.max(c0[0],c1[0])+.04,z1:Math.max(c0[1],c1[1])+.04}); }
+      for(const vv of [v0+.1,v1-.1]){ const q=at(u,vv); put(RIG.cyl(.012,.014,.2,8),q[0],.1,q[1],0,chrome); }
+      const pp=at(u,v0); put(RIG.rbox(.09,1.95,.04,.01,2),pp[0],.975,pp[1],yawTo(b[0],b[1]),lam);
+    }
+    { const a0=at(uR,v0), a1=at(uR-nSt*stW,v0), L=Math.hypot(a1[0]-a0[0],a1[1]-a0[1]);
+      put(RIG.cyl(.018,.018,L,10),(a0[0]+a1[0])/2,1.96,(a0[1]+a1[1])/2,axisYaw(s[0],s[1]),steel,1,1,1,null,0,Math.PI/2); }
+    const doorAng=[.25,1.25,.6], faceIn=Math.atan2(-b[0],-b[1]);
+    for(let i=0;i<nSt;i++){
+      const uc=uR-(i+.5)*stW, cc=at(uc,Dp-.34);
+      wc(cc[0],cc[1],faceIn,i===1);
+      /* the door: hinged at one pilaster, swung in by a different amount each; one hangs off */
+      const hinge=at(uR-i*stW-.06,v0), dw=stW-.14;
+      if(i===nSt-1){ const q=at(uc-.1,v0-.55); put(RIG.rbox(dw,1.5,.03,.008,2),q[0],.36,q[1],axisYaw(s[0],s[1])+.35,lamDoor,1,1,1,null,1.15,.2); }
+      else { const a=doorAng[i%3];
+        /* swung into the cubicle about the hinge: the leaf runs along -cos(a)·s + sin(a)·b */
+        const lx=-Math.cos(a)*s[0]+Math.sin(a)*b[0], lz=-Math.cos(a)*s[1]+Math.sin(a)*b[1];
+        const q=[hinge[0]+lx*dw/2,hinge[1]+lz*dw/2];
+        put(RIG.rbox(dw,1.5,.03,.008,2),q[0],.2+.75,q[1],axisYaw(lx,lz),lamDoor); }
+    }
+    const nB=Math.max(2,Math.min(3,Math.floor((v0-1.2)/.95))), taps=[];
+    for(let i=0;i<nB;i++){ const v=1.05+i*.95, q=at(-hw+.22,v); taps.push(basin(q[0],q[1],Math.atan2(s[0],s[1])));
+      /* the mirror over it, cracked */
+      const m=at(-hw+.02,v), mat=this.mirrorMat(i);
+      const mg=new THREE.PlaneGeometry(.5,.7); const mm=new THREE.Mesh(mg,mat); mm.position.set(m[0],y+1.55,m[1]); mm.rotation.y=Math.atan2(s[0],s[1]); F.group.add(mm);
+      put(RIG.rbox(.54,.74,.02,.006,2),m[0]-s[0]*.004,1.55,m[1]-s[1]*.004,Math.atan2(s[0],s[1]),steel);
+      if(i===0){ const V=V6Tex.bloodSet(); const v6=V&&V[1]; if(v6){ const w=new THREE.Mesh(new THREE.PlaneGeometry(.48,.13),v6.mat);
+        w.position.set(m[0]+s[0]*.008,y+1.62,m[1]+s[1]*.008); w.rotation.y=Math.atan2(s[0],s[1]); w.renderOrder=3; F.group.add(w); } }
+    }
+    /* floor drain, the rusted soil pipe along the back wall, toilet-roll holder */
+    { const q=at(0,v0-1.1); put(RIG.disk(.09,18),q[0],.009,q[1],0,RIspec(RK.steelDull,{c:0x3b3a36,w:.8}),1,1,1,null,-Math.PI/2);
+      for(let k=-2;k<=2;k++) put(RIG.box(.13,.004,.012),q[0],.011,q[1]+k*.03,0,RIspec(RK.plBlack,{})); }
+    { const a0=at(-hw+.05,Dp-.09), a1=at(hw-.05,Dp-.09), L=Math.hypot(a1[0]-a0[0],a1[1]-a0[1]);
+      put(RIG.cyl(.05,.05,L,14),(a0[0]+a1[0])/2,2.45,(a0[1]+a1[1])/2,axisYaw(s[0],s[1]),rust,1,1,1,null,0,Math.PI/2); }
+    const gm=new THREE.Mesh(gb.geometry(),MAT.prop); gm.castShadow=!IS_TOUCH; gm.receiveShadow=true; F.group.add(gm);
+
+    /* water: the taps and the soil pipe drip into puddles that ripple */
+    try{ taps.forEach(t=>V6Int.drip(F,[t.tapX,y+.98,t.tapZ],y+.8,1.6+R()*1.4,R));
+      const q=at(-.6,Dp-.12); V6Int.drip(F,[q[0],y+2.4,q[1]],y,1.1,R); const q2=at(.9,Dp-.12); V6Int.drip(F,[q2[0],y+2.4,q2[1]],y,2.3,R);
+      V6Int.flushPuddles(F); }catch(e){ console.warn('bath drips',e); }
+
+    /* blood: dragged out of a cubicle to the drain, a hand on a door, a pool */
+    try{ const L=[], add=(type,m,age,ext)=>L.push({type,m,seed:R()*97,age,ext:ext||0});
+      const s0=at(uR-1.5*stW,v0+.4), s1=at(0,v0-1.0), dx=s1[0]-s0[0], dz=s1[1]-s0[1], Ld=Math.hypot(dx,dz);
+      for(let k=0;k<3;k++){ const t=(k+.5)/3; add(1,MX(s0[0]+dx*t,y+.009,s0[1]+dz*t,-Math.PI/2,Math.atan2(-dz,dx),0,Ld/3*1.15,.55,1),.45+k*.08); }
+      const pl=at(uR-.5*stW,Dp-.9); add(0,MX(pl[0],y+.009,pl[1],-Math.PI/2,R()*6,0,.9,.8,1),.3);
+      const hd=at(uR-1.4*stW,v0-.02); add(3,MX(hd[0]-b[0]*.02,y+1.15,hd[1]-b[1]*.02,0,Math.atan2(-b[0],-b[1]),0,.36,.4,1),.35,1);
+      const sp=at(hw-.02,1.6); add(2,MX(sp[0],y+1.3,sp[1],0,Math.atan2(-s[0],-s[1]),0,1.1,1.1,1),.4);
+      const geo=new THREE.PlaneGeometry(1,1), A=new Float32Array(L.length*4);
+      L.forEach((q,i)=>{ A[i*4]=q.type; A[i*4+1]=q.seed; A[i*4+2]=q.age; A[i*4+3]=q.ext; });
+      geo.setAttribute('aB',new THREE.InstancedBufferAttribute(A,4));
+      const im=new THREE.InstancedMesh(geo,RI_BLOOD.material(),L.length); L.forEach((q,i)=>im.setMatrixAt(i,q.m)); im.instanceMatrix.needsUpdate=true; im.computeBoundingSphere();
+      im.receiveShadow=true; im.renderOrder=2; F.group.add(im); }catch(e){ console.warn('bath blood',e); }
+
+    /* a tube that will not stay lit — handed to the floor's own flicker, so it behaves like every other tube */
+    { const c=at(0,Dp*.45), Lt=new THREE.PointLight(0xd6efe4,0,7,2); Lt.position.set(c[0],y+CH-.25,c[1]); F.group.add(Lt);
+      const tube=new THREE.Mesh(new THREE.BoxGeometry(1.2,.035,.035),new THREE.MeshBasicMaterial({color:0xe8fff4,toneMapped:false}));
+      tube.position.set(c[0],y+CH-.05,c[1]); tube.rotation.y=Math.atan2(-s[1],s[0]); F.group.add(tube);
+      const hous=new THREE.Mesh(new THREE.BoxGeometry(1.26,.05,.12),MAT.prop); hous.position.set(c[0],y+CH-.02,c[1]); hous.rotation.y=tube.rotation.y; F.group.add(hous);
+      F.lights.push({L:Lt,tube,base:2.6,phase:R()*9,broken:true,x:c[0],z:c[1],forced:null,userData:{}}); }
+    this.center=at(0,Dp*.5);
+    ensureDoorAt(fi,r);
+  },
+  mirrorMat(i){
+    this._mm=this._mm||[];
+    if(this._mm[i%2]) return this._mm[i%2];
+    const t=V8Tex.mirror(4000+i*17);
+    const m=new THREE.MeshStandardMaterial({color:0x8e9493,map:t,roughness:.05,roughnessMap:t,metalness:1,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-4});
+    if(RI.env){ m.envMap=RI.env; m.envMapIntensity=1.1; }
+    return (this._mm[i%2]=m);
+  },
+  /* first time through the door: the far cubicle door bangs, the tube dies for a moment */
+  update(dt){
+    const r=this.room; if(!r||this.entered||!P.inside||P.floor!==1||Vent.active) return;
+    if(P.x>r.x0+.4&&P.x<r.x1-.4&&P.z>r.z0+.4&&P.z<r.z1-.4){
+      this.entered=true; const raw=Vent.raw();
+      setTimeout(()=>{ try{ A.boom(.45,'metal'); }catch(_){} Effects.shake(.25);
+        const F=this.F; if(F) F.lights.forEach(l=>{ if(Math.hypot(l.x-P.x,l.z-P.z)<6){ l.forced=0; setTimeout(()=>{ l.forced=null; },600); } });
+        if(raw) raw.rawNoise(1.2,{f:700,q:9,g:.03}); },900);
+    }
+  }
+};
+
+/* ---------------- rats ---------------- */
+const V8Rat={
+  geo:null, list:[],
+  build(){
+    if(this.geo) return this.geo;
+    const V=[], objs={}; let cur='Body';
+    for(const line of RAT_OBJ.split('\n')){ const p=line.trim().split(/\s+/);
+      if(p[0]==='v') V.push([+p[1],+p[2],+p[3]]); else if(p[0]==='o'){ cur=p[1]; objs[cur]=objs[cur]||[]; }
+      else if(p[0]==='f'){ const ids=p.slice(1).map(q=>parseInt(q)-1); (objs[cur]=objs[cur]||[]).push(ids); } }
+    const gb=new GB();
+    const spec={Body:RIspec(RK.fabBlue,{c:0x2e241c,r:.93,w:.35,d:3}),Head:RIspec(RK.fabBlue,{c:0x33281f,r:.9,w:.3,d:3}),
+      Tail:RIspec(RK.rubber,{c:0x8a6a60,r:.55,w:.3}),Ears:RIspec(RK.rubber,{c:0x9b7268,r:.6,w:.2})};
+    for(const k in objs){ const P=[], I=[], map=new Map();
+      for(const f of objs[k]){ const loc=f.map(id=>{ if(!map.has(id)){ map.set(id,P.length/3); P.push(...V[id]); } return map.get(id); });
+        for(let t=1;t<loc.length-1;t++) I.push(loc[0],loc[t],loc[t+1]); }
+      const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.Float32BufferAttribute(P,3)); g.setIndex(I); g.computeVertexNormals();
+      gb.add(g,null,spec[k]||spec.Body); }
+    /* two wet black eyes */
+    for(const sx of [-.017,.017]) gb.add(RIG.sphere(.0065,8,6),MX(sx,.052,-.094),RIspec(RK.glass,{c:0x050505,r:.05}));
+    return (this.geo=gb.geometry());
+  },
+  spot(F,R,inRoom){
+    for(let k=0;k<60;k++){
+      if(inRoom){ const f=V8Bath.frame; if(!f) return null; const q=f.at((R()-.5)*(f.W-.6),.5+R()*(f.Dp-1.8)); if(navFree(F,q[0],q[1])) return q; continue; }
+      const walls=F.ri&&F.ri.walls; if(!walls||!walls.length) return null;
+      const w=walls[(R()*walls.length)|0], side=V6W.onCorr(w); if(!side||w.b-w.a<1.5) continue;
+      const p=V6W.face(w,side,w.a+.5+R()*(w.b-w.a-1)), x=p.x+p.nx*.16, z=p.z+p.nz*.16;
+      if(navFree(F,x,z)&&!(x>RUN.x0-1&&x<RUN.x1+1&&z>RUN.z0-1&&z<RUN.z1+1)) return [x,z,Math.atan2(p.nz,-p.nx)];
+    }
+    return null;
+  },
+  add(F,fi,R,inRoom){
+    const q=this.spot(F,R,inRoom); if(!q) return;
+    const m=new THREE.Mesh(this.build(),MAT.prop); m.castShadow=!IS_TOUCH; m.receiveShadow=true; m.scale.setScalar(1.15);
+    m.position.set(q[0],F.y+.003,q[1]); m.rotation.y=q[2]!==undefined?q[2]:R()*6.28; F.group.add(m);
+    this.list.push({m,F,fi,inRoom,R,state:'idle',t:R()*5,ph:R()*9,vx:0,vz:0,wait:0,ry:m.rotation.y});
+  },
+  squeak(){ const r=Vent.raw(); if(!r) return;
+    for(let i=0;i<3;i++) setTimeout(()=>{ try{ r.rawTone(3300+Math.random()*700,4300+Math.random()*500,.06,{g:.035,type:'sine'}); }catch(_){} },i*80);
+    try{ r.rawNoise(.35,{f:4800,q:2.2,g:.02}); }catch(_){} },
+  update(dt){
+    if(!P.inside||Vent.active) return;
+    const lit=Torch.lit(), fx=-Math.sin(P.yaw)*Math.cos(P.pitch), fz=-Math.cos(P.yaw)*Math.cos(P.pitch), fy=Math.sin(P.pitch);
+    for(const r of this.list){
+      if(r.fi!==P.floor) continue;
+      const m=r.m; r.ph+=dt;
+      if(r.state==='gone'){ r.wait-=dt; if(r.wait<=0){ const q=this.spot(r.F,r.R,r.inRoom);
+          if(q&&Math.hypot(q[0]-P.x,q[1]-P.z)>6){ m.position.set(q[0],r.F.y+.003,q[1]); if(q[2]!==undefined) r.ry=q[2]; m.rotation.set(0,r.ry,0); m.visible=true; r.state='idle'; } else r.wait=4; }
+        continue; }
+      if(r.state==='idle'){
+        /* sniffing: the head swings, the body twitches, now and then a little scoot */
+        m.rotation.y=r.ry+Math.sin(r.ph*2.3)*.18+Math.sin(r.ph*7.1)*.04; m.position.y=r.F.y+.003+Math.abs(Math.sin(r.ph*11))*.002;
+        const dx=m.position.x-P.x, dy=(m.position.y+.05)-P.camY, dz=m.position.z-P.z, d=Math.hypot(dx,dy,dz)||1;
+        if(lit&&d<8.5&&(dx*fx+dy*fy+dz*fz)/d>.9){
+          /* the torch finds it: it squeals and bolts away along the wall */
+          r.state='run'; r.t=0; this.squeak();
+          let ax=dx/Math.hypot(dx,dz), az=dz/Math.hypot(dx,dz); const side=Math.random()<.5?1:-1;
+          ax+= -az*side*.8; az+= ax*side*.8; const l=Math.hypot(ax,az)||1; ax/=l; az/=l;
+          const sp=3.4+Math.random()*1.2; r.vx=ax*sp; r.vz=az*sp; r.ry=Math.atan2(-ax,-az);
+        }
+        continue;
+      }
+      if(r.state==='run'){
+        r.t+=dt;
+        const wig=Math.sin(r.t*28)*.35, c=Math.cos(wig*.3), s=Math.sin(wig*.3);
+        const vx=r.vx*c-r.vz*s, vz=r.vx*s+r.vz*c, nx=m.position.x+vx*dt, nz=m.position.z+vz*dt;
+        m.rotation.y=Math.atan2(-vx,-vz); m.position.y=r.F.y+.003+Math.abs(Math.sin(r.t*30))*.012;
+        m.rotation.z=Math.sin(r.t*30)*.08;
+        if(navFree(r.F,nx,nz)&&r.t<1.6){ m.position.x=nx; m.position.z=nz; if(Math.random()<dt*9){ const raw=Vent.raw(); if(raw) raw.rawNoise(.03,{f:5200,q:3,g:.012}); } }
+        else { m.visible=false; r.state='gone'; r.wait=28+Math.random()*40; m.rotation.z=0; }
+      }
+    }
+  }
+};
+
+/* the washroom is decided when the ground floor is laid out; everything else is dressed after */
+{ const _d=V6Int.dress; V6Int.dress=function(F,fi){ _d.call(this,F,fi);
+    try{ if(F&&F.special&&F.special.toilet) V8Bath.build(F,fi); }catch(e){ console.warn('V8 washroom',e); }
+    try{ const R=mulberry(99100+fi*71); V8Rat.add(F,fi,R,false); if(fi>=2&&fi%2===0) V8Rat.add(F,fi,R,false);
+      if(F&&F.special&&F.special.toilet){ V8Rat.add(F,fi,R,true); V8Rat.add(F,fi,R,true); } }catch(e){ console.warn('V8 rats',e); } }; }
+{ const _u=V6Int.update; V6Int.update=function(dt){ _u.call(this,dt); try{ V8Rat.update(dt); V8Bath.update(dt); }catch(e){ if(!V8Rat._err){ V8Rat._err=1; console.warn('V8 update',e); } } }; }
+/* the torch: a reflector pattern, a finer shadow map, shadows that sit on what casts them */
+{ const _ti=Torch.init; Torch.init=function(){ _ti.call(this);
+    try{ this.spot.map=V8Tex.cookie(); this.spot.shadow.bias=-.0005; this.spot.shadow.normalBias=.012;
+      if(!IS_TOUCH) this.spot.shadow.mapSize.set(2048,2048); }catch(e){ console.warn('V8 torch',e); } }; }
 
 window.IGMC={P,State,Story,Ghost,Torch,Int,Ext,A,Music,Scream,Pandit,ITEMS,MISSIONS,MAT,camera,renderer,scene,key,head,RI,RIU,
   UI:{say,toast,setObjective,setPrompt,openDoc,closeDoc,die,pauseGame},
