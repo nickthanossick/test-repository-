@@ -17297,9 +17297,10 @@ const Vent={
       if(this.ph>=1.0){
         /* which way does he spin? behind him if there is room, else the most open side */
         const y=P.yaw, back=[Math.sin(y),Math.cos(y)], left=[-Math.cos(y),Math.sin(y)], right=[Math.cos(y),-Math.sin(y)], fwd=[-Math.sin(y),-Math.cos(y)];
-        let best=null;
-        for(const [d,pref] of [[back,1.6],[left,1],[right,1],[fwd,.55]]){ const L=this.ray(P.x,P.z,d,3.2), s=Math.min(L,2.2)*pref; if(!best||s>best.s) best={d,L,s}; }
-        const D=clamp(best.L-.35,1.0,1.55), d=best.d, g=this.g={x:P.x+d[0]*D,z:P.z+d[1]*D,yaw:Math.atan2(-d[0],-d[1]),from:P.yaw};
+        /* always behind him if there is half a metre of duct there; the less room, the closer she is */
+        let best={d:back,L:this.ray(P.x,P.z,back,3.2)};
+        if(best.L<.45) for(const d of [left,right,fwd]){ const L=this.ray(P.x,P.z,d,3.2); if(L>best.L) best={d,L}; }
+        const D=clamp(best.L-.1,.45,1.55), d=best.d, g=this.g={x:P.x+d[0]*D,z:P.z+d[1]*D,yaw:Math.atan2(-d[0],-d[1]),from:P.yaw};
         let dy=g.yaw-P.yaw; while(dy>Math.PI)dy-=Math.PI*2; while(dy<-Math.PI)dy+=Math.PI*2; g.dy=dy;
         P.frozen=1; clearMoveInput(); P.vx=P.vz=0;
         Ghost.mode='vent'; Ghost.deadly=false; Ghost.floor=P.floor; Ghost.x=g.x; Ghost.z=g.z;
@@ -17937,6 +17938,9 @@ const V8Bath={
     const r=F.special&&F.special.toilet; if(!r) return;
     this.room=r; this.F=F;
     const T=WALL_T, y=F.y, CH=FLOOR_H-.55, R=mulberry(9091), M=this.mat();
+    /* the corridor graffiti pass wrote on these walls too: the tiles go over it, so take it down */
+    try{ const bm=new Set((V6Tex.bloodSet()||[]).map(v=>v.mat));
+      for(const o of F.group.children) if(o.isMesh&&bm.has(o.material)&&o.position.x>r.x0-.3&&o.position.x<r.x1+.3&&o.position.z>r.z0-.3&&o.position.z<r.z1+.3) o.visible=false; }catch(_){}
     const ix0=r.x0+T/2, ix1=r.x1-T/2, iz0=r.z0+T/2, iz1=r.z1-T/2;
     /* the room's own frame: s along the door wall, b from the door into the room */
     const D=r.door, ax=D.axis, dir=r.dir>0?1:-1;
@@ -18087,8 +18091,8 @@ const V8Bath={
     this._mm=this._mm||[];
     if(this._mm[i%2]) return this._mm[i%2];
     const t=V8Tex.mirror(4000+i*17);
-    const m=new THREE.MeshStandardMaterial({color:0x8e9493,map:t,roughness:.05,roughnessMap:t,metalness:1,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-4});
-    if(RI.env){ m.envMap=RI.env; m.envMapIntensity=1.1; }
+    const m=new THREE.MeshStandardMaterial({color:0x6c7170,map:t,roughness:.13,roughnessMap:t,metalness:1,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-4});
+    if(RI.env){ m.envMap=RI.env; m.envMapIntensity=.42; }
     return (this._mm[i%2]=m);
   },
   /* first time through the door: the far cubicle door bangs, the tube dies for a moment */
