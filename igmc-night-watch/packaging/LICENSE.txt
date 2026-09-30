@@ -47,4 +47,10 @@ The Game uses three.js (https://threejs.org), licensed under the MIT License:
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   SOFTWARE.
 
+Online co-op uses PeerJS (https://peerjs.com), licensed under the MIT License:
+
+  Copyright (c) 2015 Michelle Bu and Eric Zhang, http://peerjs.com
+
+  (The MIT permission notice and disclaimer above apply to PeerJS as well.)
+
 Other third-party components remain under their own licences.
