@@ -19913,7 +19913,9 @@ const V11_DOC_BIN='data:application/octet-stream;base64,RE9DMaw+AABg6gAAWcO1vgAA
 /* ═════════════ V11 OPENING ═════════════ */
 /* the build speaks English on screen: the new lines join the translator's table */
 try{ for(const [a,b] of [['Suno…','Listen…'],['IGMC ke bahar · baat poori hone do','Outside IGMC · let the call finish'],
-    ['AB IGMC KE ANDAR JA SAKTE HO','YOU CAN GO INTO IGMC NOW']]){ const k=riENn(a); RI_EN.set(k,b); RI_ENU.set(k.toUpperCase(),b.toUpperCase()); }
+    ['AB IGMC KE ANDAR JA SAKTE HO','YOU CAN GO INTO IGMC NOW'],
+    ['TEST: CONSULTANT AA GAYA · K = wapas bhejo','TEST: CONSULTANT SUMMONED · K TO SEND BACK'],['TEST: CONSULTANT GAYA','TEST: CONSULTANT DISMISSED'],
+    ['YAHAN JAGAH NAHI — CORRIDOR MEIN JAAO','NO ROOM HERE — GO INTO A CORRIDOR'],['ABHI NAHI','NOT NOW']]){ const k=riENn(a); RI_EN.set(k,b); RI_ENU.set(k.toUpperCase(),b.toUpperCase()); }
   RI_ENC.clear(); }catch(_){}
 const V11Open={
   buf:null, decoding:false, src:null, gain:null, playing:false, offset:0, t0:0, done:true, wait:0, el:null, failed:false,
@@ -20008,7 +20010,7 @@ const V11Open={
 const V11Doc={
   root:null, mesh:null, mat:null, u:null, geo:null, ready:false,
   state:'off', scene:'', t:0, cd:75, quiet:0, mission:-1, seenT:0, flick:0,
-  x:0, z:0, ry:0, vx:0, vz:0, speed:0, walk:0, ph:0, yaw:0, tilt:.1, lean:0, life:0, stepAcc:0, debug:false, kill:false, hold:false,
+  x:0, z:0, ry:0, vx:0, vz:0, speed:0, walk:0, ph:0, yaw:0, tilt:.1, lean:0, life:0, stepAcc:0, debug:false, kill:false, hold:false, n:0, look:false, testMode:false,
   bytes(s){ const b=atob(s.slice(s.indexOf(',')+1)), u=new Uint8Array(b.length); for(let i=0;i<b.length;i++) u[i]=b.charCodeAt(i); return u; },
   /* DOC1: positions (u16, in bbox), normals (i8), uv (u16), cavity (u8), indices */
   model(){
@@ -20221,7 +20223,7 @@ float cF(vec3 p){ return cN(p)*.5+cN(p*2.03+7.1)*.28+cN(p*4.11+3.3)*.14+cN(p*8.3
       cine:!!Cine.active, tape:!!Tape.active, flash:typeof Flashback!=='undefined'&&!!Flashback.active, vent:typeof Vent!=='undefined'&&!!Vent.active,
       opening:typeof OpeningScare!=='undefined'&&!!OpeningScare.active, ritual:!!(window.RitualTerror&&RitualTerror.active),
       gate:typeof V9Gate!=='undefined'&&!!V9Gate.busy, tv:!!V10TV.scare, peek:!!DoorPeek.active, scare:Scare.live>0,
-      mission:((Story&&Story.mission)||0)<2, naina:this.nainaHere(), quiet:this.quiet<4, director:HorrorDirector.silence<=6, cd:this.cd>0};
+      mission:!this.eligible(), naina:this.nainaHere(), quiet:this.quiet<4, cd:this.cd>0};
     for(const k in c) if(c[k]) return k; return '';
   },
   /* ---------- rules ---------- */
@@ -20241,17 +20243,21 @@ float cF(vec3 p){ return cN(p)*.5+cN(p*2.03+7.1)*.28+cN(p*4.11+3.3)*.14+cN(p*8.3
       (typeof V9Gate!=='undefined'&&V9Gate.busy)||(typeof V10TV!=='undefined'&&!!V10TV.scare)||
       (typeof DoorPeek!=='undefined'&&DoorPeek.active)||(typeof Scare!=='undefined'&&Scare.live>0);
   },
-  canAppear(){
+  /* from mission 2 on, and in mission 1 once her scripted first encounter inside is over */
+  eligible(){
     const m=(Story&&Story.mission)||0;
-    return this.ready&&m>=2&&!this.busy()&&!this.nainaHere()&&this.quiet>=4&&
-      (typeof HorrorDirector==='undefined'||HorrorDirector.silence>6);
+    if(m>=2) return true;
+    return m===1&&typeof OpeningScare!=='undefined'&&OpeningScare.completed&&!OpeningScare.awaitRespawn&&!OpeningScare.active;
   },
-  reset(){ this.vanish(true); this.cd=rnd(60,90); this.quiet=0; },
+  canAppear(){
+    return this.ready&&this.eligible()&&!this.busy()&&!this.nainaHere()&&this.quiet>=4;
+  },
+  reset(){ this.vanish(true); this.cd=rnd(25,40); this.quiet=0; this.n=0; },
   /* ---------- placing him ---------- */
   fwd(){ return [-Math.sin(P.yaw),-Math.cos(P.yaw)]; },
   clear(F,x0,z0,x1,z1){ return Ghost.clearPath(F,x0,z0,x1,z1); },
   spotEnd(F){ const [fx,fz]=this.fwd();
-    for(let d=rnd(11.5,14);d>=8.5;d-=.5){ const x=P.x+fx*d, z=P.z+fz*d; if(navFree(F,x,z)&&this.clear(F,P.x,P.z,x,z)) return {x,z}; } return null; },
+    for(let d=rnd(11.5,14);d>=6.5;d-=.5){ const x=P.x+fx*d, z=P.z+fz*d; if(navFree(F,x,z)&&this.clear(F,P.x,P.z,x,z)) return {x,z}; } return null; },
   spotBehind(F){ const [fx,fz]=this.fwd();
     for(let d=8.5;d>=6.5;d-=.5){ const x=P.x-fx*d, z=P.z-fz*d; if(navFree(F,x,z)&&this.clear(F,P.x,P.z,x,z)) return {x,z}; } return null; },
   /* a room's doorway ahead of you: in the opening if there is no door or it stands open,
@@ -20276,7 +20282,8 @@ float cF(vec3 p){ return cN(p)*.5+cN(p*2.03+7.1)*.28+cN(p*4.11+3.3)*.14+cN(p*8.3
     return null; },
   start(only){
     const F=Int.floors[P.floor]; if(!F) return false;
-    const order=only?[only]:['end','follow','door','cross'].sort(()=>Math.random()-.5);
+    /* the first time in a mission he is somewhere in front of you, never behind */
+    const order=only?[only]:(this.n?['end','follow','door','cross']:['end','door','cross']).sort(()=>Math.random()-.5);
     for(const k of order){
       const s=k==='end'?this.spotEnd(F):k==='follow'?this.spotBehind(F):k==='door'?this.spotDoor(F):this.spotCross(F);
       if(!s) continue;
@@ -20286,7 +20293,7 @@ float cF(vec3 p){ return cN(p)*.5+cN(p*2.03+7.1)*.28+cN(p*4.11+3.3)*.14+cN(p*8.3
       if(k==='cross'){ this.tx=s.tx; this.tz=s.tz; const dx=s.tx-s.x, dz=s.tz-s.z, l=Math.hypot(dx,dz)||1; this.vx=dx/l; this.vz=dz/l; this.ry=Math.atan2(-this.vx,-this.vz); }
       else this.ry=Math.atan2(-(P.x-s.x),-(P.z-s.z));
       this.place();
-      this.kill=false; this.u.uGone.value=0;
+      this.kill=false; this.u.uGone.value=0; this.look=this.n===0; this.n++;
       this.root.visible=true;
       if(typeof HorrorDirector!=='undefined'){ HorrorDirector.t=Math.max(HorrorDirector.t||0,8); }
       return true;
@@ -20294,12 +20301,30 @@ float cF(vec3 p){ return cN(p)*.5+cN(p*2.03+7.1)*.28+cN(p*4.11+3.3)*.14+cN(p*8.3
     return false;
   },
   place(){ this.root.position.set(this.x,this.F.y,this.z); this.root.rotation.y=this.ry; },
+  /* K — bring him in front of you, K again to send him away (for testing, like J for Naina).
+     He stays until you come within 3.5 m; Naina still clears him the moment she appears. */
+  test(){
+    if(!this.ready) return;
+    if(!P.inside){ toast('ANDAR JAAO PEHLE'); return; }
+    if(this.active()){ this.vanish(undefined,'test-off'); toast('TEST: CONSULTANT GAYA'); return; }
+    if(Ghost.mode!=='off') Ghost.hide();
+    if(this.busy()){ toast('ABHI NAHI'); return; }
+    const F=Int.floors[P.floor]; this.quiet=99;
+    let ok=this.start('end')||this.start('door')||this.start('cross');
+    if(!ok&&F){ const [fx,fz]=this.fwd();
+      for(let d=8;d>=4;d-=.5){ const x=P.x+fx*d, z=P.z+fz*d; if(navFree(F,x,z)&&this.clear(F,P.x,P.z,x,z)){
+        this.scene='end'; this.state='on'; this.t=0; this.seenT=0; this.life=0; this.x=x; this.z=z; this.F=F;
+        this.walk=0; this.tilt=.12; this.lean=0; this.shut=false; this.ry=Math.atan2(-(P.x-x),-(P.z-z)); this.place();
+        this.kill=false; this.u.uGone.value=0; this.look=true; this.n++; this.root.visible=true; ok=true; break; } } }
+    if(!ok){ toast('YAHAN JAGAH NAHI — CORRIDOR MEIN JAAO'); return; }
+    this.testMode=true; toast('TEST: CONSULTANT AA GAYA · K = wapas bhejo');
+  },
   /* gone: the lamps nearest you blink once and he is not there */
   vanish(instant,why){
     if(this.state!=='off') this.why=why||'';
     if(this.state==='off'){ if(this.root) this.root.visible=false; return; }
     this.state='off'; if(this.root) this.root.visible=false;
-    const m=(Story&&Story.mission)||1; this.cd=m>=4?rnd(80,130):rnd(95,150);
+    const m=(Story&&Story.mission)||1; this.cd=m>=4?rnd(50,85):rnd(60,100); this.testMode=false;
     if(instant===true) return;                     /* cleared for her: the director's clock is hers, leave it alone */
     if(this.scene==='door'&&this.shut){ const raw=typeof Vent!=='undefined'&&Vent.raw?Vent.raw():null;
       if(raw) setTimeout(()=>{ try{ raw.rawNoise(.05,{f:1900,q:3,g:.05}); raw.rawTone(160,120,.08,{g:.04,type:'square'}); }catch(_){} },rnd(180,320)); }
@@ -20329,7 +20354,7 @@ float cF(vec3 p){ return cN(p)*.5+cN(p*2.03+7.1)*.28+cN(p*4.11+3.3)*.14+cN(p*8.3
     if(!this.active()){
       if(this.root) this.root.visible=false;
       if(!P.inside) return;
-      if(this.busy()) return;
+      if(this.busy()||!this.eligible()) return;
       this.cd-=dt;
       if(this.cd<=0&&this.canAppear()&&Math.random()<dt*.5){ if(!this.start()) this.cd=rnd(6,12); }
       return;
@@ -20340,28 +20365,31 @@ float cF(vec3 p){ return cN(p)*.5+cN(p*2.03+7.1)*.28+cN(p*4.11+3.3)*.14+cN(p*8.3
     const seen=lk.dot>.6&&lk.d<16&&(lit||lk.d<6);
     const caught=lit&&lk.dot>.93&&lk.d<16;            /* the beam is on him */
     let move=0;
+    if(this.testMode&&lk.d<3.5) return this.vanish(undefined,'test-near');
     if(this.scene==='end'){
       this.seenT=caught?this.seenT+dt:Math.max(0,this.seenT-dt);
       this.lean=lerp(this.lean,.6,1-Math.exp(-.8*dt));
-      if(this.seenT>.4||lk.d<6) return this.vanish(undefined,'end-seen');
-      if(this.life>9&&lk.dot<.4) return this.vanish('quiet','end-ignored');
+      if(!this.testMode){
+        if(this.seenT>(this.look?1.8:1.1)||lk.d<5) return this.vanish(undefined,'end-seen');
+        if(this.life>14&&lk.dot<.4) return this.vanish('quiet','end-ignored'); }
     } else if(this.scene==='follow'){
       if(seen&&this.state==='on'){ this.state='caught'; this.t=0; }
-      if(this.state==='caught'){ this.tilt=lerp(this.tilt,.62,1-Math.exp(-9*dt)); if(this.t>.85) return this.vanish(undefined,'follow-caught'); }
-      else { const d=lk.d; if(d>3.2){ move=.85; } if(this.life>16&&!seen) return this.vanish('quiet','follow-lost'); }
+      if(this.state==='caught'){ this.tilt=lerp(this.tilt,.62,1-Math.exp(-9*dt)); if(this.t>1.4) return this.vanish(undefined,'follow-caught'); }
+      else { const d=lk.d; if(d>3.2){ move=.85; } if(this.life>20&&!seen) return this.vanish('quiet','follow-lost'); }
       if(move){ const dx=P.x-this.x, dz=P.z-this.z, l=Math.hypot(dx,dz)||1, nx=this.x+dx/l*move*dt, nz=this.z+dz/l*move*dt;
         if(navFree(this.F,nx,nz)){ this.x=nx; this.z=nz; } else move=0; }
       this.ry=Math.atan2(-(P.x-this.x),-(P.z-this.z));
     } else if(this.scene==='door'){
       this.seenT=caught?this.seenT+dt:Math.max(0,this.seenT-dt);
       this.ry=Math.atan2(-(P.x-this.x),-(P.z-this.z));
-      if(lk.d<5||this.seenT>1.2) return this.vanish(undefined,'door-near');
-      if(this.life>10&&lk.dot<.4) return this.vanish('quiet','door-ignored');
+      if(!this.testMode){
+        if(lk.d<4.5||this.seenT>(this.look?2.0:1.6)) return this.vanish(undefined,'door-near');
+        if(this.life>14&&lk.dot<.4) return this.vanish('quiet','door-ignored'); }
     } else if(this.scene==='cross'){
       move=.78;
       const nx=this.x+this.vx*move*dt, nz=this.z+this.vz*move*dt;
       if(navFree(this.F,nx,nz)){ this.x=nx; this.z=nz; } else return this.vanish(seen?undefined:'quiet','cross-blocked');
-      if(Math.hypot(this.tx-this.x,this.tz-this.z)<.25) return this.vanish(seen?undefined:'quiet','cross-arrived');
+      if(Math.hypot(this.tx-this.x,this.tz-this.z)<.25){ if(this.testMode){ this.scene='end'; this.ry=Math.atan2(-(P.x-this.x),-(P.z-this.z)); } else return this.vanish(seen?undefined:'quiet','cross-arrived'); }
       if(lk.d<3.2) return this.vanish(undefined,'cross-near');
     }
     this.place();
@@ -20393,6 +20421,7 @@ float cF(vec3 p){ return cN(p)*.5+cN(p*2.03+7.1)*.28+cN(p*4.11+3.3)*.14+cN(p*8.3
     try{ V11Doc.update(dt); }catch(e){ if(!V11Doc._err){ V11Doc._err=1; console.warn('V11 consultant',e); } } }; }
 { const _sr=startRun; startRun=function(m,quiet){ try{ V11Doc.reset(); }catch(_){} return _sr(m,quiet); }; }
 { const _w=RI.warmup; RI.warmup=function(set){ return Promise.resolve(_w.call(this,set)).then(r=>{ try{ V11Doc.warm(); }catch(_){} return r; }); }; }
+addEventListener('keydown',e=>{ if(e.code==='KeyK'&&State.playing&&!e.repeat){ try{ V11Doc.test(); }catch(err){ console.warn('V11 test',err); } } });
 window.V11={Open:V11Open,Doc:V11Doc};
 
 window.IGMC={P,State,Story,Ghost,Torch,Int,Ext,A,Music,Scream,Pandit,ITEMS,MISSIONS,MAT,camera,renderer,scene,key,head,RI,RIU,

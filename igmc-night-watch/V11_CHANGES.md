@@ -69,23 +69,31 @@ he is not.
   - a head that turns on the neck further than a neck should, and cocks;
   - small twitches.
 
-### What he does (missions 2–6)
+### What he does (all missions)
 
 | Scene | |
 |---|---|
-| **End of the corridor** | Stands 8.5–14 m away, facing you. When the torch catches him, or you come within about 6 m, the lamps near you blink once and he is gone. |
-| **Behind you** | Walks slowly behind you, out of view, with heavy footsteps. When you turn round he stops, his head cocks, and after 0.85 s he vanishes in a flicker. |
-| **Doorway** | In a room's doorway ahead, watching you. If the door is shut, he stands in front of it, and when he goes you hear the latch click, as if he had gone through. He goes when you get close or hold the torch on him. |
+| **End of the corridor** | Stands 6.5–14 m away, facing you. He goes when the torch stays on him for 1.1 s (1.8 s the first time in a mission) or you come within 5 m: the lamps near you blink once and he is gone. |
+| **Behind you** | Walks slowly behind you, out of view, with heavy footsteps. When you turn round he stops, his head cocks, and after 1.4 s he vanishes in a flicker. |
+| **Doorway** | In a room's doorway ahead, watching you. If the door is shut, he stands in front of it, and when he goes you hear the latch click, as if he had gone through. He goes when you come within 4.5 m or hold the torch on him for 1.6 s (2 s the first time). |
 | **Crossing** | Walks slowly across the corridor ahead, from one side to the other. |
 
-- **First appearance** is 60–90 s into a mission; after that, every 95–150 s (80–130 s from
-  mission 4).
-- He only comes in a quiet stretch:
-  - the horror director has been silent for over 6 s;
-  - Naina has been gone for at least 4 s.
+- **When:** from mission 2 on, and in mission 1 as soon as Naina's scripted first encounter inside is
+  over.
+  - His first appearance in a mission comes 25–40 s in, always somewhere **in front of you** (corridor
+    end, doorway or crossing), never behind.
+  - After that, every 60–100 s (50–85 s from mission 4).
+- **K (test key, like J for Naina):** press K inside the hospital and he stands in front of you in the
+  corridor. He stays even in the torch beam, until you walk within 3.5 m of him or press K again.
+  Naina still clears him if she comes.
+- He only comes when Naina has been gone for at least 4 s. The horror director then holds its next
+  event for 8 s while he is there.
+- In mission 4 Naina hunts floors 7 and 8 non-stop, so he does not appear on those two floors.
 - **Naina always wins.** If she comes while he is there, he is simply gone; she often cuts his
-  scene short, and that is intended. In an 8-minute test on mission 2 he appeared 4 times, and
-  each time she came in a few seconds later and he went.
+  scene short, and that is intended.
+  - In a 6-minute mission 2 test (player moving between corridors) he appeared at 53, 139, 245
+    and 345 s.
+  - Mission 5: he appeared at 207 and 319 s.
 - **Never** during cutscenes, tapes, flashbacks, notes, vents, `OpeningScare`, `RitualTerror`, a
   door peek, a TV scare or any other scripted scare.
 
