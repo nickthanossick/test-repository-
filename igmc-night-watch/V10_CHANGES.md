@@ -81,11 +81,8 @@ layouts, items, missions and saves roll exactly as before.
   doorframes cut dark wedges out of the beam.
 - **Torch beam on phones:** an analytic cone solved on a mesh attached to the torch (one
   additive draw).
-- **Eye adaptation:** lit corridors no longer burn out to flat white. Desktop meters the frame
-  on the GPU (centre-weighted log average). Phones estimate it from the lamps that are lit.
-  It only ever stops the exposure down, quickly in light and slowly back. It never brightens
-  the dark.
 - **Contrast-adaptive sharpening** in the final pass (desktop).
+- The exposure and the lamps are the game's own. Nothing in V10 dims the picture (see V10.1).
 
 ## 5. Fixes
 
@@ -94,6 +91,23 @@ layouts, items, missions and saves roll exactly as before.
   ANGLE-based browsers (Chrome/Android, Safari) refuse to link that ("precisions of uniform
   differ"), so every wall, floor, ceiling and prop went black. 98 programs failed in testing.
   The vertex stage now matches, and 0 programs fail.
+
+## V10.1 — lights back to how they were
+
+The first V10 build added "eye adaptation": automatic exposure that stopped the image down
+in bright places. On the same 8 test views (floors 1, 3 and 7), average frame brightness
+(0–255) came out like this:
+
+| | desktop | phone mode |
+|---|---|---|
+| V6.15 (original) | 108–157 | black (the shader bug in section 5) |
+| V10 (first push) | **45–68** | 112–150 |
+| V10.1 | 106–159 | 107–160 |
+
+On desktop the whole game ran at about a third of its brightness, and on phones it was about
+10% dimmer. V10.1 removes eye adaptation completely. The idle TVs also no longer light the
+wall, because on a phone (5 lamp slots) that light could take a ceiling tube's slot. The TV
+light now switches on only during a scare.
 
 ## Performance
 

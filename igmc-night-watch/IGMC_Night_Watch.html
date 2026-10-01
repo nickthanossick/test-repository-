@@ -13,7 +13,7 @@
 <!-- Opening preserved. Difficulty: M1-3 restrained, M4-5 extreme; roof crawl guaranteed visible in late game. -->
 <!-- Story/flashback/epilogue visuals: Fal-generated pencil-anime frames, permanently embedded as compressed WebP data URIs. -->
 <!-- V6: voice-only audio (dialogue, narration, screams; one BOOM for falling debris), haunted interior (burst pipes, blood writing, flicker, falling ceiling), MC Shimla forecourt, wall-mounted extinguishers. -->
-<!-- V10: haunted wall TVs on every floor (static / green monitor / NO SIGNAL loops, buzz, and a night-vision CCTV feed of Naina attacking with her scream through every set), life-size rats with fur, eyeshine and a readable escape, skin shading for the dead (scattering, pores, two-lobe specular, lividity), a shadowed volumetric torch beam, eye adaptation and CAS sharpening. -->
+<!-- V10: haunted wall TVs on every floor (static / green monitor / NO SIGNAL loops, buzz, and a night-vision CCTV feed of Naina attacking with her scream through every set), life-size rats with fur, eyeshine and a readable escape, skin shading for the dead (scattering, pores, two-lobe specular, lividity), a shadowed volumetric torch beam and CAS sharpening (exposure and lamps unchanged). -->
 <!-- single-file build: three.js, the IGMC scan, props, Nirmala and the terrain map are all inlined. Works offline, no server needed. -->
 <meta name="description" content="Six-mission first person horror inside the IGMC Shimla building." />
 <style>
@@ -18627,7 +18627,8 @@ Story.enterBuilding=function(){
      Skin now has scattering at the shadow edge, pores, a second oily
      highlight, veins, mottling and lividity where the blood has settled.
    - CAMERA (desktop): a volumetric torch beam with real shadows through
-     the dust, and contrast-adaptive sharpening.
+     the dust, and contrast-adaptive sharpening. The exposure and the lamps
+     are exactly the game's own: nothing here dims the picture.
    Everything here is seeded on its own streams and built at load time, so
    the floor plans, items and missions roll exactly as before.
    ═══════════════════════════════════════════════════════════════════════ */
@@ -19221,7 +19222,8 @@ vec3 tvScreen(){
         const k=near.pw*near.bright*(near.boost||1)*(.85+.15*Math.random());
         if(near.mix>.5){ if(near.red>.3) L.color.setRGB(1,.25,.2); else L.color.setRGB(.82,1,.9); }
         else if(near.gif===1) L.color.setRGB(.45,1,.55); else if(near.gif===2) L.color.setRGB(.42,.62,1); else L.color.setRGB(.78,.84,.92);
-        L.intensity=(this.scare?6.5:1.7)*k+near.flash*14;
+        /* only while the sets are screaming: idle, it would take a ceiling lamp's place in the light budget */
+        L.intensity=this.scare?6.5*k+near.flash*14:0;
       }
     } else { V10Audio.buzz(0,0); if(L) L.intensity=0; }
   },
@@ -19861,83 +19863,12 @@ void main(){
     this.cone.visible=U.uI.value>.002;
   }
 };
-/* ═════════════ V10 EYE — exposure that adapts like an eye ═════════════
-   A tube-lit corridor was drawn at the same exposure as a black one with a
-   torch in it, so the lit floors burned out to flat white plaster. The eye
-   stops down in a bright place and opens up again slowly in the dark. Here it
-   only ever stops DOWN (never brightens the dark — that is the game's), quickly
-   into light and slowly back out of it.
-   DESKTOP: metered on the GPU from the frame itself (log-average luminance,
-   centre-weighted), adapted in a 1x1 target, applied in the final pass.
-   PHONE: estimated on the CPU from the lamps the light budget has lit.   */
-const V10Eye={
-  on:true, lum:null, ex:[null,null], cur:0, lumMat:null, adMat:null, m:1, K:.36, MIN:.62,
-  setupPost(post){
-    try{
-      const ex=renderer.extensions, hdr=ex.has('EXT_color_buffer_float')||ex.has('EXT_color_buffer_half_float');
-      if(!hdr){ this.on=false; return; }
-      const o={depthBuffer:false,type:THREE.HalfFloatType,minFilter:THREE.NearestFilter,magFilter:THREE.NearestFilter,generateMipmaps:false};
-      this.lum=new THREE.WebGLRenderTarget(48,27,o); this.ex=[new THREE.WebGLRenderTarget(1,1,o),new THREE.WebGLRenderTarget(1,1,o)];
-      this.lumMat=new THREE.ShaderMaterial({depthTest:false,depthWrite:false,toneMapped:false,vertexShader:post.VS,uniforms:{t:{value:null}},
-        fragmentShader:`uniform sampler2D t; varying vec2 vUv;
-          void main(){ vec2 o=vec2(1./96.,1./54.); float l=0.;
-            for(int j=0;j<2;j++) for(int i=0;i<2;i++){ vec3 c=texture2D(t,vUv+(vec2(float(i),float(j))-.5)*o).rgb; l+=log2(max(dot(c,vec3(.2126,.7152,.0722)),1e-4)); }
-            gl_FragColor=vec4(l*.25,0.,0.,1.); }`});
-      this.adMat=new THREE.ShaderMaterial({depthTest:false,depthWrite:false,toneMapped:false,vertexShader:post.VS,
-        uniforms:{tL:{value:this.lum.texture},tP:{value:null},uK:{value:this.K},uMin:{value:this.MIN},uDt:{value:.016},uReset:{value:1}},
-        fragmentShader:`uniform sampler2D tL,tP; uniform float uK,uMin,uDt,uReset; varying vec2 vUv;
-          void main(){ float s=0., w=0.;
-            for(int j=0;j<27;j++) for(int i=0;i<48;i++){ vec2 uv=(vec2(float(i),float(j))+.5)/vec2(48.,27.);
-              vec2 d=(uv-.5)*vec2(1.6,1.); float k=exp(-dot(d,d)*3.2); s+=texture2D(tL,uv).r*k; w+=k; }
-            float avg=exp2(s/w);
-            float want=clamp(uK/avg,uMin,1.);
-            float prev=uReset>.5?want:texture2D(tP,vec2(.5)).r;
-            float rate=want<prev?2.6:.55;
-            gl_FragColor=vec4(mix(prev,want,1.-exp(-rate*uDt)),avg,0.,1.); }`});
-      const m=post.mat;
-      m.uniforms.tExp={value:this.ex[0].texture}; m.uniforms.uExpOn={value:0};
-      let fs=m.fragmentShader;
-      fs=fs.replace('uniform sampler2D tColor,tAO,tDepth,tVol;','uniform sampler2D tColor,tAO,tDepth,tVol,tExp; uniform float uExpOn;');
-      fs=fs.replace('float l=dot(col,vec3(.2126,.7152,.0722));','if(uExpOn>.5) col*=texture2D(tExp,vec2(.5)).r;\n          float l=dot(col,vec3(.2126,.7152,.0722));');
-      if(fs===m.fragmentShader){ console.warn('V10 eye: final pass not patched'); this.on=false; return; }
-      m.fragmentShader=fs; m.needsUpdate=true;
-    }catch(e){ console.warn('V10 eye setup',e); this.on=false; }
-  },
-  _t:0,
-  pass(post){
-    const u=post.mat.uniforms; if(!u.uExpOn) return;
-    if(!this.on||!this.lumMat){ u.uExpOn.value=0; return; }
-    const now=performance.now(), dt=this._t?clamp((now-this._t)/1000,0,.25):.016; this._t=now;
-    this.lumMat.uniforms.t.value=post.rtC.texture; post.pass(this.lumMat,this.lum);
-    const a=this.ex[this.cur], b=this.ex[1-this.cur];
-    const U=this.adMat.uniforms; U.tP.value=a.texture; U.uDt.value=dt;
-    post.pass(this.adMat,b); U.uReset.value=0;
-    this.cur=1-this.cur; u.tExp.value=b.texture; u.uExpOn.value=1;
-  },
-  /* the phone: how much lamp light reaches the eye, from the lamps that are lit */
-  _v:new THREE.Vector3(),
-  cpu(dt){
-    const post=!V7Post.off&&V7Post.ready;
-    if(post||!P.inside){ if(this.m!==1){ this.m=1; this.applyCpu(); } return; }
-    let E=0; const L=LightBudget.live||[];
-    for(let i=0;i<L.length;i++){ const l=L[i]; if(!l.visible||l.intensity<=.01||l===(V10TV&&V10TV.light)) continue;
-      l.getWorldPosition(this._v); const dx=this._v.x-P.x, dy=this._v.y-P.camY, dz=this._v.z-P.z;
-      E+=l.intensity/Math.max(1.5,dx*dx+dy*dy+dz*dz); }
-    const want=clamp(1.95/(E+.4),this.MIN+.06,1);
-    this.m=lerp(this.m,want,1-Math.exp(-(want<this.m?2.4:.5)*dt));
-    this.applyCpu();
-  },
-  applyCpu(){
-    const base=(Quality&&Quality.cfg&&Quality.cfg.high&&Quality.cfg.high.exposure)||1.12;
-    renderer.toneMappingExposure=base*this.m;
-  }
-};
 /* ---- wiring the beam into the V7 post chain ---- */
 { const _setup=V7Post.setup; V7Post.setup=function(){ _setup.call(this); try{ V10Look.setupPost(this); }catch(e){ console.warn('V10 post setup',e); V10Look.volOn=false; } }; }
 { const _rs=V7Post.resize; V7Post.resize=function(w,h){ _rs.call(this,w,h); try{ V10Look.resizePost(this,w,h); }catch(_){} }; }
 { const _pass=V7Post.pass; V7Post.pass=function(mat,target){
     /* the final pass is the only one drawn to the screen: march the beam just before it */
-    if(mat===this.mat&&target===null){ try{ V10Eye.pass(this); }catch(e){ if(!V10Eye._err){ V10Eye._err=1; console.warn('V10 eye pass',e); } V10Eye.on=false; if(this.mat.uniforms.uExpOn) this.mat.uniforms.uExpOn.value=0; }
+    if(mat===this.mat&&target===null){
       try{ V10Look.volPass(this); }catch(e){ if(!V10Look._err){ V10Look._err=1; console.warn('V10 vol',e); } V10Look.volOn=false; if(this.mat.uniforms.uVolOn) this.mat.uniforms.uVolOn.value=0; } }
     return _pass.call(this,mat,target); }; }
 /* the beam is the first thing given up if the frame rate is short */
@@ -19961,7 +19892,6 @@ V8Rat.list=V10Rat.list;
 { const _u=V6Int.update; V6Int.update=function(dt){ _u.call(this,dt);
     try{ V10TV.update(dt); }catch(e){ if(!V10TV._err){ V10TV._err=1; console.warn('V10 tv update',e); } }
     try{ V10Look.updateCone(dt); }catch(e){ if(!V10Look._cerr){ V10Look._cerr=1; console.warn('V10 cone',e); } }
-    try{ V10Eye.cpu(dt); }catch(e){ if(!V10Eye._cerr){ V10Eye._cerr=1; console.warn('V10 eye cpu',e); } }
     if(Ghost._falReady&&!V10Feed.mixer&&!V10Feed.rigLoading&&!V10Feed._rigTried&&!V10TV.scare){ V10Feed._rigTried=true;
       V10Feed.rig().then(()=>{ if(V10Feed.mixer) V10TV.warm(); }).catch(()=>{}); } }; }
 /* the programs for the feed, its stage and the phone's beam are built with everything else */
@@ -19972,14 +19902,13 @@ V10TV.warm=function(){
       V10Feed.nainaRoot.visible=false; if(p&&p.catch) p.catch(()=>{}); } }catch(e){ console.warn('V10 feed warm',e); }
   /* the post passes this build adds, compiled on the post chain's own quad */
   try{ if(V7Post.ready&&!V7Post.off&&V7Post.quad){ const q=V7Post.quad, keep=q.material;
-      for(const m of [V10Look.mat,V10Eye.lumMat,V10Eye.adMat,V7Post.mat]) if(m){ q.material=m; renderer.compile(V7Post.sc,V7Post.cam); }
+      for(const m of [V10Look.mat,V7Post.mat]) if(m){ q.material=m; renderer.compile(V7Post.sc,V7Post.cam); }
       q.material=keep; } }catch(e){ console.warn('V10 post warm',e); }
   try{ V10Look.initCone(); if(V10Look.cone){ const s=new THREE.Scene(); const m=new THREE.Mesh(V10Look.cone.geometry,V10Look.cone.material); m.frustumCulled=false; s.add(m); renderer.compile(s,camera); } }catch(e){ console.warn('V10 cone warm',e); }
 };
 { const _w=RI.warmup; RI.warmup=function(set){ return Promise.resolve(_w.call(this,set)).then(r=>{ try{ V10TV.warm(); }catch(_){} return r; }); }; }
 { const _sr=startRun; startRun=function(m,quiet){ try{ V10TV.reset(); }catch(_){} return _sr(m,quiet); }; }
-{ const _setup2=V7Post.setup; V7Post.setup=function(){ _setup2.call(this); try{ V10Eye.setupPost(this); }catch(e){ console.warn('V10 eye',e); } }; }
-window.V10={Dead:V9Dead,Eye:V10Eye,TV:V10TV,Rat:V10Rat,Feed:V10Feed,Look:V10Look,Skin:V10Skin,Audio:V10Audio};
+window.V10={Dead:V9Dead,TV:V10TV,Rat:V10Rat,Feed:V10Feed,Look:V10Look,Skin:V10Skin,Audio:V10Audio};
 
 window.IGMC={P,State,Story,Ghost,Torch,Int,Ext,A,Music,Scream,Pandit,ITEMS,MISSIONS,MAT,camera,renderer,scene,key,head,RI,RIU,
   UI:{say,toast,setObjective,setPrompt,openDoc,closeDoc,die,pauseGame},
